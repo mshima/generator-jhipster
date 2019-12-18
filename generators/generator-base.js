@@ -1127,14 +1127,14 @@ module.exports = class extends PrivateBase {
                 this.debug('using global module as local version could not be found in node_modules');
                 generatorTocall = path.join(npmPackageName, 'generators', subGen);
             }
-            this.debug('Running yeoman compose with options: ', generatorTocall, options);
+            this.debug('Running yeoman compose: ', generatorTocall);
             this.composeWith(require.resolve(generatorTocall), options);
         } catch (err) {
             this.debug('ERROR:', err);
             const generatorName = npmPackageName.replace('generator-', '');
             const generatorCallback = `${generatorName}:${subGen}`;
             // Fallback for legacy modules
-            this.debug('Running yeoman legacy compose with options: ', generatorCallback, options);
+            this.debug('Running yeoman legacy compose: ', generatorCallback);
             this.composeWith(generatorCallback, options);
         }
     }
@@ -1487,6 +1487,10 @@ module.exports = class extends PrivateBase {
      * @param {string} msg - message to print
      */
     error(msg) {
+        if (this._debug && this._debug.enabled) {
+            this._debug(`${chalk.red.bold('ERROR!')} ${msg}`);
+        }
+        // Terminate current environment.
         this.env.error(`${msg}`);
     }
 
@@ -1496,7 +1500,11 @@ module.exports = class extends PrivateBase {
      * @param {string} msg - message to print
      */
     warning(msg) {
-        this.log(`${chalk.yellow.bold('WARNING!')} ${msg}`);
+        const warn = `${chalk.yellow.bold('WARNING!')} ${msg}`;
+        this.log(warn);
+        if (this._debug && this._debug.enabled) {
+            this._debug(warn);
+        }
     }
 
     /**
@@ -1506,6 +1514,9 @@ module.exports = class extends PrivateBase {
      */
     info(msg) {
         this.log.info(msg);
+        if (this._debug && this._debug.enabled) {
+            this._debug(`${chalk.green('INFO!')} ${msg}`);
+        }
     }
 
     /**
