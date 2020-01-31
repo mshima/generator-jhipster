@@ -1,11 +1,14 @@
 name: "Pull Request Labeler"
 on:
-    - pull_request
+    schedule:
+        # * is a special character in YAML so you have to quote this string
+        - cron:  '*/5 * * * *'
 
 jobs:
     triage:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/labeler@v2
+            - uses: mshima/labeler@master
+              if: github.repository == 'mshima/generator-jhipster' && github.ref == 'master'
               with:
                   repo-token: "${{ secrets.GITHUB_TOKEN }}"
