@@ -8,7 +8,7 @@ jobs:
     triage:
         runs-on: ubuntu-latest
         steps:
-            - uses: mshima/labeler@master
+            - uses: mshima/labeler@v2
               if: github.repository == 'mshima/generator-jhipster' && github.ref == 'master'
               with:
                   repo-token: "${{ secrets.GITHUB_TOKEN }}"
