@@ -18,6 +18,7 @@ We are honoured by any contributions you may have small or large. Please refer t
 
 Support this project by becoming a sponsor! [Become a sponsor](https://opencollective.com/generator-jhipster) or [learn more about sponsoring the project](https://www.jhipster.tech/sponsors/).
 
+A
 **Thank you to our sponsors!**
 
 ### Gold Sponsors
