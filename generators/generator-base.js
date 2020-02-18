@@ -1905,7 +1905,7 @@ module.exports = class extends PrivateBase {
      * @param {boolean} returnFiles - weather to return the generated file list or to write them
      * @param {string} prefix - pefix to add to path
      */
-    writeFilesToDisk(files, generator, returnFiles, prefix) {
+    writeFilesToDisk(files, generator, returnFiles, prefix, customizer = files => files) {
         const _this = generator || this;
         const filesOut = [];
         const startTime = new Date();
@@ -1940,6 +1940,7 @@ module.exports = class extends PrivateBase {
                             templatePathTo = templatePath.replace('.ejs', '');
                         }
                         filesOut.push(templatePathTo);
+
                         if (!returnFiles) {
                             let templatePathFrom = prefix ? `${prefix}/${templatePath}` : templatePath;
                             if (
@@ -1952,8 +1953,17 @@ module.exports = class extends PrivateBase {
                             ) {
                                 templatePathFrom = `${templatePathFrom}.ejs`;
                             }
+
+                            const writeCustomizer = customizer({ options, templatePathFrom, templatePathTo, useTemplate });
+
                             // if (method === 'template')
-                            _this[method](templatePathFrom, templatePathTo, _this, options, useTemplate);
+                            _this[method](
+                                writeCustomizer.templatePathFrom,
+                                writeCustomizer.templatePathTo,
+                                _this,
+                                writeCustomizer.options,
+                                writeCustomizer.useTemplate
+                            );
                         }
                     });
                 }
