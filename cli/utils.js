@@ -216,15 +216,19 @@ const printSuccess = () => {
     }
 };
 
-const createYeomanEnv = packagePatterns => {
-    const env = yeoman.createEnv();
+const setupEnvironment = (env, packagePatterns) => {
     // Register jhipster generators.
     env.lookup({ packagePaths: [path.join(__dirname, '..')] });
     if (packagePatterns && packagePatterns.length > 0) {
         // Lookup for blueprints.
         env.lookup({ filterPaths: true, packagePatterns });
     }
+    env.sharedOptions['from-cli'] = true;
     return env;
+};
+
+const createYeomanEnv = packagePatterns => {
+    return setupEnvironment(yeoman.createEnv(), packagePatterns);
 };
 
 const loadBlueprints = () => {
@@ -353,6 +357,7 @@ module.exports = {
     done: doneFactory(SUCCESS_MESSAGE),
     printSuccess,
     createYeomanEnv,
+    setupEnvironment,
     loadBlueprints,
     loadBlueprintsFromYoRc,
     getBlueprintPackagePaths,

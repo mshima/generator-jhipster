@@ -539,6 +539,15 @@ module.exports = class extends PrivateBase {
     }
 
     /**
+     * Add a new changelog to the Liquibase master.xml file.
+     *
+     * @param {string} changelogName - The name of the changelog (name of the file without .xml at the end).
+     */
+    addNewChangelogToLiquibase(changelogName) {
+        this.needleApi.serverLiquibase.addNewChangelog(changelogName);
+    }
+
+    /**
      * Add a new constraints changelog to the Liquibase master.xml file.
      *
      * @param {string} changelogName - The name of the changelog (name of the file without .xml at the end).
@@ -883,8 +892,7 @@ module.exports = class extends PrivateBase {
     /**
      * Generate a date to be used by Liquibase changelogs.
      */
-    dateFormatForLiquibase() {
-        let now = new Date();
+    dateFormatForLiquibase(now = new Date(), verify = true) {
         // Run reproducible timestamp when regenerating the project with with-entities option.
         if (this.options.withEntities || this.options.creationTimestamp) {
             if (this.configOptions.lastLiquibaseTimestamp) {
@@ -928,7 +936,18 @@ module.exports = class extends PrivateBase {
         if (second.length === 1) {
             second = `0${second}`;
         }
-        return `${year}${month}${day}${hour}${minute}${second}`;
+        let formatted = `${year}${month}${day}${hour}${minute}${second}`;
+        if (verify) {
+            const { lastReturnedFormattedDate } = this.configOptions;
+            if (Number.parseInt(lastReturnedFormattedDate, 10)) {
+                while (lastReturnedFormattedDate >= formatted) {
+                    now.setSeconds(now.getSeconds() + 1);
+                    formatted = this.dateFormatForLiquibase(now, false);
+                }
+            }
+            this.configOptions.lastReturnedFormattedDate = formatted;
+        }
+        return formatted;
     }
 
     /**
@@ -1290,7 +1309,7 @@ module.exports = class extends PrivateBase {
 
         try {
             let filename = path.join(JHIPSTER_CONFIG_DIR, `${_.upperFirst(file)}.json`);
-            if (this.context.microservicePath) {
+            if (this.context && this.context.microservicePath) {
                 filename = path.join(this.context.microservicePath, filename);
             }
             // TODO 7.0 filename = this.destinationPath(filename);
@@ -1310,7 +1329,11 @@ module.exports = class extends PrivateBase {
         const entities = [];
 
         function isBefore(e1, e2) {
-            return e1.definition.changelogDate - e2.definition.changelogDate;
+            const dateDiff = e1.definition.changelogDate - e2.definition.changelogDate;
+            if (dateDiff === 0) {
+                return e1.name > e2.name;
+            }
+            return dateDiff;
         }
 
         // TODO 7.0 this.destinationPath(JHIPSTER_CONFIG_DIR);
@@ -1548,7 +1571,7 @@ module.exports = class extends PrivateBase {
             this._debug(`${chalk.red.bold('ERROR!')} ${msg}`);
         }
         // Terminate current environment.
-        this.env.error(`${msg}`);
+        throw new Error(`${msg}`);
     }
 
     /**
