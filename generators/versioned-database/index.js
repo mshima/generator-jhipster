@@ -689,19 +689,14 @@ Do you confirm?`,
         const savedChangelogs = [];
         // Compare entity changes and create changelogs
         entities.forEach(loaded => {
-            const currentEntity = { ...loaded.definition };
-            const entityName = currentEntity.name || loaded.name;
+            const entity = { ...loaded.definition };
+            const entityName = entity.name || loaded.name;
 
-            let fields = [];
-            let relationships = [];
+            const dbEntity = this.loadDatabaseChangelogEntity(entityName);
+            const fields = entity.fields;
+            const relationships = entity.relationships;
 
-            if (!generate) {
-                const entity = this.loadDatabaseChangelogEntity(entityName);
-                fields = entity.fields;
-                relationships = entity.relationships;
-            }
-
-            const currentFields = currentEntity.fields || [];
+            const currentFields = dbEntity.fields || [];
             // Calculate new fields
             const addedFields = fields.filter(field => !currentFields.find(fieldRef => fieldRef.fieldName === field.fieldName));
             // Calculate removed fields
@@ -728,14 +723,14 @@ Do you confirm?`,
             // Calculate new relationships
             const addedRelationships = relationships.filter(
                 relationship =>
-                    !currentEntity.relationships.find(relRef => {
+                    !dbEntity.relationships.find(relRef => {
                         const refName = relRef.relationshipName || relRef.otherEntityName;
                         const name = relationship.relationshipName || relationship.otherEntityName;
                         return refName === name;
                     })
             );
             // Calculate removed relationships
-            const removedRelationships = currentEntity.relationships.filter(
+            const removedRelationships = dbEntity.relationships.filter(
                 relationship =>
                     !relationships.find(relRef => {
                         const refName = relRef.relationshipName || relRef.otherEntityName;
