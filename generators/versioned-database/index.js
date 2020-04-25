@@ -117,7 +117,7 @@ module.exports = class extends BaseGenerator {
         });
 
         this.registerPrettierTransform();
-        this.changelogConfig = this.createStorage('.yo-rc.json', 'generator-jhipster.liquibaseChangelogs', true);
+        this.changelogConfig = this.createStorage('.yo-rc.json', 'generator-jhipster.databaseChangelogs', true);
     }
 
     _initializing() {

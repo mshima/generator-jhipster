@@ -43,7 +43,7 @@ module.exports = {
      * @returns {Array} Array of changelogs
      */
     loadDatabaseChangelogs(filter) {
-        const databaseChangelogs = this.config.get('liquibaseChangelogs');
+        const databaseChangelogs = this.config.get('databaseChangelogs');
         if (!databaseChangelogs) {
             throw new Error('Cannot find any changelog');
         }
