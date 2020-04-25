@@ -185,6 +185,7 @@ module.exports = class extends BaseGenerator {
                     }
                     const changelog = this._createChangelogContext('entity-new', entity.name, changelogDate);
                     changelog.set('definition', entity.definition);
+                    changelog.set('migration', true);
                     changelog.save();
                 });
                 this.fullRegeneration = true;
