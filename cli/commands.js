@@ -109,9 +109,6 @@ Example:
         argument: ['languages...'],
         desc: 'Select languages from a list of available languages. The i18n files will be copied to the /webapp/i18n folder'
     },
-    liquibase: {
-        desc: 'Create a new changelog'
-    },
     openshift: {
         desc: 'Deploy the current application to OpenShift'
     },
@@ -132,6 +129,9 @@ Example:
     },
     'upgrade-config': {
         desc: 'Upgrade the JHipster configuration'
+    },
+    'versioned-database': {
+        desc: 'Versioned database manipulation'
     }
 };
 
