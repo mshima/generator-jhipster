@@ -106,8 +106,7 @@ module.exports = class extends BaseGenerator {
 
         this.option('entity', {
             desc: 'Name of the entity to update',
-            type: String,
-            defaults: false
+            type: String
         });
 
         this.option('new-entity', {
@@ -231,11 +230,15 @@ module.exports = class extends BaseGenerator {
                 let entities = this.getExistingEntities();
                 if (entityName) {
                     this._debug(`Found entities ${entities.map(entity => entity.name).join(', ')}`);
+                    this._debug(`Filtering entity ${entityName}`);
                     entities = entities.filter(entity => entity.name === entityName);
                 }
                 this._debug(`Updating or creating changelog for ${entities.map(entity => entity.name).join(', ')}`);
                 const changelogs = this._generateChangelogFromDiff(entities);
-                changelogs.forEach(changelog => this._writeChangelog(changelog));
+                if (entityName) {
+                    // If entityName, this generator was called by entity generator, so write the changelog
+                    changelogs.forEach(changelog => this._writeChangelog(changelog));
+                }
             },
 
             /**
@@ -363,6 +366,7 @@ module.exports = class extends BaseGenerator {
                     this.composeWith(require.resolve('../app'), {
                         'with-entities': true,
                         configOptions,
+                        updateVersionedDatabase: false,
                         'from-cli': true,
                         'skip-install': true,
                         debug: this.isDebugEnabled
@@ -371,8 +375,8 @@ module.exports = class extends BaseGenerator {
                     this.cancelCancellableTasks();
                     return;
                 }
-                const { regenerate, init } = this.options;
-                if (!regenerate && !init) {
+                const { regenerate } = this.options;
+                if (!regenerate) {
                     return;
                 }
                 this._regenerate();
@@ -405,6 +409,7 @@ module.exports = class extends BaseGenerator {
     /* ======================================================================== */
 
     _writeChangelog(databaseChangelog) {
+        this._debug('Regenerating changelog %s', databaseChangelog.changelogDate);
         const versionedDatabase = this.config.get('versionedDatabase');
         const generator = versionedDatabase === 'liquibase' ? require.resolve('../versioned-database-liquibase') : versionedDatabase;
         this.composeWith(generator, { databaseChangelog });
@@ -458,16 +463,6 @@ module.exports = class extends BaseGenerator {
     }
 
     /**
-     * Save the changelog to .yo-rc.json
-     * @param {Object} changelog - The changelog definition
-     */
-    _saveChangelog(changelog) {
-        const changelogs = this.changelogConfig.getAll() || {};
-        changelogs[changelog.changelogDate] = changelog;
-        this.changelogConfig.set(changelogs);
-    }
-
-    /**
      * Creates a new changelog definition.
      * @param {String} type - Type of the changelog
      * @param {String} name - Name of the changelog or name of the entity
@@ -503,7 +498,7 @@ module.exports = class extends BaseGenerator {
             },
             save(force = false) {
                 if (!force && !hasChanged) return false;
-                self._saveChangelog(context);
+                self.changelogConfig.set(context.changelogDate, context);
                 return true;
             }
         };
@@ -668,7 +663,8 @@ Do you confirm?`,
         ]).then(answers => {
             if (answers.confirmMerge) {
                 mergeData.changelogsToMerge.forEach(changelog => this._dropChangelog(changelog.changelogDate));
-                this._saveChangelog(mergeData.dest);
+                const changelog = mergeData.dest;
+                this.changelogConfig.set(changelog.changelogDate, changelog);
                 this.fullRegeneration = true;
             }
         });
@@ -676,25 +672,14 @@ Do you confirm?`,
 
     /**
      * Regenerate changelogs.
-     * @param {String} untilChangelogDate - The reference date to me regenerated
      */
-    _regenerate(untilChangelogDate) {
+    _regenerate() {
         const ordered = this.loadDatabaseChangelogs();
         if (!ordered) return;
 
-        const changelogsToApply = [];
         // Generate in order
-        ordered.find(item => {
-            this._debug('Regenerating changelog %s', item.changelogDate);
-            if (item.type.startsWith('entity-')) {
-                changelogsToApply.push(item);
-            }
-            const found = untilChangelogDate && untilChangelogDate === item.changelogDate;
-            if (untilChangelogDate && !found) {
-                return false;
-            }
+        ordered.forEach(item => {
             this._writeChangelog(item);
-            return found;
         });
     }
 

@@ -452,11 +452,13 @@ module.exports = class extends BaseBlueprintGenerator {
                 if (!this.config.get('versionedDatabase')) {
                     return;
                 }
+                let update = this.options.updateVersionedDatabase;
+                update = update === undefined ? true : update; 
                 // If there is changelogs then liquibase should be call entities by changelog order.
                 this.composeWith(require.resolve('../versioned-database'), {
                     ...this.options,
                     configOptions: this.configOptions,
-                    update: true,
+                    update,
                     regenerate: true,
                     'skip-install': true,
                     debug: this.isDebugEnabled
