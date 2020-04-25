@@ -186,7 +186,6 @@ function writeLiquibaseFiles() {
         this.addChangelogToLiquibase(`${this.changelogDate}_added_entity_${this.entityClass}`);
         return;
     }
-                
     // When the file was imported by liquibase generator, then relationships are moved to another changelog
     // So keep it ordered by date.
     this.addNewChangelogToLiquibase(fileName);
