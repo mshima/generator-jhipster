@@ -14,7 +14,7 @@ if [[ "$JHI_LIQUIBASE" == "jdl" ]]; then
     jhipster import-jdl *.jdl --no-insight --force --skip-install
 else
     cp -f "$JHI_SAMPLES"/"$JHI_APP"/liquibase.json "$JHI_FOLDER_APP"/
-    jhipster liquibase --apply liquibase.json --no-insight --force --skip-install
+    jhipster versioned-database --apply liquibase.json --no-insight --force --skip-install
 fi
 
 #-------------------------------------------------------------------------------
