@@ -151,28 +151,56 @@ jobs:
             #----------------------------------------------------------------------
             # Install all tools and check configuration
             #----------------------------------------------------------------------
-            - name: 'Checkout generator-jhipster'
-              uses: actions/checkout@v2
-              with:
-                  path: generator-jhipster
-            - name: 'Create required dir'
-              run: |
-                  mkdir app
-                  mkdir -p base/app
-                  mkdir -p base/uaa
-              working-directory: ${{ github.workspace }}
             - uses: actions/setup-node@v2.1.1
               with:
                   node-version: ${{ matrix.node_version }}
             - uses: actions/setup-java@v1
               with:
                   java-version: '11.x'
-            - name: Get chrome/chromedriver version
+            - name: 'SETUP: Checkout generator-jhipster'
+              uses: actions/checkout@v2
+              with:
+                  path: generator-jhipster
+            - name: 'SETUP: Create app dir'
+              run: |
+                  mkdir app
+                  mkdir -p base/app
+                  mkdir -p base/uaa
+              working-directory: ${{ github.workspace }}
+            - name: 'SETUP: Get chrome/chromedriver version'
               id: chromedriver-version
               run: |
                   CHROME_VERSION=$(google-chrome --version | cut -f 3 -d ' ' | cut -d '.' -f 1) \
                   && CHROMEDRIVER_VERSION=$(curl --location --fail --retry 3 http://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}) \
                   && echo "::set-output name=version::$CHROMEDRIVER_VERSION"
+            - name: 'SETUP: Get date'
+              id: get-date
+              run: |
+                  echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+            - name: 'SETUP: load npm cache'
+              uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-node-${{ matrix.app-type }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json.ejs') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node-${{ matrix.app-type }}
+            - name: 'SETUP: load maven cache'
+              uses: actions/cache@v2
+              with:
+                  path: ~/.m2/repository
+                  key: ${{ runner.os }}-maven-${{ matrix.app-type }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('generator-jhipster/**/pom.xml.ejs') }}
+                  restore-keys: |
+                      ${{ runner.os }}-maven-${{ matrix.app-type }}
+            - name: 'SETUP: load gradle cache'
+              if: ${{ contains(matrix.app-type, 'gradle') }}
+              uses: actions/cache@v2
+              with:
+                  path: |
+                      ~/.gradle/caches
+                      ~/.gradle/wrapper
+                  key: ${{ runner.os }}-gradle-${{ matrix.app-type }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('generator-jhipster/**/build.gradle.ejs') }}
+                  restore-keys: |
+                      ${{ runner.os }}-gradle-${{ matrix.app-type }}
             - name: 'ENV: display variables'
               run: $JHI_SCRIPTS/01-display-configuration.sh
             - name: 'TOOLS: configure tools installed by the system'
@@ -261,19 +289,20 @@ jobs:
               run: $JHI_SCRIPTS/22-tests-frontend.sh
             - name: 'TESTS: packaging'
               run: $JHI_SCRIPTS/23-package.sh
-            - name: 'Synchronize chromedriver version'
+            - name: 'E2E: Synchronize chromedriver version'
               if: ${{ matrix.e2e == 1 }}
               run: npm run e2e:update-webdriver -- --versions.chrome ${{ steps.chromedriver-version.outputs.version }}
               working-directory: ${{ github.workspace }}/app
-            - name: 'TESTS: End-to-End'
+            - name: 'E2E: Run'
               id: e2e
-              run: $JHI_SCRIPTS/24-tests-e2e.sh
-            - uses: actions/upload-artifact@v2
+              run: $JHI_SCRIPTS/24-tests-e2e.sh || $JHI_SCRIPTS/24-tests-e2e.sh
+            - name: 'E2E: Store failure screenshots'
+              uses: actions/upload-artifact@v2
               if: ${{ always() && steps.e2e.outcome == 'failure' }}
               with:
                   name: screenshots-${{ matrix.app-type }}
                   path: ${{ github.workspace }}/app/target/cypress/screenshots
-            - name: 'TESTS: Sonar analysis'
+            - name: 'Sonar analysis'
               run: $JHI_SCRIPTS/25-sonar-analyze.sh
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
