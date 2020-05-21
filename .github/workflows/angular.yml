@@ -144,9 +144,9 @@ jobs:
                   cache-name: cache-apt
               with:
                   path: /var/cache/apt/archives
-                  key: apt-get
+                  key: ${{ runner.os }}-apt
                   restore-keys: |
-                      build-${{ env.cache-name }}-
+                      ${{ runner.os }}-apt
             - name: Download latest chrome binary
               run: |
                   sudo apt update
