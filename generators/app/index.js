@@ -483,6 +483,7 @@ module.exports = class extends BaseBlueprintGenerator {
                 this.warning(this.config.get('creationTimestamp'));
                 this.warning(new Date().getTime());
                 const creationTimestamp = this.parseCreationTimestamp() || this.config.get('creationTimestamp') || new Date().getTime();
+                this.warning(creationTimestamp);
 
                 const config = {
                     jhipsterVersion: packagejs.version,
