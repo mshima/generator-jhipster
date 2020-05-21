@@ -24,6 +24,7 @@ jobs:
         name: npm test
         runs-on: ${{ matrix.os }}
         if: >-
+            ((github.event_name != 'push') || (!contains(github.ref, 'skip_ci'))) &&
             !contains(github.event.head_commit.message, '[ci skip]') &&
             !contains(github.event.head_commit.message, '[skip ci]') &&
             !contains(github.event.pull_request.title, '[skip ci]') &&
