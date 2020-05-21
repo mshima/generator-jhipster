@@ -39,6 +39,7 @@ jobs:
         name: ${{ matrix.app-type }}
         runs-on: ${{ matrix.os }}
         if: >-
+            ((github.event_name !== 'push') || (!contains(github.ref, 'skip_ci'))) &&
             !contains(github.event.head_commit.message, '[ci skip]') &&
             !contains(github.event.head_commit.message, '[skip ci]') &&
             !contains(github.event.pull_request.title, '[skip ci]') &&
@@ -174,6 +175,9 @@ jobs:
                   cd "$HOME"/app
                   rm -rf src
                   rm -rf node_modules
+            - name: 'GENERATION: jhipster info'
+              if: github.event.pull_request
+              run: $JHI_SCRIPTS/14-jhipster-info.sh
             - name: 'GENERATION: project'
               run: $JHI_SCRIPTS/12-generate-project.sh
             - name: 'GENERATION: merge project diff'
