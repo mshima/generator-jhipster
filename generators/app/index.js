@@ -478,6 +478,10 @@ module.exports = class extends BaseBlueprintGenerator {
             },
 
             saveConfig() {
+                this.warning('saveConfig');
+                this.warning(this.parseCreationTimestamp());
+                this.warning(this.config.get('creationTimestamp'));
+                this.warning(new Date().getTime());
                 const creationTimestamp = this.parseCreationTimestamp() || this.config.get('creationTimestamp') || new Date().getTime();
 
                 const config = {
