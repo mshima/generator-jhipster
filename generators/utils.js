@@ -74,6 +74,7 @@ module.exports = {
     RandexpWithFaker,
     gitExec,
     isGitInstalled,
+    createConfigOptions,
 };
 
 /**
@@ -816,4 +817,50 @@ function isGitInstalled(callback) {
     const code = gitExec('--version', { trace: false }).code;
     if (callback) callback(code);
     return code === 0;
+}
+
+/**
+ * Handler for configOptions
+ */
+function configOptionsHandler() {
+    const temporaryConfig = {};
+    return {
+        /**
+         * Getter.
+         * Gets the option from storage and fallback to temporary option.
+         */
+        get(storage, property) {
+            const storedValue = storage.get('property');
+            if (storedValue !== undefined) {
+                return storedValue;
+            }
+            return temporaryConfig[property];
+        },
+        /**
+         * Setter.
+         * If the option exists on the storage, then update it.
+         * Otherwise set the temporary value.
+         */
+        set(storage, property, value) {
+            const storedValue = storage.get('property');
+            if (storedValue !== undefined) {
+                // The property existing on the storage, so update it
+                storage.set(property, value);
+                delete temporaryConfig[property];
+                return true;
+            }
+            temporaryConfig[property] = value;
+            return true;
+        },
+    };
+}
+
+/**
+ * Creates a configOptions instance.
+ * Workarounds a synchronization problem between configOptions and storage.
+ * @param {Storage} storage - Storage that stores the config.
+ * @return {Object} proxy that synchonizes configOptions and storage.
+ */
+function createConfigOptions(storage) {
+    return new Proxy(storage, configOptionsHandler());
 }

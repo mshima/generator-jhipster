@@ -35,7 +35,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
     constructor(args, opts) {
         super(args, opts);
 
-        this.configOptions = this.options.configOptions || {};
+        this.configOptions = this.options.configOptions || this._createConfigOptions();
 
         // This makes `name` a required argument.
         this.argument('name', {

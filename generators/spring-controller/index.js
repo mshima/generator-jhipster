@@ -32,7 +32,7 @@ let useBlueprints;
 module.exports = class extends BaseBlueprintGenerator {
     constructor(args, opts) {
         super(args, opts);
-        this.configOptions = this.options.configOptions || {};
+        this.configOptions = this.options.configOptions || this._createConfigOptions();
         this.argument('name', { type: String, required: true });
         this.name = this.options.name;
         // This adds support for a `--from-cli` flag

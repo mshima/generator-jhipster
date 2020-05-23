@@ -29,7 +29,7 @@ module.exports = class extends BaseBlueprintGenerator {
         super(args, opts);
         utils.copyObjectProps(this, opts.context);
         this.jhipsterContext = opts.jhipsterContext || opts.context;
-        this.configOptions = opts.configOptions || {};
+        this.configOptions = opts.configOptions || this._createConfigOptions();
 
         useBlueprints =
             !this.fromBlueprint && this.instantiateBlueprints('entity-i18n', { context: opts.context, debug: opts.context.isDebugEnabled });

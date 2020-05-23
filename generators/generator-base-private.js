@@ -49,6 +49,13 @@ const REACT = constants.SUPPORTED_CLIENT_FRAMEWORKS.REACT;
 module.exports = class extends Generator {
     constructor(args, opts) {
         super(args, opts);
+
+        // Create a storage with generator-jhipster key.
+        // At this point this.config is configured at packageName key.
+        // When a module/blueprint extends from generator-base, it can
+        // use this variable to use the generator-jhipster configuration.
+        this.jhipsterConfig = this._getStorage('generator-jhipster');
+
         // expose lodash to templates
         this._ = _;
     }
@@ -56,6 +63,10 @@ module.exports = class extends Generator {
     /* ======================================================================== */
     /* private methods use within generator (not exposed to modules) */
     /* ======================================================================== */
+
+    _createConfigOptions() {
+        return jhipsterUtils.createConfigOptions(this.jhipsterConfig);
+    }
 
     /**
      * Override yeoman generator's usage function to fine tune --help message.
