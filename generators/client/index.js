@@ -26,7 +26,7 @@ const writeReactFiles = require('./files-react').writeFiles;
 const packagejs = require('../../package.json');
 const constants = require('../generator-constants');
 const statistics = require('../statistics');
-const { clientDefaultConfig } = require('../generator-defaults');
+const { clientDefaultConfig, defaultConfig } = require('../generator-defaults');
 
 const ANGULAR = constants.SUPPORTED_CLIENT_FRAMEWORKS.ANGULAR;
 const REACT = constants.SUPPORTED_CLIENT_FRAMEWORKS.REACT;
@@ -76,6 +76,10 @@ module.exports = class extends BaseBlueprintGenerator {
         if (this.options.skipCommitHook) {
             this.skipCommitHook = this.jhipsterConfig.skipCommitHook = true;
         }
+
+        this.useYarn = this.configOptions.useYarn = this.options.yarn || this.jhipsterConfig.clientPackageManager === 'yarn';
+        this.useNpm = this.configOptions.useNpm = !this.options.yarn;
+        this.jhipsterConfig.clientPackageManager = this.useYarn ? 'yarn' : 'npm';
 
         this.existingProject = !!this.jhipsterConfig.clientFramework;
 
@@ -187,84 +191,55 @@ module.exports = class extends BaseBlueprintGenerator {
                 }
             },
             getSharedConfigOptions() {
-                this.serverPort = this.jhipsterConfig.serverPort || 8080;
+                this.packagejs = packagejs;
 
                 this.setupClientOptions(this);
 
-                this.clientFramework = this.jhipsterConfig.clientFramework;
-                this.clientTheme = this.jhipsterConfig.clientTheme || 'none';
-                this.clientThemeVariant = this.jhipsterConfig.clientThemeVariant;
+                const config = _.defaults({}, this.jhipsterConfig, defaultConfig);
+                this.clientFramework = config.clientFramework;
+                this.clientTheme = config.clientTheme;
+                this.clientThemeVariant = config.clientThemeVariant;
                 this.enableI18nRTL = false;
 
-                this.packagejs = packagejs;
+                this.baseName = config.baseName;
+                this.clientPackageManager = config.clientPackageManager;
+                this.applicationType = config.applicationType;
+                this.reactive = config.reactive;
 
-                this.baseName = this.jhipsterConfig.baseName;
-                this.clientPackageManager = this.jhipsterConfig.clientPackageManager;
-                this.applicationType = this.jhipsterConfig.applicationType;
-                this.reactive = this.jhipsterConfig.reactive;
-                this.messageBroker = this.jhipsterConfig.messageBroker;
-                this.serviceDiscoveryType = this.jhipsterConfig.serviceDiscoveryType;
+                this.serverPort = config.serverPort;
+                this.messageBroker = config.messageBroker;
+                this.serviceDiscoveryType = config.serviceDiscoveryType;
+                this.cacheProvider = config.cacheProvider;
+                this.enableHibernateCache = config.enableHibernateCache;
+                this.websocket = config.websocket;
+                this.databaseType = config.databaseType;
+                this.devDatabaseType = config.devDatabaseType;
+                this.prodDatabaseType = config.prodDatabaseType;
+                this.messageBroker = config.messageBroker;
+                this.searchEngine = config.searchEngine;
+                this.buildTool = config.buildTool;
+                this.authenticationType = config.authenticationType;
+                this.otherModules = config.otherModules;
+                this.testFrameworks = config.testFrameworks;
 
-                if (this.jhipsterConfig.cacheProvider) {
-                    this.cacheProvider = this.jhipsterConfig.cacheProvider;
-                }
-                if (this.jhipsterConfig.enableHibernateCache) {
-                    this.enableHibernateCache = this.jhipsterConfig.enableHibernateCache;
-                }
-                if (this.jhipsterConfig.websocket !== undefined) {
-                    this.websocket = this.jhipsterConfig.websocket;
-                }
-                if (this.jhipsterConfig.databaseType) {
-                    this.databaseType = this.jhipsterConfig.databaseType;
-                }
-                if (this.jhipsterConfig.devDatabaseType) {
-                    this.devDatabaseType = this.jhipsterConfig.devDatabaseType;
-                }
-                if (this.jhipsterConfig.prodDatabaseType) {
-                    this.prodDatabaseType = this.jhipsterConfig.prodDatabaseType;
-                }
-                if (this.jhipsterConfig.messageBroker !== undefined) {
-                    this.messageBroker = this.jhipsterConfig.messageBroker;
-                }
-                if (this.jhipsterConfig.searchEngine !== undefined) {
-                    this.searchEngine = this.jhipsterConfig.searchEngine;
-                }
-                if (this.jhipsterConfig.buildTool) {
-                    this.buildTool = this.jhipsterConfig.buildTool;
-                }
-                if (this.jhipsterConfig.authenticationType) {
-                    this.authenticationType = this.jhipsterConfig.authenticationType;
-                }
-                if (this.jhipsterConfig.otherModules) {
-                    this.otherModules = this.jhipsterConfig.otherModules;
-                }
-                if (this.jhipsterConfig.testFrameworks) {
-                    this.testFrameworks = this.jhipsterConfig.testFrameworks;
-                }
                 this.protractorTests = this.testFrameworks.includes('protractor');
 
-                if (this.jhipsterConfig.enableTranslation !== undefined) {
-                    this.enableTranslation = this.jhipsterConfig.enableTranslation;
-                }
-                if (this.jhipsterConfig.nativeLanguage !== undefined) {
-                    this.nativeLanguage = this.jhipsterConfig.nativeLanguage;
-                }
-                if (this.jhipsterConfig.languages !== undefined) {
-                    this.languages = this.jhipsterConfig.languages;
+                this.enableTranslation = config.enableTranslation;
+                this.nativeLanguage = config.nativeLanguage;
+                this.languages = config.languages;
+                if (this.languages !== undefined) {
                     this.enableI18nRTL = this.isI18nRTLSupportNecessary(this.languages);
                 }
 
-                if (this.jhipsterConfig.uaaBaseName !== undefined) {
-                    this.uaaBaseName = this.jhipsterConfig.uaaBaseName;
-                }
+                this.uaaBaseName = config.uaaBaseName;
 
                 // Make dist dir available in templates
-                this.BUILD_DIR = this.getBuildDirectoryForBuildTool(this.jhipsterConfig.buildTool);
+                this.BUILD_DIR = this.getBuildDirectoryForBuildTool(config.buildTool);
 
                 this.styleSheetExt = 'scss';
                 this.pkType = this.getPkType(this.databaseType);
                 this.apiUaaPath = `${this.authenticationType === 'uaa' ? `services/${this.uaaBaseName.toLowerCase()}/` : ''}`;
-                this.DIST_DIR = this.getResourceBuildDirectoryForBuildTool(this.jhipsterConfig.buildTool) + constants.CLIENT_DIST_DIR;
+                this.DIST_DIR = this.getResourceBuildDirectoryForBuildTool(config.buildTool) + constants.CLIENT_DIST_DIR;
 
                 // Application name modified, using each technology's conventions
                 this.camelizedBaseName = _.camelCase(this.baseName);
@@ -277,14 +252,14 @@ module.exports = class extends BaseBlueprintGenerator {
             },
 
             insight() {
-                const app = { clientFramework: this.clientFramework, enableTranslation: this.enableTranslation };
-                if (this.nativeLanguage !== undefined) {
-                    app.nativeLanguage = this.nativeLanguage;
-                }
-                if (this.languages !== undefined) {
-                    app.languages = this.languages;
-                }
-                statistics.sendSubGenEvent('generator', 'client', { app });
+                statistics.sendSubGenEvent('generator', 'client', {
+                    app: {
+                        clientFramework: this.clientFramework,
+                        enableTranslation: this.enableTranslation,
+                        nativeLanguage: this.nativeLanguage,
+                        languages: this.languages,
+                    },
+                });
             },
         };
     }

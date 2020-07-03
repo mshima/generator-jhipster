@@ -39,6 +39,7 @@ const appDefaultConfig = {
 
 const serverDefaultConfig = {
     serviceDiscoveryType: false,
+    serverPort: 8080,
 };
 
 const clientDefaultConfig = {

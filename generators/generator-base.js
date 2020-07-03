@@ -1920,7 +1920,7 @@ module.exports = class extends PrivateBase {
      * @param {String} type - server | client
      */
     composeLanguagesSub(generator, configOptions, type) {
-        if (generator.enableTranslation) {
+        if (generator.jhipsterConfig.enableTranslation) {
             // skip server if app type is client
             const skipServer = type && type === 'client';
             // skip client if app type is server
