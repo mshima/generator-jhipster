@@ -436,10 +436,10 @@ module.exports = class extends BaseBlueprintGenerator {
                 this.enableTranslation = this.jhipsterConfig.enableTranslation;
                 this.nativeLanguage = this.jhipsterConfig.nativeLanguage;
                 this.languages = this.jhipsterConfig.languages;
-                this.testFrameworks = this.jhipsterConfig.testFrameworks;
                 this.clientFramework = this.jhipsterConfig.clientFramework;
                 this.skipClient = this.jhipsterConfig.skipClient;
                 this.uaaBaseName = this.jhipsterConfig.uaaBaseName;
+                this.testFrameworks = this.jhipsterConfig.testFrameworks || [];
                 this.gatlingTests = this.testFrameworks.includes('gatling');
                 this.cucumberTests = this.testFrameworks.includes('cucumber');
             },
