@@ -1932,7 +1932,7 @@ module.exports = class extends PrivateBase {
                 'skip-client': skipClient,
                 'from-cli': generator.options['from-cli'],
                 skipChecks: generator.options.skipChecks,
-                languages: generator.languages,
+                languages: generator.jhipsterConfig.languages,
                 force: generator.options.force,
                 debug: generator.options.debug,
             });
