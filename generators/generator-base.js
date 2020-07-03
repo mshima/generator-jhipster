@@ -1900,7 +1900,7 @@ module.exports = class extends PrivateBase {
         generator.prompt(prompts).then(answers => {
             generator.enableTranslation = generator.jhipsterConfig.enableTranslation = answers.enableTranslation;
             generator.nativeLanguage = generator.jhipsterConfig.nativeLanguage = answers.nativeLanguage;
-            let languages = [];
+            const languages = [];
             if (answers.nativeLanguage) {
                 languages.push(answers.nativeLanguage);
             }
