@@ -33,7 +33,7 @@ module.exports = {
 };
 
 function askForModuleName() {
-    if (this.baseName) return undefined;
+    if (this.jhipsterConfig.baseName) return undefined;
 
     return this.askModuleName(this);
 }
