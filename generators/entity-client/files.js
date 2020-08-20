@@ -408,11 +408,8 @@ function addEnumerationFiles(generator, templateDir, clientFolder) {
 
 function addSampleRegexTestingStrings(generator) {
     generator.fields.forEach(field => {
-        if (field.fieldValidateRulesPattern !== undefined) {
-            const randExp = field.createRandexp();
-            field.fieldValidateSampleString = randExp.gen();
-            field.fieldValidateModifiedString = randExp.gen();
-        }
+        field.fieldValidateSampleString = field.generateFakeData();
+        field.fieldValidateModifiedString = field.generateFakeData();
     });
 }
 
