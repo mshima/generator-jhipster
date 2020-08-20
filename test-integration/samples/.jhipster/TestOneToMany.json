@@ -1,0 +1,18 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipName": "testRequiredManyToOne",
+            "otherEntityName": "testManyToOne",
+            "relationshipType": "one-to-many",
+            "otherEntityField": "id",
+            "otherEntityRelationshipName": "testRequiredManyToOne"
+        }
+    ],
+    "fields": [],
+    "changelogDate": "20160208211541",
+    "dto": "no",
+    "service": "no",
+    "angularJSSuffix": "mySuffix",
+    "pagination": "no"
+}

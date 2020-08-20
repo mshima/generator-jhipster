@@ -56,6 +56,13 @@
             "relationshipType": "many-to-one",
             "otherEntityField": "id",
             "otherEntityRelationshipName": "superMegaLargeTestManyToOne"
+        },
+        {
+            "relationshipName": "testRequiredManyToOne",
+            "otherEntityName": "testOneToMany",
+            "relationshipType": "many-to-one",
+            "otherEntityField": "id",
+            "otherEntityRelationshipName": "testRequiredManyToOne"
         }
     ],
     "fields": [],
