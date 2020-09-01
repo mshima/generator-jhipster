@@ -54,34 +54,17 @@ for (idx in relationships) {
     }
 }
 
-// store unique values
-const uniqueValues = {};
-for (idx in fields) {
-    if (fields[idx].fieldValidate === true && fields[idx].fieldValidateRules.includes('unique')) {
-        uniqueValues[idx] = [];
-    }
-}
-
 // Generate CSV rows
 
 for (lineNb = 1; lineNb <= numberOfRows; lineNb++) {
     let line = [ lineNb ];
-    for (idx in fields) {
-        let data = fields[idx].generateFakeData();
-        // manage required
-        if (data === undefined) {
-            if (fields[idx].fieldValidateRules.includes('required')) {
-                line = [];
-                break;
-            }
-            data = '';
-        }
-
-        line.push(data);
+    const sample = generateFakeData();
+    fields.forEach(field => {
+        line.push(sample[field.fieldName]);
         if (fields[idx].columnType === 'blob' || fields[idx].columnType === 'longblob') {
             line.push('image/png');
         }
-    }
+    });
 
     for (idx in relationships) {
         const relationshipType = relationships[idx].relationshipType;
