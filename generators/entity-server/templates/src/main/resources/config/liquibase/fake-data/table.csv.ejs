@@ -59,9 +59,10 @@ for (idx in relationships) {
 for (lineNb = 1; lineNb <= numberOfRows; lineNb++) {
     let line = [ lineNb ];
     const sample = generateFakeData();
+    if (!sample) continue;
     fields.forEach(field => {
         line.push(sample[field.fieldName]);
-        if (fields[idx].columnType === 'blob' || fields[idx].columnType === 'longblob') {
+        if (field.columnType === 'blob' || field.columnType === 'longblob') {
             line.push('image/png');
         }
     });
