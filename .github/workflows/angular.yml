@@ -189,7 +189,7 @@ jobs:
             - name: 'GENERATION: project'
               run: $JHI_SCRIPTS/12-generate-project.sh
             - name: 'GENERATION: replace version in generated project'
-              run: $JHI_SCRIPTS/13-replace-version-generated-project.sh
+              run: $JHI_SCRIPTS/13-replace-version-generated-project.sh --skip-jhipster-dependencies
             - name: 'GENERATION: jhipster info'
               run: $JHI_SCRIPTS/14-jhipster-info.sh
             #----------------------------------------------------------------------
@@ -215,7 +215,7 @@ jobs:
                   $JHI_SCRIPTS/11-generate-entities.sh
                   # 11-generate-entities.sh removes current dir, we need to switch to the new one
                   cd ../app
-                  $JHI_SCRIPTS/12-generate-project.sh --skip-install --skip-git
+                  $JHI_SCRIPTS/12-generate-project.sh --skip-install --skip-git --skip-jhipster-dependencies
               env:
                   JHI_FOLDER_APP: ${{ github.workspace }}/base/app
                   JHI_FOLDER_UAA: ${{ github.workspace }}/base/uaa
