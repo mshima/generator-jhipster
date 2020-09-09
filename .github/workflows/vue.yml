@@ -23,6 +23,9 @@ on:
         branches-ignore:
             - 'dependabot/**'
             - 'skip_ci*'
+        paths-ignore:
+            - 'generators/client/templates/angular/**'
+            - 'generators/client/templates/react/**'
     pull_request:
         branches:
             - '*'
