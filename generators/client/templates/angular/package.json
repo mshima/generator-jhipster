@@ -1,4 +1,14 @@
 {
+  "dependencies": {
+    "@angular/common": "10.1.0",
+    "@angular/compiler": "10.1.0",
+    "@angular/core": "10.1.0",
+    "@angular/forms": "10.1.0",
+    "@angular/localize": "10.1.0",
+    "@angular/platform-browser": "10.1.0",
+    "@angular/platform-browser-dynamic": "10.1.0",
+    "@angular/router": "10.1.0",
+  },
   "devDependencies": {
     "webpack": "4.44.1"
   }
