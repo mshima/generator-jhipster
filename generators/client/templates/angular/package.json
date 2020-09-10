@@ -10,6 +10,7 @@
     "@angular/router": "10.1.0"
   },
   "devDependencies": {
+    "rimraf": "3.0.2",
     "webpack": "4.43.0"
   }
 }
