@@ -10,6 +10,6 @@
     "@angular/router": "10.1.0"
   },
   "devDependencies": {
-    "webpack": "4.44.1"
+    "webpack": "4.43.0"
   }
 }
