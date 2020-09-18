@@ -67,9 +67,7 @@
                     <th scope="col" <% if (pagination !== 'no') { %> jhiSortBy="<%= fields[idx].fieldName %>"<% } %>><span jhiTranslate="<%= `${i18nKeyPrefix}.${fields[idx].fieldName}` %>"><%= fields[idx].fieldNameHumanized %></span><% if (pagination !== 'no') { %> <fa-icon icon="sort"></fa-icon><% } %></th>
                     <%_ } _%>
                     <%_ for (idx in relationships) { _%>
-                        <%_ if (relationships[idx].relationshipType === 'many-to-one'
-                                || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)
-                                || (relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true && pagination === 'no')) {
+                        <%_ if (relationships[idx].shouldBeAddedToClient && pagination === 'no') {
                             const fieldName = dto === 'no' ? "." + relationships[idx].otherEntityField : relationships[idx].otherEntityFieldCapitalized;
                         _%>
                     <th scope="col" <% if (pagination !== 'no') { %> jhiSortBy="<%= relationships[idx].relationshipName + (fieldName) %>"<% } %>><span jhiTranslate="<%= `${i18nKeyPrefix}.${relationships[idx].relationshipName}` %>"><%= relationships[idx].relationshipNameHumanized %></span><% if (pagination !== 'no') { %> <fa-icon icon="sort"></fa-icon><% } %></th>
@@ -121,13 +119,11 @@
                     const otherEntityField = relationships[idx].otherEntityField;
                     const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized;
                 _%>
-                    <%_ if (relationshipType === 'many-to-one'
-                            || (relationshipType === 'one-to-one' && ownerSide === true)
-                            || (relationshipType === 'many-to-many' && ownerSide === true && pagination === 'no')) {
+                    <%_ if (relationships[idx].shouldBeAddedToClient && pagination === 'no') {
                     _%>
                     <td>
                         <%_ if (otherEntityName === 'user') { _%>
-                            <%_ if (relationshipType === 'many-to-many') { _%>
+                            <%_ if (relationshipType === 'many-to-many' || relationshipType === 'one-to-many') { _%>
                         <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
                             {{ <%= relationshipFieldName %>.<%= otherEntityField %> }}{{ last ? '' : ', ' }}
                         </span>
@@ -139,7 +135,7 @@
                                 <%_ } _%>
                             <%_ } _%>
                         <%_ } else { _%>
-                            <%_ if (relationshipType === 'many-to-many') { _%>
+                            <%_ if (relationshipType === 'many-to-many' || relationshipType === 'one-to-many') { _%>
                         <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
                             <a class="form-control-static" [routerLink]="['/<%= otherEntityStateName %>', <%= relationshipFieldName %>?.id, 'view']">{{ <%= relationshipFieldName %>.<%= otherEntityField %> }}</a>{{ last ? '' : ', ' }}
                         </span>

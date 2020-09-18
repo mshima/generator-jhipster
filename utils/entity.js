@@ -43,6 +43,7 @@ const BASE_TEMPLATE_DATA = {
     fieldsContainTextBlob: false,
     fieldsContainBlobOrImage: false,
     validation: false,
+    fieldsContainManyToMany: false,
     fieldsContainOwnerManyToMany: false,
     fieldsContainNoOwnerOneToOne: false,
     fieldsContainOwnerOneToOne: false,
@@ -50,6 +51,7 @@ const BASE_TEMPLATE_DATA = {
     fieldsContainManyToOne: false,
     fieldsContainEmbedded: false,
     fieldsIsReactAvField: false,
+    relationshipsContainLoadEargly: false,
 
     get enums() {
         return [];

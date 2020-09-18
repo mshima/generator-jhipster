@@ -404,8 +404,15 @@ class EntityGenerator extends BaseBlueprintGenerator {
 
                 // Validate entity json relationship content
                 const relationships = this.entityConfig.relationships;
+
                 relationships.forEach(relationship => {
                     this._validateRelationship(relationship);
+                    this._.defaults(relationship, {
+                        otherEntityField: 'id',
+                        ownerSide:
+                            relationship.relationshipType !== 'one-to-many' &&
+                            (relationship.ownerSide || relationship.relationshipType === 'many-to-one'),
+                    });
 
                     if (relationship.relationshipName === undefined) {
                         relationship.relationshipName = relationship.otherEntityName;
@@ -485,6 +492,14 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     prepareRelationshipForTemplates(this.context, relationship, this);
                 });
             },
+
+            generateEagerRelationsAndEntityTypes() {
+                this.context.relationshipsContainLoadEargly = this.context.relationships.some(
+                    relationship => relationship.shouldLoadEargly
+                );
+                this.context.eagerRelations = this.context.relationships.filter(rel => rel.shouldLoadEargly);
+            },
+
             /*
              * Composed generators uses context ready for the templates.
              */

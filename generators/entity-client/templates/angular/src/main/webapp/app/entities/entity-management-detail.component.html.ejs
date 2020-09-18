@@ -66,14 +66,12 @@
                     const otherEntityStateName = relationships[idx].otherEntityStateName;
                     const otherEntityField = relationships[idx].otherEntityField;
                     const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized;
-                    if (relationshipType === 'many-to-one'
-                        || (relationshipType === 'one-to-one' && ownerSide === true)
-                        || (relationshipType === 'many-to-many' && ownerSide === true)) {
+                    if (relationships[idx].shouldBeAddedToClient) {
                 _%>
                 <dt><span jhiTranslate="<%= i18nKeyPrefix %>.<%= relationshipName %>"><%= relationshipNameHumanized %></span></dt>
                 <dd>
                     <%_ if (otherEntityName === 'user') { _%>
-                        <%_ if (relationshipType === 'many-to-many') { _%>
+                        <%_ if (relationshipType === 'many-to-many' || relationshipType === 'one-to-many') { _%>
                     <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
                         {{ <%= relationshipFieldName %>.<%= otherEntityField %> }}{{ last ? '' : ', ' }}
                     </span>
@@ -85,7 +83,7 @@
                             <%_ } _%>
                         <%_ } _%>
                     <%_ } else { _%>
-                        <%_ if (relationshipType === 'many-to-many') { _%>
+                        <%_ if (relationshipType === 'many-to-many' || relationshipType === 'one-to-many') { _%>
                     <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
                         <a [routerLink]="['/<%= otherEntityStateName %>', <%= relationshipFieldName %>?.id, 'view']">{{ <%= relationshipFieldName %>.<%= otherEntityField %> }}</a>{{ last ? '' : ', ' }}
                     </span>

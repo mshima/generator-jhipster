@@ -118,7 +118,7 @@ import org.junit.jupiter.api.AfterEach;
 <%_ } _%>
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-<%_ if ((searchEngine === 'elasticsearch' || fieldsContainOwnerManyToMany || cacheProvider === 'redis') || databaseType === 'neo4j' || reactiveSqlTestContainers) { _%>
+<%_ if ((searchEngine === 'elasticsearch' || relationshipsContainLoadEargly || cacheProvider === 'redis') || databaseType === 'neo4j' || reactiveSqlTestContainers) { _%>
 import org.mockito.Mock;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -130,7 +130,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 <%_ } _%>
 import org.springframework.boot.test.context.SpringBootTest;
-<%_ if (searchEngine === 'elasticsearch' && pagination !== 'no' || fieldsContainOwnerManyToMany) { _%>
+<%_ if (searchEngine === 'elasticsearch' && pagination !== 'no' || relationshipsContainLoadEargly) { _%>
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 <%_ } _%>
@@ -152,7 +152,7 @@ import org.springframework.transaction.annotation.Transactional;
 <%_ if (fieldsContainBlob === true) { _%>
 import org.springframework.util.Base64Utils;
 <%_ } _%>
-<%_ if (reactive && (fieldsContainOwnerManyToMany === true || searchEngine === 'elasticsearch')) { _%>
+<%_ if (reactive && (relationshipsContainLoadEargly || searchEngine === 'elasticsearch')) { _%>
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 <%_ } _%>
@@ -167,7 +167,7 @@ import java.time.ZonedDateTime;
 import java.time.ZoneOffset;<% } %><% if (fieldsContainLocalDate === true || fieldsContainZonedDateTime === true) { %>
 import java.time.ZoneId;<% } %><% if (fieldsContainInstant === true) { %>
 import java.time.temporal.ChronoUnit;<% } %>
-<%_ if (fieldsContainOwnerManyToMany) { _%>
+<%_ if (relationshipsContainLoadEargly) { _%>
 import java.util.ArrayList;
 <%_ } _%>
 <%_ if (searchEngine === 'elasticsearch' && !reactive) { _%>
@@ -199,7 +199,7 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
     <%_ } _%>
 <%_ } _%>
-<%_ if (searchEngine === 'elasticsearch' || fieldsContainOwnerManyToMany === true) { _%>
+<%_ if (searchEngine === 'elasticsearch' || relationshipsContainLoadEargly === true) { _%>
 import static org.mockito.Mockito.*;
 <%_ } _%>
 <%_ if (!reactive) { _%>
@@ -221,7 +221,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 <%_ } _%>
 <%_ if (cacheProvider === 'redis') { _%>
 @ExtendWith({ RedisTestContainerExtension.class, MockitoExtension.class })
-<%_ } else if (searchEngine === 'elasticsearch' || fieldsContainOwnerManyToMany === true) { _%>
+<%_ } else if (searchEngine === 'elasticsearch' || relationshipsContainLoadEargly) { _%>
 @ExtendWith(MockitoExtension.class)
 <%_ } _%>
 <%_ if (databaseType === 'neo4j') { _%>
@@ -421,7 +421,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
     @Autowired
     private UserRepository userRepository;
     <%_ } _%>
-    <%_ if (fieldsContainOwnerManyToMany === true) { _%>
+    <%_ if (relationshipsContainLoadEargly) { _%>
 
     @Mock
     private <%= entityClass %>Repository <%= entityInstance %>RepositoryMock;
@@ -431,7 +431,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
     @Autowired
     private <%= entityClass %>Mapper <%= entityInstance %>Mapper;
     <%_ } if (service !== 'no') { _%>
-    <%_ if (fieldsContainOwnerManyToMany === true) { _%>
+    <%_ if (relationshipsContainLoadEargly) { _%>
 
     @Mock
     private <%= entityClass %>Service <%= entityInstance %>ServiceMock;
@@ -878,7 +878,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
                                                     if (fields[idx].fieldType === 'ZonedDateTime') { %>)<% } else 
                                                         if (fields[idx].fieldType !== 'String') { %>.toString()<% } %>))<%= !reactive ? ')' : '' %><%_ } _%>;
     }
-    <% if (fieldsContainOwnerManyToMany === true) { %>
+    <% if (relationshipsContainLoadEargly) { %>
     @SuppressWarnings({"unchecked"})
     public void getAll<%= entityClassPlural %>WithEagerRelationshipsIsEnabled() <% if (!reactive) { %>throws Exception <% } %>{
         <%_ if (service !== 'no') { _%>

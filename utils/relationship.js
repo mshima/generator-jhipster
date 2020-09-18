@@ -198,8 +198,9 @@ function prepareRelationshipForTemplates(entityWithConfig, relationship, generat
     }
 
     // Load in-memory data for root
-    if (relationship.relationshipType === 'many-to-many' && relationship.ownerSide) {
-        entityWithConfig.fieldsContainOwnerManyToMany = true;
+    if (relationship.relationshipType === 'many-to-many') {
+        entityWithConfig.fieldsContainManyToMany = true;
+        entityWithConfig.fieldsContainOwnerManyToMany = entityWithConfig.fieldsContainOwnerManyToMany || relationship.ownerSide;
     } else if (relationship.relationshipType === 'one-to-one' && !relationship.ownerSide) {
         entityWithConfig.fieldsContainNoOwnerOneToOne = true;
     } else if (relationship.relationshipType === 'one-to-one' && relationship.ownerSide) {
@@ -230,6 +231,18 @@ function prepareRelationshipForTemplates(entityWithConfig, relationship, generat
         entityWithConfig.differentRelationships[entityType] = [];
     }
     entityWithConfig.differentRelationships[entityType].push(relationship);
+
+    //    relationship.shouldLoadEargly = relationship.shouldLoadEargly || (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === true);
+    relationship.shouldLoadEargly =
+        relationship.shouldLoadEargly ||
+        relationship.relationshipType === 'many-to-many' ||
+        relationship.relationshipType === 'one-to-many';
+    relationship.shouldBeAddedToClient =
+        relationship.shouldBeAddedToClient ||
+        true; /* (relationship.relationshipType === 'many-to-one'
+                        || (relationship.relationshipType === 'one-to-one' && relationship.ownerSide === true)
+                        || (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === true)); */
+
     return relationship;
 }
 
