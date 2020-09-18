@@ -483,8 +483,23 @@ class EntityGenerator extends BaseBlueprintGenerator {
             prepareRelationshipsForTemplates() {
                 this.context.relationships.forEach(relationship => {
                     prepareRelationshipForTemplates(this.context, relationship, this);
+                    this._.defaults(relationship, {
+                        otherEntityField: 'id',
+                        shouldLoadEargly: relationship.relationshipType === 'many-to-many' && relationship.ownerSide === true,
+                        ownerSide:
+                            relationship.relationshipType !== 'one-to-many' &&
+                            (relationship.ownerSide || relationship.relationshipType === 'many-to-one'),
+                    });
                 });
             },
+
+            generateEagerRelationsAndEntityTypes() {
+                this.context.relationshipsContainLoadEargly = this.context.relationships.some(
+                    relationship => relationship.shouldLoadEargly
+                );
+                this.context.eagerRelations = this.context.relationships.filter(rel => rel.shouldLoadEargly);
+            },
+
             /*
              * Composed generators uses context ready for the templates.
              */

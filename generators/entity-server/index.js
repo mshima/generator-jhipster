@@ -78,25 +78,23 @@ module.exports = class extends BaseBlueprintGenerator {
             processJavaEntityImports() {
                 this.importJsonIgnore = false;
                 this.importJsonIgnoreProperties = false;
-                this.importSet = false;
                 this.uniqueEnums = {};
 
-                this.importApiModelProperty = this.relationships.filter(v => typeof v.javadoc != 'undefined').length > 0;
-                if (!this.importApiModelProperty) {
-                    this.importApiModelProperty = this.fields.filter(v => typeof v.javadoc != 'undefined').length > 0;
-                }
+                this.entityContainsSetField = this.relationships.some(relationship =>
+                    ['one-to-many', 'many-to-many'].includes(relationship.relationshipType)
+                );
+                this.importApiModelProperty =
+                    this.relationships.some(relationship => relationship.javadoc) || this.fields.some(field => field.javadoc);
 
                 this.relationships.forEach(relationship => {
                     if (
-                        relationship.ownerSide === false &&
-                        ['one-to-many', 'one-to-one', 'many-to-many'].includes(relationship.relationshipType)
+                        !relationship.ownerSide &&
+                        ['one-to-one', 'many-to-many'].includes(relationship.relationshipType) &&
+                        !this.otherEntityRelationshipName
                     ) {
-                        this.importJsonIgnore = true;
-                    } else if (relationship.relationshipType === 'many-to-one') {
+                        this.importJsonIgnore = false;
+                    } else {
                         this.importJsonIgnoreProperties = true;
-                    }
-                    if (relationship.relationshipType === 'one-to-many' || relationship.relationshipType === 'many-to-many') {
-                        this.importSet = true;
                     }
                 });
 
@@ -124,9 +122,6 @@ module.exports = class extends BaseBlueprintGenerator {
             },
 
             generateEagerRelationsAndEntityTypes() {
-                this.eagerRelations = this.relationships.filter(
-                    rel => rel.relationshipType === 'many-to-one' || (rel.relationshipType === 'one-to-one' && rel.ownerSide === true)
-                );
                 this.regularEagerRelations = this.eagerRelations.filter(rel => rel.useJPADerivedIdentifier !== true);
                 this.uniqueEntityTypes = new Set(this.eagerRelations.map(rel => rel.otherEntityNameCapitalized));
                 this.uniqueEntityTypes.add(this.entityClass);
