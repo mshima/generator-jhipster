@@ -16,7 +16,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>.service;
+package <%= classPath %>;
+
+<%- include('/partials/import_pos.ejs', {entities: [this], classPackage}); -%>
 
 <%_
 const serviceClassName = entityClass + 'QueryService';
@@ -44,14 +46,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.github.jhipster.service.QueryService;
 
-import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
-import <%= packageName %>.domain.*; // for static metamodels
-import <%= packageName %>.repository.<%= entityClass %>Repository;<% if (searchEngine === 'elasticsearch') { %>
-import <%= packageName %>.repository.search.<%= entityClass %>SearchRepository;<% } %>
-import <%= packageName %>.service.dto.<%= entityClass %>Criteria;
+import <%= resolveClassPath(`repository.${entityClass}Repository`) %>;
+<%_ if (searchEngine === 'elasticsearch') { _%>
+import <%= resolveClassPath(`repository.search.${entityClass}SearchRepository`) %>;
+<%_ } _%>
+import <%= resolveClassPath(`service.dto.${entityClass}Criteria`) %>;
 <%_ if (dto === 'mapstruct') { _%>
-import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
-import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
+import <%= resolveClassPath(`service.dto.${entityDTO}`) %>;
+import <%= resolveClassPath(`service.mapper.${entityClass}Mapper`) %>;
 <%_ } _%>
 
 /**
@@ -65,7 +67,7 @@ import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
 public class <%= serviceClassName %> extends QueryService<<%= asEntity(entityClass) %>> {
 
     private final Logger log = LoggerFactory.getLogger(<%= serviceClassName %>.class);
-<%- include('../common/inject_template', {viaService: false, constructorName: serviceClassName, queryService: false, isUsingMapsId: false, mapsIdAssoc: null, isController: false}); -%>
+<%- include('../common/inject_template', {classPathsToImport: false, viaService: false, constructorName: serviceClassName, queryService: false, isUsingMapsId: false, mapsIdAssoc: null, isController: false}); -%>
 
     /**
      * Return a {@link List} of {@link <%= instanceType %>} which matches the criteria from the database.

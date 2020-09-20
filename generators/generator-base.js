@@ -751,7 +751,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
      * @param {string} packageFolder - the Java package folder
      * @param {string} cacheProvider - the cache provider
      */
-    addEntryToCache(entry, packageFolder, cacheProvider) {
+    addEntryToCache(entry, packageFolder = this.jhipsterConfig.packageFolder, cacheProvider = this.jhipsterConfig.cacheProvider) {
         this.needleApi.serverCache.addEntryToCache(entry, packageFolder, cacheProvider);
     }
 
@@ -2135,8 +2135,20 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
                             useTemplate = templateObj.template ? templateObj.template : useTemplate;
                             options = templateObj.options ? { ...templateObj.options } : options;
                         }
+
+                        // Clear file variables for current file.
+                        delete generator.classPath;
+                        delete generator.className;
+                        delete generator.classPackage;
+
                         if (templateObj && templateObj.renameTo) {
                             templatePathTo = blockPath + templateObj.renameTo(_this);
+                        } else if (templateObj && templateObj.relativeClassPath) {
+                            const classPath = _this.resolveClassPath(templateObj.relativeClassPath(_this, useTemplate));
+                            generator.classPath = classPath;
+                            generator.className = _this.classNameFromClassPath(classPath);
+                            generator.classPackage = _this.packageFromClassPath(classPath);
+                            templatePathTo = blockPath + _this.filePathFromClassPath(classPath);
                         } else {
                             // remove the .ejs suffix
                             templatePathTo = templatePath.replace('.ejs', '');
@@ -2207,6 +2219,7 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
                 }
             });
         });
+        this.debug(`Files written: ${JSON.stringify(filesOut, null, 4)}`);
         this.debug(`Time taken to write files: ${new Date() - startTime}ms`);
         return filesOut;
     }
@@ -2552,7 +2565,7 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
      * @param {String} name entity name
      */
     asEntity(name) {
-        return name + this.entitySuffix;
+        return name + (this.entitySuffix || this.jhipsterConfig.entitySuffix || '');
     }
 
     /**
@@ -2560,7 +2573,7 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
      * @param {String} name entity name
      */
     asDto(name) {
-        return name + this.dtoSuffix;
+        return name + (this.dtoSuffix || this.jhipsterConfig.dtoSuffix || '');
     }
 
     get needleApi() {

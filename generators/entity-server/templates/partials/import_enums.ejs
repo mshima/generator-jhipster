@@ -1,0 +1,6 @@
+<%- this.includeUnique(
+    enums
+        .map(enumName => this.resolveClassPath('domain.enumeration.' + enumName))
+        .filter(relatedClassPath => this.packageFromClassPath(relatedClassPath) !== classPackage)
+        .map(relatedClassPath => `import ${relatedClassPath};`)
+); %>

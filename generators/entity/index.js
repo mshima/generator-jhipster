@@ -499,6 +499,13 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     prepareFieldForTemplates(entity, field, this);
                 });
             },
+            domain() {
+                const entity = this.context;
+                if (entity.domainName) {
+                    entity.dto = 'no';
+                    entity.service = 'serviceImpl';
+                }
+            },
             shareEntity() {
                 this.configOptions.sharedEntities = this.configOptions.sharedEntities || {};
                 this.configOptions.sharedEntities[this.context.name] = this.context;

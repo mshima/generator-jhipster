@@ -16,7 +16,11 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>.repository.rowmapper;
+package <%= classPackage %>;
+
+<%- include('/partials/import_pos.ejs', {entities: [this], classPackage}); -%>
+
+<%- include('/partials/import_enums.ejs', {enums: Object.keys(uniqueEnums), classPackage}); -%>
 
 <%_ if (fieldsContainBigDecimal === true) { _%>
 import java.math.BigDecimal;
@@ -35,10 +39,6 @@ import java.util.function.BiFunction;
 
 import org.springframework.stereotype.Service;
 
-import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
-<%_ Object.keys(uniqueEnums).forEach(function(element) { _%>
-import <%= packageName %>.domain.enumeration.<%= element %>;
-<%_ }); _%>
 import <%= packageName %>.service.ColumnConverter;
 
 import io.r2dbc.spi.Row;

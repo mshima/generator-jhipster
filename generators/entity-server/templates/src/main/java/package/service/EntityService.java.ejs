@@ -16,7 +16,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>.service;
+package <%= classPath %>;
+
+<%_ if (dto === 'mapstruct') { _%>
+<%- include('/partials/import_dtos.ejs', {entities: [this], classPackage}); -%>
+<%_ } else { _%>
+<%- include('/partials/import_pos.ejs', {entities: [this], classPackage}); -%>
+<%_ } _%>
 
 <%_
 const instanceType = (dto === 'mapstruct') ? asDto(entityClass) : asEntity(entityClass);
@@ -25,11 +31,6 @@ const optionalOrMono = (reactive === true) ? 'Mono' : 'Optional';
 const listOrFlux = (reactive === true) ? 'Flux' : 'List';
 const pageOrFlux = (reactive === true) ? 'Flux' : 'Page';
 _%>
-<%_ if (dto === 'mapstruct') { _%>
-import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
-<%_ } else { _%>
-import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
-<%_ } _%>
 <%_ if (pagination !== 'no' || relationshipsContainEagerLoad) { _%>
 
     <%_ if (!reactive) { _%>
@@ -53,9 +54,9 @@ import java.util.UUID;
 <%_ } _%>
 
 /**
- * Service Interface for managing {@link <% if (dto === 'mapstruct') { %><%= packageName %>.domain.<% } %><%= asEntity(entityClass) %>}.
+ * Service Interface for managing {@link <% if (dto === 'mapstruct') { %><%= entityDTO %>.<% } %><%= entityPO %>}.
  */
-public interface <%= entityClass %>Service {
+public interface <%= className %> {
 
     /**
      * Save a <%= entityInstance %>.

@@ -16,19 +16,17 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= classPackage %>.search;
+package <%= this.packageFromClassPath(entityRepositoryConfigurationClassPath) %>;
 
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+<%_ if (searchEngine === 'elasticsearch') { _%>
+import org.springframework.data.elasticsearch.repository.config.Enable<% if (reactive) { %>Reactive<% } %>ElasticsearchRepositories;
+<%_ } _%>
 
-/**
- * Configure a Mock version of {@link <%= entityClass %>SearchRepository} to test the
- * application without starting Elasticsearch.
- */
 @Configuration
-public class <%= entityClass %>SearchRepositoryMockConfiguration {
-
-    @MockBean
-    private <%= entityClass %>SearchRepository mock<%= entityClass %>SearchRepository;
-
-}
+@EnableJpaRepositories({"<%= domainRepositoryPackageName %>"})
+<%_ if (searchEngine === 'elasticsearch') { _%>
+@Enable<% if (reactive) { %>Reactive<% } %>ElasticsearchRepositories("<%= domainRepositoryPackageName %>.search")
+<%_ } _%>
+public class <%= classNameFromClassPath(entityRepositoryConfigurationClassPath) %> {}

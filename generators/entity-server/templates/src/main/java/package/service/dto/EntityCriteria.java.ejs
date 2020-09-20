@@ -1,11 +1,12 @@
-package <%= packageName %>.service.dto;
+package <%= classPackage %>;
+
 
 import java.io.Serializable;
 import java.util.Objects;
 import io.github.jhipster.service.Criteria;
-<%_ for (idx in fields) { if (fields[idx].fieldIsEnum === true) { _%>
-import <%= packageName %>.domain.enumeration.<%= fields[idx].fieldType %>;
-<%_ } } _%>
+
+<%- include('/partials/import_enums.ejs', {enums: Object.keys(uniqueEnums), classPackage}); -%>
+
 import io.github.jhipster.service.filter.BooleanFilter;
 import io.github.jhipster.service.filter.DoubleFilter;
 import io.github.jhipster.service.filter.Filter;

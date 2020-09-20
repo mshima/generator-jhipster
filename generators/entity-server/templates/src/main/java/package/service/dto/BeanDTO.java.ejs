@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= classPackage %>;
+package <%= dtoPackage %>;
 
 <%_ if (typeof javadoc != 'undefined') { _%>
 import io.swagger.annotations.ApiModel;
@@ -62,12 +62,14 @@ import javax.persistence.Lob;
 <%_ if (typeof javadoc !== 'undefined') { _%>
 @ApiModel(description = "<%- formatAsApiDescription(javadoc) %>")
 <%_ } _%>
-public class <%= entityDTO %> implements Serializable {
+public class <%= entityClass + dtoSuffix %> implements Serializable {
     <% if (!embedded) { %>
     private <%= primaryKeyType %> id;
     <%_ } _%>
 
-    <%_ for (idx in fields) {
+    <%_
+    const dtoRelationshipSuffix = dtoType === 'relationshipKeyValue' ? 'KeyValue' : '';
+    for (idx in fields) {
         if (typeof fields[idx].javadoc !== 'undefined') { _%>
 <%- formatAsFieldJavadoc(fields[idx].javadoc) %>
         <%_ }
@@ -107,7 +109,6 @@ public class <%= entityDTO %> implements Serializable {
         <%_ } _%>
     <%_ } _%>
     <%_ for (idx in relationships) {
-        const relationship = relationships[idx];
         const relationshipFieldName = relationships[idx].relationshipFieldName;
         const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
         const relationshipType = relationships[idx].relationshipType;
@@ -116,22 +117,17 @@ public class <%= entityDTO %> implements Serializable {
         const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized;
         const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
         const ownerSide = relationships[idx].ownerSide;
+        const otherEntityClassName = relationships[idx].otherEntityNameCapitalized + dtoSuffix + dtoRelationshipSuffix;
         if (typeof relationships[idx].javadoc != 'undefined') { _%>
 <%- formatAsFieldJavadoc(relationships[idx].javadoc) %>
     @ApiModelProperty(value = "<%- formatAsApiDescription(relationships[idx].javadoc) %>")
     <%_ }
-        if ((relationshipType === 'many-to-many' && ownerSide === true)
-            || (relationshipType === 'one-to-many' && otherEntityIsEmbedded)) { _%>
-    private Set<<%= relationship.otherEntity.entityDTO %>> <%= relationshipFieldNamePlural %> = new HashSet<>();
-    <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true && otherEntityIsEmbedded) { _%>
-    private <%= relationship.otherEntity.entityDTO %> <%= relationshipFieldName %>;
-    <%_ } else if (!embedded && (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true))) { _%>
-
-    private <%= otherEntityPrimaryKeyType %> <%= relationshipFieldName %>Id;
-    <%_ if (otherEntityFieldCapitalized !== 'Id' && otherEntityFieldCapitalized !== '') { _%>
-
-    private String <%= relationshipFieldName %><%= otherEntityFieldCapitalized %>;
-    <%_ } } } _%>
+        if (relationshipType === 'many-to-many' || relationshipType === 'one-to-many') { _%>
+    private Set<<%= otherEntityClassName %>> <%= relationshipFieldNamePlural %> = new HashSet<>();
+    <%_ } else if (relationshipType === 'one-to-one' || relationshipType === 'many-to-one') { _%>
+    private <%= otherEntityClassName %> <%= relationshipFieldName %>;
+    <%_ }
+    } _%>
     <% if (!embedded) { %>
     public <%= primaryKeyType %> getId() {
         return id;
@@ -187,61 +183,35 @@ public class <%= entityDTO %> implements Serializable {
         const relationshipNameCapitalized = relationships[idx].relationshipNameCapitalized;
         const relationshipNameCapitalizedPlural = relationships[idx].relationshipNameCapitalizedPlural;
         const ownerSide = relationships[idx].ownerSide;
-        if ((relationshipType === 'many-to-many' && ownerSide === true)
-                || (relationshipType === 'one-to-many' && otherEntityIsEmbedded)) { _%>
+        const otherSideEmbedded = relationships[idx].otherEntity.embedded;
+        const otherEntityClassName = relationships[idx].otherEntityNameCapitalized + dtoSuffix + (otherSideEmbedded ? '' : dtoRelationshipSuffix);
+        if (relationshipType === 'many-to-many' || relationshipType === 'one-to-many') { _%>
 
-    public Set<<%= otherEntityNameCapitalized + dtoSuffix %>> get<%= relationshipNameCapitalizedPlural %>() {
+    public Set<<%= otherEntityClassName %>> get<%= relationshipNameCapitalizedPlural %>() {
         return <%= relationshipFieldNamePlural %>;
     }
 
-    public void set<%= relationshipNameCapitalizedPlural %>(Set<<%= otherEntityNameCapitalized + dtoSuffix %>> <%= otherEntityNamePlural %>) {
+    public void set<%= relationshipNameCapitalizedPlural %>(Set<<%= otherEntityClassName %>> <%= otherEntityNamePlural %>) {
         this.<%= relationshipFieldNamePlural %> = <%= otherEntityNamePlural %>;
     }
-    <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true && otherEntityIsEmbedded) { _%>
+    <%_ } else if (relationshipType === 'one-to-one' || relationshipType === 'many-to-one') { _%>
 
-    public <%= otherEntityNameCapitalized + dtoSuffix %> get<%= relationshipNameCapitalized %>() {
+    public <%= otherEntityClassName %> get<%= relationshipNameCapitalized %>() {
         return <%= relationshipFieldName %>;
     }
 
-    public void set<%= relationshipNameCapitalized %>(<%= otherEntityNameCapitalized + dtoSuffix %> <%= otherEntityName %>) {
+    public void set<%= relationshipNameCapitalized %>(<%= otherEntityClassName %> <%= otherEntityName %>) {
         this.<%= relationshipFieldName %> = <%= otherEntityName %>;
     }
-    <%_ } else if (!embedded && (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true))) { _%>
-
-    <%_ if (relationshipNameCapitalized.length > 1) { _%>
-    public <%= otherEntityPrimaryKeyType %> get<%= relationshipNameCapitalized %>Id() {
-        return <%= relationshipFieldName %>Id;
-    }
-
-    public void set<%= relationshipNameCapitalized %>Id(<%= otherEntityPrimaryKeyType %> <%= otherEntityName %>Id) {
-        this.<%= relationshipFieldName %>Id = <%= otherEntityName %>Id;
-    }
-    <%_ } else { // special case when the entity name has one character _%>
-    public <%= otherEntityPrimaryKeyType %> get<%= relationshipNameCapitalized.toLowerCase() %>Id() {
-        return <%= relationshipFieldName %>Id;
-    }
-
-    public void set<%= relationshipNameCapitalized.toLowerCase() %>Id(<%= primaryKeyType %> <%= otherEntityName %>Id) {
-        this.<%= relationshipFieldName %>Id = <%= otherEntityName %>Id;
-    }
-    <%_ } _%>
-    <%_ if (otherEntityFieldCapitalized !== 'Id' && otherEntityFieldCapitalized !== '') { _%>
-
-    public String get<%= relationshipNameCapitalized %><%= otherEntityFieldCapitalized %>() {
-        return <%= relationshipFieldName %><%= otherEntityFieldCapitalized %>;
-    }
-
-    public void set<%= relationshipNameCapitalized %><%= otherEntityFieldCapitalized %>(String <%= otherEntityName %><%= otherEntityFieldCapitalized %>) {
-        this.<%= relationshipFieldName %><%= otherEntityFieldCapitalized %> = <%= otherEntityName %><%= otherEntityFieldCapitalized %>;
-    }
-    <%_ } } } _%>
+    <%_ }
+    } _%>
 
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof <%= entityClass + dtoSuffix %>)) {
+        if (!(o instanceof <%= entityClass + dtoSuffix%>)) {
             return false;
         }
 
@@ -285,11 +255,54 @@ public class <%= entityDTO %> implements Serializable {
             ", <%= relationshipFieldNamePlural %>='" + get<%= relationshipNameCapitalizedPlural %>() + "'" +
                 <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true && otherEntityIsEmbedded) { _%>
             ", <%= relationshipFieldName %>='" + get<%= relationshipNameCapitalized %>() + "'" +
-                <%_ } else if (!embedded && (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true))) { _%>
-            ", <%= relationshipFieldName %>Id=<% if (otherEntityPrimaryKeyType === 'String') { %>'<% } %>" + get<%= relationshipNameCapitalized %>Id() <% if (otherEntityPrimaryKeyType === 'String') { %>+ "'" <% } %>+
-                    <%_ if (otherEntityFieldCapitalized !== 'Id' && otherEntityFieldCapitalized !== '') { _%>
-            ", <%= relationshipFieldName %><%= otherEntityFieldCapitalized %>='" + get<%= relationshipNameCapitalized %><%= otherEntityFieldCapitalized %>() + "'" +
-            <%_ } } } _%>
+                <%_ }
+                } _%>
             "}";
     }
+
+<%_ if (dtoType === 'relationshipKeyValue') {
+        relationships.forEach(relationship => {
+            if (relationship.otherEntity.embedded) return;
+            const otherEntityNameCapitalized = relationship.otherEntityNameCapitalized;
+            const otherEntityClassName = relationship.otherEntityNameCapitalized + dtoSuffix + dtoRelationshipSuffix;
+
+            let otherFieldInstance
+            let otherFieldInstanceCapitalized
+            let otherFieldType
+            if (relationship.otherEntityValueField) {
+                otherFieldInstance = relationship.otherEntityValueField.fieldName;
+                otherFieldInstanceCapitalized = relationship.otherEntityValueField.fieldNameCapitalized;
+                otherFieldType =
+                    (!relationship.otherEntityValueField.fieldType || relationship.otherEntityValueField.fieldIsEnum)
+                        ? 'String'
+                        : relationship.otherEntityValueField.fieldType;
+            }
+     _%>
+    public static class <%= otherEntityClassName %> {
+        private Long id;
+
+        <%  if (relationship.otherEntityValueField) { %>
+        private <%= otherFieldType %> <%= otherFieldInstance %>;
+
+        <%  } %>
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+        <%  if (relationship.otherEntityValueField) { %>
+
+        public <%= otherFieldType %> get<%= otherFieldInstanceCapitalized %>() {
+            return <%= otherFieldInstance %>;
+        }
+
+        public void set<%= otherFieldInstanceCapitalized %>(<%= otherFieldType %> <%= otherFieldInstance %>) {
+            this.<%= otherFieldInstance %> = <%= otherFieldInstance %>;
+        }
+        <%  } %>
+    }
+    <%_ });
+    } _%>
 }

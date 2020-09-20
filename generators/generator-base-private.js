@@ -82,6 +82,90 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     }
 
     /**
+     * Convert java package to folder.
+     * @param {string} packageName - Package name to convert
+     * @return folder.
+     */
+    packageAsFolder(packageName) {
+        return packageName.replace(/\./g, '/');
+    }
+
+    includeUnique(lines) {
+        return [...new Set(lines)].join('\n');
+    }
+
+    /**
+     * Allows blueprints to customize classPaths.
+     * @param {string} packageName - Package name to convert
+     * @return folder.
+     */
+    resolveClassPath(classPath, absolute = false) {
+        if (!absolute && !classPath.startsWith(this.jhipsterConfig.packageName)) {
+            classPath = `${this.jhipsterConfig.packageName}.${classPath}`;
+        }
+        if (this.configOptions.resolveClassPath) {
+            return this.configOptions.resolveClassPath(classPath);
+        }
+        return classPath;
+    }
+
+    /**
+     * Get file path from class path.
+     * @param {string} classPath - Class path to get package
+     * @return file path.
+     */
+    filePathFromClassPath(classPath) {
+        return `${this.resolveClassPath(classPath).replace(/\./g, '/')}.java`;
+    }
+
+    /**
+     * Get java package from class path.
+     * @param {string} classPath - Class path to get package
+     * @return package.
+     */
+    packageFromClassPath(classPath) {
+        return this.resolveClassPath(classPath).slice(0, classPath.lastIndexOf('.'));
+    }
+
+    /**
+     * Get class name from class path.
+     * @param {string} classPath - Class path to get package
+     * @return class name.
+     */
+    classNameFromClassPath(classPath) {
+        return this.resolveClassPath(classPath).slice(classPath.lastIndexOf('.') + 1);
+    }
+
+    /**
+     * @param {string} classPath - Class path to get package
+     * @return dto class path.
+     */
+    classNameFromClassPathAsDTO(classPath) {
+        const splitted = this.resolveClassPath(classPath).split('.');
+        splitted.push(this.asDto(splitted.pop()));
+        return splitted.join('.');
+    }
+
+    /**
+     * @param {string} classPath - Class path to get package
+     * @return dto class path.
+     */
+    classNameFromClassPathAsEntity(classPath) {
+        const splitted = this.resolveClassPath(classPath).split('.');
+        splitted.push(this.asEntity(splitted.pop()));
+        return splitted.join('.');
+    }
+
+    /**
+     * Get instance name from class path.
+     * @param {string} classPath - Class path to get package
+     * @return instance name.
+     */
+    instanceNameFromClassPath(classPath) {
+        return _.lowerFirst(this.classNameFromClassPath(classPath)).replace(/Impl$/, '');
+    }
+
+    /**
      * Install I18N Client Files By Language
      *
      * @param {any} _this reference to generator

@@ -16,9 +16,10 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>.repository.search;
+package <%= classPackage %>;
 
-import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
+<%- include('/partials/import_pos.ejs', {entities: [this], classPackage}); -%>
+
 <%_ if (reactive) { _%>
     <%_ if (pagination !== 'no') { _%>
 import org.springframework.data.domain.Pageable;

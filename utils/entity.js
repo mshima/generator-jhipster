@@ -98,6 +98,8 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
     _.defaults(entityWithConfig, {
         entityNameCapitalized: _.upperFirst(entityName),
         entityClass: _.upperFirst(entityName),
+        entityPO: generator.asEntity(_.upperFirst(entityName)),
+        entityDTO: generator.asDto(_.upperFirst(entityName)),
         entityInstance: _.lowerFirst(entityName),
         entityTableName: generator.getTableName(entityName),
         entityNamePlural: pluralize(entityName),
@@ -107,7 +109,23 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
         entityNamePluralizedAndSpinalCased: _.kebabCase(entityWithConfig.entityNamePlural),
         entityClassPlural: _.upperFirst(entityWithConfig.entityNamePlural),
         entityInstancePlural: _.lowerFirst(entityWithConfig.entityNamePlural),
+        entityPOInstance: _.lowerFirst(entityWithConfig.entityPO),
+        entityDTOInstance: _.lowerFirst(entityWithConfig.entityDTO),
+        entityPOClassPath: `domain.${entityWithConfig.entityPO}`,
     });
+
+    if (entityWithConfig.dto === 'mapstruct') {
+        _.defaults(entityWithConfig, {
+            entityDTOClassPath: `services.dto.${entityWithConfig.entityDTO}`,
+            entityPO_DTO: entityWithConfig.entityDTO,
+            entityPO_DTOClassPath: `services.dto.${entityWithConfig.entityDTO}`,
+        });
+    } else {
+        _.defaults(entityWithConfig, {
+            entityPO_DTO: entityWithConfig.entityPO,
+            entityPO_DTOClassPath: entityWithConfig.entityPOClassPath,
+        });
+    }
 
     _.defaults(entityWithConfig, {
         // Implement i18n variant ex: 'male', 'female' when applied

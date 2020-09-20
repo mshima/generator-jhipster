@@ -1,0 +1,10 @@
+<%#
+Example:
+include('/partials/import_enums.ejs', {enums: Object.keys(uniqueEnums), classPackage});
+-%>
+<%- this.includeUnique(
+    classPaths
+        .map(classPath => this.resolveClassPath(classPath))
+        .filter(classPath => this.packageFromClassPath(classPath) !== classPackage)
+        .map(classPath => `import ${classPath};`)
+); %>

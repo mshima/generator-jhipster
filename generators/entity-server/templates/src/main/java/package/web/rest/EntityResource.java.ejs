@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>.web.rest;
+package <%= classPackage %>;
 
 <%_
 const viaService = service !== 'no';
@@ -30,17 +30,17 @@ for (idx in relationships) {
 }
 _%>
 <%_ if (dto !== 'mapstruct' || service === 'no') { _%>
-import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
+import <%= this.resolveClassPath(entityPO_DTOClassPath) %>;
 <%_ } _%>
 <%_ if (service !== 'no') { _%>
-import <%= packageName %>.service.<%= entityClass %>Service;
+import <%= entityServiceClassPath %>;
 <%_ } else { _%>
-import <%= packageName %>.repository.<%= entityClass %>Repository;
+import <%= entityRepositoryClassPath %>;
     <%_ if (isUsingMapsId === true) { _%>
-import <%= packageName %>.repository.<%= mapsIdAssoc.otherEntityNameCapitalized %>Repository;
+import <%= domainRepositoryPackageName %>.<%= mapsIdAssoc.otherEntityNameCapitalized %>Repository;
     <%_ } _%>
     <%_ if (searchEngine === 'elasticsearch') { _%>
-import <%= packageName %>.repository.search.<%= entityClass %>SearchRepository;
+import <%= domainRepositoryPackageName %>.search.<%= entityClass %>SearchRepository;
     <%_ } _%>
 <%_ } _%>
 <%_ if (saveUserSnapshot) { _%>
@@ -48,14 +48,14 @@ import <%= packageName %>.repository.UserRepository;
 <%_ } _%>
 import <%= packageName %>.web.rest.errors.BadRequestAlertException;
 <%_ if (dto === 'mapstruct') { _%>
-import <%= packageName %>.service.dto.<%= asDto(entityClass) %>;
+import <%= entityControllerDtoClassPath %>;
     <%_ if (service === 'no') { _%>
-import <%= packageName %>.service.mapper.<%= entityClass %>Mapper;
+import <%= this.resolveClassPath(`service.mapper.${entityClass}Mapper`) %>;
     <%_ } _%>
 <%_ } _%>
 <%_ if (jpaMetamodelFiltering) {  _%>
-import <%= packageName %>.service.dto.<%= entityClass %>Criteria;
-import <%= packageName %>.service.<%= entityClass %>QueryService;
+import <%= this.resolveClassPath(`service.dto.${entityClass}Criteria`) %>;
+import <%= this.resolveClassPath(`service.${entityClass}QueryService`) %>;
 <%_ } _%>
 
 import io.github.jhipster.web.util.HeaderUtil;
@@ -134,7 +134,7 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 <%_ } _%>
 
 /**
- * REST controller for managing {@link <%= packageName %>.domain.<%= asEntity(entityClass) %>}.
+ * REST controller for managing {@link <%= this.resolveClassPath(entityPO_DTOClassPath) %>}.
  */
 @RestController
 @RequestMapping("/api")
@@ -160,7 +160,7 @@ public class <%= entityClass %>Resource {
     const instanceName = (dto === 'mapstruct') ? asDto(entityInstance) : asEntity(entityInstance);
     const mapper = entityInstance  + 'Mapper';
     const entityToDtoReference = mapper + '::' + 'toDto';
-    _%><%- include('../../common/inject_template', {viaService: viaService, constructorName: entityClass + 'Resource', queryService: jpaMetamodelFiltering, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: true}); -%>
+    _%><%- include('../../common/inject_template', {entityServiceClassPath, entityRepositoryClassPath, viaService: viaService, constructorName: entityClass + 'Resource', queryService: jpaMetamodelFiltering, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: true}); -%>
 <%_ if (!readOnly) { _%>
 
     /**
@@ -193,12 +193,12 @@ public class <%= entityClass %>Resource {
         <%= instanceName %>.setId(UUID.randomUUID());
         <%_ } _%>
         <%_ if (!reactive) { _%>
-<%- include('../../common/save_template', {asEntity, asDto, viaService: viaService, returnDirectly: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: true}); -%>
+<%- include('../../common/save_template', {instanceType, instanceName, asEntity, asDto, viaService: viaService, returnDirectly: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: true}); -%>
         return ResponseEntity.created(new URI("/api/<%= entityApiUrl %>/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, result.getId()<% if (primaryKeyType !== 'String') { %>.toString()<% } %>))
             .body(result);
         <%_ } else { _%>
-<%- include('../../common/save_reactive_template', {asEntity, asDto, viaService: viaService, returnDirectly: false}); -%>
+<%- include('../../common/save_reactive_template', {instanceType, instanceName, asEntity, asDto, viaService: viaService, returnDirectly: false}); -%>
             .map(result -> {
                 try {
                     return ResponseEntity.created(new URI("/api/<%= entityApiUrl %>/" + result.getId()))
@@ -240,12 +240,12 @@ public class <%= entityClass %>Resource {
             <%_ } _%>
         <%_ } _%>
     <%_ if (!reactive) { _%>
-<%- include('../../common/save_template', {asEntity, asDto, viaService: viaService, returnDirectly: false, isUsingMapsId: false, mapsIdAssoc: mapsIdAssoc}); -%>
+<%- include('../../common/save_template', {instanceType, instanceName, asEntity, asDto, viaService: viaService, returnDirectly: false, isUsingMapsId: false, mapsIdAssoc: mapsIdAssoc}); -%>
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, <%= instanceName %>.getId()<% if (primaryKeyType !== 'String') { %>.toString()<% } %>))
             .body(result);
     <%_ } else { _%>
-<%- include('../../common/save_reactive_template', {asEntity, asDto, viaService: viaService, returnDirectly: false}); -%>
+<%- include('../../common/save_reactive_template', {instanceType, instanceName, asEntity, asDto, viaService: viaService, returnDirectly: false}); -%>
             .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
             .map(result -> ResponseEntity.ok()
                 .headers(HeaderUtil.createEntityUpdateAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, result.getId()<% if (primaryKeyType !== 'String') { %>.toString()<% } %>))
@@ -285,7 +285,7 @@ public class <%= entityClass %>Resource {
             <%_ } _%>
         <%_ } _%>
 
-        <%- include('../../common/patch_template', {asEntity, asDto, isService: false, viaService: viaService}); -%>
+        <%- include('../../common/patch_template', {instanceType, instanceName, asEntity, asDto, isService: false, viaService: viaService}); -%>
             <%_ if (!reactive) { _%>
         return ResponseUtil.wrapOrNotFound(
             result,
@@ -325,7 +325,7 @@ public class <%= entityClass %>Resource {
     <%_ if (databaseType === 'sql' && isUsingMapsId === true && !viaService) { _%>
     @Transactional(readOnly = true)
     <%_ } _%>
-<%- include('../../common/get_all_template', {asEntity, asDto, viaService}); -%>
+<%- include('../../common/get_all_template', {instanceType, instanceName, asEntity, viaService}); -%>
 
     <%_ if (reactiveRepositories && pagination === 'no') { _%>
     /**
@@ -405,6 +405,6 @@ public class <%= entityClass %>Resource {
     <%_ } _%>
      * @return the result of the search.
      */
-    @GetMapping("/_search/<%= entityApiUrl %>")<%- include('../../common/search_template', {asEntity, asDto, viaService}); -%>
+    @GetMapping("/_search/<%= entityApiUrl %>")<%- include('../../common/search_template', {instanceType, instanceName, asEntity, asDto, viaService}); -%>
 <%_ } _%>
 }

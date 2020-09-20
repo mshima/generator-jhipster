@@ -16,7 +16,15 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>.repository;
+package <%= classPackage %>;
+
+<%- include('/partials/import_pos.ejs', {entities: [this], classPackage}); -%>
+
+<%- include('/partials/import_class_paths.ejs', {classPaths: relationships.filter(rel => rel.relationshipType === 'many-to-many' && rel.ownerSide), classPackage}).map(rel => `domain.${rel.otherEntity.entityPO}`); -%>
+
+<%- include('/partials/import_enums.ejs', {enums: Object.keys(uniqueEnums), classPackage}); -%>
+
+<%- include('/partials/import_class_paths.ejs', {classPaths: reactiveUniqueEntityTypes.map(entityType => `repository.rowmapper.${entityType}RowMapper`), classPackage}); -%>
 
 import java.util.function.BiFunction;
 <%_ if (fieldsContainBigDecimal === true) { _%>
@@ -56,20 +64,6 @@ import org.springframework.data.relational.core.sql.SelectBuilder.SelectFromAndJ
 import org.springframework.data.relational.core.sql.Table;
 <%_ } _%>
 
-import <%= packageName %>.domain.<%= asEntity(entityClass) %>;
-<% relationships.forEach(function(rel) {
-    if (rel.relationshipType === 'many-to-many' && rel.ownerSide) { _%>
-import <%= packageName %>.domain.<%= asEntity(rel.otherEntityNameCapitalized) %>;
-    <%_ } _%>
-<%_ } ); _%>
-<%_ Object.keys(uniqueEnums).forEach(function(element) { _%>
-
-import <%= packageName %>.domain.enumeration.<%= element %>;
-<%_ }); _%>
-
-<%_ reactiveUniqueEntityTypes.forEach(function(element) { _%>
-import <%= packageName %>.repository.rowmapper.<%= element %>RowMapper;
-<%_ }); _%>
 import <%= packageName %>.service.EntityManager;
 <%_ if (fieldsContainOwnerManyToMany) { _%>
 import <%= packageName %>.service.EntityManager.LinkTable;

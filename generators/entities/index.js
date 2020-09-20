@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const _ = require('lodash');
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const { JHIPSTER_CONFIG_DIR } = require('../generator-constants');
 
@@ -111,6 +112,62 @@ module.exports = class extends BaseBlueprintGenerator {
 
     get composing() {
         return useBlueprints ? undefined : this._composing();
+    }
+
+    _preparing() {
+        return {
+            createBuiltInEntitiesStubs() {
+                this.configOptions.sharedEntities = this.configOptions.sharedEntities || {};
+                if (this.jhipsterConfig.skipUserManagement && this.jhipsterConfig.authenticationType !== 'oauth2') return;
+                // Create entity definition for built-in entity to make easier to deal with relationships.
+                this.configOptions.sharedEntities.User = {
+                    name: 'User',
+                    java: {
+                        entityBOClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('User')}`,
+                        entityDTOClassPath: `${this.jhipsterConfig.packageName}.service.dto.${this.asDto('User')}`,
+                        entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.UserResource`,
+                    },
+                    entityPO: 'User',
+                    entityPOClassPath: 'domain.User',
+                    entityDTO: 'UserDTO',
+                    entityPO_DTO: 'UserDTO',
+                    relationships: [],
+                    fields: [],
+                };
+                this.configOptions.sharedEntities.Authority = {
+                    name: 'Authority',
+                    java: {
+                        entityBOClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('Authority')}`,
+                        entityDTOClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('Authority')}`,
+                        entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.AuthorityResource`,
+                    },
+                    relationships: [],
+                    fields: [],
+                };
+            },
+
+            prepareDomains() {
+                this.configOptions.domains = this.configOptions.domains || {};
+                this.getExistingEntities().forEach(entity => {
+                    const definition = entity.definition;
+                    if (!definition.domainName) return;
+                    const domainName = _.upperFirst(definition.domainName);
+                    if (_.upperFirst(entity.name) !== domainName) return;
+                    const domain = this.configOptions.domains[domainName] || {};
+                    this.configOptions.domains[domainName] = domain;
+                    domain.webPort = definition.webPort || 'primary';
+                    domain.webAdapter = definition.webAdapter || 'web';
+                    domain.repositoryPort = definition.repositoryPort || 'secondary';
+                    if (typeof definition.additionalPorts === 'string') {
+                        domain.additionalPorts = entity.additionalPorts.split(',').map(port => port.trim());
+                    }
+                });
+            },
+        };
+    }
+
+    get preparing() {
+        return useBlueprints ? undefined : this._preparing();
     }
 
     // Public API method used by the getter and also by Blueprints

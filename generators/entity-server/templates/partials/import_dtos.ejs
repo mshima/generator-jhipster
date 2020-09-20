@@ -1,0 +1,6 @@
+<%- this.includeUnique(
+    entities
+        .map(entity => this.resolveClassPath('domain.' + (typeof(dtoOnly) !== 'undefined' && dtoOnly ? entity.entityDTO : (typeof(poOnly) !== 'undefined' && poOnly ? entity.entityPO : entity.entityPO_DTO))))
+        .filter(relatedClassPath => this.packageFromClassPath(relatedClassPath) !== classPackage)
+        .map(relatedClassPath => `import ${relatedClassPath};`)
+); %>
