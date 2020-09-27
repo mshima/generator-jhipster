@@ -2472,7 +2472,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
      * @param {String} name entity name
      */
     asDto(name) {
-        return name + (this.dtoSuffix || this.jhipsterConfig.dtoSuffix || 'DTO');
+        return name + (this.dtoSuffix || this.jhipsterConfig.dtoSuffix || '');
     }
 
     get needleApi() {
