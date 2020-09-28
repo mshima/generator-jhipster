@@ -62,14 +62,19 @@ module.exports = class extends BaseBlueprintGenerator {
              * Generate paths to files and resources.
              */
             generatePaths() {
+                let portsPackage;
+                let repositoryPort;
+                let webPort;
                 if (this.domainName) {
                     this.warning('Domain support is experimental and subject to change, use at your own risk');
+                    const domain = this.configOptions.domains[this.domainName] || {};
+                    portsPackage = domain.portsPackage || 'infrastructure';
+                    repositoryPort = domain.repositoryPort || 'secondary';
+                    webPort = domain.webPort || 'primary';
                 } else {
+                    // set as undefined for templates.
                     this.domainName = undefined;
                 }
-                const portsPackage = 'infrastructure';
-                const repositoryPort = 'secondary';
-                const controllerPort = 'primary';
 
                 this.domainPackage = this.domainName ? `${this.packageName}.${this.domainName}` : this.packageName;
                 const domainRelativeModelPackage =
@@ -79,7 +84,7 @@ module.exports = class extends BaseBlueprintGenerator {
                         ? `${portsPackage}.${repositoryPort}`
                         : 'repository';
                 const domainRelativeWebPackage =
-                    this.configOptions.domainRelativeWebPackage || this.domainName ? `${portsPackage}.${controllerPort}` : 'web.rest';
+                    this.configOptions.domainRelativeWebPackage || this.domainName ? `${portsPackage}.${webPort}` : 'web.rest';
                 const domainRelativeServicePackage =
                     this.configOptions.domainRelativeServicePackage || this.domainName ? 'domain.service' : 'service';
 

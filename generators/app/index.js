@@ -455,6 +455,22 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
                 cleanup.upgradeFiles(this);
             },
 
+            prepareDomains() {
+                this.configOptions.domains = this.configOptions.domains || {};
+                if (this.withEntities) {
+                    this.getExistingEntities().forEach(entity => {
+                        if (!entity.domainName) return;
+                        const domainName = _.uppertFirst(entity.domainName);
+                        if (_.uppertFirst(entity.name) !== domainName) return;
+                        const domain = this.configOptions.domains[domainName] || {};
+                        this.configOptions.domains[domainName] = domain;
+                        domain.webPort = entity.webPort || 'web';
+                        domain.repositoryPort = entity.repositoryPort || 'secondary';
+                        domain.additionalPorts = entity.additionalPorts.split(',').map(port => port.trim());
+                    });
+                }
+            },
+
             regenerateEntities() {
                 if (this.withEntities && !this.configOptions.skipComposeEntity) {
                     this.configOptions.skipComposeEntity = true;
