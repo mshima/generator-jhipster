@@ -105,11 +105,11 @@ import <%= domainRepositoryPackageName %>.search.<%= entityClass %>SearchReposit
 import <%= entityServiceClassPath %>;
 <%_ } _%>
 <%_ if (dto === 'mapstruct') { _%>
-import <%= entityServiceDtoClassPath %>;
+import <%= entityControllerDtoClassPath %>;
 import <%= domainServicePackageName %>.mapper.<%= entityClass %>Mapper;
 <%_ } _%>
 <%_ if (jpaMetamodelFiltering) { _%>
-import <%= domainServiceDtoPackageName %>.<%= entityClass %>Criteria;
+import <%= domainControllerDtoPackageName %>.<%= entityClass %>Criteria;
 import <%= domainServicePackageName %>.<%= entityClass %>QueryService;
 <%_ } _%>
 

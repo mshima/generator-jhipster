@@ -48,9 +48,9 @@ import <%= entityClassPath %>;
 import <%= domainModelPackageName %>.*; // for static metamodels
 import <%= entityRepositoryClassPath %>;<% if (searchEngine === 'elasticsearch') { %>
 import <%= domainRepositoryPackageName %>.search.<%= entityClass %>SearchRepository;<% } %>
-import <%= domainServiceDtoPackageName %>.<%= entityClass %>Criteria;
+import <%= domainControllerDtoPackageName %>.<%= entityClass %>Criteria;
 <%_ if (dto === 'mapstruct') { _%>
-import <%= entityServiceDtoClassPath %>;
+import <%= entityControllerDtoClassPath %>;
 import <%= domainServicePackageName %>.mapper.<%= entityClass %>Mapper;
 <%_ } _%>
 

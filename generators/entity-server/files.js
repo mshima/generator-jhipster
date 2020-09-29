@@ -220,15 +220,15 @@ const dtoFiles = {
             templates: [
                 {
                     file: 'package/service/dto/EntityDTO.java',
-                    renameTo: generator => `${generator.entityServiceDtoBaseName}.java`,
+                    renameTo: (_generator, data) => `${data.dtoBaseName}.java`,
                 },
                 {
                     file: 'package/service/mapper/BaseEntityMapper.java',
-                    renameTo: generator => `${generator.domainServiceFolder}/mapper/EntityMapper.java`,
+                    renameTo: (_generator, data) => `${data.dtoMapperFolder}/EntityMapper.java`,
                 },
                 {
                     file: 'package/service/mapper/EntityMapper.java',
-                    renameTo: generator => `${generator.domainServiceFolder}/mapper/${generator.entityClass}Mapper.java`,
+                    renameTo: (_generator, data) => `${data.dtoMapperFolder}/${data.entityClass}Mapper.java`,
                 },
             ],
         },
@@ -237,17 +237,17 @@ const dtoFiles = {
             templates: [
                 {
                     file: 'package/service/dto/EntityDTOTest.java',
-                    renameTo: generator => `${generator.entityServiceDtoBaseName}Test.java`,
+                    renameTo: (_generator, data) => `${data.dtoBaseName}Test.java`,
                 },
             ],
         },
         {
-            condition: generator => ['sql', 'mongodb', 'couchbase', 'neo4j'].includes(generator.databaseType),
+            condition: (_generator, data) => ['sql', 'mongodb', 'couchbase', 'neo4j'].includes(data.databaseType),
             path: SERVER_TEST_SRC_DIR,
             templates: [
                 {
                     file: 'package/service/mapper/EntityMapperTest.java',
-                    renameTo: generator => `${generator.domainServiceFolder}/mapper/${generator.entityClass}MapperTest.java`,
+                    renameTo: (_generator, data) => `${data.dtoMapperFolder}/${data.entityClass}MapperTest.java`,
                 },
             ],
         },
@@ -292,7 +292,18 @@ function writeFiles() {
 
             // write dto files for the domain service
             if (this.dto === 'mapstruct') {
-                this.writeFilesToDisk(dtoFiles, this, false, this.fetchFromInstalledJHipster('entity-server/templates'));
+                this.writeFilesToDisk(dtoFiles, this, false, this.fetchFromInstalledJHipster('entity-server/templates'), {
+                    ...this.entity,
+                    importApiModelProperty: this.importApiModelProperty,
+                    uniqueEnums: this.uniqueEnums,
+                    domainServicePackageName: this.domainServicePackageName,
+                    domainModelPackageName: this.domainModelPackageName,
+                    dtoPackage: this.domainControllerDtoPackageName,
+                    dtoFolder: this.domainServiceFolder,
+                    dtoBaseName: this.entityControllerDtoBaseName,
+                    dtoMapperPackage: this.domainControllerMapperPackage,
+                    dtoMapperFolder: this.packageAsFolder(this.domainControllerMapperPackage),
+                });
             }
             // write domain files.
             if (this.domainName) {

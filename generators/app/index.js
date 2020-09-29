@@ -408,11 +408,13 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
                     entityClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('User')}`,
                     entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.UserResource`,
                     relationships: [],
+                    fields: [],
                 };
                 this.configOptions.sharedEntities.Authority = {
                     entityClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('Authority')}`,
                     entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.AuthorityResource`,
                     relationships: [],
+                    fields: [],
                 };
             },
         };

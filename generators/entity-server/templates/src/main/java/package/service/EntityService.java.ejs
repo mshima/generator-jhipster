@@ -26,7 +26,7 @@ const listOrFlux = (reactive === true) ? 'Flux' : 'List';
 const pageOrFlux = (reactive === true) ? 'Flux' : 'Page';
 _%>
 <%_ if (dto === 'mapstruct') { _%>
-import <%= entityServiceDtoClassPath %>;
+import <%= entityControllerDtoClassPath %>;
 <%_ } else { _%>
 import <%= entityClassPath %>;
 <%_ } _%>

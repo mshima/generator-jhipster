@@ -93,22 +93,32 @@ module.exports = class extends BaseBlueprintGenerator {
                 this.domainWebPackageName = `${this.domainPackage}.${domainRelativeWebPackage}`;
                 this.domainServicePackageName = `${this.domainPackage}.${domainRelativeServicePackage}`;
 
-                this.domainServiceDtoPackageName = `${this.domainPackage}.${domainRelativeServicePackage}.dto`;
+                this.domainFilteringPackageName = `${this.domainPackage}.${domainRelativeServicePackage}.dto`;
 
                 this.domainModelFolder = this.packageAsFolder(this.domainModelPackageName);
                 this.domainRepositoryFolder = this.packageAsFolder(this.domainRepositoryPackageName);
                 this.domainServiceFolder = this.packageAsFolder(this.domainServicePackageName);
 
+                const domainRelativeControllerDtoPackage =
+                    this.configOptions.domainRelativeControllerPackage || this.domainName
+                        ? domainRelativeWebPackage
+                        : domainRelativeServicePackage;
+
+                this.domainControllerDtoPackageName = `${this.domainPackage}.${domainRelativeControllerDtoPackage}.dto`;
+                this.domainControllerMapperPackage = this.domainName
+                    ? `${this.domainControllerDtoPackageName}.mapper`
+                    : `${this.domainPackage}.service.mapper`;
+
                 if (this.domain) {
                     this.domainFolder = this.packageAsFolder(this.domainPackage);
 
                     this.entityPackage = this.domainModelPackageName;
-                    this.entityRepositoryDtoPackage = this.domainServiceDtoPackageName;
+                    this.entityRepositoryDtoPackage = this.domainControllerDtoPackageName;
                     this.entityRepositoryPackage = this.domainRepositoryPackageName;
                     this.entityServicePackage = this.domainServicePackageName;
                 } else {
                     this.entityPackage = this.domainModelPackageName;
-                    this.entityRepositoryDtoPackage = this.domainServiceDtoPackageName;
+                    this.entityRepositoryDtoPackage = this.domainControllerDtoPackageName;
                     this.entityRepositoryPackage = this.domainRepositoryPackageName;
                     this.entityServicePackage = this.domainServicePackageName;
                 }
@@ -116,23 +126,24 @@ module.exports = class extends BaseBlueprintGenerator {
                 this.entityClassPath = `${this.entityPackage}.${this.asEntity(this.entityClass)}`;
                 this.entityRepositoryClassPath = `${this.entityRepositoryPackage}.${this.entityClass}Repository`;
                 this.entityControllerClassPath = `${this.domainWebPackageName}.${this.entityClass}Resource`;
-                this.entityServiceDtoClassPath = `${this.entityRepositoryDtoPackage}.${this.asDto(this.entityClass)}`;
                 this.entityServiceClassPath = `${this.entityServicePackage}.${this.entityClass}Service`;
 
                 this.entityBaseName = this.packageAsFolder(this.entityClassPath);
                 this.entityRepositoryBaseName = this.packageAsFolder(this.entityRepositoryClassPath);
                 this.entityControllerBaseName = this.packageAsFolder(this.entityControllerClassPath);
-                this.entityServiceDtoBaseName = this.packageAsFolder(this.entityServiceDtoClassPath);
                 this.entityServiceBaseName = this.packageAsFolder(this.entityServiceClassPath);
 
                 this.entityServiceImplClassPath = `${this.domainServicePackageName}.impl.${this.entityClass}ServiceImpl`;
                 this.entityServiceImplBaseName = this.packageAsFolder(this.entityServiceImplClassPath);
 
+                this.entityControllerDtoClassPath = `${this.entityRepositoryDtoPackage}.${this.asDto(this.entityClass)}`;
+                this.entityControllerDtoBaseName = this.packageAsFolder(this.entityControllerDtoClassPath);
+
                 // Export to be used by relationships.
                 this.entity.entityClassPath = this.entityClassPath;
                 this.entity.entityRepositoryClassPath = this.entityRepositoryClassPath;
                 this.entity.entityControllerClassPath = this.entityControllerClassPath;
-                this.entity.entityServiceDtoClassPath = this.entityServiceDtoClassPath;
+                this.entity.entityControllerDtoClassPath = this.entityControllerDtoClassPath;
                 this.entity.entityServiceClassPath = this.entityServiceClassPath;
             },
 

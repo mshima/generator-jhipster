@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= domainServicePackageName %>.mapper;
+package <%= dtoMapperPackage %>;
 
 <%_
 let existingMappings = [];
@@ -25,12 +25,12 @@ let byteMapMethod = false;
 for (idx in relationships) {
     if ((relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) || relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) {
         // if the entity is mapped twice, we should implement the mapping once
-        if (!existingMappings.includes(relationships[idx].otherEntityNameCapitalized) && asEntity(relationships[idx].otherEntityNameCapitalized) !== asEntity(entityClass)) {
+        if (!existingMappings.includes(relationships[idx].otherEntityNameCapitalized) && this.asEntity(relationships[idx].otherEntityNameCapitalized) !== this.asEntity(entityClass)) {
             existingMappings.push(relationships[idx].otherEntityNameCapitalized);
         }
-        let otherEntity = getExistingEntities().find(e => e.name === relationships[idx].otherEntityNameCapitalized);
+        let otherEntity = relationships[idx].otherEntity;
         if (otherEntity) {
-            let otherEntityField = otherEntity.definition.fields.find(f => f.fieldName === relationships[idx].otherEntityField);
+            let otherEntityField = otherEntity.fields.find(f => f.fieldName === relationships[idx].otherEntityField);
             if (otherEntityField) {
                 if (otherEntityField.fieldType === 'UUID') {
                     uuidMapMethod = true;
@@ -45,7 +45,7 @@ for (idx in relationships) {
 _%>
 
 import <%= domainModelPackageName %>.*;
-import <%= entityServiceDtoClassPath %>;
+import <%= entityControllerDtoClassPath %>;
 
 import org.mapstruct.*;
 <%_ if (uuidMapMethod) { _%>
@@ -55,10 +55,10 @@ import java.util.UUID;
 <%_ } _%>
 
 /**
- * Mapper for the entity {@link <%= asEntity(entityClass) %>} and its DTO {@link <%= asDto(entityClass) %>}.
+ * Mapper for the entity {@link <%= this.asEntity(entityClass) %>} and its DTO {@link <%= this.asDto(entityClass) %>}.
  */
 @Mapper(componentModel = "spring", uses = {<%= existingMappings.map(otherEntityNameCapitalized => otherEntityNameCapitalized + 'Mapper.class').join(', ') %>})
-public interface <%= entityClass %>Mapper extends EntityMapper<<%= asDto(entityClass) %>, <%= asEntity(entityClass) %>> {
+public interface <%= entityClass %>Mapper extends EntityMapper<<%= this.asDto(entityClass) %>, <%= this.asEntity(entityClass) %>> {
 
 <%_
 if (!embedded) {
@@ -78,7 +78,7 @@ _%>
         <%_ } _%>
     <%_ } _%>
     <%_ if (renMapAnotEnt === true) { _%>
-    <%= asDto(entityClass) %> toDto(<%= asEntity(entityClass) %> <%= asEntity(entityInstance) %>);
+    <%= this.asDto(entityClass) %> toDto(<%= this.asEntity(entityClass) %> <%= this.asEntity(entityInstance) %>);
     <%_ } _%>
 
 <%_ } _%>
@@ -110,17 +110,17 @@ _%>
     <%_ } _%>
     <%_ } _%>
     <%_ if (renMapAnotDto === true) { _%>
-    <%= asEntity(entityClass) %> toEntity(<%= asDto(entityClass) %> <%= asDto(entityInstance) %>);
+    <%= this.asEntity(entityClass) %> toEntity(<%= this.asDto(entityClass) %> <%= this.asDto(entityInstance) %>);
     <%_ } _%>
     <%_ if ((databaseType === 'sql' || databaseType === 'mongodb' || databaseType === 'couchbase') && !embedded) { _%>
 
-    default <%= asEntity(entityClass) %> fromId(<%= primaryKeyType %> id) {
+    default <%= this.asEntity(entityClass) %> fromId(<%= primaryKeyType %> id) {
         if (id == null) {
             return null;
         }
-        <%= asEntity(entityClass) %> <%= asEntity(entityInstance) %> = new <%= asEntity(entityClass) %>();
-        <%= asEntity(entityInstance) %>.setId(id);
-        return <%= asEntity(entityInstance) %>;
+        <%= this.asEntity(entityClass) %> <%= this.asEntity(entityInstance) %> = new <%= this.asEntity(entityClass) %>();
+        <%= this.asEntity(entityInstance) %>.setId(id);
+        return <%= this.asEntity(entityInstance) %>;
     }
 <%_ } _%>
     <%_ if (uuidMapMethod) { _%>

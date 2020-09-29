@@ -45,7 +45,7 @@ import <%= domainRepositoryPackageName %>.<%= mapsIdAssoc.otherEntityNameCapital
 import <%= domainRepositoryPackageName %>.search.<%= entityClass %>SearchRepository;
 <%_ } _%>
 <%_ if (dto === 'mapstruct') { _%>
-import <%= entityServiceDtoClassPath %>;
+import <%= entityControllerDtoClassPath %>;
 import <%= domainServicePackageName %>.mapper.<%= entityClass %>Mapper;
 <%_ } _%>
 import org.slf4j.Logger;

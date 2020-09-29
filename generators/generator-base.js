@@ -2047,7 +2047,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
      * @param {boolean} returnFiles - weather to return the generated file list or to write them
      * @param {string} prefix - pefix to add to path
      */
-    writeFilesToDisk(files, generator, returnFiles, prefix) {
+    writeFilesToDisk(files, generator, returnFiles, prefix, templateData = false) {
         const _this = generator || this;
         const filesOut = [];
         const startTime = new Date();
@@ -2055,12 +2055,12 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
         for (let i = 0, blocks = Object.keys(files); i < blocks.length; i++) {
             for (let j = 0, blockTemplates = files[blocks[i]]; j < blockTemplates.length; j++) {
                 const blockTemplate = blockTemplates[j];
-                if (!blockTemplate.condition || blockTemplate.condition(_this)) {
+                if (!blockTemplate.condition || blockTemplate.condition(_this, templateData)) {
                     const path = blockTemplate.path || '';
                     blockTemplate.templates.forEach(templateObj => {
                         let templatePath = path;
                         let method = 'template';
-                        let useTemplate = false;
+                        let useTemplate = templateData;
                         let options = {};
                         let templatePathTo;
                         if (typeof templateObj === 'string') {
@@ -2076,7 +2076,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
                             options = templateObj.options ? templateObj.options : options;
                         }
                         if (templateObj && templateObj.renameTo) {
-                            templatePathTo = path + templateObj.renameTo(_this);
+                            templatePathTo = path + templateObj.renameTo(_this, useTemplate);
                         } else {
                             // remove the .ejs suffix
                             templatePathTo = templatePath.replace('.ejs', '');
