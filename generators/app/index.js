@@ -405,12 +405,14 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
                 if (this.jhipsterConfig.skipUserManagement && this.jhipsterConfig.authenticationType !== 'oauth2') return;
                 // Create entity definition for built-in entity to make easier to deal with relationships.
                 this.configOptions.sharedEntities.User = {
+                    name: 'User',
                     entityClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('User')}`,
                     entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.UserResource`,
                     relationships: [],
                     fields: [],
                 };
                 this.configOptions.sharedEntities.Authority = {
+                    name: 'Authority',
                     entityClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('Authority')}`,
                     entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.AuthorityResource`,
                     relationships: [],
