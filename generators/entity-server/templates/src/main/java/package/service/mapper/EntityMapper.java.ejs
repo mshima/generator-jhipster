@@ -45,7 +45,7 @@ for (idx in relationships) {
 _%>
 
 import <%= domainModelPackageName %>.*;
-import <%= entityControllerDtoClassPath %>;
+import <%= dtoClassPath %>;
 
 import org.mapstruct.*;
 <%_ if (uuidMapMethod) { _%>
@@ -55,10 +55,10 @@ import java.util.UUID;
 <%_ } _%>
 
 /**
- * Mapper for the entity {@link <%= this.asEntity(entityClass) %>} and its DTO {@link <%= this.asDto(entityClass) %>}.
+ * Mapper for the entity {@link <%= this.asEntity(entityClass) %>} and its DTO {@link <%= entityClass + dtoSuffix %>}.
  */
 @Mapper(componentModel = "spring", uses = {<%= existingMappings.map(otherEntityNameCapitalized => otherEntityNameCapitalized + 'Mapper.class').join(', ') %>})
-public interface <%= entityClass %>Mapper extends EntityMapper<<%= this.asDto(entityClass) %>, <%= this.asEntity(entityClass) %>> {
+public interface <%= entityClass + dtoSuffix %>Mapper extends EntityMapper<<%= entityClass + dtoSuffix %>, <%= this.asEntity(entityClass) %>> {
 
 <%_
 if (!embedded) {
@@ -78,7 +78,7 @@ _%>
         <%_ } _%>
     <%_ } _%>
     <%_ if (renMapAnotEnt === true) { _%>
-    <%= this.asDto(entityClass) %> toDto(<%= this.asEntity(entityClass) %> <%= this.asEntity(entityInstance) %>);
+    <%= entityClass + dtoSuffix %> toDto(<%= this.asEntity(entityClass) %> <%= this.asEntity(entityInstance) %>);
     <%_ } _%>
 
 <%_ } _%>
@@ -110,7 +110,7 @@ _%>
     <%_ } _%>
     <%_ } _%>
     <%_ if (renMapAnotDto === true) { _%>
-    <%= this.asEntity(entityClass) %> toEntity(<%= this.asDto(entityClass) %> <%= this.asDto(entityInstance) %>);
+    <%= this.asEntity(entityClass) %> toEntity(<%= entityClass + dtoSuffix %> <%= entityInstance + dtoSuffix %>);
     <%_ } _%>
     <%_ if ((databaseType === 'sql' || databaseType === 'mongodb' || databaseType === 'couchbase') && !embedded) { _%>
 

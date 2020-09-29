@@ -55,9 +55,6 @@ import java.util.UUID;
 <%_ if (fieldsContainBlob && databaseType === 'sql') { _%>
 import javax.persistence.Lob;
 <%_ } _%>
-<%_ Object.keys(uniqueEnums).forEach(function(element) { _%>
-import <%= domainModelPackageName %>.enumeration.<%= element %>;
-<%_ }); _%>
 
 /**
  * A DTO for the {@link <%= entityClassPath %>} entity.
@@ -65,7 +62,7 @@ import <%= domainModelPackageName %>.enumeration.<%= element %>;
 <%_ if (typeof javadoc !== 'undefined') { _%>
 @ApiModel(description = "<%- formatAsApiDescription(javadoc) %>")
 <%_ } _%>
-public class <%= this.asDto(entityClass) %> implements Serializable {
+public class <%= entityClass + dtoSuffix %> implements Serializable {
     <% if (!embedded) { %>
     private <%= primaryKeyType %> id;
     <%_ } _%>
@@ -84,7 +81,7 @@ public class <%= this.asDto(entityClass) %> implements Serializable {
         const fieldValidateRulesMin = fields[idx].fieldValidateRulesMin;
         const fieldValidateRulesMax = fields[idx].fieldValidateRulesMax;
         const fieldValidateRulesPatternJava = fields[idx].fieldValidateRulesPatternJava;
-        const fieldType = fields[idx].fieldType;
+        const fieldType = fields[idx].fieldIsEnum ? 'String' : fields[idx].fieldType;
         const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
         const fieldName = fields[idx].fieldName; _%>
     <%_ if (fieldValidate === true) {
@@ -124,9 +121,9 @@ public class <%= this.asDto(entityClass) %> implements Serializable {
     <%_ }
         if ((relationshipType === 'many-to-many' && ownerSide === true)
             || (relationshipType === 'one-to-many' && otherEntityIsEmbedded)) { _%>
-    private Set<<%= this.asDto(otherEntityNameCapitalized) %>> <%= relationshipFieldNamePlural %> = new HashSet<>();
+    private Set<<%= otherEntityNameCapitalized + dtoSuffix %>> <%= relationshipFieldNamePlural %> = new HashSet<>();
     <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true && otherEntityIsEmbedded) { _%>
-    private <%= this.asDto(otherEntityNameCapitalized) %> <%= relationshipFieldName %>;
+    private <%= otherEntityNameCapitalized + dtoSuffix %> <%= relationshipFieldName %>;
     <%_ } else if (!embedded && (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true))) { _%>
 
     private <%= otherEntityPrimaryKeyType %> <%= relationshipFieldName %>Id;
@@ -144,7 +141,7 @@ public class <%= this.asDto(entityClass) %> implements Serializable {
     }
     <%_ }
         for (idx in fields) {
-        const fieldType = fields[idx].fieldType;
+        const fieldType = fields[idx].fieldIsEnum ? 'String' : fields[idx].fieldType;
         const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
         const fieldInJavaBeanMethod = fields[idx].fieldInJavaBeanMethod;
         const fieldName = fields[idx].fieldName; _%>
@@ -192,20 +189,20 @@ public class <%= this.asDto(entityClass) %> implements Serializable {
         if ((relationshipType === 'many-to-many' && ownerSide === true)
                 || (relationshipType === 'one-to-many' && otherEntityIsEmbedded)) { _%>
 
-    public Set<<%= this.asDto(otherEntityNameCapitalized) %>> get<%= relationshipNameCapitalizedPlural %>() {
+    public Set<<%= otherEntityNameCapitalized + dtoSuffix %>> get<%= relationshipNameCapitalizedPlural %>() {
         return <%= relationshipFieldNamePlural %>;
     }
 
-    public void set<%= relationshipNameCapitalizedPlural %>(Set<<%= this.asDto(otherEntityNameCapitalized) %>> <%= otherEntityNamePlural %>) {
+    public void set<%= relationshipNameCapitalizedPlural %>(Set<<%= otherEntityNameCapitalized + dtoSuffix %>> <%= otherEntityNamePlural %>) {
         this.<%= relationshipFieldNamePlural %> = <%= otherEntityNamePlural %>;
     }
     <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true && otherEntityIsEmbedded) { _%>
 
-    public <%= this.asDto(otherEntityNameCapitalized) %> get<%= relationshipNameCapitalized %>() {
+    public <%= otherEntityNameCapitalized + dtoSuffix %> get<%= relationshipNameCapitalized %>() {
         return <%= relationshipFieldName %>;
     }
 
-    public void set<%= relationshipNameCapitalized %>(<%= this.asDto(otherEntityNameCapitalized) %> <%= otherEntityName %>) {
+    public void set<%= relationshipNameCapitalized %>(<%= otherEntityNameCapitalized + dtoSuffix %> <%= otherEntityName %>) {
         this.<%= relationshipFieldName %> = <%= otherEntityName %>;
     }
     <%_ } else if (!embedded && (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true))) { _%>
@@ -243,12 +240,12 @@ public class <%= this.asDto(entityClass) %> implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof <%= this.asDto(entityClass) %>)) {
+        if (!(o instanceof <%= entityClass + dtoSuffix %>)) {
             return false;
         }
 
         <%_ if (!embedded) { _%>
-        return id != null && id.equals(((<%= this.asDto(entityClass) %>) o).id);
+        return id != null && id.equals(((<%= entityClass + dtoSuffix %>) o).id);
         <%_ } else { _%>
         return false;
         <%_ } _%>
@@ -262,7 +259,7 @@ public class <%= this.asDto(entityClass) %> implements Serializable {
     // prettier-ignore
     @Override
     public String toString() {
-        return "<%= this.asDto(entityClass) %>{" +
+        return "<%= entityClass + dtoSuffix %>{" +
             <%_ if (!embedded) { _%>
             "id=" + getId() +
             <%_ }

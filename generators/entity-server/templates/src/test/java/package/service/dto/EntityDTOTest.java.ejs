@@ -29,22 +29,22 @@ _%>
 import java.util.UUID;
 <%_ } _%>
 
-public class <%= this.asDto(entityClass) %>Test {
+public class <%= entityClass + dtoSuffix %>Test {
 
     @Test
     public void dtoEqualsVerifier() throws Exception {
-        TestUtil.equalsVerifier(<%= this.asDto(entityClass) %>.class);
+        TestUtil.equalsVerifier(<%= entityClass + dtoSuffix %>.class);
         <%_if (!embedded) { _%>
-        <%= this.asDto(entityClass) %> <%= this.asDto(entityInstance) %>1 = new <%= this.asDto(entityClass) %>();
-        <%= this.asDto(entityInstance) %>1.setId(<%- id1 %>);
-        <%= this.asDto(entityClass) %> <%= this.asDto(entityInstance) %>2 = new <%= this.asDto(entityClass) %>();
-        assertThat(<%= this.asDto(entityInstance) %>1).isNotEqualTo(<%= this.asDto(entityInstance) %>2);
-        <%= this.asDto(entityInstance) %>2.setId(<%= this.asDto(entityInstance) %>1.getId());
-        assertThat(<%= this.asDto(entityInstance) %>1).isEqualTo(<%= this.asDto(entityInstance) %>2);
-        <%= this.asDto(entityInstance) %>2.setId(<%- id2 %>);
-        assertThat(<%= this.asDto(entityInstance) %>1).isNotEqualTo(<%= this.asDto(entityInstance) %>2);
-        <%= this.asDto(entityInstance) %>1.setId(null);
-        assertThat(<%= this.asDto(entityInstance) %>1).isNotEqualTo(<%= this.asDto(entityInstance) %>2);
+        <%= entityClass + dtoSuffix %> <%= entityInstance + dtoSuffix %>1 = new <%= entityClass + dtoSuffix %>();
+        <%= entityInstance + dtoSuffix %>1.setId(<%- id1 %>);
+        <%= entityClass + dtoSuffix %> <%= entityInstance + dtoSuffix %>2 = new <%= entityClass + dtoSuffix %>();
+        assertThat(<%= entityInstance + dtoSuffix %>1).isNotEqualTo(<%= entityInstance + dtoSuffix %>2);
+        <%= entityInstance + dtoSuffix %>2.setId(<%= entityInstance + dtoSuffix %>1.getId());
+        assertThat(<%= entityInstance + dtoSuffix %>1).isEqualTo(<%= entityInstance + dtoSuffix %>2);
+        <%= entityInstance + dtoSuffix %>2.setId(<%- id2 %>);
+        assertThat(<%= entityInstance + dtoSuffix %>1).isNotEqualTo(<%= entityInstance + dtoSuffix %>2);
+        <%= entityInstance + dtoSuffix %>1.setId(null);
+        assertThat(<%= entityInstance + dtoSuffix %>1).isNotEqualTo(<%= entityInstance + dtoSuffix %>2);
         <%_} _%>
     }
 }

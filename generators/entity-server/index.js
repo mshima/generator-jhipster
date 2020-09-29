@@ -62,13 +62,13 @@ module.exports = class extends BaseBlueprintGenerator {
              * Generate paths to files and resources.
              */
             generatePaths() {
-                let portsPackage;
                 let repositoryPort;
                 let webPort;
-                if (this.domainName) {
+                const enableDomain = this.domainName && this.enableDomain;
+                this.portsPackage = this.portsPackage || 'infrastructure';
+                if (enableDomain) {
                     this.warning('Domain support is experimental and subject to change, use at your own risk');
                     const domain = this.configOptions.domains[this.domainName] || {};
-                    portsPackage = domain.portsPackage || 'infrastructure';
                     repositoryPort = domain.repositoryPort || 'secondary';
                     webPort = domain.webPort || 'primary';
                 } else {
@@ -76,17 +76,17 @@ module.exports = class extends BaseBlueprintGenerator {
                     this.domainName = undefined;
                 }
 
-                this.domainPackage = this.domainName ? `${this.packageName}.${this.domainName}` : this.packageName;
+                this.domainPackage = enableDomain ? `${this.packageName}.${this.domainName}` : this.packageName;
                 const domainRelativeModelPackage =
-                    this.configOptions.domainRelativeModelPackage || this.domainName ? 'domain.model' : 'domain';
+                    this.configOptions.domainRelativeModelPackage || enableDomain ? 'domain.model' : 'domain';
                 const domainRelativeRepositoryPackage =
-                    this.configOptions.domainRelativeRepositoryPackage || this.domainName
-                        ? `${portsPackage}.${repositoryPort}`
+                    this.configOptions.domainRelativeRepositoryPackage || enableDomain
+                        ? `${this.portsPackage}.${repositoryPort}`
                         : 'repository';
                 const domainRelativeWebPackage =
-                    this.configOptions.domainRelativeWebPackage || this.domainName ? `${portsPackage}.${webPort}` : 'web.rest';
+                    this.configOptions.domainRelativeWebPackage || enableDomain ? `${this.portsPackage}.${webPort}` : 'web.rest';
                 const domainRelativeServicePackage =
-                    this.configOptions.domainRelativeServicePackage || this.domainName ? 'domain.service' : 'service';
+                    this.configOptions.domainRelativeServicePackage || enableDomain ? 'domain.service' : 'service';
 
                 this.domainModelPackageName = `${this.domainPackage}.${domainRelativeModelPackage}`;
                 this.domainRepositoryPackageName = `${this.domainPackage}.${domainRelativeRepositoryPackage}`;
@@ -100,12 +100,12 @@ module.exports = class extends BaseBlueprintGenerator {
                 this.domainServiceFolder = this.packageAsFolder(this.domainServicePackageName);
 
                 const domainRelativeControllerDtoPackage =
-                    this.configOptions.domainRelativeControllerPackage || this.domainName
+                    this.configOptions.domainRelativeControllerPackage || enableDomain
                         ? domainRelativeWebPackage
                         : domainRelativeServicePackage;
 
                 this.domainControllerDtoPackageName = `${this.domainPackage}.${domainRelativeControllerDtoPackage}.dto`;
-                this.domainControllerMapperPackage = this.domainName
+                this.domainControllerMapperPackage = enableDomain
                     ? `${this.domainControllerDtoPackageName}.mapper`
                     : `${this.domainPackage}.service.mapper`;
 

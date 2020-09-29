@@ -228,7 +228,7 @@ const dtoFiles = {
                 },
                 {
                     file: 'package/service/mapper/EntityMapper.java',
-                    renameTo: (_generator, data) => `${data.dtoMapperFolder}/${data.entityClass}Mapper.java`,
+                    renameTo: (_generator, data) => `${data.dtoMapperFolder}/${data.entityClass}${data.dtoSuffix}Mapper.java`,
                 },
             ],
         },
@@ -247,7 +247,7 @@ const dtoFiles = {
             templates: [
                 {
                     file: 'package/service/mapper/EntityMapperTest.java',
-                    renameTo: (_generator, data) => `${data.dtoMapperFolder}/${data.entityClass}MapperTest.java`,
+                    renameTo: (_generator, data) => `${data.dtoMapperFolder}/${data.entityClass}${data.dtoSuffix}MapperTest.java`,
                 },
             ],
         },
@@ -294,17 +294,42 @@ function writeFiles() {
             if (this.dto === 'mapstruct') {
                 this.writeFilesToDisk(dtoFiles, this, false, this.fetchFromInstalledJHipster('entity-server/templates'), {
                     ...this.entity,
+                    dtoSuffix: this.dtoSuffix,
+                    domainModelPackageName: this.domainModelPackageName,
                     importApiModelProperty: this.importApiModelProperty,
                     uniqueEnums: this.uniqueEnums,
-                    domainServicePackageName: this.domainServicePackageName,
-                    domainModelPackageName: this.domainModelPackageName,
                     dtoPackage: this.domainControllerDtoPackageName,
-                    dtoFolder: this.domainServiceFolder,
+                    dtoClassPath: entityControllerDtoClassPath,
+                    dtoFolder: this.packageAsFolder(this.domainControllerDtoPackageName),
                     dtoBaseName: this.entityControllerDtoBaseName,
                     dtoMapperPackage: this.domainControllerMapperPackage,
                     dtoMapperFolder: this.packageAsFolder(this.domainControllerMapperPackage),
                 });
             }
+
+            if (this.entity.additionalPorts) {
+                this.entity.additionalPorts.forEach(port => {
+                    const domainNamePackageName = this._.lowerFirst(this.entity.domainName);
+                    const portPackage = `${this.packageName}.${domainNamePackageName}.${this.portsPackage}.${port}`;
+                    const dtoSuffix = this._.upperFirst(port);
+                    const dtoPackage = `${portPackage}.dto`;
+                    const dtoClassPath = `${dtoPackage}.${this.entityClass}${dtoSuffix}`;
+                    this.writeFilesToDisk(dtoFiles, this, false, this.fetchFromInstalledJHipster('entity-server/templates'), {
+                        ...this.entity,
+                        dtoSuffix,
+                        importApiModelProperty: this.importApiModelProperty,
+                        domainModelPackageName: this.domainModelPackageName,
+                        uniqueEnums: [],
+                        dtoPackage,
+                        dtoClassPath,
+                        dtoFolder: this.packageAsFolder(dtoPackage),
+                        dtoBaseName: this.packageAsFolder(`${dtoClassPath}`),
+                        dtoMapperPackage: `${dtoPackage}.mapper`,
+                        dtoMapperFolder: this.packageAsFolder(`${dtoPackage}.mapper`),
+                    });
+                });
+            }
+
             // write domain files.
             if (this.domainName) {
                 this.writeFilesToDisk(domainFiles, this, false, this.fetchFromInstalledJHipster('entity-server/templates'));
