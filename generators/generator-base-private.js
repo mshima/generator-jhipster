@@ -88,6 +88,42 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     }
 
     /**
+     * Get file path from class path.
+     * @param {string} classPath - Class path to get package
+     * @return file path.
+     */
+    filePathFromClassPath(classPath) {
+        return classPath.replace(/\./g, '/');
+    }
+
+    /**
+     * Get java package from class path.
+     * @param {string} classPath - Class path to get package
+     * @return package.
+     */
+    packageFromClassPath(classPath) {
+        return classPath.slice(0, classPath.lastIndexOf('.'));
+    }
+
+    /**
+     * Get class name from class path.
+     * @param {string} classPath - Class path to get package
+     * @return class name.
+     */
+    classNameFromClassPath(classPath) {
+        return classPath.slice(classPath.lastIndexOf('.') + 1);
+    }
+
+    /**
+     * Get instance name from class path.
+     * @param {string} classPath - Class path to get package
+     * @return instance name.
+     */
+    instanceNameFromClassPath(classPath) {
+        return _.lowerFirst(this.classNameFromClassPath(classPath)).replace(/Impl$/, '');
+    }
+
+    /**
      * Install I18N Client Files By Language
      *
      * @param {any} _this reference to generator

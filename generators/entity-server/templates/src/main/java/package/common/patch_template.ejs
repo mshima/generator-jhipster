@@ -17,8 +17,6 @@
  limitations under the License.
 -%>
 <%
-const instanceType = (dto === 'mapstruct') ? asDto(entityClass) : asEntity(entityClass);
-const instanceName = (dto === 'mapstruct') ? asDto(entityInstance) : asEntity(entityInstance);
 const returnType = reactive ? 'Mono' : 'Optional'
 const mapOrFlatMap = reactive ? 'flatMap' : 'map'
 const returnPrefix = (isService) ? 'return' : returnType + '<' + instanceType + '> result =';

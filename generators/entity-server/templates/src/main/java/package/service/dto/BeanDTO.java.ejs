@@ -57,7 +57,7 @@ import javax.persistence.Lob;
 <%_ } _%>
 
 /**
- * A DTO for the {@link <%= entityClassPath %>} entity.
+ * A DTO for the {@link <%= entityPOClassPath %>} entity.
  */
 <%_ if (typeof javadoc !== 'undefined') { _%>
 @ApiModel(description = "<%- formatAsApiDescription(javadoc) %>")
@@ -117,7 +117,7 @@ public class <%= entityClass + dtoSuffix %> implements Serializable {
         const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized;
         const otherEntityIsEmbedded = relationships[idx].otherEntityIsEmbedded;
         const ownerSide = relationships[idx].ownerSide;
-        const otherEntityClassName = otherEntityNameCapitalized + dtoSuffix + dtoRelationshipSuffix;
+        const otherEntityClassName = relationships[idx].otherEntityNameCapitalized + dtoSuffix + dtoRelationshipSuffix;
         if (typeof relationships[idx].javadoc != 'undefined') { _%>
 <%- formatAsFieldJavadoc(relationships[idx].javadoc) %>
     @ApiModelProperty(value = "<%- formatAsApiDescription(relationships[idx].javadoc) %>")
@@ -183,8 +183,8 @@ public class <%= entityClass + dtoSuffix %> implements Serializable {
         const relationshipNameCapitalized = relationships[idx].relationshipNameCapitalized;
         const relationshipNameCapitalizedPlural = relationships[idx].relationshipNameCapitalizedPlural;
         const ownerSide = relationships[idx].ownerSide;
-        const otherSideEmbedded = relationship[idx].otherEntity.embedded;
-        const otherEntityClassName = otherEntityNameCapitalized + dtoSuffix + otherSideEmbedded ? '' : dtoRelationshipSuffix;
+        const otherSideEmbedded = relationships[idx].otherEntity.embedded;
+        const otherEntityClassName = relationships[idx].otherEntityNameCapitalized + dtoSuffix + (otherSideEmbedded ? '' : dtoRelationshipSuffix);
         if (relationshipType === 'many-to-many' || relationshipType === 'one-to-many') { _%>
 
     public Set<<%= otherEntityClassName %>> get<%= relationshipNameCapitalizedPlural %>() {
@@ -264,11 +264,19 @@ public class <%= entityClass + dtoSuffix %> implements Serializable {
         relationships.forEach(relationship => {
             if (relationship.otherEntity.embedded) return;
             const otherEntityNameCapitalized = relationship.otherEntityNameCapitalized;
-            const otherEntityClassName = otherEntityNameCapitalized + dtoSuffix + dtoRelationshipSuffix;
+            const otherEntityClassName = relationship.otherEntityNameCapitalized + dtoSuffix + dtoRelationshipSuffix;
 
-            const otherFieldInstance = relationship.otherEntityValueField.fieldName;
-            const otherFieldInstanceCapitalized = relationship.otherEntityValueField.fieldNameCapitalized;
-            const otherFieldType = relationship.otherEntityValueField.fieldIsEnum ? 'String' : relationship.otherEntityValueField.fieldType;
+            let otherFieldInstance
+            let otherFieldInstanceCapitalized
+            let otherFieldType
+            if (relationship.otherEntityValueField) {
+                otherFieldInstance = relationship.otherEntityValueField.fieldName;
+                otherFieldInstanceCapitalized = relationship.otherEntityValueField.fieldNameCapitalized;
+                otherFieldType =
+                    (!relationship.otherEntityValueField.fieldType || relationship.otherEntityValueField.fieldIsEnum)
+                        ? 'String'
+                        : relationship.otherEntityValueField.fieldType;
+            }
      _%>
     public static class <%= otherEntityClassName %> {
         private Long id;

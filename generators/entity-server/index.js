@@ -64,83 +64,117 @@ module.exports = class extends BaseBlueprintGenerator {
             generatePaths() {
                 let repositoryPort;
                 let webPort;
-                const enableDomain = this.domainName && this.enableDomain;
-                this.portsPackage = this.portsPackage || 'infrastructure';
+                let webAdapter;
+                const enableDomain = !!this.domainName;
+                this.portsPackage = this.portsPackage || 'ports';
+                this.adaptersPackage = this.adaptersPackage || 'adapters';
                 if (enableDomain) {
                     this.warning('Domain support is experimental and subject to change, use at your own risk');
+                    this.domainName = this._.upperFirst(this.domainName);
                     const domain = this.configOptions.domains[this.domainName] || {};
-                    repositoryPort = domain.repositoryPort || 'secondary';
-                    webPort = domain.webPort || 'primary';
+                    this.entity.domainData = domain;
+                    repositoryPort = domain.repositoryPort;
+                    webPort = domain.webPort;
+                    webAdapter = domain.webAdapter;
                 } else {
                     // set as undefined for templates.
                     this.domainName = undefined;
                 }
+                const domainNamePackage = this._.lowerFirst(this.domainName);
 
-                this.domainPackage = enableDomain ? `${this.packageName}.${this.domainName}` : this.packageName;
-                const domainRelativeModelPackage =
-                    this.configOptions.domainRelativeModelPackage || enableDomain ? 'domain.model' : 'domain';
-                const domainRelativeRepositoryPackage =
-                    this.configOptions.domainRelativeRepositoryPackage || enableDomain
-                        ? `${this.portsPackage}.${repositoryPort}`
-                        : 'repository';
-                const domainRelativeWebPackage =
-                    this.configOptions.domainRelativeWebPackage || enableDomain ? `${this.portsPackage}.${webPort}` : 'web.rest';
-                const domainRelativeServicePackage =
-                    this.configOptions.domainRelativeServicePackage || enableDomain ? 'domain.service' : 'service';
+                const domainPackage = enableDomain ? `${this.packageName}.${domainNamePackage}` : this.packageName;
+                const domainRelativeModelPackage = enableDomain ? 'domain' : 'domain';
+                const domainRelativeRepositoryPackage = enableDomain ? `${this.portsPackage}.${repositoryPort}` : 'repository';
+                const domainRelativeWebPackage = enableDomain ? `${this.adaptersPackage}.${webAdapter}` : 'web.rest';
+                const domainRelativeServicePackage = enableDomain ? `${this.portsPackage}.${webPort}` : 'service';
 
-                this.domainModelPackageName = `${this.domainPackage}.${domainRelativeModelPackage}`;
-                this.domainRepositoryPackageName = `${this.domainPackage}.${domainRelativeRepositoryPackage}`;
-                this.domainWebPackageName = `${this.domainPackage}.${domainRelativeWebPackage}`;
-                this.domainServicePackageName = `${this.domainPackage}.${domainRelativeServicePackage}`;
+                const domainDomainPackage = `${domainPackage}.${domainRelativeModelPackage}`;
+                const domainRepositoryPackageName = `${domainPackage}.${domainRelativeRepositoryPackage}`;
+                const domainWebPackageName = `${domainPackage}.${domainRelativeWebPackage}`;
+                const domainServicePackageName = `${domainPackage}.${domainRelativeServicePackage}`;
 
-                this.domainFilteringPackageName = `${this.domainPackage}.${domainRelativeServicePackage}.dto`;
-
-                this.domainModelFolder = this.packageAsFolder(this.domainModelPackageName);
-                this.domainRepositoryFolder = this.packageAsFolder(this.domainRepositoryPackageName);
-                this.domainServiceFolder = this.packageAsFolder(this.domainServicePackageName);
+                const domainFilteringPackageName = enableDomain
+                    ? `${domainPackage}.${domainRelativeServicePackage}.filtering`
+                    : `${domainPackage}.${domainRelativeServicePackage}.dto`;
 
                 const domainRelativeControllerDtoPackage =
                     this.configOptions.domainRelativeControllerPackage || enableDomain
                         ? domainRelativeWebPackage
                         : domainRelativeServicePackage;
 
-                this.domainControllerDtoPackageName = `${this.domainPackage}.${domainRelativeControllerDtoPackage}.dto`;
-                this.domainControllerMapperPackage = enableDomain
-                    ? `${this.domainControllerDtoPackageName}.mapper`
-                    : `${this.domainPackage}.service.mapper`;
+                const domainControllerDtoPackageName = `${domainPackage}.${domainRelativeControllerDtoPackage}.dto`;
+                const domainControllerMapperPackage = enableDomain
+                    ? `${domainControllerDtoPackageName}.mapper`
+                    : `${domainPackage}.service.mapper`;
 
-                if (this.domain) {
-                    this.domainFolder = this.packageAsFolder(this.domainPackage);
+                const domainSearchImplPackage = enableDomain ? domainRepositoryPackageName : domainServicePackageName;
 
-                    this.entityPackage = this.domainModelPackageName;
-                    this.entityRepositoryDtoPackage = this.domainControllerDtoPackageName;
-                    this.entityRepositoryPackage = this.domainRepositoryPackageName;
-                    this.entityServicePackage = this.domainServicePackageName;
-                } else {
-                    this.entityPackage = this.domainModelPackageName;
-                    this.entityRepositoryDtoPackage = this.domainControllerDtoPackageName;
-                    this.entityRepositoryPackage = this.domainRepositoryPackageName;
-                    this.entityServicePackage = this.domainServicePackageName;
+                const entityPackage = domainDomainPackage;
+                const entityRepositoryDtoPackage = domainControllerDtoPackageName;
+                const entityRepositoryPackage = domainRepositoryPackageName;
+                // const entityServicePackage = enableDomain ? domainDomainPackage : domainServicePackageName;
+
+                const entityBOClassPath = `${entityPackage}.${this.asEntity(this.entityClass)}`;
+                const entityRepositoryClassPath = enableDomain
+                    ? `${entityRepositoryPackage}.${this.entityClass}${this._.upperFirst(repositoryPort)}Port`
+                    : `${entityRepositoryPackage}.${this.entityClass}Repository`;
+                const entityRepositoryConfigurationClassPath = enableDomain
+                    ? `${entityRepositoryPackage}.${this.entityClass}${this._.upperFirst(repositoryPort)}PortConfiguration`
+                    : undefined;
+                const entityControllerClassPath = `${domainWebPackageName}.${this.entityClass}Resource`;
+                const entityControllerDtoClassPath = `${entityRepositoryDtoPackage}.${this.asDto(this.entityClass)}`;
+
+                let entityServiceClassPath;
+                let entityServiceImplClassPath;
+                if (this.service !== 'no') {
+                    const entityServiceClassName = enableDomain
+                        ? `${this.entityClass}${this._.upperFirst(webPort)}Port`
+                        : `${this.entityClass}Service`;
+                    entityServiceClassPath = `${domainServicePackageName}.${entityServiceClassName}`;
+
+                    if (this.service === 'serviceImpl') {
+                        const entityServiceImplClassName = `${entityServiceClassName}Impl`;
+                        entityServiceImplClassPath = enableDomain
+                            ? `${domainServicePackageName}.${entityServiceImplClassName}`
+                            : `${domainServicePackageName}.impl.${entityServiceImplClassName}`;
+                    }
                 }
 
-                this.entityClassPath = `${this.entityPackage}.${this.asEntity(this.entityClass)}`;
-                this.entityRepositoryClassPath = `${this.entityRepositoryPackage}.${this.entityClass}Repository`;
-                this.entityControllerClassPath = `${this.domainWebPackageName}.${this.entityClass}Resource`;
-                this.entityServiceClassPath = `${this.entityServicePackage}.${this.entityClass}Service`;
+                const java = {
+                    domainPackage,
+                    entityPackage,
 
-                this.entityBaseName = this.packageAsFolder(this.entityClassPath);
-                this.entityRepositoryBaseName = this.packageAsFolder(this.entityRepositoryClassPath);
-                this.entityControllerBaseName = this.packageAsFolder(this.entityControllerClassPath);
-                this.entityServiceBaseName = this.packageAsFolder(this.entityServiceClassPath);
+                    domainWebPackageName,
+                    domainRepositoryPackageName,
+                    domainServicePackageName,
 
-                this.entityServiceImplClassPath = `${this.domainServicePackageName}.impl.${this.entityClass}ServiceImpl`;
-                this.entityServiceImplBaseName = this.packageAsFolder(this.entityServiceImplClassPath);
+                    domainDomainPackage,
+                    domainSearchImplPackage,
 
-                this.entityControllerDtoClassPath = `${this.entityRepositoryDtoPackage}.${this.asDto(this.entityClass)}`;
-                this.entityControllerDtoBaseName = this.packageAsFolder(this.entityControllerDtoClassPath);
+                    domainControllerMapperPackage,
+                    domainControllerDtoPackageName,
+                    domainFilteringPackageName,
+
+                    entityBOClassPath,
+                    entityPOClassPath: entityBOClassPath,
+                    entityDTOClassPath: entityBOClassPath,
+
+                    entityRepositoryDtoPackage,
+                    entityRepositoryPackage,
+                    entityRepositoryClassPath,
+                    entityRepositoryConfigurationClassPath,
+
+                    entityControllerClassPath,
+                    entityControllerDtoClassPath,
+
+                    entityServiceImplClassPath,
+                    entityServiceClassPath,
+                };
+                this.entity.java = java;
+                Object.assign(this, java);
 
                 // Export to be used by relationships.
-                this.entity.entityClassPath = this.entityClassPath;
+                this.entity.entityBOClassPath = this.entityBOClassPath;
                 this.entity.entityRepositoryClassPath = this.entityRepositoryClassPath;
                 this.entity.entityControllerClassPath = this.entityControllerClassPath;
                 this.entity.entityControllerDtoClassPath = this.entityControllerDtoClassPath;
@@ -233,7 +267,13 @@ module.exports = class extends BaseBlueprintGenerator {
 
     // Public API method used by the getter and also by Blueprints
     _writing() {
-        return { ...writeFiles(), ...super._missingPostWriting() };
+        return {
+            reloadEntityToGenerator() {
+                utils.copyObjectProps(this, this.entity);
+            },
+            ...writeFiles(),
+            ...super._missingPostWriting(),
+        };
     }
 
     get writing() {

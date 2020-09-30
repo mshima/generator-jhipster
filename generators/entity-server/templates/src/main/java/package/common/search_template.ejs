@@ -17,8 +17,6 @@
  limitations under the License.
 -%>
 <%_
-    const instanceType = (dto === 'mapstruct') ? asDto(entityClass) : asEntity(entityClass);
-    const instanceName = (dto === 'mapstruct') ? asDto(entityInstance) : asEntity(entityInstance);
     const listOrFlux = (reactive === true) ? 'Flux' : 'List';
     const mapper = entityInstance + 'Mapper';
     const entityToDtoReference = mapper + '::' + 'toDto';

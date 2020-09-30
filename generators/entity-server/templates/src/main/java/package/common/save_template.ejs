@@ -16,8 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-<%_ const instanceType = (dto === 'mapstruct') ? asDto(entityClass) : asEntity(entityClass);
-const instanceName = (dto === 'mapstruct') ? asDto(entityInstance) : asEntity(entityInstance);
+<%_
 const mapper = entityInstance  + 'Mapper';
 const dtoToEntity = mapper + '.' + 'toEntity';
 const entityToDto = mapper + '.' + 'toDto';
@@ -58,7 +57,9 @@ if (!viaService) {
         <%= entityInstance %>SearchRepository.save(<%= resultEntity %>);
             <%_ if (returnDirectly) { _%>
         return result;
-    <%_ }}} else { _%>
+            <%_ }
+        }
+    } else { _%>
         <%_ if (isUsingMapsId === true && isController === false) { _%>
         <%= mapsIdAssoc.otherEntityPrimaryKeyType %> <%= otherEntityName %>Id = <%= entityInstance %>.get<%= mapsIdAssoc.relationshipNameCapitalized %>().getId();
         <%= mapsIdRepoInstance %>.findById(<%= otherEntityName %>Id).ifPresent(<%= entityInstance %>::<%_ if (fluentMethods === false) { _%>set<%= mapsIdAssoc.relationshipNameCapitalized %> <%_ } else { _%><%= otherEntityName %><%_ } _%>);

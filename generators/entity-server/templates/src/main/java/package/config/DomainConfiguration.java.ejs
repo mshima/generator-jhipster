@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= domainModelPackageName %>.config;
+package <%= this.packageFromClassPath(entityRepositoryConfigurationClassPath) %>;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -29,4 +29,4 @@ import org.springframework.data.elasticsearch.repository.config.Enable<% if (rea
 <%_ if (searchEngine === 'elasticsearch') { _%>
 @Enable<% if (reactive) { %>Reactive<% } %>ElasticsearchRepositories("<%= domainRepositoryPackageName %>.search")
 <%_ } _%>
-public class <%= domainName %>DomainConfiguration {}
+public class <%= classNameFromClassPath(entityRepositoryConfigurationClassPath) %> {}

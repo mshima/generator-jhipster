@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= domainServicePackageName %><% if (service === 'serviceImpl') { %>.impl<% } %>;
+package <%= this.packageFromClassPath(entityServiceImplClassPath) %>;
 
 <%_
 const serviceClassName = service === 'serviceImpl' ? entityClass + 'ServiceImpl' : entityClass + 'Service';
@@ -36,7 +36,7 @@ _%>
 <%_ if (service === 'serviceImpl') { _%>
 import <%= entityServiceClassPath %>;
 <%_ } _%>
-import <%= entityClassPath %>;
+import <%= entityPOClassPath %>;
 import <%= entityRepositoryClassPath %>;
 <%_ if (isUsingMapsId === true) { _%>
 import <%= domainRepositoryPackageName %>.<%= mapsIdAssoc.otherEntityNameCapitalized %>Repository;
@@ -94,10 +94,10 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  */
 @Service<% if (databaseType === 'sql') { %>
 @Transactional<% } %>
-public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> implements <%= entityClass %>Service<% } %> {
+public class <%= this.classNameFromClassPath(entity.java.entityServiceImplClassPath) %><% if (service === 'serviceImpl') { %> implements <%= this.classNameFromClassPath(entity.java.entityServiceClassPath) %><% } %> {
 
-    private final Logger log = LoggerFactory.getLogger(<%= serviceClassName %>.class);
-<%- include('../../common/inject_template', {asEntity, asDto, viaService: false, constructorName: serviceClassName, queryService: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
+    private final Logger log = LoggerFactory.getLogger(<%= this.classNameFromClassPath(entity.java.entityServiceImplClassPath) %>.class);
+<%- include('../../common/inject_template', {classPathsToImport: false, asEntity, asDto, viaService: false, constructorName: this.classNameFromClassPath(entityServiceImplClassPath), queryService: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
 
     <%_ if (service !== 'serviceImpl') { _%>
     /**
@@ -113,9 +113,9 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     public <% if (reactive) { %>Mono<<% } %><%= instanceType %><% if (reactive) { %>><% } %> save(<%= instanceType %> <%= instanceName %>) {
         log.debug("Request to save <%= entityClass %> : {}", <%= instanceName %>);
         <%_ if (!reactive) { _%>
-<%- include('../../common/save_template', {asEntity, asDto, viaService: false, returnDirectly: true, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
+<%- include('../../common/save_template', {instanceType, instanceName, asEntity, asDto, viaService: false, returnDirectly: true, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
         <%_ } else { _%>
-<%- include('../../common/save_reactive_template', {asEntity, asDto, viaService: false, returnDirectly: true}); -%>
+<%- include('../../common/save_reactive_template', {instanceType, instanceName, asEntity, asDto, viaService: false, returnDirectly: true}); -%>
         <%_ } _%>
     }
 
@@ -132,7 +132,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %><%= instanceType %><% if (reactive) { %>><% } %> partialUpdate(<%= instanceType %> <%= instanceName %>) {
         log.debug("Request to partially update <%= entityClass %> : {}", <%= instanceName %>);
-<%- include('../../common/patch_template', {asEntity, asDto, isService: true, viaService: false}); -%>
+<%- include('../../common/patch_template', {instanceType, instanceName, asEntity, asDto, isService: true, viaService: false}); -%>
     }
 
     <%_ if (service !== 'serviceImpl') { _%>
@@ -174,7 +174,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
         return <%= entityInstance %>Repository.findAllWithEagerRelationships(pageable)<% if (dto !== 'mapstruct') { %>;<% } else { %>.map(<%= entityToDtoReference %>);<% } %>
     }
     <%_ } _%>
-<%- include('../../common/get_filtered_template', {asEntity, asDto}); -%>
+<%- include('../../common/get_filtered_template', {instanceType, instanceName, asEntity, asDto}); -%>
 <%_ if (reactive) { _%>
     <%_ if (service !== 'serviceImpl') { _%>
     /**
@@ -215,7 +215,7 @@ public class <%= serviceClassName %><% if (service === 'serviceImpl') { %> imple
     @Transactional(readOnly = true)
     <%_ } _%>
     public <%= optionalOrMono %><<%= instanceType %>> findOne(<%= primaryKeyType %> id) {
-        log.debug("Request to get <%= entityClass %> : {}", id);<%- include('../../common/get_template', {asEntity, asDto, viaService: false, returnDirectly:true}); -%>
+        log.debug("Request to get <%= entityClass %> : {}", id);<%- include('../../common/get_template', {instanceType, instanceName, asEntity, asDto, viaService: false, returnDirectly:true}); -%>
     }
 
     <%_ if (service !== 'serviceImpl') { _%>

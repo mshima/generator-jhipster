@@ -18,7 +18,7 @@
 -%>
 package <%= domainRepositoryPackageName %>.search;
 
-import <%= entityClassPath %>;
+import <%= entityPOClassPath %>;
 <%_ if (reactive) { _%>
     <%_ if (pagination !== 'no') { _%>
 import org.springframework.data.domain.Pageable;

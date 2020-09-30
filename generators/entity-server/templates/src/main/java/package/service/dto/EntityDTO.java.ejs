@@ -57,7 +57,7 @@ import javax.persistence.Lob;
 <%_ } _%>
 
 /**
- * A DTO for the {@link <%= entityClassPath %>} entity.
+ * A DTO for the {@link <%= entityPOClassPath %>} entity.
  */
 <%_ if (typeof javadoc !== 'undefined') { _%>
 @ApiModel(description = "<%- formatAsApiDescription(javadoc) %>")

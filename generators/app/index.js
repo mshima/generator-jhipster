@@ -406,15 +406,21 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
                 // Create entity definition for built-in entity to make easier to deal with relationships.
                 this.configOptions.sharedEntities.User = {
                     name: 'User',
-                    entityClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('User')}`,
-                    entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.UserResource`,
+                    java: {
+                        entityBOClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('User')}`,
+                        entityDTOClassPath: `${this.jhipsterConfig.packageName}.service.dto.${this.asDto('User')}`,
+                        entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.UserResource`,
+                    },
                     relationships: [],
                     fields: [],
                 };
                 this.configOptions.sharedEntities.Authority = {
                     name: 'Authority',
-                    entityClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('Authority')}`,
-                    entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.AuthorityResource`,
+                    java: {
+                        entityBOClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('Authority')}`,
+                        entityDTOClassPath: `${this.jhipsterConfig.packageName}.domain.${this.asEntity('Authority')}`,
+                        entityControllerClassPath: `${this.jhipsterConfig.packageName}.web.rest.AuthorityResource`,
+                    },
                     relationships: [],
                     fields: [],
                 };
@@ -461,18 +467,20 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
 
             prepareDomains() {
                 this.configOptions.domains = this.configOptions.domains || {};
-                if (this.withEntities) {
-                    this.getExistingEntities().forEach(entity => {
-                        if (!entity.domainName) return;
-                        const domainName = _.uppertFirst(entity.domainName);
-                        if (_.uppertFirst(entity.name) !== domainName) return;
-                        const domain = this.configOptions.domains[domainName] || {};
-                        this.configOptions.domains[domainName] = domain;
-                        domain.webPort = entity.webPort || 'web';
-                        domain.repositoryPort = entity.repositoryPort || 'secondary';
+                this.getExistingEntities().forEach(entity => {
+                    const definition = entity.definition;
+                    if (!definition.domainName) return;
+                    const domainName = _.upperFirst(definition.domainName);
+                    if (_.upperFirst(entity.name) !== domainName) return;
+                    const domain = this.configOptions.domains[domainName] || {};
+                    this.configOptions.domains[domainName] = domain;
+                    domain.webPort = definition.webPort || 'primary';
+                    domain.webAdapter = definition.webAdapter || 'web';
+                    domain.repositoryPort = definition.repositoryPort || 'secondary';
+                    if (typeof definition.additionalPorts === 'string') {
                         domain.additionalPorts = entity.additionalPorts.split(',').map(port => port.trim());
-                    });
-                }
+                    }
+                });
             },
 
             regenerateEntities() {

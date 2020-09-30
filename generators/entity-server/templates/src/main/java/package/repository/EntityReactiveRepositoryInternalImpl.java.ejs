@@ -56,15 +56,15 @@ import org.springframework.data.relational.core.sql.SelectBuilder.SelectFromAndJ
 import org.springframework.data.relational.core.sql.Table;
 <%_ } _%>
 
-import <%= entityClassPath %>;
+import <%= entityPOClassPath %>;
 <% relationships.forEach(function(rel) {
     if (rel.relationshipType === 'many-to-many' && rel.ownerSide) { _%>
-import <%= domainModelPackageName %>.<%= asEntity(rel.otherEntityNameCapitalized) %>;
+import <%= domainDomainPackage %>.<%= asEntity(rel.otherEntityNameCapitalized) %>;
     <%_ } _%>
 <%_ } ); _%>
 <%_ Object.keys(uniqueEnums).forEach(function(element) { _%>
 
-import <%= domainModelPackageName %>.enumeration.<%= element %>;
+import <%= domainDomainPackage %>.enumeration.<%= element %>;
 <%_ }); _%>
 
 <%_ uniqueEntityTypes.forEach(function(element) { _%>

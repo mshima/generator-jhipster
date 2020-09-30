@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= domainServicePackageName %>;
+package <%= this.packageFromClassPath(entityServiceClassPath) %>;
 
 <%_
 const instanceType = (dto === 'mapstruct') ? asDto(entityClass) : asEntity(entityClass);
@@ -28,7 +28,7 @@ _%>
 <%_ if (dto === 'mapstruct') { _%>
 import <%= entityControllerDtoClassPath %>;
 <%_ } else { _%>
-import <%= entityClassPath %>;
+import <%= entityBOClassPath %>;
 <%_ } _%>
 <%_ if (pagination !== 'no' || relationshipsContainEagerLoad) { _%>
 
@@ -53,9 +53,9 @@ import java.util.UUID;
 <%_ } _%>
 
 /**
- * Service Interface for managing {@link <% if (dto === 'mapstruct') { %><%= domainModelPackageName %>.<% } %><%= asEntity(entityClass) %>}.
+ * Service Interface for managing {@link <% if (dto === 'mapstruct') { %><%= domainDomainPackage %>.<% } %><%= asEntity(entityClass) %>}.
  */
-public interface <%= entityClass %>Service {
+public interface <%= this.classNameFromClassPath(entity.java.entityServiceClassPath) %> {
 
     /**
      * Save a <%= entityInstance %>.

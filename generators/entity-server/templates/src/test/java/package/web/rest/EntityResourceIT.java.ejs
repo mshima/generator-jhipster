@@ -79,12 +79,12 @@ import <%= packageName %>.config.SecurityBeanOverrideConfiguration;
 <%_ if (authenticationType === 'oauth2') { _%>
 import <%= packageName %>.config.TestSecurityConfiguration;
 <%_ } _%>
-import <%= entityClassPath %>;
+import <%= entityDTOClassPath %>;
 <%_ relatedEntities.forEach(entity => { _%>
-import <%= entity.entityClassPath %>;
+import <%= entity.java.entityDTOClassPath %>;
 <%_ });
 relatedEntitiesFromAnotherDomain.forEach(entity => { _%>
-import <%= entity.entityControllerClassPath %>IT;
+import <%= entity.java.entityControllerClassPath %>IT;
 <%_
 }); _%>
 
@@ -207,7 +207,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 <%_ } _%>
 
-<%_ for (idx in fields) { if (fields[idx].fieldIsEnum === true) { _%>import <%= domainModelPackageName %>.enumeration.<%= fields[idx].fieldType %>;
+<%_ for (idx in fields) { if (fields[idx].fieldIsEnum === true) { _%>import <%= domainDomainPackage %>.enumeration.<%= fields[idx].fieldType %>;
 <%_ } } _%>
 /**
  * Integration tests for the {@link <%= entityClass %>Resource} REST controller.
@@ -411,7 +411,7 @@ public class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') {
     <%_ } } _%>
 
     @Autowired
-    private <%= entityClass %>Repository <%= entityInstance %>Repository;
+    private <%= this.classNameFromClassPath(entityRepositoryClassPath) %> <%= entityInstance %>Repository;
     <%_ if (isUsingMapsId === true && ( dto !== 'mapstruct' && service === 'no')) { _%>
     @Autowired
     private <%= mapsIdEntity %>Repository <%= mapsIdRepoInstance %>;
@@ -424,7 +424,7 @@ public class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') {
     <%_ if (fieldsContainOwnerManyToMany === true) { _%>
 
     @Mock
-    private <%= entityClass %>Repository <%= entityInstance %>RepositoryMock;
+    private <%= this.classNameFromClassPath(entityRepositoryClassPath) %> <%= entityInstance %>RepositoryMock;
     <%_ } _%>
     <%_ if (dto === 'mapstruct') { _%>
 
@@ -434,11 +434,11 @@ public class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') {
     <%_ if (fieldsContainOwnerManyToMany === true) { _%>
 
     @Mock
-    private <%= entityClass %>Service <%= entityInstance %>ServiceMock;
+    private <%= entityServiceClassPath ? this.classNameFromClassPath(entityServiceClassPath) : entityClass + 'Service' %> <%= entityInstance %>ServiceMock;
     <%_ } _%>
 
     @Autowired
-    private <%= entityClass %>Service <%= entityInstance %>Service;
+    private <%= this.classNameFromClassPath(entity.java.entityServiceClassPath) %> <%= entityInstance %>Service;
     <%_ } if (searchEngine === 'elasticsearch') { _%>
 
     /**

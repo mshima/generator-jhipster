@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= domainModelPackageName %>;
+package <%= this.packageFromClassPath(entityBOClassPath) %>;
 
 <%_
 
@@ -33,7 +33,7 @@ for (idx in fields) {
 }
 
 relatedEntitiesFromAnotherDomain.forEach(entity => {
-_%>import <%= entity.entityClassPath %>;<%_
+_%>import <%= entity.java.entityBOClassPath %>;<%_
 });
 _%>
 
@@ -126,7 +126,7 @@ import java.util.UUID;
 <%_ }
 Object.keys(uniqueEnums).forEach(function(element) { _%>
 
-import <%= domainModelPackageName %>.enumeration.<%= element %>;
+import <%= domainDomainPackage %>.enumeration.<%= element %>;
 <%_ }); _%>
 
 <%_ if (databaseType === 'couchbase' && !embedded) { _%>

@@ -35,9 +35,9 @@ import java.util.function.BiFunction;
 
 import org.springframework.stereotype.Service;
 
-import <%= entityClassPath %>;
+import <%= entityPOClassPath %>;
 <%_ Object.keys(uniqueEnums).forEach(function(element) { _%>
-import <%= domainModelPackageName %>.enumeration.<%= element %>;
+import <%= domainDomainPackage %>.enumeration.<%= element %>;
 <%_ }); _%>
 import <%= domainServicePackageName %>.ColumnConverter;
 

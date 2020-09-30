@@ -18,7 +18,11 @@
 -%>
 <%_ const beans = [];
     if (viaService) {
-        beans.push({class: `${entityClass}Service`, instance: `${entityInstance}Service`});
+        if (entityServiceClassPath) {
+            beans.push({class: this.classNameFromClassPath(entityServiceClassPath), instance: `${entityInstance}Service`});
+        } else {
+            beans.push({class: `${entityClass}Service`, instance: `${entityInstance}Service`});
+        }
         if (queryService) {
             beans.push({class: `${entityClass}QueryService`, instance: `${entityInstance}QueryService`});
         }
@@ -29,7 +33,11 @@
             beans.push({class: `${mapsIdEntity}Repository`, instance: mapsIdRepoInstance});
         }
     } else {
-        beans.push({class: `${entityClass}Repository`, instance: `${entityInstance}Repository`});
+        if (entityRepositoryClassPath) {
+            beans.push({class: this.classNameFromClassPath(entityRepositoryClassPath), instance: `${entityInstance}Repository`});
+        } else {
+            beans.push({class: `${entityClass}Repository`, instance: `${entityInstance}Repository`});
+        }
         if (dto === 'mapstruct') {
             beans.push({class: `${entityClass}Mapper`, instance: `${entityInstance}Mapper`});
         }
