@@ -219,15 +219,11 @@ const dtoFiles = {
             path: SERVER_MAIN_SRC_DIR,
             templates: [
                 {
-                    file: 'package/service/dto/EntityDTO.java',
+                    file: 'package/service/dto/BeanDTO.java',
                     renameTo: (_generator, data) => `${data.dtoBaseName}.java`,
                 },
                 {
-                    file: 'package/service/mapper/BaseEntityMapper.java',
-                    renameTo: (_generator, data) => `${data.dtoMapperFolder}/EntityMapper.java`,
-                },
-                {
-                    file: 'package/service/mapper/EntityMapper.java',
+                    file: 'package/service/dto/BeanDTOMapper.java',
                     renameTo: (_generator, data) => `${data.dtoMapperFolder}/${data.entityClass}${data.dtoSuffix}Mapper.java`,
                 },
             ],
@@ -294,6 +290,7 @@ function writeFiles() {
             if (this.dto === 'mapstruct') {
                 this.writeFilesToDisk(dtoFiles, this, false, this.fetchFromInstalledJHipster('entity-server/templates'), {
                     ...this.entity,
+                    dtoType: 'relationshipKeyValue',
                     dtoSuffix: this.dtoSuffix,
                     domainModelPackageName: this.domainModelPackageName,
                     importApiModelProperty: this.importApiModelProperty,
@@ -316,6 +313,7 @@ function writeFiles() {
                     const dtoClassPath = `${dtoPackage}.${this.entityClass}${dtoSuffix}`;
                     this.writeFilesToDisk(dtoFiles, this, false, this.fetchFromInstalledJHipster('entity-server/templates'), {
                         ...this.entity,
+                        dtoType: 'relationshipKeyValue',
                         dtoSuffix,
                         importApiModelProperty: this.importApiModelProperty,
                         domainModelPackageName: this.domainModelPackageName,
