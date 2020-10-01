@@ -1,20 +1,23 @@
+name: "Dependabot Automerge"
+
 on:
     pull_request:
         types:
             - opened
             - labeled
-            - reopened
+            - unlabeled
         branches:
             - master
 
 jobs:
     automerge:
         runs-on: ubuntu-latest
-        if: >-
-            contains(github.event.pull_request.user.login, 'dependabot') &&
-            contains(github.event.pull_request.labels.*.name, 'pr: automerge')
+        if: github.event.pull_request.user.login == 'dependabot'
         steps:
-            - uses: actions/github-script@v3
+            - name: 'Ask dependabot to merge'
+              uses: actions/github-script@v3
+              if: >-
+                  contains(github.event.pull_request.labels.*.name, 'pr: automerge')
               with:
                   github-token: ${{secrets.COMMENT}}
                   script: |
@@ -23,4 +26,18 @@ jobs:
                         owner: context.repo.owner,
                         repo: context.repo.repo,
                         body: '@dependabot merge'
+                      })
+            - name: 'Ask dependabot to cancel merge'
+              uses: actions/github-script@v3
+              if: >-
+                  github.event.action == 'unlabeled' &&
+                  github.event.label.name == 'pr: automerge'
+              with:
+                  github-token: ${{secrets.COMMENT}}
+                  script: |
+                      github.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: '@dependabot cancel merge'
                       })
