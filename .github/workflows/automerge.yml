@@ -1,0 +1,41 @@
+on:
+    pull_request:
+        types:
+            - opened
+            - labeled
+            - reopened
+        branches:
+            - master
+
+jobs:
+    automerge:
+        runs-on: ubuntu-latest
+        if: >-
+            contains(github.event.pull_request.user.login, 'dependabot') &&
+            contains(github.event.pull_request.labels.*.name, 'pr: automerge')
+        steps:
+            - name: Dump GitHub context
+              env:
+                  GITHUB_CONTEXT: ${{ toJson(github) }}
+              run: echo "$GITHUB_CONTEXT"
+            - name: Add comment to PR
+              env:
+                  URL: ${{ github.event.pull_request.comments_url }}
+                  GITHUB_TOKEN: ${{ secrets.COMMENT }}
+              run: |
+                  curl \
+                  -X POST \
+                  $URL \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: token $GITHUB_TOKEN" \
+                  --data '{ "body": "@dependabot merge" }'
+            - uses: actions/github-script@v3
+              with:
+                  github-token: ${{secrets.COMMENT}}
+                  script: |
+                      github.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: '${{ github.repository_owner }}',
+                        repo: context.repo.repo,
+                        body: '@dependabot merge'
+                      })
