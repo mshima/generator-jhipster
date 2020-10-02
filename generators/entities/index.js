@@ -18,6 +18,9 @@
  */
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const { JHIPSTER_CONFIG_DIR } = require('../generator-constants');
+const { prepareEntityForTemplates, loadRequiredConfigIntoEntity } = require('../../utils/entity');
+const { prepareFieldForTemplates } = require('../../utils/field');
+const { formatDateForChangelog } = require('../../utils/liquibase');
 
 let useBlueprints;
 
@@ -111,6 +114,51 @@ module.exports = class extends BaseBlueprintGenerator {
 
     get composing() {
         return useBlueprints ? undefined : this._composing();
+    }
+
+    _loading() {
+        return {
+            createBuiltInEntitiesStubs() {
+                this.configOptions.sharedEntities = this.configOptions.sharedEntities || {};
+                if (this.jhipsterConfig.skipUserManagement && this.jhipsterConfig.authenticationType !== 'oauth2') return;
+                const changelogDateDate = this.jhipsterConfig.creationTimestamp
+                    ? new Date(this.jhipsterConfig.creationTimestamp)
+                    : new Date();
+                const changelogDate = formatDateForChangelog(changelogDateDate);
+                // Create entity definition for built-in entity to make easier to deal with relationships.
+                const user = {
+                    name: 'User',
+                    entityTableName: this.getTableName(`${this.jhipsterConfig.jhiPrefix}User`),
+                    relationships: [],
+                    fields: [
+                        {
+                            fieldName: 'id',
+                            fieldType: this.jhipsterConfig.authenticationType === 'oauth2' ? 'String' : 'Long',
+                            columnType: this.jhipsterConfig.authenticationType === 'oauth2' ? 'varchar(100)' : 'bigint',
+                            options: {
+                                fieldNameHumanized: 'ID',
+                                id: true,
+                            },
+                        },
+                        {
+                            fieldName: 'login',
+                            fieldType: 'String',
+                        },
+                    ],
+                    changelogDate,
+                };
+                loadRequiredConfigIntoEntity(user, this.jhipsterConfig);
+                prepareEntityForTemplates(user, this);
+                user.fields.forEach(field => {
+                    prepareFieldForTemplates(user, field, this);
+                });
+                this.configOptions.sharedEntities.User = user;
+            },
+        };
+    }
+
+    get loading() {
+        return this._loading();
     }
 
     // Public API method used by the getter and also by Blueprints
