@@ -1,0 +1,42 @@
+import { NgModule } from '@angular/core';
+import { SharedModule } from './shared.module';
+
+<%_ for(entity of frontendEmbeddedEntities) { _%>
+import { <%= entity.entityAngularName %>DeleteDialogComponent } from 'app/entities/<%= entity.entityFolderName %>/delete/<%= entity.entityFileName %>-delete-dialog.component';
+import { <%= entity.entityAngularName %>DetailComponent } from 'app/entities/<%= entity.entityFolderName %>/detail/<%= entity.entityFileName %>-detail.component';
+import { <%= entity.entityAngularName %>DetailModalComponent } from 'app/entities/<%= entity.entityFolderName %>/detail/<%= entity.entityFileName %>-detail-modal.component';
+import { <%= entity.entityAngularName %>UpdateComponent } from 'app/entities/<%= entity.entityFolderName %>/update/<%= entity.entityFileName %>-update.component';
+import { <%= entity.entityAngularName %>UpdateModalComponent } from 'app/entities/<%= entity.entityFolderName %>/update/<%= entity.entityFileName %>-update-modal.component';
+import { <%= entity.entityAngularName %>UpdateNestedComponent } from 'app/entities/<%= entity.entityFolderName %>/update/<%= entity.entityFileName %>-update-nested.component';
+<%_ } _%>
+
+@NgModule({
+  imports: [SharedModule],
+  declarations: [
+<%_ for(entity of frontendEmbeddedEntities) { _%>
+    <%= entity.entityAngularName %>DeleteDialogComponent,
+    <%= entity.entityAngularName %>DetailComponent,
+    <%= entity.entityAngularName %>DetailModalComponent,
+    <%= entity.entityAngularName %>UpdateComponent,
+    <%= entity.entityAngularName %>UpdateModalComponent,
+    <%= entity.entityAngularName %>UpdateNestedComponent,
+<%_ } _%>
+  ],
+  entryComponents: [
+<%_ for(entity of frontendEmbeddedEntities) { _%>
+    <%= entity.entityAngularName %>DeleteDialogComponent,
+<%_ } _%>
+  ],
+  exports: [
+    SharedModule,
+<%_ for(entity of frontendEmbeddedEntities) { _%>
+    <%= entity.entityAngularName %>DeleteDialogComponent,
+    <%= entity.entityAngularName %>DetailComponent,
+    <%= entity.entityAngularName %>DetailModalComponent,
+    <%= entity.entityAngularName %>UpdateComponent,
+    <%= entity.entityAngularName %>UpdateModalComponent,
+    <%= entity.entityAngularName %>UpdateNestedComponent,
+<%_ } _%>
+  ],
+})
+export class SharedEntityModule {}
