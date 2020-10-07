@@ -89,7 +89,10 @@ public interface <%= entityClass %>Repository extends <% if (databaseType === 's
 
     @Query(value = "select distinct <%= entityInstance %> from <%= asEntity(entityClass) %> <%= entityInstance %><%
     for (idx in relationships) {
-        if (relationships[idx].relationshipEagerLoad) { %> left join fetch <%= entityInstance %>.<%= relationships[idx].relationshipFieldNamePlural %><% }
+        if (relationships[idx].relationshipEagerLoad &&
+            (relationships[idx].relationshipType === 'one-to-one' || relationships[idx].relationshipType === 'many-to-one')) {
+      %> left join fetch <%= entityInstance %>.<%= relationships[idx].relationshipFieldNamePlural %><%
+        }
     } %>",
         countQuery = "select count(distinct <%= entityInstance %>) from <%= asEntity(entityClass) %> <%= entityInstance %>")
     Page<<%= asEntity(entityClass) %>> findAllWithEagerRelationships(Pageable pageable);

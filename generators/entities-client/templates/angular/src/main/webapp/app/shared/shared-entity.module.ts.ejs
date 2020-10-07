@@ -1,0 +1,31 @@
+import { NgModule } from '@angular/core';
+import { SharedModule } from './shared.module';
+
+<%_ for(entity of valueObjectEntities) { _%>
+import {
+    <%= entity.entityAngularName %>UpdateComponent,
+    <%= entity.entityAngularName %>UpdateNestedComponent,
+    <%= entity.entityAngularName %>UpdateModalComponent,
+} from 'app/entities/<%= entity.entityFolderName %>/<%= entity.entityFileName %>-update.component';
+<%_ } _%>
+
+@NgModule({
+  imports: [SharedModule],
+  declarations: [
+<%_ for(entity of valueObjectEntities) { _%>
+    <%= entity.entityAngularName %>UpdateComponent,
+    <%= entity.entityAngularName %>UpdateNestedComponent,
+    <%= entity.entityAngularName %>UpdateModalComponent,
+<%_ } _%>
+  ],
+  entryComponents: [],
+  exports: [
+    SharedModule,
+<%_ for(entity of valueObjectEntities) { _%>
+    <%= entity.entityAngularName %>UpdateComponent,
+    <%= entity.entityAngularName %>UpdateNestedComponent,
+    <%= entity.entityAngularName %>UpdateModalComponent,
+<%_ } _%>
+  ],
+})
+export class SharedEntityModule {}

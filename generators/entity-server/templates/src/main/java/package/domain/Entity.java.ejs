@@ -50,7 +50,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 <%_ } if (!reactive && (hasTextBlob === true || (fieldsContainUUID === true && ['mysql', 'mariadb'].includes(prodDatabaseType)))) { _%>
 import org.hibernate.annotations.Type;
 <%_ } if (databaseType === 'mongodb') {
-        if (!embedded) { _%>
+        if (!embedded && (!valueObject || valueObject === 'cascade')) { _%>
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
     <%_ } _%>
@@ -59,7 +59,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.DBRef;
     <%_ } _%>
 <%_ } else if (databaseType === 'couchbase') {
-        if (!embedded) { _%>
+        if (!embedded && !valueObject) { _%>
 import org.springframework.data.annotation.Id;
 import org.springframework.data.couchbase.core.mapping.Document;
 import org.springframework.data.couchbase.core.mapping.id.GeneratedValue;
@@ -123,8 +123,12 @@ Object.keys(uniqueEnums).forEach(function(element) { _%>
 
 import <%= packageName %>.domain.enumeration.<%= element %>;
 <%_ }); _%>
+<%_ if (entityContainsCascadeAllRelationship) { _%>
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+<%_ } _%>
 
-<%_ if (databaseType === 'couchbase' && !embedded) { _%>
+<%_ if (databaseType === 'couchbase' && !embedded && !valueObject) { _%>
 import static <%= packageName %>.config.Constants.ID_DELIMITER;
 import static org.springframework.data.couchbase.core.mapping.id.GenerationStrategy.UNIQUE;
 
@@ -149,7 +153,7 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     <%_ } _%>
   <%_ } _%>
-<%_ } if (!embedded) {
+<%_ } if (!embedded && !valueObject) {
     if (databaseType === 'mongodb') { _%>
 @Document(collection = "<%= entityTableName %>")
 <%_ } if (databaseType === 'neo4j') { _%>
@@ -173,7 +177,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     private String prefix = PREFIX;
     <%_ } _%>
 
-<%_ if (!embedded) { _%>
+<%_ if (!embedded && (!valueObject || valueObject === 'cascade')) { _%>
     @Id
     <%_ if (databaseType === 'sql' && isUsingMapsId === false && !reactive) { _%>
         <%_ if (prodDatabaseType === 'mysql' || prodDatabaseType === 'mariadb') { _%>
@@ -183,7 +187,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     @SequenceGenerator(name = "sequenceGenerator")
         <%_ } _%>
     <%_ } _%>
-    <%_ if (databaseType === 'couchbase' && !embedded) { _%>
+    <%_ if (databaseType === 'couchbase' && !embedded && !valueObject) { _%>
     @GeneratedValue(strategy = UNIQUE, delimiter = ID_DELIMITER)
     <%_ } _%>
     <%_ if (databaseType === 'neo4j') { _%>
@@ -297,7 +301,7 @@ relationships.forEach((relationship, idx) => {
     }
 
     // An embedded entity should not reference entities that embeds it, unless the other entity is also embedded
-    if (embedded && !otherEntityIsEmbedded && ownerSide === false) {
+    if (((embedded && !otherEntityIsEmbedded) || (valueObject && valueObject !== 'cascade')) && ownerSide === false) {
       return;
     }
 
@@ -310,7 +314,15 @@ relationships.forEach((relationship, idx) => {
     if (relationshipType === 'one-to-many') {
         if (databaseType === 'sql' && !reactive) {
     _%>
-    @OneToMany(mappedBy = "<%= otherEntityRelationshipName %>")
+    @OneToMany(
+        mappedBy = "<%= otherEntityRelationshipName %>"
+<%_ if (relationship.options && relationship.options.cascadeAll) { _%>
+        , cascade = CascadeType.ALL, orphanRemoval = true
+<%_ } _%>
+    )
+<%_ if (relationship.options && relationship.options.cascadeAll) { _%>
+    @JsonManagedReference
+<%_ } _%>
         <%_ if (enableHibernateCache) { _%>
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
         <%_ }
@@ -342,6 +354,9 @@ relationships.forEach((relationship, idx) => {
         if (databaseType === 'sql' && !reactive) {
     _%>
     @ManyToOne<% if (relationshipRequired) { %>(optional = false)<% } %>
+        <%_ if (relationship.options && relationship.options.cascadeAll) { _%>
+    @JsonBackReference
+<%_ } _%>
         <%_ if (relationshipValidate) { _%>
     <%- include('relationship_validators', { relationships, idx }); -%>
         <%_ }
@@ -457,7 +472,7 @@ relationships.forEach((relationship, idx) => {
 }); _%>
     // jhipster-needle-entity-add-field - JHipster will add fields here
 <%_
-if (!embedded) { _%>
+if (!embedded && (!valueObject || valueObject === 'cascade')) { _%>
     public <% if (databaseType === 'sql') { %><%= primaryKeyType %><% } %><% if (databaseType === 'mongodb' || databaseType === 'couchbase' || databaseType === 'neo4j') { %>String<% } %><% if (databaseType === 'cassandra') { %>UUID<% } %> getId() {
         return id;
     }
@@ -661,7 +676,7 @@ if (!embedded) { _%>
         if (!(o instanceof <%= asEntity(entityClass) %>)) {
             return false;
         }
-        <%_ if (!embedded) { _%>
+        <%_ if (!embedded && (!valueObject || valueObject === 'cascade')) { _%>
         return id != null && id.equals(((<%= asEntity(entityClass) %>) o).id);
         <%_ } else { _%>
         return false;
@@ -677,7 +692,7 @@ if (!embedded) { _%>
     @Override
     public String toString() {
         return "<%= asEntity(entityClass) %>{" +
-        <%_ if (!embedded) { _%>
+        <%_ if (!embedded && (!valueObject || valueObject === 'cascade')) { _%>
             "id=" + getId() +
         <%_ } _%>
             <%_ for (idx in fields) {

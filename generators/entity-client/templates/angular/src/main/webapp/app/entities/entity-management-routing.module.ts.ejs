@@ -25,7 +25,7 @@ import { UserRouteAccessService } from 'app/core/auth/user-route-access.service'
 import { <%= entityAngularName %>Component } from './<%= entityFileName %>.component';
 import { <%= entityAngularName %>DetailComponent } from './<%= entityFileName %>-detail.component';
 <%_ if (!readOnly) { _%>
-import { <%= entityAngularName %>UpdateComponent } from './<%= entityFileName %>-update.component';
+import { <%= entityAngularName %>RouteUpdateComponent } from './<%= entityFileName %>-update.component';
 <%_ } _%>
 import { <%= entityAngularName %>RoutingResolveService } from './<%= entityFileName %>-routing-resolve.service';
 import { <%= microservicePrefix %><%= entityAngularName %>Module } from './<%= entityFileName %>.module';
@@ -58,7 +58,7 @@ const <%= entityInstance %>Route: Routes = [
     <%_ if (!readOnly) { _%>
     {
         path: 'new',
-        component: <%= entityAngularName %>UpdateComponent,
+        component: <%= entityAngularName %>RouteUpdateComponent,
         resolve: {
             <%= entityInstance %>: <%= entityAngularName %>RoutingResolveService
         },
@@ -70,7 +70,7 @@ const <%= entityInstance %>Route: Routes = [
     },
     {
         path: ':id/edit',
-        component: <%= entityAngularName %>UpdateComponent,
+        component: <%= entityAngularName %>RouteUpdateComponent,
         resolve: {
             <%= entityInstance %>: <%= entityAngularName %>RoutingResolveService
         },
@@ -88,6 +88,11 @@ const <%= entityInstance %>Route: Routes = [
         RouterModule.forChild(<%= entityInstance %>Route),
         <%= microservicePrefix %><%= entityAngularName %>Module,
     ],
+    <%_ if (!readOnly) { _%>
+    declarations: [
+        <%= entityAngularName %>RouteUpdateComponent,
+    ],
+    <%_ } _%>
     exports: [
         <%= microservicePrefix %><%= entityAngularName %>Module,
     ],

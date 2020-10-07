@@ -23,28 +23,31 @@ const variables = query.variables;
 const rxjsMapIsUsed = query.rxjsMapIsUsed;
 const selectableEntities = query.selectableEntities;
 const selectableManyToManyEntities = query.selectableManyToManyEntities;
-const hasValidationRule = fields.some(field =>
-        field.fieldValidate && (
-                field.fieldValidateRules.includes('required') ||
-                field.fieldValidateRules.includes('minlength') ||
-                field.fieldValidateRules.includes('maxlength') ||
-                field.fieldValidateRules.includes('min') ||
-                field.fieldValidateRules.includes('max') ||
-                field.fieldValidateRules.includes('pattern')
-        )
-);
-const hasRequiredRelationship = relationships.some(relationship => relationship.relationshipRequired);
-const isValidatorsRequired = hasValidationRule || hasRequiredRelationship;
 _%>
-import { Component, OnInit<% if (fieldsContainImageBlob) { %>, ElementRef<% } %>, Optional } from '@angular/core';
+import {
+    Component,
+    OnInit,
+    <% if (fieldsContainImageBlob) { %>ElementRef,<% } %>
+    Input,
+    ViewChild,
+} from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { FormBuilder,<%_ if (isValidatorsRequired) { _%> Validators<%_ } _%> } from '@angular/forms';
+import {
+    FormBuilder,
+    FormGroup,
+<%_ if (entityContainsValueObject) { _%>
+    FormArray,
+<%_ } _%>
+} from '@angular/forms';
+<%_ if (!valueObject) { _%>
 import { ActivatedRoute } from '@angular/router';
+<%_ } else { _%>
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+<%_ } _%>
 import { Observable } from 'rxjs';
 <%_ if ( rxjsMapIsUsed ) { _%>
 import { map } from 'rxjs/operators';
 <%_ } _%>
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
 import * as dayjs from 'dayjs';
 import { DATE_TIME_FORMAT } from 'app/core/config/input.constants';
@@ -53,7 +56,7 @@ import { DATE_TIME_FORMAT } from 'app/core/config/input.constants';
 import { JhiDataUtils, JhiFileLoadError, JhiEventManager, JhiEventWithContent } from 'ng-jhipster';
 <%_ } _%>
 
-import { I<%= entityAngularName %>, <%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
+import { I<%= entityAngularName %>, <%= entityAngularName %>, <%= entityInstance %>FormGroupDefinition } from 'app/shared/model/<%= entityModelFileName %>.model';
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 <%_ if (fieldsContainBlob) { _%>
 import { AlertError } from 'app/shared/alert/alert-error.model';
@@ -77,6 +80,12 @@ import { <%= uniqueRel.otherEntityAngularName %>Service } from 'app/entities/<%=
         }
     }
 });
+
+for (entity of relatedValueObjects) { _%>
+import { <%= entity.entityInstance %>FormGroupDefinition } from 'app/shared/model/<%= entity.entityFileName %>.model';
+<%_
+}
+
 let selectableEntitiesIdType = getTypescriptKeyType(getPkType(databaseType));
 if (databaseType === 'sql' && authenticationType === 'oauth2') {
     let existsUserSelectableEntity = false;
@@ -96,6 +105,7 @@ if (databaseType === 'sql' && authenticationType === 'oauth2') {
         }
     }
 }
+
 let selectableEntitiesType = '';
 if (selectableEntities.length === 1) {
     selectableEntitiesType = selectableEntities[0];
@@ -122,41 +132,28 @@ type SelectableManyToManyEntity = <%= selectableManyToManyEntities.join(' | ') %
 }
 _%>
 
+interface OnSuccessCallback {
+  (response: HttpResponse<I<%= entityAngularName %>>): void;
+}
+
+interface OnErrorCallback {
+  (error: any): void;
+}
+
 @Component({
     selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update',
     templateUrl: './<%= entityFileName %>-update.component.html'
 })
 export class <%= entityAngularName %>UpdateComponent implements OnInit {
+    @Input() <%= entityInstance %>?: I<%= entityAngularName %>;
+
+    @Input() hideActions = false;
     isSaving = false;
     <%_ for (const idx in variables) { _%>
     <%- variables[idx] %>
     <%_ } _%>
 
-    editForm = this.fb.group({
-    <%_ for (idx in fields) {
-        const fieldName = fields[idx].fieldName;
-        const fieldType = fields[idx].fieldType;
-        const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
-    _%>
-        <%= fieldName %>: [<% if (fields[idx].fieldValidate === true) { %>null,[<% if (fields[idx].fieldValidateRules.includes('required')) { %>Validators.required,<% } %><% if (fields[idx].fieldValidateRules.includes('minlength')) { %>Validators.minLength(<%= fields[idx].fieldValidateRulesMinlength %>),<% } %><% if (fields[idx].fieldValidateRules.includes('maxlength')) { %>Validators.maxLength(<%= fields[idx].fieldValidateRulesMaxlength %>),<% } %><% if (fields[idx].fieldValidateRules.includes('min')) { %>Validators.min(<%= fields[idx].fieldValidateRulesMin %>),<% } %><% if (fields[idx].fieldValidateRules.includes('max')) { %>Validators.max(<%= fields[idx].fieldValidateRulesMax %>),<% } %><% if (fields[idx].fieldValidateRules.includes('pattern')) { %>Validators.pattern('<%= fields[idx].fieldValidateRulesPattern.replace(/\\/g, '\\\\') %>'),<% } %>]<% } %>],
-        <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
-        <%= fieldName %>ContentType: [],
-        <%_ } _%>
-    <%_ } _%>
-<%_ for (idx in relationships) {
-    const relationshipType = relationships[idx].relationshipType;
-    const ownerSide = relationships[idx].ownerSide;
-    const relationshipName = relationships[idx].relationshipName;
-    const relationshipFieldNamePlural = relationships[idx].relationshipFieldNamePlural;
-    const relationshipRequired = relationships[idx].relationshipRequired;
-_%>
-    <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
-        <%= relationshipName %>: [<% if (relationshipRequired) { %>null,Validators.required<% } %>],
-    <%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%>
-        <%= relationshipFieldNamePlural %>: [<% if (relationshipRequired) { %>null,Validators.required<% } %>],
-    <%_ } _%>
-<%_ } _%>
-    });
+    lazyEditForm?: FormGroup;
 
     constructor(
         <%_ if (fieldsContainBlob) { _%>
@@ -179,41 +176,59 @@ _%>
         <%_ if (fieldsContainImageBlob) { _%>
         protected elementRef: ElementRef,
         <%_ } _%>
-        protected activatedRoute: ActivatedRoute,
         private fb: FormBuilder,
-        @Optional() public activeModal?: NgbActiveModal,
     ) {}
 
-    ngOnInit(): void {
-        if (this.activeModal) {
-          return;
+    onSuccess: OnSuccessCallback = (): void => {
+      // do nothing.
+    };
+    onError: OnErrorCallback = (): void => {
+      // do nothing.
+    };
+    previousState = (): void => {
+      // do nothing.
+    };
+
+    @Input() set editForm(editForm: FormGroup) {
+        this.lazyEditForm = editForm;
+    }
+
+    get editForm(): FormGroup {
+        if (this.lazyEditForm == null) {
+            this.lazyEditForm = this.fb.group(
+<%_ if (entityContainsValueObject) {
+        for (relationship of valueObjectRelationships) { %>
+                {
+                    ...<%= entityInstance %>FormGroupDefinition,
+                    attachments: this.fb.array([]),
+                }
+<%_     }
+    } else { _%>
+                <%= entityInstance %>FormGroupDefinition
+<%_ } _%>
+            );
         }
-        this.activatedRoute.data.subscribe(({ <%= entityInstance %> }) => {
-            <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
-            if (<%= entityInstance %>.id == null) {
-                const today = dayjs().startOf('day');
-            <%_ } _%>
-            <%_ for (idx in fields) {
-                const fieldName = fields[idx].fieldName;
-                const fieldType = fields[idx].fieldType;
-            _%>
-                <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                <%= entityInstance %>.<%= fieldName %> = today;
-                <%_ } _%>
-            <%_ } _%>
-            <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
-            }
-            <%_ } _%>
+        return this.lazyEditForm;
+    }
 
-            this.updateForm(<%= entityInstance %>);
+    ngOnInit(): void {
+        if (this.<%= entityInstance %> != null) {
+            this.updateForm(this.<%= entityInstance %>);
+        }
 
-            <%_ for (idx in queries) { _%>
-            <%- queries[idx] %>
-            <%_ } _%>
-        });
+        <%_ queries.forEach(query => { _%>
+        <%- query %>
+        <%_ }); _%>
     }
 
     updateForm(<%= entityInstance %>: I<%= entityAngularName %>): void {
+<%_ for (relationship of valueObjectRelationships) {
+        if (relationship.relationshipType === 'one-to-many') { _%>
+        this.<%= relationship.relationshipName %>Forms.clear();
+        <%= entityInstance %>.<%= relationship.relationshipNamePlural %>!.forEach(() => this.add<%= relationship.relationshipNameCapitalized %>());
+<%_     }
+    } _%>
+
         this.editForm.patchValue({
     <%_ for (idx in fields) {
         const fieldName = fields[idx].fieldName;
@@ -230,6 +245,7 @@ _%>
         <%_ } _%>
     <%_ } _%>
     <%_ for (idx in relationships) {
+        const relationship = relationships[idx];
         const relationshipType = relationships[idx].relationshipType;
         const ownerSide = relationships[idx].ownerSide;
         const relationshipName = relationships[idx].relationshipName;
@@ -238,7 +254,8 @@ _%>
     _%>
         <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
             <%= relationshipName %>: <%= entityInstance %>.<%= relationshipFieldName %>,
-        <%_ } else if (relationshipType === 'many-to-many' && ownerSide === true) { _%>
+        <%_ } else if ((relationshipType === 'many-to-many' && ownerSide === true) ||
+            (relationshipType === 'one-to-many' && relationship.otherEntity.valueObject)) { _%>
             <%= relationshipFieldNamePlural %>: <%= entityInstance %>.<%= relationshipFieldNamePlural %>,
         <%_ } _%>
     <%_ } _%>
@@ -276,14 +293,6 @@ _%>
     <%_ } _%>
 <%_ } _%>
 
-    previousState(): void {
-        if (this.activeModal) {
-            this.activeModal.close();
-        } else {
-            window.history.back();
-        }
-    }
-
     save(): void {
         this.isSaving = true;
         const <%= entityInstance %> = this.createFromForm();
@@ -314,6 +323,7 @@ _%>
         <%_ } _%>
     <%_ } _%>
     <%_ for (idx in relationships) {
+        const relationship = relationships[idx];
         const relationshipType = relationships[idx].relationshipType;
         const ownerSide = relationships[idx].ownerSide;
         const relationshipName = relationships[idx].relationshipName;
@@ -321,7 +331,8 @@ _%>
     _%>
         <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
             <%= relationshipName %>: this.editForm.get(['<%= relationshipName %>'])!.value,
-        <%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%>
+        <%_ } else if ((relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) ||
+            (relationshipType === 'one-to-many' && relationship.otherEntity.valueObject)) { _%>
             <%= relationshipFieldNamePlural %>: this.editForm.get(['<%= relationshipFieldNamePlural %>'])!.value,
         <%_ } _%>
     <%_ } _%>
@@ -329,16 +340,13 @@ _%>
     }
 
     protected subscribeToSaveResponse(result: Observable<HttpResponse<I<%= entityAngularName %>>>): void {
-        result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
-    }
-
-    protected onSaveSuccess(): void {
-        this.isSaving = false;
-        this.previousState();
-    }
-
-    protected onSaveError(): void {
-        this.isSaving = false;
+        result.subscribe(
+            response => this.onSuccess(response),
+            error => this.onError(error),
+            () => {
+                this.isSaving = false;
+            }
+        );
     }
 
     <%_ if (selectableEntitiesType) { _%>
@@ -359,4 +367,132 @@ _%>
         return option;
     }
     <%_ } _%>
+
+<%_ for (relationship of valueObjectRelationships) {
+        if (relationship.relationshipType === 'one-to-many') { _%>
+    add<%= relationship.relationshipNameCapitalized %>(): void {
+        const formGroup = this.fb.group(<%= relationship.otherEntity.entityInstance %>FormGroupDefinition);
+        // Disable backReference
+        formGroup.get('<%= relationship.otherRelationship.relationshipName %>')?.disable();
+        this.<%= relationship.relationshipName %>Forms.push(formGroup);
+    }
+
+    remove<%= relationship.relationshipNameCapitalized %>(index: number): void {
+        this.<%= relationship.relationshipName %>Forms.removeAt(index);
+    }
+
+    get <%= relationship.relationshipName %>Forms(): FormArray {
+        return this.editForm.get('<%= relationship.relationshipNamePlural %>') as FormArray;
+    }
+
+    get <%= relationship.relationshipName %>FormControls(): FormGroup[] {
+        return this.<%= relationship.relationshipName %>Forms.controls as FormGroup[];
+    }
+<%_     }
+    } _%>
 }
+<%_ if (!valueObject) { _%>
+
+@Component({
+    selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-route-update',
+    template: `
+<div class="row justify-content-center">
+    <div class="col-8">
+        <h2 id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.createOrEditLabel">Create or edit a <%= entityClassHumanized %></h2>
+        <<%= jhiPrefixDashed %>-alert-error></<%= jhiPrefixDashed %>-alert-error>
+        <<%= jhiPrefixDashed %>-<%= entityFileName %>-update [<%= entityInstance %>]="<%= entityInstance %>"></<%= jhiPrefixDashed %>-<%= entityFileName %>-update>
+    </div>
+</div>`,
+})
+export class <%= entityAngularName %>RouteUpdateComponent implements OnInit {
+    <%= entityInstance %>?: I<%= entityAngularName %>;
+
+    constructor(
+        protected activatedRoute: ActivatedRoute,
+    ){}
+
+    ngOnInit(): void {
+        this.activatedRoute.data.subscribe(({ <%= entityInstance %> }) => {
+            <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
+            if (<%= entityInstance %>.id == null) {
+                const today = dayjs().startOf('day');
+            <%_ } _%>
+            <%_ for (idx in fields) {
+                const fieldName = fields[idx].fieldName;
+                const fieldType = fields[idx].fieldType;
+            _%>
+                <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                <%= entityInstance %>.<%= fieldName %> = today;
+                <%_ } _%>
+            <%_ } _%>
+            <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
+            }
+            <%_ } _%>
+            this.<%= entityInstance %> = <%= entityInstance %>;
+        });
+    }
+
+    @ViewChild(<%= entityAngularName %>UpdateComponent) set component(child: <%= entityAngularName %>UpdateComponent) {
+        child.onSuccess = () => this.previousState();
+        child.previousState = () => this.previousState();
+    }
+
+    previousState(): void {
+        window.history.back();
+    }
+}
+<%_ } _%>
+<%_ if (valueObject) { _%>
+
+@Component({
+  selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update-nested',
+  template: `
+<div class="row justify-content-center">
+  <div class="col-12">
+      <<%= jhiPrefixDashed %>-<%= entityFileName %>-update [editForm]="editForm!" [<%= entityInstance %>]="<%= entityInstance %>" [hideActions]="true"></<%= jhiPrefixDashed %>-<%= entityFileName %>-update>
+  </div>
+</div>
+      `,
+})
+export class <%= entityAngularName %>UpdateNestedComponent {
+  @Input() <%= entityInstance %>?: I<%= entityAngularName %>;
+<% relationships.filter(rel => rel.ownerSide).forEach(relationship => { %>
+  @Input() <%= relationship.relationshipName %>?: I<%= relationship.otherEntity.entityAngularName %>;
+<%_ }); _%>
+
+  @Input() editForm?: FormGroup;
+}
+
+interface ReponseCallback {
+  (entity: I<%= entityAngularName %>): void;
+}
+
+@Component({
+  selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update-modal',
+  template: `
+<div class="row justify-content-center">
+  <div class="col-12">
+      <<%= jhiPrefixDashed %>-<%= entityFileName %>-update [<%= entityInstance %>]="<%= entityInstance %>"></<%= jhiPrefixDashed %>-<%= entityFileName %>-update>
+  </div>
+</div>
+      `,
+})
+export class <%= entityAngularName %>UpdateModalComponent {
+  <%= entityInstance %>?: I<%= entityAngularName %>;
+  callback?: ReponseCallback;
+
+  constructor(public activeModal: NgbActiveModal) {}
+
+  @ViewChild(<%= entityAngularName %>UpdateComponent) set component (child: <%= entityAngularName %>UpdateComponent){
+    child.onSuccess = (response: HttpResponse<I<%= entityAngularName %>>) => {
+      this.callback!(response.body!);
+      this.previousState();
+    };
+    child.previousState = () => this.previousState();
+  }
+
+  previousState(): void {
+    this.activeModal.close();
+  }
+}
+<%_ } _%>

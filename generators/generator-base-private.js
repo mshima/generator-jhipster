@@ -916,11 +916,11 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
                 if (relationshipType === 'one-to-one' && ownerSide === true && otherEntityName !== 'user') {
                     rxjsMapIsUsed = true;
                     variableName = relationship.relationshipFieldNamePlural.toLowerCase();
-                    if (variableName === entityInstance) {
+                    if (variableName === entityInstance || this.jhipsterConfig.clientFramework === ANGULAR) {
                         variableName += 'Collection';
                     }
                     const relationshipFieldName = `${relationship.relationshipFieldName}`;
-                    const relationshipFieldNameIdCheck = `!${entityInstance}.${relationshipFieldName} || !${entityInstance}.${relationshipFieldName}.id`;
+                    const relationshipIdGetter = `this.editForm.get(['${relationshipFieldName}', 'id'])?.value`;
 
                     filter = `filter: '${relationship.otherEntityRelationshipName.toLowerCase()}-is-null'`;
                     if (relationship.jpaMetamodelFiltering) {
@@ -932,22 +932,18 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
                             .query({${filter}})
                             .pipe(map((res: HttpResponse<I${relationship.otherEntityAngularName}[]>) => res.body ?? []))
                             .subscribe((resBody: I${relationship.otherEntityAngularName}[]) => {
-                                if (${relationshipFieldNameIdCheck}) {
+                                if (!${relationshipIdGetter}) {
                                     this.${variableName} = resBody;
                                 } else {
                                     this.${relationship.otherEntityName}Service
-                                        .find(${entityInstance}.${relationshipFieldName}${dto !== 'no' ? 'Id' : '.id'})
-                                        .pipe(map((subRes: HttpResponse<I${
-                                            relationship.otherEntityAngularName
-                                        }>) => subRes.body ? [subRes.body].concat(resBody) : resBody))
-                                        .subscribe((concatRes: I${
-                                            relationship.otherEntityAngularName
-                                        }[]) => this.${variableName} = concatRes);
+                                        .find(${relationshipIdGetter})
+                                        .pipe(map((subRes: HttpResponse<I${relationship.otherEntityAngularName}>) => subRes.body ? [subRes.body].concat(resBody) : resBody))
+                                        .subscribe((concatRes: I${relationship.otherEntityAngularName}[]) => this.${variableName} = concatRes);
                                 }
                             });`;
                 } else {
                     variableName = relationship.otherEntityNameCapitalizedPlural.toLowerCase();
-                    if (variableName === entityInstance) {
+                    if (variableName === entityInstance || this.jhipsterConfig.clientFramework === ANGULAR) {
                         variableName += 'Collection';
                     }
                     query = `
@@ -1012,12 +1008,13 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
      * @param {Array|Object} relationships - array of relationships
      * @param {string} dto - dto
      * @param {boolean} embedded - either the actual entity is embedded or not
+     * @param {string} valueObject - value object implementation type
      * @returns variablesWithTypes: Array
      */
-    generateEntityClientFields(pkType, fields, relationships, dto, customDateType = 'dayjs.Dayjs', embedded = false) {
+    generateEntityClientFields(pkType, fields, relationships, dto, customDateType = 'dayjs.Dayjs', embedded = false, valueObject) {
         const variablesWithTypes = [];
         const tsKeyType = this.getTypescriptKeyType(pkType);
-        if (!embedded && this.jhipsterConfig.clientFramework !== ANGULAR) {
+        if (!embedded && this.jhipsterConfig.clientFramework !== ANGULAR && (!valueObject || valueObject === 'cascade')) {
             variablesWithTypes.push(`id?: ${tsKeyType}`);
         }
         fields.forEach(field => {

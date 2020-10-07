@@ -51,12 +51,6 @@ const angularFiles = {
             path: ANGULAR_DIR,
             templates: [
                 {
-                    file: 'entities/entity-management.component.html',
-                    method: 'processHtml',
-                    template: true,
-                    renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}.component.html`,
-                },
-                {
                     file: 'entities/entity-management-detail.component.html',
                     method: 'processHtml',
                     template: true,
@@ -65,6 +59,26 @@ const angularFiles = {
                 {
                     file: 'entities/entity-management.module.ts',
                     renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}.module.ts`,
+                },
+                {
+                    file: 'entities/entity-management-detail.component.ts',
+                    renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}-detail.component.ts`,
+                },
+                {
+                    file: 'entities/entity.service.ts',
+                    renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}.service.ts`,
+                },
+            ],
+        },
+        {
+            condition: generator => !generator.embedded && !generator.valueObject,
+            path: ANGULAR_DIR,
+            templates: [
+                {
+                    file: 'entities/entity-management.component.html',
+                    method: 'processHtml',
+                    template: true,
+                    renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}.component.html`,
                 },
                 {
                     file: 'entities/entity-management-routing.module.ts',
@@ -77,14 +91,6 @@ const angularFiles = {
                 {
                     file: 'entities/entity-management.component.ts',
                     renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}.component.ts`,
-                },
-                {
-                    file: 'entities/entity-management-detail.component.ts',
-                    renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}-detail.component.ts`,
-                },
-                {
-                    file: 'entities/entity.service.ts',
-                    renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}.service.ts`,
                 },
             ],
         },
@@ -126,10 +132,22 @@ const angularFiles = {
                     renameTo: generator =>
                         `spec/app/entities/${generator.entityFolderName}/${generator.entityFileName}-detail.component.spec.ts`,
                 },
+            ],
+        },
+        {
+            condition: generator => !generator.embedded && !generator.valueObject,
+            path: CLIENT_TEST_SRC_DIR,
+            templates: [
                 {
                     file: 'spec/app/entities/entity-management.component.spec.ts',
                     renameTo: generator => `spec/app/entities/${generator.entityFolderName}/${generator.entityFileName}.component.spec.ts`,
                 },
+            ],
+        },
+        {
+            condition: generator => !generator.embedded && (!generator.valueObject || generator.valueObject === 'cascade'),
+            path: CLIENT_TEST_SRC_DIR,
+            templates: [
                 {
                     file: 'spec/app/entities/entity-management.service.spec.ts',
                     renameTo: generator => `spec/app/entities/${generator.entityFolderName}/${generator.entityFileName}.service.spec.ts`,
@@ -172,7 +190,7 @@ const angularFiles = {
 const reactFiles = {
     client: [
         {
-            condition: generator => !generator.embedded,
+            condition: generator => !generator.embedded && !generator.valueObject,
             path: REACT_DIR,
             templates: [
                 {
@@ -206,7 +224,7 @@ const reactFiles = {
             ],
         },
         {
-            condition: generator => !generator.readOnly && !generator.embedded,
+            condition: generator => !generator.readOnly && !generator.embedded && !generator.valueObject,
             path: REACT_DIR,
             templates: [
                 {
@@ -224,7 +242,7 @@ const reactFiles = {
     ],
     test: [
         {
-            condition: generator => !generator.embedded,
+            condition: generator => !generator.embedded && !generator.valueObject,
             path: CLIENT_TEST_SRC_DIR,
             templates: [
                 {
@@ -234,7 +252,7 @@ const reactFiles = {
             ],
         },
         {
-            condition: generator => generator.protractorTests && !generator.embedded,
+            condition: generator => generator.protractorTests && !generator.embedded && !generator.valueObject,
             path: CLIENT_TEST_SRC_DIR,
             templates: [
                 {
@@ -248,7 +266,7 @@ const reactFiles = {
             ],
         },
         {
-            condition: generator => generator.protractorTests && !generator.readOnly && !generator.embedded,
+            condition: generator => generator.protractorTests && !generator.readOnly && !generator.embedded && !generator.valueObject,
             path: CLIENT_TEST_SRC_DIR,
             templates: [
                 {
@@ -273,7 +291,7 @@ const vueFiles = {
             ],
         },
         {
-            condition: generator => !generator.embedded,
+            condition: generator => !generator.embedded && !generator.valueObject,
             path: VUE_DIR,
             templates: [
                 {
@@ -299,7 +317,7 @@ const vueFiles = {
             ],
         },
         {
-            condition: generator => !generator.readOnly && !generator.embedded,
+            condition: generator => !generator.readOnly && !generator.embedded && !generator.valueObject,
             path: VUE_DIR,
             templates: [
                 {
@@ -315,7 +333,7 @@ const vueFiles = {
     ],
     test: [
         {
-            condition: generator => !generator.embedded,
+            condition: generator => !generator.embedded && !generator.valueObject,
             path: CLIENT_TEST_SRC_DIR,
             templates: [
                 {
@@ -334,7 +352,7 @@ const vueFiles = {
             ],
         },
         {
-            condition: generator => !generator.readOnly && !generator.embedded,
+            condition: generator => !generator.readOnly && !generator.embedded && !generator.valueObject,
             path: CLIENT_TEST_SRC_DIR,
             templates: [
                 {
@@ -345,7 +363,7 @@ const vueFiles = {
             ],
         },
         {
-            condition: generator => generator.protractorTests && !generator.embedded,
+            condition: generator => generator.protractorTests && !generator.embedded && !generator.valueObject,
             path: CLIENT_TEST_SRC_DIR,
             templates: [
                 {
@@ -363,7 +381,7 @@ const vueFiles = {
             ],
         },
         {
-            condition: generator => generator.protractorTests && !generator.readOnly && !generator.embedded,
+            condition: generator => generator.protractorTests && !generator.readOnly && !generator.embedded && !generator.valueObject,
             path: CLIENT_TEST_SRC_DIR,
             templates: [
                 {
@@ -378,7 +396,7 @@ const vueFiles = {
 const commonFiles = {
     testsCypress: [
         {
-            condition: generator => generator.cypressTests && !generator.embedded,
+            condition: generator => generator.cypressTests && !generator.embedded && !generator.valueObject,
             path: `${CLIENT_TEST_SRC_DIR}cypress/`,
             templates: [
                 {
@@ -467,7 +485,7 @@ function writeFiles() {
                 clientMainSrcDir = VUE_DIR;
                 templatesDir = CLIENT_VUE_TEMPLATES_DIR;
             } else {
-                if (!this.embedded) {
+                if (!this.embedded && !this.valueObject) {
                     this.addEntityToMenu(
                         this.entityStateName,
                         this.enableTranslation,
@@ -484,7 +502,7 @@ function writeFiles() {
 
             addEnumerationFiles(this, clientMainSrcDir);
 
-            if (!this.embedded) {
+            if (!this.embedded && !this.valueObject) {
                 this.addEntityToModule(
                     this.entityInstance,
                     this.entityClass,

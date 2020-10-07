@@ -585,6 +585,18 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 );
             },
 
+            processValueObjects() {
+                this.context.valueObjectRelationships = this.context.relationships.filter(
+                    relationship => relationship.otherEntity && relationship.otherEntity.valueObject
+                );
+                this.context.cascadeAllRelationships = this.context.relationships.filter(
+                    relationship => relationship.options && relationship.options.cascadeAll
+                );
+                this.context.relatedValueObjects = this.context.valueObjectRelationships.map(relationship => relationship.otherEntity);
+                this.context.entityContainsValueObject = this.context.valueObjectRelationships.length > 0;
+                this.context.entityContainsCascadeAllRelationship = this.context.cascadeAllRelationships.length > 0;
+            },
+
             /**
              * Process relationships that should be loaded eagerly.
              */
@@ -593,10 +605,11 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     .filter(relationship => relationship.relationshipEagerLoad === undefined)
                     .forEach(relationship => {
                         relationship.relationshipEagerLoad =
-                            !relationship.embedded &&
-                            // Allows the entity to force earger load every relationship
-                            (this.context.eagerLoad ||
-                                (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === true));
+                            (!this.context.valueObject && relationship.options && relationship.options.cascadeAll) ||
+                            (!relationship.embedded &&
+                                // Allows the entity to force earger load every relationship
+                                (this.context.eagerLoad ||
+                                    (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === true)));
                     });
                 this.context.relationshipsContainEagerLoad = this.context.relationships.some(
                     relationship => relationship.relationshipEagerLoad

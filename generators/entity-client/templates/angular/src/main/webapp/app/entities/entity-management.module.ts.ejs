@@ -20,7 +20,12 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { SharedModule } from 'app/shared/shared.module';
+<%_ if (entityContainsValueObject) { _%>
+import { SharedEntityModule } from 'app/shared/shared-entity.module';
+<%_ } _%>
+<%_ if (!valueObject) { _%>
 import { <%= entityAngularName %>Component } from './<%= entityFileName %>.component';
+<%_ } _%>
 import { <%= entityAngularName %>DetailComponent } from './<%= entityFileName %>-detail.component';
 <%_ if (!readOnly) { _%>
 import { <%= entityAngularName %>UpdateComponent } from './<%= entityFileName %>-update.component';
@@ -30,10 +35,15 @@ import { <%= entityAngularName %>DeleteDialogComponent } from './<%= entityFileN
 @NgModule({
     imports: [
         SharedModule,
+<%_ if (entityContainsValueObject) { _%>
+        SharedEntityModule,
+<%_ } _%>
         RouterModule,
     ],
     declarations: [
+<%_ if (!valueObject) { _%>
         <%= entityAngularName %>Component,
+<%_ } _%>
         <%= entityAngularName %>DetailComponent,
         <%_ if (!readOnly) { _%>
         <%= entityAngularName %>UpdateComponent,
@@ -41,6 +51,10 @@ import { <%= entityAngularName %>DeleteDialogComponent } from './<%= entityFileN
         <%_ } %>
     ],
     exports: [
+        SharedModule,
+<%_ if (entityContainsValueObject) { _%>
+        SharedEntityModule,
+<%_ } _%>
         <%= entityAngularName %>DetailComponent,
         <%_ if (!readOnly) { _%>
         <%= entityAngularName %>UpdateComponent,

@@ -68,7 +68,7 @@ const serverFiles = {
             ],
         },
         {
-            condition: generator => !generator.embedded,
+            condition: generator => !generator.embedded && (!generator.valueObject || generator.valueObject === 'cascade'),
             path: SERVER_MAIN_SRC_DIR,
             templates: [
                 {
@@ -102,7 +102,8 @@ const serverFiles = {
             ],
         },
         {
-            condition: generator => !generator.reactive && !generator.embedded,
+            condition: generator =>
+                !generator.reactive && !generator.embedded && (!generator.valueObject || generator.valueObject === 'cascade'),
             path: SERVER_MAIN_SRC_DIR,
             templates: [
                 {
@@ -112,7 +113,8 @@ const serverFiles = {
             ],
         },
         {
-            condition: generator => generator.reactive && !generator.embedded,
+            condition: generator =>
+                generator.reactive && !generator.embedded && (!generator.valueObject || generator.valueObject === 'cascade'),
             path: SERVER_MAIN_SRC_DIR,
             templates: [
                 {
@@ -122,7 +124,11 @@ const serverFiles = {
             ],
         },
         {
-            condition: generator => generator.reactive && generator.databaseType === 'sql' && !generator.embedded,
+            condition: generator =>
+                generator.reactive &&
+                generator.databaseType === 'sql' &&
+                !generator.embedded &&
+                (!generator.valueObject || generator.valueObject === 'cascade'),
             path: SERVER_MAIN_SRC_DIR,
             templates: [
                 {
@@ -136,7 +142,10 @@ const serverFiles = {
             ],
         },
         {
-            condition: generator => generator.service === 'serviceImpl' && !generator.embedded,
+            condition: generator =>
+                generator.service === 'serviceImpl' &&
+                !generator.embedded &&
+                (!generator.valueObject || generator.valueObject === 'cascade'),
             path: SERVER_MAIN_SRC_DIR,
             templates: [
                 {
@@ -150,7 +159,10 @@ const serverFiles = {
             ],
         },
         {
-            condition: generator => generator.service === 'serviceClass' && !generator.embedded,
+            condition: generator =>
+                generator.service === 'serviceClass' &&
+                !generator.embedded &&
+                (!generator.valueObject || generator.valueObject === 'cascade'),
             path: SERVER_MAIN_SRC_DIR,
             templates: [
                 {
@@ -180,7 +192,7 @@ const serverFiles = {
     ],
     test: [
         {
-            condition: generator => !generator.embedded,
+            condition: generator => !generator.embedded && (!generator.valueObject || generator.valueObject === 'cascade'),
             path: SERVER_TEST_SRC_DIR,
             templates: [
                 {

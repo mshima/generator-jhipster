@@ -17,6 +17,10 @@
  * limitations under the License.
  */
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
+const { angularFiles } = require('./files-angular');
+const {
+    SUPPORTED_CLIENT_FRAMEWORKS: { ANGULAR },
+} = require('../generator-constants');
 
 let useBlueprints;
 
@@ -65,11 +69,36 @@ module.exports = class extends BaseBlueprintGenerator {
                 // Make user entity available to templates.
                 this.user = this.configOptions.sharedEntities.User;
             },
+
+            loadValueObjectEntities() {
+                this.valueObjectEntities = this.getExistingEntities()
+                    .filter(entity => entity.definition.valueObject)
+                    .map(entity => this.configOptions.sharedEntities[entity.name]);
+            },
         };
     }
 
     get default() {
         return useBlueprints ? undefined : this._default();
+    }
+
+    // Public API method used by the getter and also by Blueprints
+    _writing() {
+        return {
+            writeFiles() {
+                switch (this.clientFramework) {
+                    case ANGULAR:
+                        this.writeFilesToDisk(angularFiles, 'angular');
+                        break;
+                    default:
+                    // do nothing by default
+                }
+            },
+        };
+    }
+
+    get writing() {
+        return useBlueprints ? undefined : this._writing();
     }
 
     // Public API method used by the getter and also by Blueprints
