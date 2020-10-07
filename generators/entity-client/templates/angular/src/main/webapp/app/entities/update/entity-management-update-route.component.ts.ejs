@@ -1,0 +1,81 @@
+<%#
+ Copyright 2013-2020 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+<%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
+import * as dayjs from 'dayjs';
+<%_ } _%>
+
+import { I<%= entityAngularName %> } from '../<%= entityFileName %>.model';
+
+@Component({
+  selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update-route',
+  template: `  <form (ngSubmit)="<%= entityInstance %>Component.save()" name="editForm">
+    <div class="row justify-content-center">
+      <div class="col-8">
+      <h2 id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" <%= jhiPrefixDashed %>Translate="<%= i18nKeyPrefix %>.home.createOrEditLabel">Create or edit a <%= entityClassHumanized %></h2>
+      <<%= jhiPrefixDashed %>-alert-error></<%= jhiPrefixDashed %>-alert-error>
+      <<%= jhiPrefixDashed %>-<%= entityFileName %>-update #<%= entityInstance %>Component [<%= entityInstance %>]="<%= entityInstance %>!" (<%= entityInstance %>Save)="previousState()" (<%= entityInstance %>Close)="previousState()"></<%= jhiPrefixDashed %>-<%= entityFileName %>-update>
+      </div>
+    </div>
+
+    <div>
+      <button type="button" id="cancel-save" class="btn btn-secondary" (click)="<%= entityInstance %>Component.cancel()">
+        <fa-icon icon="ban"></fa-icon>&nbsp;<span <%= jhiPrefix %>Translate="entity.action.cancel">Cancel</span>
+      </button>
+
+      <button type="submit" id="save-entity" data-cy="entityCreateSaveButton" [disabled]="<%= entityInstance %>Component.editForm.invalid || <%= entityInstance %>Component.isSaving" class="btn btn-primary">
+        <fa-icon icon="save"></fa-icon>&nbsp;<span <%= jhiPrefix %>Translate="entity.action.save">Save</span>
+      </button>
+    </div>
+  </form>`,
+})
+export class <%= entityAngularName %>UpdateRouteComponent implements OnInit {
+  <%= entityInstance %>?: I<%= entityAngularName %>;
+
+  constructor(
+  protected activatedRoute: ActivatedRoute,
+  ){}
+
+  ngOnInit(): void {
+  this.activatedRoute.data.subscribe(({ <%= entityInstance %> }) => {
+    <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
+    if (<%= entityInstance %>.<%= primaryKey.name %> == null) {
+    const today = dayjs().startOf('day');
+    <%_ } _%>
+    <%_ for (idx in fields) {
+    const fieldName = fields[idx].fieldName;
+    const fieldType = fields[idx].fieldType;
+    _%>
+    <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+    <%= entityInstance %>.<%= fieldName %> = today;
+        <%_ } _%>
+      <%_ } _%>
+      <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
+      }
+      <%_ } _%>
+      this.<%= entityInstance %> = <%= entityInstance %>;
+    });
+  }
+
+  previousState(): void {
+    window.history.back();
+  }
+}

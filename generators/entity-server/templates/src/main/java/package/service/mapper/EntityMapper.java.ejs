@@ -33,7 +33,7 @@ _%>
 <%_ if (dtoReferences.some(r => r.relationship &&
         r.relationship.otherRelationship &&
         r.relationship.otherRelationship.reference.collection &&
-        r.relationship.relationshipType === 'many-to-many'
+        (r.relationship.otherRelationship.cascade || r.relationship.relationshipType === 'many-to-many')
     ) || otherDtoReferences.some(r => r.collection)) { _%>
 import java.util.Set;
 <%_ } _%>
@@ -54,17 +54,18 @@ import java.util.UUID;
 @Mapper(componentModel = "spring", uses = {<%= [...new Set(existingMappings.map(otherEntityNameCapitalized => otherEntityNameCapitalized + 'Mapper.class'))].join(', ') %>})
 public interface <%= entityClass %>Mapper extends EntityMapper<<%= asDto(entityClass) %>, <%= asEntity(entityClass) %>> {
 <%_ /***** Basic dto mapping *****/
-    if (!embedded) {
+    if (!embedded || embeddableEntity) {
         var renMapAnotEnt = false; //Render Mapping Annotation during Entity to DTO conversion?
         for (reference of dtoReferences.filter(reference => reference.relationship && !reference.relationship.otherEntity.embedded)) {
             renMapAnotEnt = true;
             let qualifiedByName;
             if (reference.relatedReference) {
-                qualifiedByName = reference.relatedReference.name;
+                qualifiedByName = reference.relatedReference.name + (reference.collection ? 'Set' : '');
+            } else if (reference.relationship && reference.relationship.cascade) {
+                qualifiedByName = reference.relationship.otherEntityRelationshipName;
             } else {
-                qualifiedByName = 'id';
-            }
-            qualifiedByName = qualifiedByName + (reference.collection ? 'Set' : ''); _%>
+                qualifiedByName = 'id' + (reference.collection ? 'Set' : '');
+            } _%>
     @Mapping(target = "<%= reference.name %>", source = "<%= reference.name %>", qualifiedByName="<%= qualifiedByName %>")
     <%_ } _%>
     <%_ for (reference of dtoReferences.filter(reference => reference.field && reference.field.mapstructExpression)) {
@@ -77,7 +78,7 @@ public interface <%= entityClass %>Mapper extends EntityMapper<<%= asDto(entityC
 <%_ } %>
 <%_ /***** Id mapping *****/
     const otherIdReferences = otherDtoReferences.filter(r => !r.relatedReference || r.relatedReference.id);
-    if (!embedded && otherIdReferences.length > 0) {
+    if (!embedded || embeddableEntity && otherIdReferences.length > 0) {
         if (otherIdReferences.some(r => !r.collection)) { _%>
 
     @Named("<%= primaryKey.name %>")
@@ -116,7 +117,7 @@ public interface <%= entityClass %>Mapper extends EntityMapper<<%= asDto(entityC
         <%_ })
         }
         for (reference of dtoReferences.filter(reference => reference.relationship)) {
-            if (reference.owned === false) {
+            if (reference.owned === false && !reference.relationship.cascade) {
                 renMapAnotDto = true; _%>
     @Mapping(target = "<%= reference.name %>", ignore = true)
         <%_ }
@@ -147,6 +148,18 @@ public interface <%= entityClass %>Mapper extends EntityMapper<<%= asDto(entityC
         <%_ if (otherReference.relationship.relatedField && !otherReference.relationship.relatedField.id) { _%>
     @Mapping(target = "<%= otherReference.relationship.relatedField.reference.name %>", source = "<%= otherReference.relationship.relatedField.reference.name %>")
         <%_ } _%>
+    <%- backReferenceDtoClass %> toDto<%= _.upperFirst(mapperName) %>(<%- backReferenceEntityClass %> <%= asEntity(entityInstance) %>);
+    <%_ }; _%>
+    <%_ /***** Add plain backreference for cascade and embedded *****/
+         for (const otherReference of otherDtoReferences.filter(r => r.relationship && r.relationship.cascade)) {
+            const reference = otherReference.relationship.otherRelationship.reference;
+            const mapperName = reference.name;
+            const collection = reference.relationship.otherRelationship.reference.collection;
+            const backReferenceDtoClass = collection ? `Set<${asDto(entityClass)}>` : asDto(entityClass);
+            const backReferenceEntityClass = collection ? `Set<${asEntity(entityClass)}>` : asEntity(entityClass); _%>
+
+    @Named("<%= mapperName %>")
+    @Mapping(target = "<%= mapperName %>", source = "<%= mapperName %>", ignore = true)
     <%- backReferenceDtoClass %> toDto<%= _.upperFirst(mapperName) %>(<%- backReferenceEntityClass %> <%= asEntity(entityInstance) %>);
     <%_ }; _%>
 

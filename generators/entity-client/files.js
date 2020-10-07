@@ -50,20 +50,34 @@ const angularFiles = {
       path: ANGULAR_DIR,
       templates: [
         {
-          file: 'entities/list/entity-management.component.html',
-          method: 'processHtml',
-          template: true,
-          renameTo: generator => `entities/${generator.entityFolderName}/list/${generator.entityFileName}.component.html`,
-        },
-        {
           file: 'entities/detail/entity-management-detail.component.html',
           method: 'processHtml',
           template: true,
           renameTo: generator => `entities/${generator.entityFolderName}/detail/${generator.entityFileName}-detail.component.html`,
         },
         {
+          file: 'entities/detail/entity-management-detail.component.ts',
+          renameTo: generator => `entities/${generator.entityFolderName}/detail/${generator.entityFileName}-detail.component.ts`,
+        },
+        {
+          file: 'entities/service/entity.service.ts',
+          renameTo: generator => `entities/${generator.entityFolderName}/service/${generator.entityFileName}.service.ts`,
+        },
+      ],
+    },
+    {
+      condition: generator => !generator.embedded && !generator.embeddableEntity,
+      path: ANGULAR_DIR,
+      templates: [
+        {
           file: 'entities/entity-management.module.ts',
           renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}.module.ts`,
+        },
+        {
+          file: 'entities/list/entity-management.component.html',
+          method: 'processHtml',
+          template: true,
+          renameTo: generator => `entities/${generator.entityFolderName}/list/${generator.entityFileName}.component.html`,
         },
         {
           file: 'entities/route/entity-management-routing.module.ts',
@@ -78,12 +92,8 @@ const angularFiles = {
           renameTo: generator => `entities/${generator.entityFolderName}/list/${generator.entityFileName}.component.ts`,
         },
         {
-          file: 'entities/detail/entity-management-detail.component.ts',
-          renameTo: generator => `entities/${generator.entityFolderName}/detail/${generator.entityFileName}-detail.component.ts`,
-        },
-        {
-          file: 'entities/service/entity.service.ts',
-          renameTo: generator => `entities/${generator.entityFolderName}/service/${generator.entityFileName}.service.ts`,
+          file: 'entities/route/entity-management-routing-resolve.service.spec.ts',
+          renameTo: generator => `entities/${generator.entityFolderName}/route/${generator.entityFileName}-routing-resolve.service.spec.ts`,
         },
       ],
     },
@@ -113,24 +123,64 @@ const angularFiles = {
         },
       ],
     },
+    {
+      condition: generator => !generator.readOnly && !generator.embedded && !generator.embeddableEntity,
+      path: ANGULAR_DIR,
+      templates: [
+        {
+          file: 'entities/update/entity-management-update-route.component.ts',
+          renameTo: generator => `entities/${generator.entityFolderName}/update/${generator.entityFileName}-update-route.component.ts`,
+        },
+      ],
+    },
+    {
+      condition: generator => !generator.readOnly && !generator.embedded && generator.embeddableEntity,
+      path: ANGULAR_DIR,
+      templates: [
+        {
+          file: 'entities/entity-management-shared.module.ts',
+          renameTo: generator => `entities/${generator.entityFolderName}/${generator.entityFileName}-shared.module.ts`,
+        },
+        {
+          file: 'entities/update/entity-management-update-nested.component.ts',
+          renameTo: generator => `entities/${generator.entityFolderName}/update/${generator.entityFileName}-update-nested.component.ts`,
+        },
+        {
+          file: 'entities/update/entity-management-update-modal.component.ts',
+          renameTo: generator => `entities/${generator.entityFolderName}/update/${generator.entityFileName}-update-modal.component.ts`,
+        },
+        {
+          file: 'entities/detail/entity-management-detail-modal.component.ts',
+          renameTo: generator => `entities/${generator.entityFolderName}/detail/${generator.entityFileName}-detail-modal.component.ts`,
+        },
+      ],
+    },
   ],
   test: [
     {
-      condition: generator => !generator.embedded,
+      condition: generator => !generator.embedded && (!generator.embeddableEntity || generator.fieldsContainBlob),
       path: ANGULAR_DIR,
       templates: [
         {
           file: 'entities/detail/entity-management-detail.component.spec.ts',
           renameTo: generator => `entities/${generator.entityFolderName}/detail/${generator.entityFileName}-detail.component.spec.ts`,
         },
+      ],
+    },
+    {
+      condition: generator => !generator.embedded && !generator.embeddableEntity,
+      path: ANGULAR_DIR,
+      templates: [
         {
           file: 'entities/list/entity-management.component.spec.ts',
           renameTo: generator => `entities/${generator.entityFolderName}/list/${generator.entityFileName}.component.spec.ts`,
         },
-        {
-          file: 'entities/route/entity-management-routing-resolve.service.spec.ts',
-          renameTo: generator => `entities/${generator.entityFolderName}/route/${generator.entityFileName}-routing-resolve.service.spec.ts`,
-        },
+      ],
+    },
+    {
+      condition: generator => !generator.embedded,
+      path: ANGULAR_DIR,
+      templates: [
         {
           file: 'entities/service/entity.service.spec.ts',
           renameTo: generator => `entities/${generator.entityFolderName}/service/${generator.entityFileName}.service.spec.ts`,
@@ -153,7 +203,7 @@ const angularFiles = {
       ],
     },
     {
-      condition: generator => generator.protractorTests && !generator.embedded,
+      condition: generator => generator.protractorTests && !generator.embedded && !generator.embeddableEntity,
       path: CLIENT_TEST_SRC_DIR,
       templates: [
         {
@@ -172,7 +222,7 @@ const angularFiles = {
 const reactFiles = {
   client: [
     {
-      condition: generator => !generator.embedded,
+      condition: generator => !generator.embedded && !generator.embeddableEntity,
       path: REACT_DIR,
       templates: [
         {
@@ -206,7 +256,7 @@ const reactFiles = {
       ],
     },
     {
-      condition: generator => !generator.readOnly && !generator.embedded,
+      condition: generator => !generator.readOnly && !generator.embedded && !generator.embeddableEntity,
       path: REACT_DIR,
       templates: [
         {
@@ -224,7 +274,7 @@ const reactFiles = {
   ],
   test: [
     {
-      condition: generator => !generator.embedded,
+      condition: generator => !generator.embedded && !generator.embeddableEntity,
       path: REACT_DIR,
       templates: [
         {
@@ -234,7 +284,7 @@ const reactFiles = {
       ],
     },
     {
-      condition: generator => generator.protractorTests && !generator.embedded,
+      condition: generator => generator.protractorTests && !generator.embedded && !generator.embeddableEntity,
       path: CLIENT_TEST_SRC_DIR,
       templates: [
         {
@@ -248,7 +298,7 @@ const reactFiles = {
       ],
     },
     {
-      condition: generator => generator.protractorTests && !generator.readOnly && !generator.embedded,
+      condition: generator => generator.protractorTests && !generator.readOnly && !generator.embedded && !generator.embeddableEntity,
       path: CLIENT_TEST_SRC_DIR,
       templates: [
         {
@@ -273,7 +323,7 @@ const vueFiles = {
       ],
     },
     {
-      condition: generator => !generator.embedded,
+      condition: generator => !generator.embedded && !generator.embeddableEntity,
       path: VUE_DIR,
       templates: [
         {
@@ -299,7 +349,7 @@ const vueFiles = {
       ],
     },
     {
-      condition: generator => !generator.readOnly && !generator.embedded,
+      condition: generator => !generator.readOnly && !generator.embedded && !generator.embeddableEntity,
       path: VUE_DIR,
       templates: [
         {
@@ -315,7 +365,7 @@ const vueFiles = {
   ],
   test: [
     {
-      condition: generator => !generator.embedded,
+      condition: generator => !generator.embedded && !generator.embeddableEntity,
       path: CLIENT_TEST_SRC_DIR,
       templates: [
         {
@@ -333,7 +383,7 @@ const vueFiles = {
       ],
     },
     {
-      condition: generator => !generator.readOnly && !generator.embedded,
+      condition: generator => !generator.readOnly && !generator.embedded && !generator.embeddableEntity,
       path: CLIENT_TEST_SRC_DIR,
       templates: [
         {
@@ -343,7 +393,7 @@ const vueFiles = {
       ],
     },
     {
-      condition: generator => generator.protractorTests && !generator.embedded,
+      condition: generator => generator.protractorTests && !generator.embedded && !generator.embeddableEntity,
       path: CLIENT_TEST_SRC_DIR,
       templates: [
         {
@@ -361,7 +411,7 @@ const vueFiles = {
       ],
     },
     {
-      condition: generator => generator.protractorTests && !generator.readOnly && !generator.embedded,
+      condition: generator => generator.protractorTests && !generator.readOnly && !generator.embedded && !generator.embeddableEntity,
       path: CLIENT_TEST_SRC_DIR,
       templates: [
         {
@@ -376,7 +426,7 @@ const vueFiles = {
 const commonFiles = {
   testsCypress: [
     {
-      condition: generator => generator.cypressTests && !generator.embedded,
+      condition: generator => generator.cypressTests && !generator.embedded && !generator.embeddableEntity,
       path: `${CLIENT_TEST_SRC_DIR}cypress/`,
       templates: [
         {
@@ -464,6 +514,17 @@ function writeFiles() {
         files = vueFiles;
         clientMainSrcDir = VUE_DIR;
         templatesDir = CLIENT_VUE_TEMPLATES_DIR;
+      } else {
+        if (!this.embedded && !this.embeddableEntity) {
+          this.addEntityToMenu(
+            this.entityStateName,
+            this.enableTranslation,
+            this.clientFramework,
+            this.entityTranslationKeyMenu,
+            this.entityClassHumanized
+          );
+        }
+        return undefined;
       }
 
       addEnumerationFiles(this, clientMainSrcDir);
@@ -477,7 +538,7 @@ function writeFiles() {
 function customizeFiles() {
   if (this.skipClient) return;
 
-  if (!this.embedded) {
+  if (!this.embedded && !this.embeddableEntity) {
     this.addEntityToModule();
     this.addEntityToMenu(
       this.entityStateName,
