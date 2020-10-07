@@ -904,7 +904,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
      * @param {boolean} embedded - either the actual entity is embedded or not
      * @returns variablesWithTypes: Array
      */
-    generateEntityClientFields(primaryKey, fields, relationships, dto, customDateType = 'dayjs.Dayjs', embedded = false) {
+    generateEntityClientFields(primaryKey, fields, relationships, dto, customDateType = 'dayjs.Dayjs', embedded = false, asConstructor) {
         const variablesWithTypes = [];
         if (!embedded && primaryKey) {
             const tsKeyType = this.getTypescriptKeyType(primaryKey);
@@ -952,7 +952,15 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
             if (nullable) {
                 fieldType += ' | null';
             }
-            variablesWithTypes.push(`${fieldName}?: ${fieldType}`);
+            if (relationship.cascade) {
+                if (asConstructor) {
+                    variablesWithTypes.push(`${fieldName}: ${fieldType} = []`);
+                } else {
+                    variablesWithTypes.push(`${fieldName}: ${fieldType}`);
+                }
+            } else {
+                variablesWithTypes.push(`${fieldName}?: ${fieldType}`);
+            }
         });
         return variablesWithTypes;
     }

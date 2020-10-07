@@ -16,13 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-<div class="row justify-content-center">
-    <div class="col-8">
-        <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
-            <h2 id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" <%= jhiPrefix %>Translate="<%= i18nKeyPrefix %>.home.createOrEditLabel">Create or edit a <%= entityClassHumanized %></h2>
-
-            <div>
-                <<%= jhiPrefixDashed %>-alert-error></<%= jhiPrefixDashed %>-alert-error>
+            <div *ngIf="editForm != null" role="form" novalidate [formGroup]="editForm">
 <%_ for (const field of fields) {
     const fieldName = field.fieldName;
     const fieldNameCapitalized = field.fieldNameCapitalized;
@@ -182,9 +176,9 @@ _%>
 _%>
     <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true && otherEntityName === 'user')) { _%>
 
-                <div class="form-group">
+                <div class="form-group" [hidden]="!editForm.get('<%= relationshipName %>')?.enabled">
                     <label class="form-control-label" <%= jhiPrefix %>Translate="<%= translationKey %>" for="field_<%= relationshipName %>"><%= relationshipNameHumanized %></label>
-                    <select class="form-control" id="field_<%= relationshipName %>" data-cy="<%= relationshipFieldName %>" name="<%= relationshipName %>" formControlName="<%= relationshipFieldName %>">
+                    <select class="form-control" id="field_<%= relationshipName %>" data-cy="<%= relationshipFieldName %>" name="<%= relationshipName %>" formControlName="<%= relationshipFieldName %>" [attr.disabled]="!<%= relationshipFieldName %>Updatable">
             <%_ if (!relationshipRequired) { _%>
                         <option [ngValue]="null"></option>
             <%_ } else { _%>
@@ -195,7 +189,7 @@ _%>
                 </div>
     <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true) { _%>
 
-                <div class="form-group">
+                <div class="form-group" [hidden]="!editForm.get('<%= relationshipName %>')?.enabled">
                     <label class="form-control-label" <%= jhiPrefix %>Translate="<%= translationKey %>" for="field_<%= relationshipName %>"><%= relationshipNameHumanized %></label>
                     <select class="form-control" id="field_<%= relationshipName %>" data-cy="<%= relationshipFieldName %>" name="<%= relationshipName %>" formControlName="<%= relationshipName %>">
             <%_ if (!relationshipRequired) { _%>
@@ -226,17 +220,29 @@ _%>
                 </div>
     <%_ } _%>
 <%_ } _%>
-            </div>
+<%_ for (relationship of embeddableRelationships) {
+        if (relationship.relationshipType === 'one-to-many') { _%>
 
-            <div>
-                <button type="button" id="cancel-save" class="btn btn-secondary" (click)="previousState()">
-                    <fa-icon icon="ban"></fa-icon>&nbsp;<span <%= jhiPrefix %>Translate="entity.action.cancel">Cancel</span>
-                </button>
-
-                <button type="submit" id="save-entity" data-cy="entityCreateSaveButton" [disabled]="editForm.invalid || isSaving" class="btn btn-primary">
-                    <fa-icon icon="save"></fa-icon>&nbsp;<span <%= jhiPrefix %>Translate="entity.action.save">Save</span>
-                </button>
+            <div class="form-group">
+                <label <%= jhiPrefixDashed %>Translate="jhipsterApp.<%= entityInstance %>.<%= relationship.relationshipName %>"><%= relationship.otherEntity.entityClassHumanized %></label>
             </div>
-        </form>
-    </div>
-</div>
+            <div class="row">
+                <div class="col my-3" *ngFor="let <%= relationship.relationshipName %>Form of <%= relationship.relationshipName %>FormControls; index as i">
+                    <div class="card h-100" style="width: 25rem;">
+                        <div class="card-body">
+                            <a (click)="remove<%= relationship.relationshipNameCapitalized %>(i)" style="float: right">&times;</a>
+                            <jhi-<%= relationship.otherEntity.entityFileName %>-update-nested [editForm]='<%= relationship.relationshipName %>Form'></jhi-<%= relationship.otherEntity.entityFileName %>-update-nested>
+                        </div>
+                    </div>
+                </div>
+                <div class="col my-3">
+                    <div class="card h-100" style="width: 25rem;">
+                        <div class="card-body">
+                            <a (click)="add<%= relationship.relationshipNameCapitalized %>()">&oplus;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+<%_    }
+    } _%>
+            </div>
