@@ -155,13 +155,51 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
         hasBuiltInUserField &&
         entityWithConfig.dto === 'no';
 
-    entityWithConfig.primaryKeyType = generator.getPkTypeBasedOnDBAndAssociation(
-        entityWithConfig.authenticationType,
-        entityWithConfig.databaseType,
-        entityWithConfig.relationships
+    entityWithConfig.fields
+        .filter(field => field.options)
+        .forEach(field => {
+            _.defaults(field, {
+                id: field.options.id,
+            });
+        });
+
+    entityWithConfig.pkFields = entityWithConfig.fields.filter(field => field.id);
+    entityWithConfig.pkRelationships = entityWithConfig.relationships.filter(
+        relationship => (relationship.options && relationship.options.id) || relationship.useJPADerivedIdentifier
     );
+    const derivedRelationship = entityWithConfig.relationships.find(relationship => relationship.useJPADerivedIdentifier === true);
+
+    if (!entityWithConfig.embedded) {
+        if (entityWithConfig.pkFields.length === 0) {
+            entityWithConfig.primaryKeyType = generator.getPkTypeBasedOnDBAndAssociation(
+                entityWithConfig.authenticationType,
+                entityWithConfig.databaseType,
+                entityWithConfig.relationships
+            );
+            let fieldValidateRulesMaxlength;
+            if (derivedRelationship && generator.isBuiltInUser(derivedRelationship.otherEntityName)) {
+                fieldValidateRulesMaxlength = 100;
+            }
+            const idField = {
+                fieldName: 'id',
+                fieldType: entityWithConfig.primaryKeyType,
+                fieldValidateRulesMaxlength,
+                id: true,
+            };
+            entityWithConfig.pkFields.push(idField);
+            entityWithConfig.fields.unshift(idField);
+        } else if (entityWithConfig.pkFields.length === 1) {
+            const fieldId = entityWithConfig.pkFields[0];
+            entityWithConfig.primaryKeyType = fieldId.fieldType;
+        } else {
+            throw new Error('Composite primary key not supported yet');
+        }
+    }
 
     entityWithConfig.fields.forEach(field => {
+        if (field.id) {
+            field.readonly = true;
+        }
         const fieldType = field.fieldType;
         if (!['Instant', 'ZonedDateTime', 'Boolean'].includes(fieldType)) {
             entityWithConfig.fieldsIsReactAvField = true;

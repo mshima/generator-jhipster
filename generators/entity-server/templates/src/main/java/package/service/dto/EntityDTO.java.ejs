@@ -66,10 +66,6 @@ import <%= packageName %>.domain.enumeration.<%= element %>;
 @ApiModel(description = "<%- formatAsApiDescription(javadoc) %>")
 <%_ } _%>
 public class <%= asDto(entityClass) %> implements Serializable {
-    <% if (!embedded) { %>
-    private <%= primaryKeyType %> id;
-    <%_ } _%>
-
     <%_ for (idx in fields) {
         if (typeof fields[idx].javadoc !== 'undefined') { _%>
 <%- formatAsFieldJavadoc(fields[idx].javadoc) %>
@@ -133,16 +129,7 @@ public class <%= asDto(entityClass) %> implements Serializable {
     <%_ if (otherEntityFieldCapitalized !== 'Id' && otherEntityFieldCapitalized !== '') { _%>
 
     private String <%= relationshipFieldName %><%= otherEntityFieldCapitalized %>;
-    <%_ } } } _%>
-    <% if (!embedded) { %>
-    public <%= primaryKeyType %> getId() {
-        return id;
-    }
-
-    public void setId(<%= primaryKeyType %> id) {
-        this.id = id;
-    }
-    <%_ }
+    <%_ } } }
         for (idx in fields) {
         const fieldType = fields[idx].fieldType;
         const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
@@ -263,15 +250,12 @@ public class <%= asDto(entityClass) %> implements Serializable {
     @Override
     public String toString() {
         return "<%= asDto(entityClass) %>{" +
-            <%_ if (!embedded) { _%>
-            "id=" + getId() +
-            <%_ }
-                for (idx in fields) {
-                const fieldName = fields[idx].fieldName;
-                const fieldType = fields[idx].fieldType;
+            <%_ fields.forEach((field, idx) => {
+                const fieldName = field.fieldName;
+                const fieldType = field.fieldType;
                 const isNumeric = ['integer', 'long', 'float', 'double', 'bigdecimal'].includes(fieldType.toLowerCase()); _%>
-            ", <%= fieldName %>=<% if (! isNumeric) { %>'<% } %>" + get<%= fields[idx].fieldInJavaBeanMethod %>() <% if (! isNumeric) { %>+ "'" <% } %>+
-            <%_ } _%>
+            "<%= idx === 0 ? '' : ', ' %><%= fieldName %>=<% if (! isNumeric) { %>'<% } %>" + get<%= field.fieldInJavaBeanMethod %>() <% if (! isNumeric) { %>+ "'" <% } %>+
+            <%_ }); _%>
             <%_ for (idx in relationships) {
                 const relationshipFieldName = relationships[idx].relationshipFieldName;
                 const relationshipType = relationships[idx].relationshipType;

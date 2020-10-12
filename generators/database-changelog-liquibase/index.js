@@ -24,7 +24,6 @@ const { addEntityFiles, updateEntityFiles, updateConstraintsFiles, updateMigrate
 const constants = require('../generator-constants');
 
 const { LIQUIBASE_DTD_VERSION } = constants;
-const { prepareEntityForTemplates, loadRequiredConfigIntoEntity } = require('../../utils/entity');
 const { prepareFieldForTemplates } = require('../../utils/field');
 const { prepareRelationshipForTemplates } = require('../../utils/relationship');
 
@@ -46,19 +45,13 @@ module.exports = class extends BaseGenerator {
             },
             prepareEntityForTemplates() {
                 const databaseChangelog = this.databaseChangelog;
-                const entityConfig = this.getEntityConfig(databaseChangelog.entityName).getAll();
-                entityConfig.name = entityConfig.name || databaseChangelog.entityName;
-
-                loadRequiredConfigIntoEntity(entityConfig, this.jhipsterConfig);
-                this.entity = prepareEntityForTemplates(entityConfig, this);
+                this.entity = this.configOptions.sharedEntities[databaseChangelog.entityName];
 
                 if (databaseChangelog.type === 'entity-new') {
-                    this.fields = this.entity.fields
-                        .map(field => prepareFieldForTemplates(this.entity, field, this))
-                        .map(field => this._prepareFieldForTemplates(this.entity, field));
-                    this.relationships = this.entity.relationships
-                        .map(relationship => prepareRelationshipForTemplates(this.entity, relationship, this))
-                        .map(relationship => this._prepareRelationshipForTemplates(this.entity, relationship));
+                    this.fields = this.entity.fields.map(field => this._prepareFieldForTemplates(this.entity, field));
+                    this.relationships = this.entity.relationships.map(relationship =>
+                        this._prepareRelationshipForTemplates(this.entity, relationship)
+                    );
                 } else {
                     this.addedFields = this.databaseChangelog.addedFields
                         .map(field => prepareFieldForTemplates(this.entity, field, this))
@@ -201,11 +194,15 @@ module.exports = class extends BaseGenerator {
     }
 
     _prepareFieldForTemplates(entity, field) {
-        field.columnType = this._columnType(entity, field);
-        field.loadColumnType = this._loadColumnType(entity, field);
-        field.shouldDropDefaultValue = field.fieldType === 'ZonedDateTime' || field.fieldType === 'Instant';
-        field.shouldCreateContentType = field.fieldType === 'byte[]' && field.fieldTypeBlobContent !== 'text';
-        field.nullable = !(field.fieldValidate === true && field.fieldValidateRules.includes('required'));
+        this._.defaults(field, {
+            columnType: this._columnType(entity, field),
+            shouldDropDefaultValue: field.fieldType === 'ZonedDateTime' || field.fieldType === 'Instant',
+            shouldCreateContentType: field.fieldType === 'byte[]' && field.fieldTypeBlobContent !== 'text',
+            nullable: !(field.fieldValidate === true && field.fieldValidateRules.includes('required')),
+        });
+        this._.defaults(field, {
+            loadColumnType: this._loadColumnType(entity, field),
+        });
         return field;
     }
 
@@ -213,7 +210,7 @@ module.exports = class extends BaseGenerator {
         relationship.shouldCreateJoinTable = this._shouldCreateJoinTable(relationship);
         relationship.shouldWriteRelationship = this._shouldWriteRelationship(relationship);
         relationship.shouldWriteJoinTable = this._shouldWriteJoinTable(relationship);
-        relationship.columnDataType = this._getRelationshipColumnType(relationship, entity);
+        relationship.columnDataType = relationship.otherEntity.columnType;
         return relationship;
     }
 
@@ -269,10 +266,6 @@ module.exports = class extends BaseGenerator {
         }
 
         return 'string';
-    }
-
-    _getRelationshipColumnType(relationship, entity) {
-        return relationship.otherEntityName === 'user' && entity.authenticationType === 'oauth2' ? 'varchar(100)' : 'bigint';
     }
 
     _columnType(entity, field) {

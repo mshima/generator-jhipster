@@ -126,6 +126,7 @@ public class <%= serviceClassName %> extends QueryService<<%= asEntity(entityCla
             }
             <%_
             fields.forEach((field) => {
+                if (field.id) return;
                 if (isFilterableType(field.fieldType)) { _%>
             if (criteria.get<%= field.fieldInJavaBeanMethod %>() != null) {
                 specification = specification.and(<%= getSpecificationBuilder(field.fieldType) %>(criteria.get<%= field.fieldInJavaBeanMethod %>(), <%= asEntity(entityClass) %>_.<%= field.fieldName %>));

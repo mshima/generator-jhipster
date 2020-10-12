@@ -157,7 +157,7 @@ function prepareFieldForTemplates(entityWithConfig, field, generator) {
     });
     const fieldType = field.fieldType;
 
-    field.fieldIsEnum = fieldIsEnum(fieldType);
+    field.fieldIsEnum = !field.id && fieldIsEnum(fieldType);
     field.fieldWithContentType = (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && field.fieldTypeBlobContent !== 'text';
 
     if (field.fieldNameAsDatabaseColumn === undefined) {
@@ -175,7 +175,10 @@ function prepareFieldForTemplates(entityWithConfig, field, generator) {
         } else {
             field.fieldNameAsDatabaseColumn = fieldNameUnderscored;
         }
-        field.columnName = field.fieldNameAsDatabaseColumn;
+    }
+    field.columnName = field.fieldNameAsDatabaseColumn;
+    if (field.id) {
+        field.fieldName = 'id';
     }
 
     if (field.fieldInJavaBeanMethod === undefined) {
