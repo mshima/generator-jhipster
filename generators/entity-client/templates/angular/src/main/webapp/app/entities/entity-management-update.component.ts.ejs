@@ -123,7 +123,6 @@ _%>
 <%_ } _%>
 
     editForm = this.fb.group({
-        id: [],
     <%_ for (idx in fields) {
         const fieldName = fields[idx].fieldName;
         const fieldType = fields[idx].fieldType;
@@ -208,7 +207,6 @@ _%>
 
     updateForm(<%= entityInstance %>: I<%= entityAngularName %>): void {
         this.editForm.patchValue({
-            id: <%= entityInstance %>.id,
     <%_ for (idx in fields) {
         const fieldName = fields[idx].fieldName;
         const fieldType = fields[idx].fieldType;
@@ -298,6 +296,7 @@ _%>
             ...new <%= entityAngularName %>(),
             id: this.editForm.get(['id'])!.value,
     <%_ for (idx in fields) {
+        if (fields[idx].id) continue;
         const fieldName = fields[idx].fieldName;
         const fieldType = fields[idx].fieldType;
         const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;

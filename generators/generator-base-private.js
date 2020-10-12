@@ -1006,10 +1006,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
      */
     generateEntityClientFields(pkType, fields, relationships, dto, customDateType = 'Moment', embedded = false) {
         const variablesWithTypes = [];
-        const tsKeyType = this.getTypescriptKeyType(pkType);
-        if (!embedded) {
-            variablesWithTypes.push(`id?: ${tsKeyType}`);
-        }
+        const tsKeyType = pkType !== undefined ? this.getTypescriptKeyType(pkType) : undefined;
         fields.forEach(field => {
             const fieldType = field.fieldType;
             const fieldName = field.fieldName;
@@ -1250,7 +1247,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     rebuildClient() {
         const done = this.async();
         this.log(`\n${chalk.bold.green('Running `webpack:build` to update client app\n')}`);
-        this.spawnCommand(this.clientPackageManager, ['run', 'webpack:build']).on('close', () => {
+        this.spawnCommand(this.jhipsterConfig.clientPackageManager, ['run', 'webpack:build']).on('close', () => {
             done();
         });
     }
