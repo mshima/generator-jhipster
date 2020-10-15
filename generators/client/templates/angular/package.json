@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@angular/core": "10.1.5",
     "@angular/common": "10.1.5",
     "bootstrap": "4.5.3",
     "@fortawesome/angular-fontawesome": "0.7.0",
