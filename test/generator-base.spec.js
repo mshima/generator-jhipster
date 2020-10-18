@@ -62,16 +62,26 @@ describe('Generator Base', () => {
         describe('when called with a value', () => {
             it('returns a join table name', () => {
                 expect(BaseGenerator.getJoinTableName('entityName', 'relationshipName', 'postgresql')).to.equal(
-                    'entity_name_relationship_name'
+                    'rel_entity_name__relationship_name'
                 );
             });
         });
         describe('when called with a long name', () => {
             it('returns a proper join table name', () => {
-                expect(BaseGenerator.getJoinTableName('entityNameLonger', 'relationshipName', 'oracle')).to.have.length(30);
                 expect(BaseGenerator.getJoinTableName('entityNameLonger', 'relationshipName', 'oracle')).to.equal(
+                    'rel_entity_name_l__relationshi'
+                );
+                expect(BaseGenerator.getJoinTableName('entityNameLonger', 'relationshipName', 'oracle')).to.have.length(30);
+            });
+        });
+        describe('when legacyRelationshipTableName is set', () => {
+            it('returns a proper join table name', () => {
+                const TestClass = class extends Base {};
+                TestClass.prototype.jhipsterConfig = { legacyRelationshipTableName: true };
+                expect(TestClass.prototype.getJoinTableName('entityNameLonger', 'relationshipName', 'oracle')).to.equal(
                     'entity_name_lon_relationship_n'
                 );
+                expect(TestClass.prototype.getJoinTableName('entityNameLonger', 'relationshipName', 'oracle')).to.have.length(30);
             });
         });
     });
