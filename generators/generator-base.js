@@ -1599,7 +1599,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
     getJoinTableName(entityName, relationshipName, prodDatabaseType) {
         const legacyRelationshipTableName = this.jhipsterConfig && this.jhipsterConfig.legacyRelationshipTableName;
         const separator = legacyRelationshipTableName ? '_' : '__';
-        const prefix = legacyRelationshipTableName ? '' : 'rel_';
+        const prefix = legacyRelationshipTableName ? '' : 'r_';
         const joinTableName = `${prefix}${this.getTableName(entityName)}${separator}${this.getTableName(relationshipName)}`;
         let limit = 0;
         if (prodDatabaseType === 'oracle' && joinTableName.length > 30 && !this.skipCheckLengthOfIdentifier) {
