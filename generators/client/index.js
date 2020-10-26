@@ -327,7 +327,7 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
                     );
                 } else {
                     scriptsStorage.set('ci:frontend:build', 'npm run webpack:build:$npm_package_config_default_environment && npm test');
-                    scriptsStorage.set('ci:frontend:test', 'npm run ci:frontend:build && npm test');
+                    scriptsStorage.set('ci:frontend:test', 'npm run ci:frontend:build');
                 }
 
                 if (scriptsStorage.get('e2e')) {
