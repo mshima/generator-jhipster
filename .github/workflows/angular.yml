@@ -213,6 +213,8 @@ jobs:
                   key: ${{ runner.os }}-e2e-${{ matrix.app-type }}-${{ hashFiles('generator-jhipster/**/package.json.ejs') }}
                   restore-keys: |
                       ${{ runner.os }}-e2e-${{ matrix.app-type }}-
+            - name: 'Update npm to npm@next-7'
+              run: npm i -g npm@next-7
             - name: 'ENV: display variables'
               run: $JHI_SCRIPTS/01-display-configuration.sh
             - name: 'TOOLS: configure tools installed by the system'
