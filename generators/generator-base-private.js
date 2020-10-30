@@ -36,6 +36,7 @@ const prettierPluginPackagejson = require('prettier-plugin-packagejson');
 const packagejs = require('../package.json');
 const jhipsterUtils = require('./utils');
 const constants = require('./generator-constants');
+const { appDefaultConfig } = require('./generator-defaults');
 const { languageToJavaLanguage } = require('./utils');
 const { prettierTransform, generatedAnnotationTransform } = require('./generator-transforms');
 const JSONToJDLEntityConverter = require('../jdl/converters/json-to-jdl-entity-converter');
@@ -1737,37 +1738,43 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
         if (
             this.configOptions.sharedEntities.User ||
             (this.jhipsterConfig.skipUserManagement && this.jhipsterConfig.authenticationType !== 'oauth2')
-        )
+        ) {
             return;
+        }
+
         const changelogDateDate = this.jhipsterConfig.creationTimestamp ? new Date(this.jhipsterConfig.creationTimestamp) : new Date();
         const changelogDate = formatDateForChangelog(changelogDateDate);
-        const userIdType =
-            this.jhipsterConfig.authenticationType === 'oauth2' || this.jhipsterConfig.databaseType !== 'sql'
-                ? 'String'
-                : this.getPkType(this.jhipsterConfig.databaseType);
         // Create entity definition for built-in entity to make easier to deal with relationships.
         const user = {
             name: 'User',
             entityTableName: `${this.getTableName(this.jhipsterConfig.jhiPrefix)}_user`,
             relationships: [],
-            fields: [
-                {
-                    fieldName: 'id',
-                    fieldType: userIdType,
-                    columnType: userIdType === 'Long' ? 'bigint' : 'varchar(100)',
-                    options: {
-                        fieldNameHumanized: 'ID',
-                        id: true,
-                    },
-                },
-                {
-                    fieldName: 'login',
-                    fieldType: 'String',
-                },
-            ],
             changelogDate,
         };
+
         loadRequiredConfigIntoEntity(user, this.jhipsterConfig);
+        // Fallback to defaults for test cases.
+        loadRequiredConfigIntoEntity(user, appDefaultConfig);
+
+        const userIdType =
+            user.authenticationType === 'oauth2' || user.databaseType !== 'sql' ? 'String' : this.getPkType(user.databaseType);
+
+        user.fields = [
+            {
+                fieldName: 'id',
+                fieldType: userIdType,
+                columnType: userIdType === 'Long' ? 'bigint' : 'varchar(100)',
+                options: {
+                    fieldNameHumanized: 'ID',
+                    id: true,
+                },
+            },
+            {
+                fieldName: 'login',
+                fieldType: 'String',
+            },
+        ];
+
         prepareEntityForTemplates(user, this);
         user.fields.forEach(field => {
             prepareFieldForTemplates(user, field, this);
