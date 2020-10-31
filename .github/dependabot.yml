@@ -26,7 +26,7 @@ updates:
       interval: 'daily'
       # Before cache workflow
       time: '23:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: jhipster-internals'
       - 'theme: dependencies'
@@ -46,7 +46,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '12:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'blueprint :paw_prints:'
@@ -60,7 +60,7 @@ updates:
       interval: 'daily'
       # Angular workflow is quite big. Give at least 2h interval.
       time: '03:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: angular'
@@ -101,7 +101,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '00:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: dependencies'
@@ -113,7 +113,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '07:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: front'
@@ -139,7 +139,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '00:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: dependencies'
@@ -151,7 +151,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '01:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: react'
@@ -191,7 +191,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '02:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: vue'
@@ -221,7 +221,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '00:20'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - 'theme: dependencies'
       - 'theme: docker :whale:'
@@ -232,7 +232,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '00:30'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - 'theme: dependencies'
       - 'theme: docker :whale:'
@@ -244,7 +244,7 @@ updates:
       interval: 'daily'
       # Maven doesn't have many PRs, but it triggers every client workflow. Let 2h of interval.
       time: '05:00'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - 'theme: dependencies'
       - 'theme: java'
@@ -255,7 +255,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '08:00'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - 'theme: dependencies'
       - 'theme: java'
@@ -277,7 +277,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '08:30'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - 'theme: dependencies'
       - 'theme: cache'
@@ -288,7 +288,7 @@ updates:
     schedule:
       interval: 'weekly'
       time: '00:30'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: github_actions'
       - 'theme: CI builds'
@@ -299,7 +299,7 @@ updates:
     schedule:
       interval: 'weekly'
       time: '00:30'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: github_actions'
       - 'theme: CI builds'
@@ -310,7 +310,7 @@ updates:
     schedule:
       interval: 'weekly'
       time: '00:30'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: github_actions'
       - 'theme: CI builds'
@@ -321,7 +321,7 @@ updates:
     schedule:
       interval: 'weekly'
       time: '00:30'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: github_actions'
       - 'theme: CI builds'
@@ -332,7 +332,7 @@ updates:
     schedule:
       interval: 'weekly'
       time: '00:30'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: github_actions'
       - 'theme: CI builds'
@@ -343,7 +343,7 @@ updates:
     schedule:
       interval: 'weekly'
       time: '00:30'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: github_actions'
       - 'theme: CI builds'
@@ -354,7 +354,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '08:30'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - 'theme: dependencies'
       - 'skip-changelog'
