@@ -5,7 +5,7 @@ updates:
     rebase-strategy: 'auto'
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: jhipster-internals'
       - 'theme: dependencies'
@@ -28,7 +28,7 @@ updates:
     rebase-strategy: 'auto'
     schedule:
       interval: 'daily'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: angular'
@@ -44,7 +44,7 @@ updates:
     rebase-strategy: 'auto'
     schedule:
       interval: 'daily'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: dependencies'
@@ -55,7 +55,7 @@ updates:
     rebase-strategy: 'auto'
     schedule:
       interval: 'daily'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: front'
@@ -67,7 +67,7 @@ updates:
     rebase-strategy: 'auto'
     schedule:
       interval: 'daily'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: react'
@@ -83,7 +83,7 @@ updates:
     rebase-strategy: 'auto'
     schedule:
       interval: 'daily'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - 'theme: vue'
@@ -104,7 +104,7 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     labels:
       - 'theme: github_actions'
       - 'theme: CI builds'
