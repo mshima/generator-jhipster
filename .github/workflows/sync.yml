@@ -1,0 +1,20 @@
+name: 'Sync'
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '10 0 * * *'
+
+jobs:
+    stale:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 'SETUP: Checkout generator-jhipster'
+              uses: actions/checkout@v2
+              with:
+                  fetch-depth: 0
+            - name: 'Rebase'
+              run: |
+                  git remote add upstream https://github.com/jhipster/generator-jhipster.git
+                  git fetch upstream/main
+                  git rebase upstream/main
+                  git push -f origin
