@@ -1706,7 +1706,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
         loadRequiredConfigIntoEntity(user, defaultConfig);
 
         const oauth2 = user.authenticationType === 'oauth2';
-        const userIdType = oauth2 || user.databaseType !== 'sql' ? 'String' : this.getPkType(user.databaseType);
+        const userIdType = oauth2 ? 'String' : this.getPkType(user.databaseType);
         const fieldValidateRulesMaxlength = userIdType === 'String' ? 100 : undefined;
 
         user.fields = [
