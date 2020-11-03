@@ -225,11 +225,15 @@ module.exports = class extends BaseGenerator {
     }
 
     _prepareFieldForTemplates(entity, field) {
-        field.columnType = this._columnType(entity, field);
-        field.loadColumnType = this._loadColumnType(entity, field);
-        field.shouldDropDefaultValue = field.fieldType === 'ZonedDateTime' || field.fieldType === 'Instant';
-        field.shouldCreateContentType = field.fieldType === 'byte[]' && field.fieldTypeBlobContent !== 'text';
-        field.nullable = !(field.fieldValidate === true && field.fieldValidateRules.includes('required'));
+        this._.defaults(field, {
+            columnType: this._columnType(entity, field),
+            shouldDropDefaultValue: field.fieldType === 'ZonedDateTime' || field.fieldType === 'Instant',
+            shouldCreateContentType: field.fieldType === 'byte[]' && field.fieldTypeBlobContent !== 'text',
+            nullable: !(field.fieldValidate === true && field.fieldValidateRules.includes('required')),
+        });
+        this._.defaults(field, {
+            loadColumnType: this._loadColumnType(entity, field),
+        });
         return field;
     }
 
@@ -237,7 +241,7 @@ module.exports = class extends BaseGenerator {
         relationship.shouldCreateJoinTable = this._shouldCreateJoinTable(relationship);
         relationship.shouldWriteRelationship = this._shouldWriteRelationship(relationship);
         relationship.shouldWriteJoinTable = this._shouldWriteJoinTable(relationship);
-        relationship.columnDataType = this._getRelationshipColumnType(relationship, entity);
+        relationship.columnDataType = relationship.otherEntity.columnType;
         return relationship;
     }
 
@@ -293,10 +297,6 @@ module.exports = class extends BaseGenerator {
         }
 
         return 'string';
-    }
-
-    _getRelationshipColumnType(relationship, entity) {
-        return relationship.otherEntityName === 'user' && entity.authenticationType === 'oauth2' ? 'varchar(100)' : 'bigint';
     }
 
     _columnType(entity, field) {

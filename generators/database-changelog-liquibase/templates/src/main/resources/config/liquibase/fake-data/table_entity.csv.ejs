@@ -21,7 +21,6 @@ let table = [];
 
 // Generate CSV header
 let header = [];
-header.push('id');
 for (idx in fields) {
     header.push(fields[idx].columnName);
     if (fields[idx].fieldType === 'byte[]' && fields[idx].fieldTypeBlobContent !== 'text') {
@@ -65,9 +64,14 @@ for (idx in fields) {
 // Generate CSV rows
 
 for (lineNb = 1; lineNb <= numberOfRows; lineNb++) {
-    let line = [ lineNb ];
+    let line = [];
     for (idx in fields) {
-        let data = fields[idx].generateFakeData();
+        let data;
+        if (fields[idx].id && fields[idx].fieldType === 'Long') {
+            data = lineNb;
+        } else {
+            data = fields[idx].generateFakeData();
+        }
         // manage required
         if (data === undefined) {
             if (fields[idx].fieldValidateRules.includes('required')) {
