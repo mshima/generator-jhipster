@@ -129,12 +129,17 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
         if (this.options.defaultLocalConfig) {
             this.config.defaults(this.options.defaultLocalConfig);
         }
+
         /*
          * Option 'localConfig' uses set instead of defaults of 'defaultLocalConfig'.
          * 'set' function sets every key from 'localConfig'.
          */
         if (this.options.localConfig) {
             this.config.set(this.options.localConfig);
+        }
+
+        if (!this.jhipsterConfig.creationTimestamp) {
+            this.jhipsterConfig.creationTimestamp = new Date().getTime();
         }
 
         if (this.options.skipGeneratedFlag !== undefined) {
@@ -1147,13 +1152,13 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
         // Miliseconds is ignored for changelogDate.
         now.setMilliseconds(0);
         // Run reproducible timestamp when regenerating the project with with-entities option.
-        if (reproducible && (this.options.withEntities || this.configOptions.creationTimestamp)) {
+        if (reproducible && this.options.withEntities) {
             if (this.configOptions.reproducibleLiquibaseTimestamp) {
                 // Counter already started.
                 now = this.configOptions.reproducibleLiquibaseTimestamp;
             } else {
                 // Create a new counter
-                const creationTimestamp = this.configOptions.creationTimestamp || this.config.get('creationTimestamp');
+                const creationTimestamp = this.jhipsterConfig.creationTimestamp;
                 now = creationTimestamp ? new Date(creationTimestamp) : now;
                 now.setMilliseconds(0);
             }
@@ -2323,12 +2328,6 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
         if (options.skipClient !== undefined) {
             dest.skipClient = options.skipClient;
         }
-        if (dest.creationTimestamp === undefined && options.creationTimestamp) {
-            const creationTimestamp = this.parseCreationTimestamp(options.creationTimestamp);
-            if (creationTimestamp) {
-                dest.creationTimestamp = creationTimestamp;
-            }
-        }
     }
 
     /**
@@ -2412,14 +2411,15 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
             this.jhipsterConfig.testFrameworks = options.testFrameworks;
         }
 
+        /* Creation timestamp is required, load or create */
         if (options.creationTimestamp) {
             const creationTimestamp = this.parseCreationTimestamp(options.creationTimestamp);
             if (creationTimestamp) {
-                this.configOptions.creationTimestamp = creationTimestamp;
-                if (this.jhipsterConfig.creationTimestamp === undefined) {
-                    this.jhipsterConfig.creationTimestamp = creationTimestamp;
-                }
+                this.jhipsterConfig.creationTimestamp = creationTimestamp;
+                this.info(`Using timestamp ${formatDateForChangelog(new Date(this.jhipsterConfig.creationTimestamp))}`);
             }
+            /* Workaround creationTimestamp been parsed at every generator. */
+            delete options.creationTimestamp;
         }
     }
 
@@ -2620,13 +2620,11 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
     setConfigDefaults(defaults = defaultConfig) {
         const jhipsterVersion = packagejs.version;
         const baseName = this.getDefaultAppName();
-        const creationTimestamp = new Date().getTime();
 
         this.config.defaults({
             ...defaults,
             jhipsterVersion,
             baseName,
-            creationTimestamp,
         });
     }
 };
