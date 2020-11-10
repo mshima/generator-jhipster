@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-name: 'Close stale issues'
+name: 'Close waiting for information stale issues'
 on:
   schedule:
     - cron: '0 0 * * *'
@@ -29,16 +29,13 @@ jobs:
       - uses: actions/stale@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+          only-labels: 'area: waiting for information'
           stale-issue-label: 'area: stale'
-          exempt-issue-labels: 'area: planned,$$ bug-bounty $$'
+          exempt-issue-labels: '$$ bug-bounty $$'
           stale-issue-message: |
-            This issue is stale because it has been open 30 days with no activity.
+            This issue is stale because it has been open 7 days with required information provided.
             Our core developers tend to be more verbose on denying. If there is no negative comment, possibly this feature will be accepted.
             We are accepting PRs :smiley:.
             Comment or this will be closed in 7 days
-          stale-pr-label: 'pr: stale'
-          stale-pr-message: |
-            This PR is stale because it has been open 30 days with no activity.
-            Comment or this will be closed in 7 days
-          days-before-stale: 30
-          days-before-close: 7
+          days-before-stale: 7
+          days-before-close: 3
