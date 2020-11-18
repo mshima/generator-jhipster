@@ -2,10 +2,10 @@ name: 'Sync'
 on:
     workflow_dispatch:
     schedule:
-        - cron: '10 0 * * *'
+        - cron: '10 */2 * * *'
 
 jobs:
-    stale:
+    sync:
         runs-on: ubuntu-latest
         steps:
             - name: 'SETUP: Checkout generator-jhipster'
