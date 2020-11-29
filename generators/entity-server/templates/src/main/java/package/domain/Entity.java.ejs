@@ -25,7 +25,7 @@ let hasTextBlob = false;
 let hasRelationship = relationships.length !== 0;
 _%>
 <%_
-for (idx in fields) {
+for (idx in fields.filter(field => !field.transient)) {
     if (prodDatabaseType === 'postgresql' && fields[idx].fieldTypeBlobContent === 'text') {
         hasTextBlob = true;
         break;
@@ -198,7 +198,7 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     private <%= primaryKeyType %> id;
 
 <%_ } _%>
-<%_ for (idx in fields) {
+<%_ for (idx in fields.filter(field => !field.transient)) {
     if (typeof fields[idx].javadoc !== 'undefined') { _%>
 <%- formatAsFieldJavadoc(fields[idx].javadoc) %>
     <%_ }
@@ -478,7 +478,7 @@ relationships.forEach((relationship, idx) => {
     }
     <%_ } _%>
 <%_ } _%>
-<%_ for (idx in fields) {
+<%_ for (idx in fields.filter(field => !field.transient)) {
         const fieldType = fields[idx].fieldType;
         const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
         const fieldName = fields[idx].fieldName;
@@ -719,7 +719,7 @@ relationships.forEach((relationship, idx) => {
         <%_ if (!embedded) { _%>
             "id=" + getId() +
         <%_ } _%>
-            <%_ for (idx in fields) {
+            <%_ for (idx in fields.filter(field => !field.transient)) {
                 const fieldType = fields[idx].fieldType;
                 const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
                 const fieldName = fields[idx].fieldName;

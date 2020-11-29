@@ -55,7 +55,9 @@ module.exports = class extends BaseGenerator {
                 this.entity = { ...this.entity, fields: this.entity.fieldsNoId };
 
                 if (databaseChangelog.type === 'entity-new') {
-                    this.fields = this.entity.fields.map(field => this._prepareFieldForTemplates(this.entity, field));
+                    this.fields = this.entity.fields
+                        .filter(field => !field.transient)
+                        .map(field => this._prepareFieldForTemplates(this.entity, field));
                     this.relationships = this.entity.relationships.map(relationship =>
                         this._prepareRelationshipForTemplates(this.entity, relationship)
                     );

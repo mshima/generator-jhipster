@@ -257,6 +257,14 @@ function prepareFieldForTemplates(entityWithConfig, field, generator) {
         return data;
     };
     field.reference = fieldToReference(entityWithConfig, field);
+
+    if (field.mapstructExpression) {
+        // Remove from Entity.java and liquibase.
+        field.transient = true;
+        // Disable update form.
+        field.readonly = true;
+    }
+
     return field;
 }
 
