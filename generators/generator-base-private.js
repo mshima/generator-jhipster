@@ -1725,6 +1725,17 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     }
 
     /**
+     * Create a mapstruct expression for the instance and references.
+     *
+     * @param {string} instanceName
+     * @param {object[]} references
+     * @return {string}
+     */
+    buildMapstructExpression(instanceName, references) {
+        return references.map(ref => `${instanceName}.${this.buildJavaGet(ref)}`).join(' + \\" \\" + ');
+    }
+
+    /**
      * Create a dotted path of reference.
      *
      * @param {object} reference
