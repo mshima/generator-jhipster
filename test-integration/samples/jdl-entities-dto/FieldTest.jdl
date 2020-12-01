@@ -1,0 +1,7 @@
+@Dto(mapstruct)
+entity FieldTest {
+  name String
+
+  @MapstructExpression("java(fieldTest.getName())")
+  value String
+}

@@ -11,7 +11,16 @@ if [ "$JHI_FOLDER_APP" == "$HOME/app" ]; then
     cp "$JHI_INTEG"/configstore/*.json "$HOME"/.config/configstore/
 fi
 
-if [[ "$JHI_ENTITY" == "jdl" ]]; then
+if [[ "$JHI_JDL_COMMAND" == "true" ]]; then
+    #-------------------------------------------------------------------------------
+    # Generate with JDL
+    #-------------------------------------------------------------------------------
+    mkdir -p "$JHI_FOLDER_APP"
+    cp -f "$JHI_SAMPLES"/"$JHI_APP"/.yo-rc.json "$JHI_FOLDER_APP"/
+    cd "$JHI_FOLDER_APP"
+    jhipster jdl --no-insight --force --with-entities --skip-checks $@
+
+elif [[ "$JHI_ENTITY" == "jdl" ]]; then
     #-------------------------------------------------------------------------------
     # Generate with JDL
     #-------------------------------------------------------------------------------

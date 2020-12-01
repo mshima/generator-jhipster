@@ -94,6 +94,8 @@ jobs:
                       testcontainers: 1
                     - app-type: ngx-mysql-es-noi18n-mapsid
                       entity: sqlfull
+                      jdl-command: true
+                      additional-args: $JHI_SAMPLES/jdl-entities-dto/*.jdl
                       environment: prod
                       war: 0
                       e2e: 1
@@ -148,6 +150,7 @@ jobs:
                       testcontainers: 0
         env:
             JHI_ENTITY: ${{ matrix.entity }}
+            JHI_JDL_COMMAND: ${{ matrix.jdl-command }}
             JHI_APP: ${{ matrix.app-type }}
             JHI_PROFILE: ${{ matrix.environment }}
             JHI_WAR: ${{ matrix.war }}
@@ -225,7 +228,7 @@ jobs:
             - name: 'GENERATION: entities'
               run: $JHI_SCRIPTS/11-generate-entities.sh
             - name: 'GENERATION: project'
-              run: $JHI_SCRIPTS/12-generate-project.sh
+              run: $JHI_SCRIPTS/12-generate-project.sh ${{ matrix.additional-args}}
             - name: 'GENERATION: replace version in generated project'
               run: $JHI_SCRIPTS/13-replace-version-generated-project.sh
             - name: 'GENERATION: jhipster info'
