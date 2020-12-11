@@ -177,6 +177,8 @@ elif [[ "$JHI_ENTITY" == "sql" ]]; then
 
     moveEntity MapsIdUserProfileWithDTO
 
+elif [[ "$JHI_ENTITY" != "" ]]; then
+    JHI_JDL_NAME=$JHI_ENTITY
 fi
 
 #-------------------------------------------------------------------------------
