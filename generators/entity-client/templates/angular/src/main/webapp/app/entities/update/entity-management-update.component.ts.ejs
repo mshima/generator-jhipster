@@ -349,12 +349,12 @@ _%>
         return item.<%= reference.relationship.otherEntity.primaryKey.name %>!;
     }
     <%_ } _%>
+    <%_ for (reference of Object.values(differentRelationships).filter(arr => arr.some(rel => rel.relationshipType === 'many-to-many' && rel.reference.owned && rel.otherEntity.primaryKey)).map(arr => arr[0].reference)) { _%>
 
-    <%_ if (selectableManyToManyEntitiesType) { _%>
-    getSelected(option: <%= selectableManyToManyEntitiesType %>, selectedVals?: <%= selectableManyToManyEntitiesType %>[]): <%= selectableManyToManyEntitiesType %> {
+    getSelected<%= reference.relationship.otherEntity.entityAngularName %>(option: I<%= reference.relationship.otherEntity.entityAngularName %>, selectedVals?: I<%= reference.relationship.otherEntity.entityAngularName %>[]): I<%= reference.relationship.otherEntity.entityAngularName %> {
         if (selectedVals) {
           for (let i = 0; i < selectedVals.length; i++) {
-              if (option.id === selectedVals[i].id) {
+              if (option.<%= reference.relationship.otherEntity.primaryKey.name %> === selectedVals[i].<%= reference.relationship.otherEntity.primaryKey.name %>) {
                   return selectedVals[i];
               }
           }
