@@ -26,6 +26,7 @@
     -->
     <changeSet id="<%= changelogDate %>-2" author="jhipster">
         <% for (idx in relationships) {
+            const relationship = relationships[idx];
             const relationshipType = relationships[idx].relationshipType,
             relationshipName = relationships[idx].relationshipName,
             ownerSide = relationships[idx].ownerSide,
@@ -55,13 +56,13 @@
         <addForeignKeyConstraint baseColumnNames="<%= getColumnName(entity.name) %>_id"
                                  baseTableName="<%= joinTableName %>"
                                  constraintName="<%= constraintName %>"
-                                 referencedColumnNames="id"
+                                 referencedColumnNames="<%= entity.primaryKey.name %>"
                                  referencedTableName="<%= entity.entityTableName %>"/>
 
         <addForeignKeyConstraint baseColumnNames="<%= getColumnName(relationshipName) %>_id"
                                  baseTableName="<%= joinTableName %>"
                                  constraintName="<%= getColumnName(otherEntityConstraintName) %>"
-                                 referencedColumnNames="id"
+                                 referencedColumnNames="<%= relationship.relatedField.columnName %>"
                                  referencedTableName="<%= otherEntityTableName %>"/>
         <%  } %><% } %>
     </changeSet>

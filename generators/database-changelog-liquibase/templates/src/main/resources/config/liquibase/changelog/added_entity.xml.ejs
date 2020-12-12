@@ -56,8 +56,8 @@
             <%_ for (idx in relationships) {
                 let nullable_relation = true,
                 relationshipType = relationships[idx].relationshipType,
-                relationshipName = relationships[idx].relationshipName,
-                relationshipColumnType = relationships[idx].otherEntityPrimaryKeyType === 'String' ? 'varchar(100)' : 'bigint';
+                relationshipName = relationships[idx].relationshipName;
+                let relationshipColumnType = relationships[idx].relatedField.columnType;
                 if (relationships[idx].relationshipValidate === true && relationships[idx].relationshipRequired) {
                     nullable_relation = false;
                 }
@@ -87,7 +87,7 @@
             relationshipName = relationships[idx].relationshipName,
             ownerSide = relationships[idx].ownerSide,
             otherEntityName = relationships[idx].otherEntityName;
-            const relationshipColumnType = relationships[idx].otherEntityPrimaryKeyType === 'String' ? 'varchar(100)' : 'bigint';
+            const relationshipColumnType = relationships[idx].relatedField.columnType;
             if (relationshipType === 'many-to-many' && ownerSide) {
                 const joinTableName = getJoinTableName(entity.entityTableName, relationshipName, prodDatabaseType);
           _%>
