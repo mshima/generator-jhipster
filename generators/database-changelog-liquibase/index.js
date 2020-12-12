@@ -82,10 +82,10 @@ module.exports = class extends BaseGenerator {
                         if (field.derived) {
                             Object.defineProperty(rowData, field.fieldName, {
                                 get: () => {
-                                    if (!field.entity.liquibaseFakeData || rowNumber >= field.entity.liquibaseFakeData.length) {
+                                    if (!field.derivedEntity.liquibaseFakeData || rowNumber >= field.derivedEntity.liquibaseFakeData.length) {
                                         return undefined;
                                     }
-                                    return field.entity.liquibaseFakeData[rowNumber][field.fieldName];
+                                    return field.derivedEntity.liquibaseFakeData[rowNumber][field.fieldName];
                                 },
                             });
                             return;
