@@ -543,7 +543,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
                     return {
                         ...field,
                         derived: true,
-                        entity: this.context.derivedPrimaryKey.otherEntity,
+                        derivedEntity: this.context.derivedPrimaryKey.otherEntity,
                         jpaGeneratedValue: false,
                         liquibaseAutoIncrement: false,
                     };
