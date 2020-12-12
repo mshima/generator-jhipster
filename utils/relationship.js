@@ -116,13 +116,25 @@ function prepareRelationshipForTemplates(entityWithConfig, relationship, generat
         relationship.otherRelationship = otherRelationship;
     }
 
-    if (relationship.otherEntity && relationship.otherEntityField) {
-        relationship.relatedField = otherEntityData.fields.find(field => field.fieldName === relationship.otherEntityField);
-        if (relationship.relatedField) {
-            relationship.otherEntityFieldCapitalized = relationship.relatedField.fieldNameCapitalized;
+    relationship.relatedField = otherEntityData.fields.find(field => field.fieldName === relationship.otherEntityField);
+    if (!relationship.relatedField) {
+        if (otherEntityData.primaryKey && otherEntityData.primaryKey.derived) {
+            Object.defineProperty(relationship, 'relatedField', {
+                get() {
+                    const relatedField = otherEntityData.primaryKey.derivedFields.find(
+                        field => field.fieldName === relationship.otherEntityField
+                    );
+                    return relatedField;
+                },
+            });
         } else {
-            relationship.otherEntityFieldCapitalized = _.upperFirst(relationship.otherEntityField);
+            throw new Error(`Error looking for field ${relationship.otherEntityField} at ${otherEntityData.name}`);
         }
+    }
+    if (relationship.relatedField) {
+        relationship.otherEntityFieldCapitalized = relationship.relatedField.fieldNameCapitalized;
+    } else {
+        relationship.otherEntityFieldCapitalized = _.upperFirst(relationship.otherEntityField);
     }
 
     if (relationship.otherEntityRelationshipName !== undefined) {
