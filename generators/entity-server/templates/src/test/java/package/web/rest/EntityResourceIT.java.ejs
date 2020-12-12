@@ -663,7 +663,11 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
         int databaseSizeBeforeCreate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
 
         // Create the <%= entityClass %> with an existing ID
+        <%_ if (primaryKeyType === 'UUID' && databaseType === 'sql') { _%>
+        <%= entityInstance %>Repository.<%= saveMethod %>(<%= asEntity(entityInstance) %>)<%= callBlock %>;
+        <%_ } else { _%>
         <%= asEntity(entityInstance) %>.set<%= primaryKey.nameCapitalized %>(<% if (primaryKeyType === 'UUID') { %>UUID.randomUUID()<% } else if (primaryKeyType === 'Long') { %>1L<% } else { %>"existing_id"<% } %>);
+        <%_ } _%>
         <%_ if (dto === 'mapstruct') { _%>
         <%= asDto(entityClass) %> <%= asDto(entityInstance) %> = <%= entityInstance %>Mapper.toDto(<%= asEntity(entityInstance) %>);
         <%_ } _%>
@@ -808,7 +812,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
     @Test
     void getAll<%= entityClassPlural %>AsStream() {
         // Initialize the database
-        <%_ if (primaryKeyType === 'UUID') { _%>
+        <%_ if (primaryKeyType === 'UUID' && databaseType !== 'sql') { _%>
         <%= asEntity(entityInstance) %>.set<%= primaryKey.nameCapitalized %>(UUID.randomUUID());
         <%_ } _%>
         <%= entityInstance %>Repository.save(<%= asEntity(entityInstance) %>)<%= callBlock %>;
@@ -846,7 +850,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
-        <%_ if (primaryKeyType === 'UUID') { _%>
+        <%_ if (primaryKeyType === 'UUID' && databaseType !== 'sql') { _%>
         <%= asEntity(entityInstance) %>.set<%= primaryKey.nameCapitalized %>(UUID.randomUUID());
         <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= asEntity(entityInstance) %>)<%= callBlock %>;
@@ -937,7 +941,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
     @Test<%= transactionalAnnotation %>
     void get<%= entityClass %>() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
-        <%_ if (primaryKeyType === 'UUID') { _%>
+        <%_ if (primaryKeyType === 'UUID' && databaseType !== 'sql') { _%>
         <%= asEntity(entityInstance) %>.set<%= primaryKey.nameCapitalized %>(UUID.randomUUID());
         <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= asEntity(entityInstance) %>)<%= callBlock %>;
@@ -1189,7 +1193,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
             .expectStatus().isOk()
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$.[*].id").value(hasItem(<%= idValue %>))<% for (idx in fields) { if (fields[idx].id) continue; %>
+            .jsonPath("$.[*].<%= primaryKey.name %>").value(hasItem(<%= idValue %>))<% for (idx in fields) { if (fields[idx].id) continue; %>
             <%_ if ((fields[idx].fieldType === 'byte[]' || fields[idx].fieldType === 'ByteBuffer') && fields[idx].fieldTypeBlobContent !== 'text') { _%>
             .jsonPath("$.[*].<%= fields[idx].fieldName %>ContentType").value(hasItem(<%= 'DEFAULT_' + fields[idx].fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE))
             <%_ } _%>
@@ -1219,7 +1223,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
         rest<%= entityClass %>MockMvc.perform(get("/api/<%= entityApiUrl %>?sort=id,desc&" + filter))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(<%= asEntity(entityInstance) %><% if (primaryKeyType !== 'Long') { %>.get<%= primaryKey.nameCapitalized %>()<% } else { %>.get<%= primaryKey.nameCapitalized %>().intValue()<% } %>)))<% fields.filter(field => !field.id).forEach((field) => { %>
+            .andExpect(jsonPath("$.[*].<%= primaryKey.name %>").value(hasItem(<%= asEntity(entityInstance) %><% if (primaryKeyType !== 'Long') { %>.get<%= primaryKey.nameCapitalized %>()<% } else { %>.get<%= primaryKey.nameCapitalized %>().intValue()<% } %>)))<% fields.filter(field => !field.id).forEach((field) => { %>
             <%_ if ((field.fieldType === 'byte[]' || field.fieldType === 'ByteBuffer') && field.fieldTypeBlobContent !== 'text') { _%>
             .andExpect(jsonPath("$.[*].<%= field.fieldName %>ContentType").value(hasItem(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE)))
             <%_ } _%>
@@ -1307,7 +1311,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
             .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
     <%_ } _%>
         // Initialize the database
-        <%_ if (primaryKeyType === 'UUID') { _%>
+        <%_ if (primaryKeyType === 'UUID' && databaseType !== 'sql') { _%>
         <%= asEntity(entityInstance) %>.set<%= primaryKey.nameCapitalized %>(UUID.randomUUID());
         <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= asEntity(entityInstance) %>)<%= callBlock %>;
@@ -1461,7 +1465,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
         when(mock<%= entityClass %>SearchRepository.deleteById(any<%= primaryKeyType %>())).thenReturn(Mono.empty());
 <%_ } _%>
         // Initialize the database
-        <%_ if (primaryKeyType === 'UUID') { _%>
+        <%_ if (primaryKeyType === 'UUID' && databaseType !== 'sql') { _%>
         <%= asEntity(entityInstance) %>.set<%= primaryKey.nameCapitalized %>(UUID.randomUUID());
         <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= asEntity(entityInstance) %>)<%= callBlock %>;
@@ -1474,7 +1478,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
         <%_ } else { _%>
-        webTestClient.delete().uri("/api/<%= entityApiUrl %>/{id}", <%= asEntity(entityInstance) %>.get<%= primaryKey.nameCapitalized %>())
+        webTestClient.delete().uri("/api/<%= entityApiUrl %>/{id}", <%= asEntity(entityInstance) %>.get<%= primaryKey.nameCapitalized %>()<% if (primaryKeyType === 'UUID' && databaseType === 'sql') { %>toString()<% } %>)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isNoContent();
@@ -1508,7 +1512,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
     <%_ } _%>
 <%_ } _%>
         // Initialize the database
-        <%_ if (primaryKeyType === 'UUID') { _%>
+        <%_ if (primaryKeyType === 'UUID' && databaseType !== 'sql') { _%>
         <%= asEntity(entityInstance) %>.set<%= primaryKey.nameCapitalized %>(UUID.randomUUID());
         <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= asEntity(entityInstance) %>)<%= callBlock %>;
@@ -1545,7 +1549,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
         <%_ } _%>
         <%_ if (['sql', 'mongodb', 'couchbase', 'cassandra'].includes(databaseType)) {
         _%>
-            <%= !reactive ? '.andExpect(' : '.' %>jsonPath("$.[*].id").value(hasItem(<%= idValue %>))<%= !reactive ? ')' : '' %><%_ } _%><% for (idx in fields) { if (fields[idx].id) continue; %>
+            <%= !reactive ? '.andExpect(' : '.' %>jsonPath("$.[*].<%= primaryKey.name %>").value(hasItem(<%= idValue %>))<%= !reactive ? ')' : '' %><%_ } _%><% for (idx in fields) { if (fields[idx].id) continue; %>
             <%_ if ((fields[idx].fieldType === 'byte[]' || fields[idx].fieldType === 'ByteBuffer') && fields[idx].fieldTypeBlobContent !== 'text') { _%>
             <%= !reactive ? '.andExpect(' : '.' %>jsonPath("$.[*].<%= fields[idx].fieldName %>ContentType").value(hasItem(<%= 'DEFAULT_' + fields[idx].fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE))<%= !reactive ? ')' : '' %>
             <%_ } _%>
