@@ -588,13 +588,15 @@ relationships.forEach((relationship, idx) => {
             <%_ if (databaseType === 'couchbase' && !otherEntityIsEmbedded) { _%>
         this.<%= relationshipFieldName %>Ids.add(<%= otherEntityName %>.get<%= primaryKey.nameCapitalized %>());
             <%_ } _%>
-            <%_ if (relationshipType === 'one-to-many') {
-                if (databaseType !== 'neo4j') { _%>
+            <%_ if (relationship.otherRelationship) {
+                    if (relationshipType === 'one-to-many') {
+                        if (databaseType !== 'neo4j') { _%>
         <%= otherEntityName %>.set<%= otherEntityRelationshipNameCapitalized %>(this);
-                <%_ } _%>
-            <%_ } else if (otherEntityRelationshipNameCapitalizedPlural && asEntity(otherEntityNameCapitalized)!=='User' && relationshipType === 'many-to-many') {
+                    <%_ } _%>
+                <%_ } else if (otherEntityRelationshipNameCapitalizedPlural && asEntity(otherEntityNameCapitalized)!=='User' && relationshipType === 'many-to-many') {
                 // JHipster version < 3.6.0 didn't ask for this relationship name _%>
         <%= otherEntityName %>.get<%= otherEntityRelationshipNameCapitalizedPlural %>().add(this);
+                <%_ } _%>
             <%_ } _%>
         <%_ } _%>
         return this;
@@ -602,17 +604,19 @@ relationships.forEach((relationship, idx) => {
 
     public <%= asEntity(entityClass) %> remove<%= relationshipNameCapitalized %>(<%= asEntity(otherEntityNameCapitalized) %> <%= otherEntityName %>) {
         this.<%= relationshipFieldNamePlural %>.remove(<%= otherEntityName %>);
-        <%_ if (!otherEntityIsEmbedded || embedded && ownerSide === true) { _%>
+        <%_ if (!otherEntityIsEmbedded || (embedded && ownerSide === true)) { _%>
             <%_ if (databaseType === 'couchbase' && !otherEntityIsEmbedded) { _%>
         this.<%= relationshipFieldName %>Ids.remove(<%= otherEntityName %>.get<%= primaryKey.nameCapitalized %>());
             <%_ } _%>
-            <%_ if (relationshipType === 'one-to-many') {
-                if (databaseType !== 'neo4j') { _%>
+            <%_ if (relationship.otherRelationship) {
+                    if (relationshipType === 'one-to-many') {
+                        if (databaseType !== 'neo4j') { _%>
         <%= otherEntityName %>.set<%= otherEntityRelationshipNameCapitalized %>(null);
-                <%_ } _%>
-            <%_ } else if (otherEntityRelationshipNameCapitalizedPlural !== '' && asEntity(otherEntityNameCapitalized)!=='User' && relationshipType === 'many-to-many') {
+                    <%_ } _%>
+                <%_ } else if (otherEntityRelationshipNameCapitalizedPlural !== '' && asEntity(otherEntityNameCapitalized)!=='User' && relationshipType === 'many-to-many') {
                 // JHipster version < 3.6.0 didn't ask for this relationship name _%>
         <%= otherEntityName %>.get<%= otherEntityRelationshipNameCapitalizedPlural %>().remove(this);
+                <%_ } _%>
             <%_ } _%>
         <%_ } _%>
         return this;
