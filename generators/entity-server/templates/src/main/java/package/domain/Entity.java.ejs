@@ -394,8 +394,8 @@ relationships.forEach((relationship, idx) => {
     <%- include('relationship_validators', { relationships, idx }); -%>
         <%_ } _%>
     @JoinTable(name = "<%= joinTableName %>",
-               joinColumns = @JoinColumn(name = "<%= getColumnName(name) %>_id", referencedColumnName = "id"),
-               inverseJoinColumns = @JoinColumn(name = "<%= getColumnName(relationships[idx].relationshipName) %>_id", referencedColumnName = "id"))
+               joinColumns = @JoinColumn(name = "<%= getColumnName(name) %>_id", referencedColumnName = "<%= primaryKey.name %>"),
+               inverseJoinColumns = @JoinColumn(name = "<%= getColumnName(relationships[idx].relationshipName) %>_id", referencedColumnName = "<%= relationships[idx].relatedField.fieldName %>"))
         <%_ }
         } else if ((databaseType === 'mongodb' || databaseType === 'couchbase') && !otherEntityIsEmbedded) {
             if (databaseType === 'mongodb') { _%>
