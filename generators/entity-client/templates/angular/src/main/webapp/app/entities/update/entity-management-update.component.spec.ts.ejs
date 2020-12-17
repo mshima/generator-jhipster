@@ -18,6 +18,7 @@
 -%>
 <%_
 const tsKeyId = generateTestEntityId(primaryKey.type);
+const testEntity = generateTestEntity(primaryKey);
 _%>
 jest.mock('@angular/router');
 
@@ -75,7 +76,7 @@ describe('Component Tests', () => {
             it('Should call update service on save for existing entity',
                 fakeAsync(() => {
                     // GIVEN
-                    const entity = new <%= entityAngularName %>(<%- tsKeyId %>);
+                    const entity = <%- testEntity %>;
                     spyOn(service, 'update').and.returnValue(of(new HttpResponse({ body: entity })));
                     comp.updateForm(entity);
                     // WHEN

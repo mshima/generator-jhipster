@@ -122,7 +122,7 @@ import java.util.Set;
 <%_ } if (databaseType === 'couchbase' && hasRelationship) { _%>
 import java.util.stream.Collectors;
 <%_ } _%>
-<%_ if ((!embedded && primaryKey.type === 'UUID') || fieldsContainUUID === true) { _%>
+<%_ if (fieldsContainUUID === true || (!embedded && primaryKey.type === 'UUID')) { _%>
 import java.util.UUID;
 <%_ }
 Object.keys(uniqueEnums).forEach(function(element) { _%>
@@ -181,24 +181,30 @@ public class <%= asEntity(entityClass) %> implements Serializable {
     private String prefix = PREFIX;
     <%_ } _%>
 
-<%_ if (!embedded) { _%>
+<%_ if (!embedded) {
+        if (primaryKey.composite) { _%>
+    @EmbeddedId
+    private <%= primaryKey.type %> <%= primaryKey.name %>;
+    <%_ } else { _%>
+        <%_ const field = primaryKey.fields[0]; _%>
     @Id
-    <%_ if (databaseType === 'sql' && isUsingMapsId === false && !reactive && !primaryKey.composite) { _%>
-        <%_ if (primaryKey.fields[0].jpaGeneratedValue === 'identity') { _%>
+        <%_ if (databaseType === 'sql') { _%>
+            <%_ if (field.jpaGeneratedValue === 'identity') { _%>
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-        <%_ } else if (primaryKey.fields[0].jpaGeneratedValue === 'sequence') { _%>
+            <%_ } else if (field.jpaGeneratedValue === 'sequence') { _%>
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
-        <%_ } else if (primaryKey.fields[0].jpaGeneratedValue) { _%>
+            <%_ } else if (field.jpaGeneratedValue) { _%>
     @GeneratedValue
-        <%_ } _%>
-    <%_ } else if (databaseType === 'couchbase' && !embedded) { _%>
+            <%_ } _%>
+        <%_ } else if (databaseType === 'couchbase' && !embedded) { _%>
     @GeneratedValue(strategy = UNIQUE, delimiter = ID_DELIMITER)
-    <%_ } else if (databaseType === 'neo4j') { _%>
+        <%_ } else if (databaseType === 'neo4j') { _%>
     @GeneratedValue(UUIDStringGenerator.class)
-    <%_ } _%>
-    private <%= primaryKey.type %> <%= primaryKey.name %>;
+        <%_ } _%>
+    private <%= field.fieldType %> <%= field.fieldName %>;
 
+    <%_ } _%>
 <%_ } _%>
 <%_ for (const field of fields.filter(field => !field.id && !field.transient)) {
     if (typeof field.javadoc !== 'undefined') { _%>
@@ -743,9 +749,21 @@ relationships.forEach((relationship, idx) => {
     // prettier-ignore
     @Override
     public String toString() {
+<%_ if (!embedded && primaryKey.composite) { _%>
+    <%_ for (reference of primaryKey.references) { _%>
+        <%= reference.type %> <%= reference.name %> = null;
+    <%_ } _%>
+        if (<%= buildJavaGet([primaryKey.name]) %> != null) {
+    <%_ for (reference of primaryKey.references) { _%>
+            <%= reference.name %> = <%= buildJavaGet([primaryKey.name, ...reference.path]) _%>;
+    <%_ } _%>
+        }
+<%_ } _%>
         return "<%= asEntity(entityClass) %>{" +
         <%_ if (!embedded) { _%>
-            "<%= primaryKey.name %>=" + get<%= primaryKey.nameCapitalized %>() +
+            <%_ for (reference of primaryKey.references) { _%>
+            "<%= reference.name %>=" + <%= primaryKey.composite ? reference.name : buildJavaGet(reference.path) %> +
+            <%_ } _%>
         <%_ } _%>
             <%_ for (const field of fields.filter(field => !field.id && !field.transient)) {
                 const fieldType = field.fieldType;

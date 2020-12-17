@@ -17,9 +17,9 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = generateTestEntityId(primaryKey.type);
 const entityArrayOptionalChainSymbol = pagination === 'infinite-scroll' ? '' : '?.';
 const order = pagination === 'infinite-scroll' ? 'asc' : 'desc';
+const testEntity = generateTestEntity(primaryKey);
 _%>
 <%_ if (pagination === 'pagination' || searchEngine !== false) { _%>
 jest.mock('@angular/router');
@@ -92,7 +92,7 @@ describe('Component Tests', () => {
             spyOn(service, 'query').and.returnValue(
                 of(
                     new HttpResponse({
-                        body: [new <%= entityAngularName %>(<%- tsKeyId %>)],
+                        body: [<%- testEntity %>],
                         headers,
                     })
                 )
@@ -105,7 +105,7 @@ describe('Component Tests', () => {
 
             // THEN
             expect(service.query).toHaveBeenCalled();
-            expect(comp.<%= entityInstancePlural %><%= entityArrayOptionalChainSymbol %>[0]).toEqual(jasmine.objectContaining({ <%- primaryKey.name %>: <%- tsKeyId %> }));
+            expect(comp.<%= entityInstancePlural %><%= entityArrayOptionalChainSymbol %>[0]).toEqual(jasmine.objectContaining(<%- testEntity %>));
         });
 
     <%_ if (pagination !== 'no') { _%>
@@ -115,7 +115,7 @@ describe('Component Tests', () => {
 
             // THEN
             expect(service.query).toHaveBeenCalled();
-            expect(comp.<%= entityInstancePlural %><%= entityArrayOptionalChainSymbol %>[0]).toEqual(jasmine.objectContaining({ <%- primaryKey.name %>: <%- tsKeyId %> }));
+            expect(comp.<%= entityInstancePlural %><%= entityArrayOptionalChainSymbol %>[0]).toEqual(jasmine.objectContaining(<%- testEntity %>));
         });
 
         it('should calculate the sort attribute for an id', () => {
@@ -149,7 +149,7 @@ describe('Component Tests', () => {
             // THEN
             expect(comp.page).toEqual(0);
             expect(service.query).toHaveBeenCalledTimes(2);
-            expect(comp.<%= entityInstancePlural %>[0]).toEqual(jasmine.objectContaining({ <%- primaryKey.name %>: <%- tsKeyId %> }));
+            expect(comp.<%= entityInstancePlural %>[0]).toEqual(jasmine.objectContaining(<%- testEntity %>));
         });
         <%_ } _%>
     <%_ } _%>

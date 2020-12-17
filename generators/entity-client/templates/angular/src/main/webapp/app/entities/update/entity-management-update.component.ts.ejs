@@ -234,7 +234,7 @@ _%>
     save(): void {
         this.isSaving = true;
         const <%= entityInstance %> = this.createFromForm();
-        if (<%= entityInstance %>.<%= primaryKey.name %> !== undefined) {
+        if (<%= entityInstance %>.<%= primaryKey.trackByField.fieldName %> !== undefined) {
             this.subscribeToSaveResponse(
                 this.<%= entityInstance %>Service.update(<%= entityInstance %>));
         } else {
