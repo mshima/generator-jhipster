@@ -1110,6 +1110,16 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     return index === 0 ? 123 : 456;
   }
 
+  generateTestEntity(primaryKey) {
+    const entries = primaryKey.references.map(reference => {
+      return [reference.name, this.generateTestEntityId(reference.type)];
+    });
+    if (primaryKey.composite) {
+      entries.push([primaryKey.trackByField.fieldName, this.generateTestEntityId(primaryKey.trackByField.fieldType)]);
+    }
+    return JSON.stringify(Object.fromEntries(entries));
+  }
+
   /**
    * Return the primary key data type based on DB
    *
@@ -1195,23 +1205,23 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
    * @param {string} defaultValue - default value
    * @returns {string} java primary key value
    */
-  getPrimaryKeyValue(primaryKeyType, databaseType = this.jhipsterConfig.databasetype, defaultValue = 1) {
-    let value;
-    switch (primaryKeyType) {
-      case 'String':
-        value = `"id${defaultValue}"`;
-        // Special case with a OneToOne relationship with User and @MapsId when using OAuth
-        if (databaseType === 'sql') {
-          value = 'UUID.randomUUID().toString()';
-        }
-        break;
-      case 'UUID':
-        value = 'UUID.randomUUID()';
-        break;
-      default:
-        value = `${defaultValue}L`;
+  getPrimaryKeyValue(primaryKey, databaseType = this.jhipsterConfig.databaseType, defaultValue = 1) {
+    if (typeof primaryKey === 'object' && primaryKey.composite) {
+      return `new ${primaryKey.type}(${primaryKey.references
+        .map(ref => this.getPrimaryKeyValue(ref.type, databaseType, defaultValue))
+        .join(', ')})`;
     }
-    return value;
+    const primaryKeyType = typeof primaryKey === 'string' ? primaryKey : primaryKey.type;
+    if (primaryKeyType === 'String') {
+      if (databaseType === 'sql' && defaultValue === 0) {
+        return 'UUID.randomUUID().toString()';
+      }
+      return `"id${defaultValue}"`;
+    }
+    if (primaryKeyType === 'UUID') {
+      return 'UUID.randomUUID()';
+    }
+    return `${defaultValue}L`;
   }
 
   /**
@@ -1638,7 +1648,8 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
    * @return {string}
    */
   buildJavaGet(reference) {
-    return reference.path.map(partialPath => `get${this.javaBeanCase(partialPath)}()`).join('.');
+    const refPath = Array.isArray(reference) ? reference : reference.path;
+    return refPath.map(partialPath => `get${this.javaBeanCase(partialPath)}()`).join('.');
   }
 
   /**
@@ -1648,7 +1659,8 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
    * @return {string}
    */
   buildReferencePath(reference) {
-    return reference.path.join('.');
+    const refPath = Array.isArray(reference) ? reference : reference.path;
+    return refPath.join('.');
   }
 
   /**
