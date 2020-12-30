@@ -167,6 +167,7 @@ public class <%= entityClass %>Resource {
     const entityToDtoReference = mapper + '::' + 'toDto';
     _%><%- include('../../common/inject_template', {viaService: viaService, constructorName: entityClass + 'Resource', queryService: jpaMetamodelFiltering, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: true}); -%>
 <%_ if (!readOnly) { _%>
+    <%_ if (primaryKey.composite || !primaryKey.fields.some(f => !f.autoGenerate)) { _%>
 
     /**
      * {@code POST  /<%= entityApiUrl %>} : Create a new <%= entityInstance %>.
@@ -178,9 +179,15 @@ public class <%= entityClass %>Resource {
     @PostMapping("/<%= entityApiUrl %>")
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> create<%= entityClass %>(<% if (validation) { %>@Valid <% } %>@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
         log.debug("REST request to save <%= entityClass %> : {}", <%= instanceName %>);
+        <%_ if (primaryKey.composite) { _%>
         if (<%= instanceName %>.<%- buildJavaGet(primaryKey.trackByField.reference) %> != null) {
             throw new BadRequestAlertException("A new <%= entityInstance %> cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        <%_ } else { _%>
+        if (<%= instanceName %>.<%- buildJavaGet(primaryKey.fields[0].reference) %> != null) {
+            throw new BadRequestAlertException("A new <%= entityInstance %> cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        <%_ } _%>
         <%_ if (saveUserSnapshot) { _%>
             <%_ if (manyToManyWithUser) { _%>
         if (<%= instanceName %>.getUsers() != null) {
@@ -214,6 +221,7 @@ public class <%= entityClass %>Resource {
             });
         <%_ } _%>
     }
+    <%_ } _%>
 
     /**
      * {@code PUT  /<%= entityApiUrl %>} : Updates an existing <%= entityInstance %>.
@@ -227,9 +235,15 @@ public class <%= entityClass %>Resource {
     @PutMapping("/<%= entityApiUrl %>")
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> update<%= entityClass %>(<% if (validation) { %>@Valid <% } %>@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
         log.debug("REST request to update <%= entityClass %> : {}", <%= instanceName %>);
+        <%_ if (primaryKey.composite) { _%>
         if (<%= instanceName %>.<%- buildJavaGet(primaryKey.trackByField.reference) %> == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
+        <%_ } else { _%>
+        if (<%= instanceName %>.<%- buildJavaGet(primaryKey.fields[0].reference) %> == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        <%_ } _%>
         <%_ if (saveUserSnapshot) { _%>
             <%_ if (manyToManyWithUser) { _%>
         if (<%= instanceName %>.getUsers() != null) {

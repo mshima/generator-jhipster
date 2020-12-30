@@ -96,6 +96,10 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import javax.persistence.*;
     <%_ } _%>
+    <%_ if (!embedded && primaryKey.derived && primaryKey.composite) { _%>
+import org.springframework.data.domain.Persistable;
+    <%_ } _%>
+
 <%_ } if (validation) { _%>
 import javax.validation.constraints.*;
 <%_ } _%>
@@ -170,7 +174,7 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
 <%_ if (searchEngine === 'elasticsearch') { _%>
 @org.springframework.data.elasticsearch.annotations.Document(indexName = "<%= entityInstance.toLowerCase() %>")
 <%_ } _%>
-public class <%= asEntity(entityClass) %> implements Serializable {
+public class <%= asEntity(entityClass) %> implements <% if (!embedded && primaryKey.derived && primaryKey.composite) { %>Persistable<<%= primaryKey.type %>>, <% } %>Serializable {
 
     private static final long serialVersionUID = 1L;
     <%_ if (databaseType === 'couchbase' && !embedded) { _%>
@@ -325,8 +329,8 @@ relationships.forEach((relationship, idx) => {
     <%_ if (!hasDto) { _%>
     @ApiModelProperty(value = "<%- formatAsApiDescription(relationship.javadoc) %>")
     <%_ } _%>
-<%_ }
-    if (relationshipType === 'one-to-many') {
+<%_ } _%>
+<%_ if (relationshipType === 'one-to-many') {
         if (databaseType === 'sql' && !reactive) {
     _%>
     @OneToMany(mappedBy = "<%= otherEntityRelationshipName %>")
@@ -460,9 +464,19 @@ relationships.forEach((relationship, idx) => {
             <%_ if (relationshipValidate) { _%>
     <%- include('relationship_validators', { relationship }); -%>
             <%_ } _%>
-            <%_ if (isUsingMapsId === true) { %>
-    @MapsId
-    @JoinColumn(name = "<%= relationship.otherEntity.primaryKey.fields[0].columnName %>")
+            <%_ if (relationship.id === true) { %>
+    @MapsId<% if (primaryKey.composite) { %>("<%= primaryKey.name %>")<% } %>
+                <%_ if (!relationship.otherEntity.primaryKey.composite) { %>
+    @JoinColumn(name = "<%= relationship.reference.entity.primaryKey.fields[0].columnName %>")
+                <%_ } else { %>
+    @JoinColumns(
+        value = {
+                    <%_ for (const field of relationship.derivedPrimaryKey.derivedFields) { %>
+            @JoinColumn(name = "<%= field.columnName %>", referencedColumnName = "<%= field.originalField.columnName %>"),
+                    <%_ } %>
+        }
+    )
+                <%_ } %>
             <%_ } else { _%>
     @JoinColumn(unique = true)
             <%_ } _%>
@@ -492,6 +506,12 @@ relationships.forEach((relationship, idx) => {
 
 <%_ }
 }); _%>
+
+<%_ if (!embedded && primaryKey.derived && primaryKey.composite) { _%>
+    @Transient
+    private Boolean newEntity;
+<%_ } _%>
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
 <%_ if (!embedded) { _%>
     public <%= primaryKey.type %> get<%= primaryKey.nameCapitalized %>() {
@@ -723,6 +743,20 @@ relationships.forEach((relationship, idx) => {
         <%_ } _%>
     <%_ } _%>
 <%_ } _%>
+<%_ if (!embedded && primaryKey.derived && primaryKey.composite) { _%>
+    public void setNew(boolean newEntity) {
+        this.newEntity = newEntity;
+    }
+
+    /*
+     * Workaround https://github.com/spring-projects/spring-boot/issues/20181
+     */
+    @Override
+    public boolean isNew() {
+        return this.newEntity != null && this.newEntity;
+    }
+<%_ } _%>
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override

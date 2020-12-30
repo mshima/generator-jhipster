@@ -32,9 +32,9 @@ _%>
    <%_ } %>
 <%_ } else { %>
     <%_ if(primaryKey.composite) { %>
-   <%= primaryKey.type %> pk = <%= instanceName %>Mapper.toEntity(<%= instanceName %>).get<%= primaryKey.nameCapitalized %>();
+   <%= primaryKey.type %> pk = <%= entityInstance %>Mapper.toEntity(<%= instanceName %>).get<%= primaryKey.nameCapitalized %>();
     <%_ } %>
-<%- returnPrefix %> <%= entityInstance %>Repository.findById(<% if(primaryKey.composite) { %>pk<%_ } else { %><%= instanceName %>.get<%= primaryKey.trackByField.fieldNameCapitalized %>()<%_ } %>)
+<%- returnPrefix %> <%= entityInstance %>Repository.findById(<% if(primaryKey.composite) { %>pk<%_ } else { %><%= instanceName %>.get<%= primaryKey.nameCapitalized %>()<%_ } %>)
    .map(existing<%= entityClass %> -> {
 <%_ for (const field of fields.filter(field => !field.id && !field.transient)) { _%>
    if (<%= instanceName %>.get<%= field.fieldNameCapitalized %>() != null) {

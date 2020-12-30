@@ -157,7 +157,6 @@ function prepareFieldForTemplates(entityWithConfig, field, generator) {
     fieldTranslationKey: `${entityWithConfig.i18nKeyPrefix}.${field.fieldName}`,
   });
   const fieldType = field.fieldType;
-
   if (field.mapstructExpression) {
     assert.equal(
       entityWithConfig.dto,

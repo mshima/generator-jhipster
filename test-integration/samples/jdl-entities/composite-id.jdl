@@ -1,0 +1,15 @@
+@ChangelogDate(20200804035360)
+entity EntityStringId {
+  @Id
+  value String
+}
+
+@ChangelogDate(20200804035361)
+entity EntityCompositeId {
+  @Id
+  idString Long
+  @Id
+  idUuid Long
+}
+
+dto JdlFieldTest, EntityCompositeId with mapstruct

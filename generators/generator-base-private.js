@@ -1686,6 +1686,17 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
   }
 
   /**
+   * Create a java getter method of reference.
+   *
+   * @param {object} reference
+   * @param {string} valueDefinition
+   * @return {string}
+   */
+  buildJavaFluentSetter(reference, valueDefinition = `${reference.type} ${reference.name}`) {
+    return `${reference.name}(${valueDefinition})`;
+  }
+
+  /**
    * Create a angular form path getter method of reference.
    *
    * @param {object} reference

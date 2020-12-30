@@ -178,7 +178,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 <%_ } _%>
 import java.util.List;
-<%_ if (['String', 'UUID'].includes(primaryKey.type) || fieldsContainUUID === true || (databaseType === 'sql' && hasOauthUser === true) || otherEntityPrimaryKeyTypes.includes('UUID')) { _%>
+<%_ if (fieldsContainUUID === true || (!embedded && (['String', 'UUID'].includes(primaryKey.type) || primaryKey.fields.some(f => !f.autoGenerate && f.fieldType === 'String'))) || (databaseType === 'sql' && hasOauthUser === true) || otherEntityPrimaryKeyTypes.includes('UUID') || fields.some(f => f.unique && f.fieldType === 'String')) { _%>
 import java.util.UUID;
 <%_ } _%>
 <%_ if (!embedded && primaryKey.fields.some(field => !field.autoGenerate && field.fieldType === 'Long')) { _%>
@@ -478,13 +478,17 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
         <%_ if (fluentMethods) { _%>
         <%= asEntity(entityClass) %> <%= asEntity(entityInstance) %> = new <%= asEntity(entityClass) %>()
             <%_ if (fieldStatus === 'DEFAULT_' && !embedded && primaryKey.composite) { _%>
-            .<%= primaryKey.name %>(new <%= primaryKey.type %>(
+            .<%= primaryKey.name %>(new <%= primaryKey.type %>()
                 <%_ for (const [idx, field] of primaryKey.fields.filter(field => !field.autoGenerate).entries()) { _%>
                     <%_ if (field.fieldType === 'Long') { _%>
-        <%= idx !== 0 ? ',' : '' %>count.incrementAndGet()
+                .<%= buildJavaFluentSetter(field.reference, 'count.incrementAndGet()') %>
+                    <%_ } else if (field.fieldType === 'String') { _%>
+                .<%= buildJavaFluentSetter(field.reference, 'UUID.randomUUID().toString()') %>
+                    <%_ } else if (field.fieldType === 'UUID') { _%>
+                .<%= buildJavaFluentSetter(field.reference, 'UUID.randomUUID()') %>
                     <%_ } _%>
                 <%_ } _%>
-            ))
+            )
             <%_ } _%>
             <%_ for (field of fields.filter(field => !field.transient && (!field.id || (!primaryKey.composite && fieldStatus === 'DEFAULT_' && !field.autoGenerate)))) { _%>
                 <%_ if (field.id) { _%>
@@ -638,10 +642,10 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
             <%_ } _%>
         <%_ } _%>
         <%_ if (!reactive) { _%>
-        rest<%= entityClass %>MockMvc.perform(post("/api/<%= entityApiUrl %>")<% if (testsNeedCsrf) { %>.with(csrf())<% }%>
+        rest<%= entityClass %>MockMvc.perform(<% if (primaryKey.composite || primaryKey.autoGenerate) { %>post<% } else { %>put<% } %>("/api/<%= entityApiUrl %>")<% if (testsNeedCsrf) { %>.with(csrf())<% }%>
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(<%= (dto === 'mapstruct' ? asDto(entityInstance) : asEntity(entityInstance))%>)))
-            .andExpect(status().isCreated());
+            .andExpect(status().<% if (primaryKey.composite || primaryKey.autoGenerate) { %>isCreated<% } else { %>isOk<% } %>());
         <%_ } else { _%>
         webTestClient.post().uri("/api/<%= entityApiUrl %>")
             .contentType(MediaType.APPLICATION_JSON)
@@ -695,10 +699,10 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
 
         // An entity with an existing ID cannot be created, so this API call must fail
         <%_ if (!reactive) { _%>
-        rest<%= entityClass %>MockMvc.perform(post("/api/<%= entityApiUrl %>")<% if (testsNeedCsrf) { %>.with(csrf())<% }%>
+        rest<%= entityClass %>MockMvc.perform(<% if (primaryKey.composite || primaryKey.autoGenerate) { %>post<% } else { %>put<% } %>("/api/<%= entityApiUrl %>")<% if (testsNeedCsrf) { %>.with(csrf())<% }%>
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(<%= (dto === 'mapstruct' ? asDto(entityInstance) : asEntity(entityInstance)) %>)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().<% if (primaryKey.composite || primaryKey.autoGenerate) { %>isBadRequest<% } else { %>isOk<% } %>());
         <%_ } else { _%>
         webTestClient.post().uri("/api/<%= entityApiUrl %>")
             .contentType(MediaType.APPLICATION_JSON)
@@ -855,7 +859,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
         assertThat(<%= entityInstance %>List).isNotNull();
         assertThat(<%= entityInstance %>List).hasSize(1);
         <%= asEntity(entityClass) %> test<%= entityClass %> = <%= entityInstance %>List.get(0);
-        <%_ for (const field of fields.filter(field => !field.id && !field.transient)) {
+        <%_ for (const field of fields.filter(field => !field.transient || field.id)) {
             if (field.fieldType === 'ZonedDateTime') { _%>
         assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
             <%_ } else if ((field.fieldType === 'byte[]' || field.fieldType === 'ByteBuffer') && field.fieldTypeBlobContent !== 'text') { _%>
@@ -895,7 +899,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
         <%_ } _%>
-            <% for (field of fields.filter(field => !field.transient && !field.id)) { %>
+            <% for (const field of fields.filter(field => !field.transient || field.id)) { %>
                 <%_ if ((field.fieldType === 'byte[]' || field.fieldType === 'ByteBuffer') && field.fieldTypeBlobContent !== 'text') { _%>
             <%= !reactive ? '.andExpect(' : '.' %>jsonPath("$.[*].<%= field.fieldName %>ContentType").value(hasItem(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE))<%= !reactive ? ')' : '' %>
                 <%_ } _%>
@@ -988,7 +992,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
         <%_ } _%>
-        <%_ for (field of fields.filter(field => !field.transient && !field.id)) { _%>
+        <%_ for (const field of fields.filter(field => !field.transient || field.id)) { _%>
             <%_ if ((field.fieldType === 'byte[]' || field.fieldType === 'ByteBuffer') && field.fieldTypeBlobContent !== 'text') { _%>
             <%= !reactive ? '.andExpect(' : '.' %>jsonPath("$.<%= field.fieldName %>ContentType").value(<%= reactive ? 'is(' : '' %><%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE))
             <%_ } _%>
@@ -1436,7 +1440,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
         rest<%= entityClass %>MockMvc.perform(put("/api/<%= entityApiUrl %>")<% if (testsNeedCsrf) { %>.with(csrf())<% }%>
             .contentType(MediaType.APPLICATION_JSON)
             .content(TestUtil.convertObjectToJsonBytes(<%= (dto === 'mapstruct' ? asDto(entityInstance) : asEntity(entityInstance)) %>)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().<% if (primaryKey.composite || primaryKey.autoGenerate) { %>isBadRequest<% } else { %>isOk<% } %>());
         <%_ } else { _%>
         webTestClient.put().uri("/api/<%= entityApiUrl %>")
             .contentType(MediaType.APPLICATION_JSON)
@@ -1450,7 +1454,7 @@ class <%= entityClass %>ResourceIT <% if (databaseType === 'cassandra') { %>exte
         SecurityContextHolder.setContext(TestSecurityContextHolder.getContext());
         <%_ } _%>
         List<<%= asEntity(entityClass) %>> <%= entityInstance %>List = <%= entityInstance %>Repository.findAll()<%= callListBlock %>;
-        assertThat(<%= entityInstance %>List).hasSize(databaseSizeBeforeUpdate);
+        assertThat(<%= entityInstance %>List).hasSize(databaseSizeBeforeUpdate<% if (!primaryKey.composite && !primaryKey.autoGenerate) { %> + 1<% } %>);
         <%_ if (searchEngine === 'elasticsearch') { _%>
 
         // Validate the <%= entityClass %> in Elasticsearch

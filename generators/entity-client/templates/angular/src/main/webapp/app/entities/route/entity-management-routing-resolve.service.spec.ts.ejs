@@ -53,7 +53,7 @@ describe('Service Tests', () => {
     });
 
     describe('resolve', () => {
-      it('should return body', () => {
+      it('should return I<%= entityAngularName %> returned by find', () => {
         // GIVEN
         service.find = jest.fn(<%= primaryKey.trackByField.fieldName %> => of(new HttpResponse({ body: { <%= primaryKey.trackByField.fieldName %> } })));
         mockActivatedRouteSnapshot.params = { <%= primaryKey.trackByField.fieldName %>: <%- tsKeyId %> };
