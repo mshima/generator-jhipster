@@ -271,7 +271,7 @@ public class UserService {
         });
         <%= asEntity('User') %> newUser = new <%= asEntity('User') %>();
         <%_ if (databaseType === 'cassandra') { _%>
-        newUser.setId(UUID.randomUUID().toString());
+        newUser.setId(UUID.randomUUID()<% if (user.primaryKey.type === 'String') { %>.toString()<% } %>);
         <%_ } _%>
         String encryptedPassword = passwordEncoder.encode(password);
         newUser.setLogin(userDTO.getLogin().toLowerCase());
@@ -334,7 +334,7 @@ public class UserService {
             .then(Mono.fromCallable(() -> {
                 User newUser = new <%= asEntity('User') %>();
                 <%_ if (databaseType === 'cassandra') { _%>
-                newUser.setId(UUID.randomUUID().toString());
+                newUser.setId(UUID.randomUUID()<% if (user.primaryKey.type === 'String') { %>.toString()<% } %>);
                 <%_ } _%>
                 String encryptedPassword = passwordEncoder.encode(password);
                 newUser.setLogin(userDTO.getLogin().toLowerCase());
@@ -400,7 +400,7 @@ public class UserService {
     <%_ } _%>
     public <% if (reactive) { %>Mono<<%= asEntity('User') %>><% } else { %><%= asEntity('User') %><% } %> createUser(<%= asDto('AdminUser') %> userDTO) {
         <%= asEntity('User') %> user = new <%= asEntity('User') %>();<% if (databaseType === 'cassandra') { %>
-        user.setId(UUID.randomUUID().toString());<% } %>
+        user.setId(UUID.randomUUID()<% if (user.primaryKey.type === 'String') { %>.toString()<% } %>);<% } %>
         user.setLogin(userDTO.getLogin().toLowerCase());
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());

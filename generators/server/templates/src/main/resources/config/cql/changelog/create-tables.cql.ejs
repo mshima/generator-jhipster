@@ -17,8 +17,9 @@
  limitations under the License.
 -%>
 <%_ if (databaseType === 'cassandra' && (!skipUserManagement || authenticationType === 'oauth2')) { _%>
+    <%_ const userIdType = user.primaryKey.type === 'UUID' ? 'uuid' : 'text' _%>
 CREATE TABLE IF NOT EXISTS user (
-    id text,
+    id <%= userIdType %>,
     login text,
     password text,
     firstname text,
@@ -35,25 +36,25 @@ CREATE TABLE IF NOT EXISTS user (
 
 CREATE TABLE IF NOT EXISTS user_by_login (
     login text,
-    id text,
+    id <%= userIdType %>,
     PRIMARY KEY(login, id)
 );
 
 CREATE TABLE IF NOT EXISTS user_by_email (
     email text,
-    id text,
+    id <%= userIdType %>,
     PRIMARY KEY(email, id)
 );
 
 CREATE TABLE IF NOT EXISTS user_by_activation_key (
     activation_key text,
-    id text,
+    id <%= userIdType %>,
     PRIMARY KEY(activation_key, id)
 );
 
 CREATE TABLE IF NOT EXISTS user_by_reset_key (
     reset_key text,
-    id text,
+    id <%= userIdType %>,
     PRIMARY KEY(reset_key, id)
 );
 
@@ -69,13 +70,13 @@ CREATE TABLE IF NOT EXISTS persistent_token (
     user_agent text,
     token_value text,
     login text,
-    user_id text,
+    user_id <%= userIdType %>,
     ip_address text,
     PRIMARY KEY(series)
 );
 
 CREATE TABLE IF NOT EXISTS persistent_token_by_user (
-    user_id text,
+    user_id <%= userIdType %>,
     persistent_token_series text,
     PRIMARY KEY(user_id, persistent_token_series)
 );
