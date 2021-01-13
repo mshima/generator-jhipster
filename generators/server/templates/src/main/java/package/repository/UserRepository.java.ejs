@@ -523,7 +523,7 @@ public class UserRepository {
         truncateByEmailStmt = session.prepare("TRUNCATE user_by_email")<% if (reactive) { %>.block()<% } %>;
     }
 
-    public <%= optionalOrMono %><<%= asEntity('User') %>> findById(String id) {
+    public <%= optionalOrMono %><<%= asEntity('User') %>> findById(<%= user.primaryKey.type %> id) {
         <%_ if (!reactive) { _%>
         return userDao.get(id);
         <%_ } else { _%>
@@ -736,7 +736,7 @@ public class UserRepository {
 interface UserDao {
 
     @Select
-    Optional<User> get(String id);
+    Optional<User> get(<%= user.primaryKey.type %> id);
 
     @Select
     PagingIterable<User> findAll();
