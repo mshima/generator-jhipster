@@ -603,19 +603,19 @@ public class UserRepository {
         if (!StringUtils.isEmpty(user.getActivationKey())) {
             batch.addStatement(insertByActivationKeyStmt.bind()
                 .setString("activation_key", user.getActivationKey())
-                .setString("id", user.getId()));
+                .set<%= user.primaryKey.type %>("id", user.getId()));
         }
         if (!StringUtils.isEmpty(user.getResetKey())) {
             batch.addStatement(insertByResetKeyStmt.bind()
                 .setString("reset_key", user.getResetKey())
-                .setString("id", user.getId()));
+                .set<%= user.primaryKey.type %>("id", user.getId()));
         }
         batch.addStatement(insertByLoginStmt.bind()
             .setString("login", user.getLogin())
-            .setString("id", user.getId()));
+            .set<%= user.primaryKey.type %>("id", user.getId()));
         batch.addStatement(insertByEmailStmt.bind()
             .setString("email", user.getEmail().toLowerCase())
-            .setString("id", user.getId()));
+            .set<%= user.primaryKey.type %>("id", user.getId()));
         session.execute(batch.build());
         return user;
     }
@@ -643,19 +643,19 @@ public class UserRepository {
                 if (!StringUtils.isEmpty(user.getActivationKey())) {
                     batch.addStatement(insertByActivationKeyStmt.bind()
                         .setString("activation_key", user.getActivationKey())
-                        .setString("id", user.getId()));
+                        .set<%= user.primaryKey.type %>("id", user.getId()));
                 }
                 if (!StringUtils.isEmpty(user.getResetKey())) {
                     batch.addStatement(insertByResetKeyStmt.bind()
                         .setString("reset_key", user.getResetKey())
-                        .setString("id", user.getId()));
+                        .set<%= user.primaryKey.type %>("id", user.getId()));
                 }
                 batch.addStatement(insertByLoginStmt.bind()
                     .setString("login", user.getLogin())
-                    .setString("id", user.getId()));
+                    .set<%= user.primaryKey.type %>("id", user.getId()));
                 batch.addStatement(insertByEmailStmt.bind()
                     .setString("email", user.getEmail().toLowerCase())
-                    .setString("id", user.getId()));
+                    .set<%= user.primaryKey.type %>("id", user.getId()));
                 return session.execute(batch.build());
             }))
             .thenReturn(user);
@@ -678,7 +678,7 @@ public class UserRepository {
 
     public <% if (reactive) { %>Mono<Void><% } else { %>void<% } %> delete(<%= asEntity('User') %> user) {
         BatchStatementBuilder batch = BatchStatement.builder(DefaultBatchType.LOGGED);
-        batch.addStatement(<% if (!reactive) { %>userDao.deleteQuery(user)<% } else { %>deleteByIdStmt.bind().setString("id", user.getId())<% } %>);
+        batch.addStatement(<% if (!reactive) { %>userDao.deleteQuery(user)<% } else { %>deleteByIdStmt.bind().set<%= user.primaryKey.type %>("id", user.getId())<% } %>);
         if (!StringUtils.isEmpty(user.getActivationKey())) {
             batch.addStatement(deleteByActivationKeyStmt.bind().setString("activation_key", user.getActivationKey()));
         }
