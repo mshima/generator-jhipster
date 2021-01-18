@@ -30,12 +30,20 @@ const hasValidationRule = fields.some(field =>
 const hasRequiredRelationship = relationships.some(relationship => relationship.relationshipRequired);
 const isValidatorsRequired = hasValidationRule || hasRequiredRelationship;
 _%>
-import { Component, OnInit<% if (fieldsContainImageBlob) { %>, ElementRef<% } %> } from '@angular/core';
+import { Component, <% if (relationships.filter(rel => !rel.cascade).length > 0) { %>OnInit, <% } %>Input, Output, EventEmitter<% if (fieldsContainImageBlob) { %>, ElementRef<% } %> } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { FormBuilder,<%_ if (isValidatorsRequired) { _%> Validators<%_ } _%> } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import {
+    FormGroup,
+    FormControl,
+<%_ if (entityContainsEmbeddableRelationship) { _%>
+    FormArray,
+<%_ } _%>
+<%_ if (isValidatorsRequired) { _%>
+    Validators,
+<%_ } _%>
+} from '@angular/forms';
 import { Observable } from 'rxjs';
-<%_ if (relationships.some(rel => rel.relationshipType === 'one-to-one' && rel.ownerSide === true && rel.otherEntityName !== 'user')) { _%>
+<%_ if (relationships.some(rel => rel.ownerSide === true)) { _%>
 import { map } from 'rxjs/operators';
 <%_ } _%>
 <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
@@ -43,7 +51,7 @@ import * as dayjs from 'dayjs';
 import { DATE_TIME_FORMAT } from 'app/config/input.constants';
 <%_ } _%>
 
-import { I<%= entityAngularName %>, <%= entityAngularName %> } from '../<%= entityFileName %>.model';
+import { I<%= entityAngularName %> } from '../<%= entityFileName %>.model';
 import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
 <%_ if (fieldsContainBlob) { _%>
 import { AlertError } from 'app/shared/alert/alert-error.model';
@@ -68,14 +76,19 @@ import { <%= uniqueRel.otherEntityAngularName %>Service } from 'app/entities/<%=
             }
         }
     }
-});
-_%>
+}); _%>
+<%_ for (relationship of embeddableRelationships) { _%>
+import { create<%= relationship.otherEntity.entityAngularName %>FormGroup } from 'app/entities/<%= relationship.otherEntityPath %>/update/<%= relationship.otherEntityFileName %>-update.component';
+<%_ } _%>
 
 @Component({
     selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update',
     templateUrl: './<%= entityFileName %>-update.component.html'
 })
-export class <%= entityAngularName %>UpdateComponent implements OnInit {
+export class <%= entityAngularName %>UpdateComponent <% if (relationships.filter(rel => !rel.cascade).length > 0) { %>implements OnInit <% } %>{
+    @Output() <%= entityInstance %>Save: EventEmitter<I<%= entityAngularName %>> = new EventEmitter();
+    @Output() <%= entityInstance %>Close: EventEmitter<any> = new EventEmitter();
+
     isSaving = false;
 
 <%_ for (const relationshipsByEntityNeedingOptions of Object.values(differentRelationships).map(relationships => relationships.filter(rel => rel.ownerSide)).filter(relationships => relationships.length > 0)) { _%>
@@ -89,31 +102,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
     <%_ } _%>
 <%_ } _%>
 
-    editForm = this.fb.group({
-    <%_ for (const field of fields) {
-        const fieldName = field.fieldName;
-        const fieldType = field.fieldType;
-        const fieldTypeBlobContent = field.fieldTypeBlobContent;
-    _%>
-        <%= fieldName %>: [<% if (field.fieldValidate === true) { %>null,[<% if (field.fieldValidateRules.includes('required')) { %>Validators.required,<% } %><% if (field.fieldValidateRules.includes('minlength')) { %>Validators.minLength(<%= field.fieldValidateRulesMinlength %>),<% } %><% if (field.fieldValidateRules.includes('maxlength')) { %>Validators.maxLength(<%= field.fieldValidateRulesMaxlength %>),<% } %><% if (field.fieldValidateRules.includes('min')) { %>Validators.min(<%= field.fieldValidateRulesMin %>),<% } %><% if (field.fieldValidateRules.includes('max')) { %>Validators.max(<%= field.fieldValidateRulesMax %>),<% } %><% if (field.fieldValidateRules.includes('pattern')) { %>Validators.pattern('<%= field.fieldValidateRulesPattern.replace(/\\/g, '\\\\') %>'),<% } %>]<% } %>],
-        <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
-        <%= fieldName %>ContentType: [],
-        <%_ } _%>
-    <%_ } _%>
-<%_ for (const relationship of relationships) {
-    const relationshipType = relationship.relationshipType;
-    const ownerSide = relationship.ownerSide;
-    const relationshipName = relationship.relationshipName;
-    const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
-    const relationshipRequired = relationship.relationshipRequired;
-_%>
-    <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
-        <%= relationshipName %>: [<% if (relationshipRequired) { %>null,Validators.required<% } %>],
-    <%_ } else if (relationshipType === 'many-to-many' && relationship.ownerSide === true) { _%>
-        <%= relationshipFieldNamePlural %>: [<% if (relationshipRequired) { %>null,Validators.required<% } %>],
-    <%_ } _%>
-<%_ } _%>
-    });
+    lazyEditForm?: FormGroup;
 
     constructor(
         <%_ if (fieldsContainBlob) { _%>
@@ -136,42 +125,45 @@ _%>
         <%_ if (fieldsContainImageBlob) { _%>
         protected elementRef: ElementRef,
         <%_ } _%>
-        protected activatedRoute: ActivatedRoute,
-        private fb: FormBuilder,
     ) {}
 
-    ngOnInit(): void {
-        this.activatedRoute.data.subscribe(({ <%= entityInstance %> }) => {
-        <%_ if (fieldsContainInstant || fieldsContainZonedDateTime) { _%>
-            if (<%= entityInstance %>.<%= primaryKey.name %> === undefined) {
-                const today = dayjs().startOf('day');
-            <%_ for (const field of fields) {
-                const fieldName = field.fieldName;
-                const fieldType = field.fieldType;
-            _%>
-                <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                <%= entityInstance %>.<%= fieldName %> = today;
-                <%_ } _%>
-            <%_ } _%>
-            }
-        <%_ } _%>
-
-            this.updateForm(<%= entityInstance %>);
-
-<%_ if (relationships.filter(rel => rel.ownerSide).length > 0) { _%>
-            this.loadRelationshipsOptions();
-<%_ } _%>
-        });
+    @Input() set editForm(editForm: FormGroup) {
+        this.lazyEditForm = editForm;
     }
+
+    get editForm(): FormGroup {
+        return this.lazyEditForm!;
+    }
+
+    @Input() set <%= entityInstance %>(<%= entityInstance %>: I<%= entityAngularName %>) {
+        this.lazyEditForm = create<%= entityAngularName %>FormGroup(<%= entityInstance %>);
+    }
+
 <%_ if (relationships.filter(rel => rel.ownerSide).length > 0) { _%>
+
+    ngOnInit(): void {
+        this.loadRelationshipsOptions();
+    }
 
     loadRelationshipsOptions(): void {
     <%_ for (const relationshipsByEntityNeedingOptions of Object.values(differentRelationships).map(relationships => relationships.filter(rel => rel.ownerSide)).filter(relationships => relationships.length > 0)) { _%>
         <%_ const relationshipsWithCustomUniqueOptions = relationshipsByEntityNeedingOptions.filter(rel => rel.relationshipType === 'one-to-one' && rel.otherEntityName !== 'user'); %>
-        <%_ if (relationshipsByEntityNeedingOptions.length > relationshipsWithCustomUniqueOptions.length) { _%>
-            <%_ const otherEntity = relationshipsByEntityNeedingOptions[0].otherEntity _%>
-        this.<%= otherEntity.entityInstance %>Service.query()
-            .subscribe((res: HttpResponse<I<%= otherEntity.entityAngularName %>[]>) => this.<%= otherEntity.entityInstancePlural %>SharedCollection = res.body ?? []);
+        <%_ const relationshipsWithCustomSharedOptions = relationshipsByEntityNeedingOptions.filter(rel => !relationshipsWithCustomUniqueOptions.includes(rel)); %>
+        <%_ const otherEntity = relationshipsByEntityNeedingOptions[0].otherEntity _%>
+        <%_ if (relationshipsWithCustomSharedOptions.length > 0) { _%>
+        this.<%= otherEntity.entityInstance %>Service
+            .query()
+            .pipe(map((res: HttpResponse<I<%= otherEntity.entityAngularName %>[]>) => res.body ?? []))
+            .pipe(map((<%= otherEntity.entityInstancePlural %>: I<%= otherEntity.entityAngularName %>[]) => this.<%= otherEntity.entityInstance %>Service.add<%= otherEntity.entityAngularName %>ToCollectionIfMissing([
+            <%_ for (const relationship of relationshipsWithCustomSharedOptions) { _%>
+                <%_ if (relationship.collection) { _%>
+                ...this.editForm.get('<%= relationship.reference.name %>')!.value,
+                <%_ } else { _%>
+                this.editForm.get('<%= relationship.reference.name %>')!.value,
+                <%_ } _%>
+            <%_ } _%>
+            ], <%= otherEntity.entityInstancePlural %>)))
+            .subscribe((<%= otherEntity.entityInstancePlural %>: I<%= otherEntity.entityAngularName %>[]) => (this.<%= otherEntity.entityInstancePlural %>SharedCollection = <%= otherEntity.entityInstancePlural %>));
         <%_ } _%>
         <%_ for (const relationship of relationshipsWithCustomUniqueOptions) { %>
             <%_ const relationshipIdGetter = `this.editForm.get(['${relationship.relationshipFieldName}', '${relationship.otherEntity.primaryKey.name}'])?.value`; _%>
@@ -180,52 +172,15 @@ _%>
         this.<%= relationship.otherEntityName %>Service
             .query({<%- filter %>})
             .pipe(map((res: HttpResponse<I<%= relationship.otherEntityAngularName %>[]>) => res.body ?? []))
-            .subscribe((resBody: I<%= relationship.otherEntityAngularName %>[]) => {
-                if (!<%- relationshipIdGetter %>) {
-                    this.<%= relationship.relationshipFieldNamePlural %>Collection = resBody;
-                } else {
-                    this.<%= relationship.otherEntityName %>Service
-                        .find(<%- relationshipIdGetter %>)
-                        .pipe(map((subRes: HttpResponse<I<%= relationship.otherEntityAngularName %>>) => subRes.body ? [subRes.body].concat(resBody) : resBody))
-                        .subscribe((concatRes: I<%= relationship.otherEntityAngularName %>[]) => this.<%= relationship.relationshipFieldNamePlural %>Collection = concatRes);
-                    }
-                }
-            );
+            .pipe(map((<%= otherEntity.entityInstancePlural %>: I<%= otherEntity.entityAngularName %>[]) => this.<%= otherEntity.entityInstance %>Service.add<%= otherEntity.entityAngularName %>ToCollectionIfMissing(this.editForm.get('<%= relationship.reference.name %>')!.value, <%= otherEntity.entityInstancePlural %>)))
+            .subscribe((<%= otherEntity.entityInstancePlural %>: I<%= otherEntity.entityAngularName %>[]) => (this.<%= relationship.relationshipFieldNamePlural %>Collection = <%= otherEntity.entityInstancePlural %>));
         <%_ } _%>
     <%_ } _%>
     }
 <%_ } _%>
 
-    updateForm(<%= entityInstance %>: I<%= entityAngularName %>): void {
-        this.editForm.patchValue({
-    <%_ for (const field of fields) {
-        const fieldName = field.fieldName;
-        const fieldType = field.fieldType;
-        const fieldTypeBlobContent = field.fieldTypeBlobContent;
-    _%>
-        <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-            <%= fieldName %>: <%= entityInstance %>.<%= fieldName %> ? <%= entityInstance %>.<%= fieldName %>.format(DATE_TIME_FORMAT) : null,
-        <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
-            <%= fieldName %>: <%= entityInstance %>.<%= fieldName %>,
-            <%= fieldName %>ContentType: <%= entityInstance %>.<%= fieldName %>ContentType,
-        <%_ } else { _%>
-            <%= fieldName %>: <%= entityInstance %>.<%= fieldName %>,
-        <%_ } _%>
-    <%_ } _%>
-    <%_ for (const relationship of relationships) {
-        const relationshipType = relationship.relationshipType;
-        const ownerSide = relationship.ownerSide;
-        const relationshipName = relationship.relationshipName;
-        const relationshipFieldName = relationship.relationshipFieldName;
-        const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
-    _%>
-        <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
-            <%= relationshipName %>: <%= entityInstance %>.<%= relationshipFieldName %>,
-        <%_ } else if (relationshipType === 'many-to-many' && ownerSide === true) { _%>
-            <%= relationshipFieldNamePlural %>: <%= entityInstance %>.<%= relationshipFieldNamePlural %>,
-        <%_ } _%>
-    <%_ } _%>
-        });
+    cancel(reason?: any): void {
+        this.<%= entityInstance %>Close.emit(reason);
     }
 
 <%_ if (fieldsContainBlob) { _%>
@@ -259,14 +214,10 @@ _%>
     <%_ } _%>
 <%_ } _%>
 
-    previousState(): void {
-        window.history.back();
-    }
-
     save(): void {
         this.isSaving = true;
-        const <%= entityInstance %> = this.createFromForm();
-        if (<%= entityInstance %>.<%= primaryKey.name %> !== undefined) {
+        const <%= entityInstance %> = this.editForm.value;
+        if (<%= entityInstance %>.<%= primaryKey.name %> != null) {
             this.subscribeToSaveResponse(
                 this.<%= entityInstance %>Service.update(<%= entityInstance %>));
         } else {
@@ -275,55 +226,30 @@ _%>
         }
     }
 
-    private createFromForm(): I<%= entityAngularName %> {
-        return {
-            ...new <%= entityAngularName %>(),
-    <%_ for (const field of fields) {
-        const fieldName = field.fieldName;
-        const fieldType = field.fieldType;
-        const fieldTypeBlobContent = field.fieldTypeBlobContent;
-    _%>
-        <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-            <%= fieldName %>: this.editForm.get(['<%= fieldName %>'])!.value ? dayjs(this.editForm.get(['<%= fieldName %>'])!.value, DATE_TIME_FORMAT) : undefined,
-        <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
-            <%= fieldName %>ContentType: this.editForm.get(['<%= fieldName %>ContentType'])!.value,
-            <%= fieldName %>: this.editForm.get(['<%= fieldName %>'])!.value,
-        <%_ } else { _%>
-            <%= fieldName %>: this.editForm.get(['<%= fieldName %>'])!.value,
-        <%_ } _%>
-    <%_ } _%>
-    <%_ for (const relationship of relationships) {
-        const relationshipType = relationship.relationshipType;
-        const ownerSide = relationship.ownerSide;
-        const relationshipName = relationship.relationshipName;
-        const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
-    _%>
-        <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
-            <%= relationshipName %>: this.editForm.get(['<%= relationshipName %>'])!.value,
-        <%_ } else if (relationshipType === 'many-to-many' && relationship.ownerSide === true) { _%>
-            <%= relationshipFieldNamePlural %>: this.editForm.get(['<%= relationshipFieldNamePlural %>'])!.value,
-        <%_ } _%>
-    <%_ } _%>
-        };
-    }
-
     protected subscribeToSaveResponse(result: Observable<HttpResponse<I<%= entityAngularName %>>>): void {
-        result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+        result.subscribe(
+            response => this.<%= entityInstance %>Save.emit(response.body!),
+            error => this.<%= entityInstance %>Close.emit(error),
+            () => {
+                this.isSaving = false;
+            }
+        );
+    }
+    <%_ for (relationship of relationships.filter(rel => rel.reference.owned && rel.otherEntity.primaryKey)) { _%>
+        <%_ const otherEntity = relationship.otherEntity; _%>
+
+    get <%= relationship.relationshipName %>Updatable(): boolean {
+        return this.editForm.get('<%= relationship.relationshipName %>')!.value.id == null || this.editForm.get('<%= relationship.relationshipName %>')!.dirty ? true : false;
+    }
+    <%_ } _%>
+    <%_ for (relationshipsForEntity of Object.values(differentRelationships).filter(arr => arr.some(rel => rel.reference.owned && rel.otherEntity.primaryKey))) { _%>
+        <%_ const otherEntity = relationshipsForEntity[0].otherEntity; %>
+
+    track<%= otherEntity.entityAngularName %>By<%= otherEntity.primaryKey.nameCapitalized %>(index: number, item: I<%= otherEntity.entityAngularName %>): <%= getTypescriptKeyType(otherEntity.primaryKey.type) %> {
+        return item.<%= otherEntity.primaryKey.name %><%= isBuiltInUser(otherEntity.entityAngularName) ? '' : '!' %>;
+        return item.<%= otherEntity.primaryKey.name %>!;
     }
 
-    protected onSaveSuccess(): void {
-        this.isSaving = false;
-        this.previousState();
-    }
-
-    protected onSaveError(): void {
-        this.isSaving = false;
-    }
-    <%_ for (reference of Object.values(differentRelationships).filter(arr => arr.some(rel => rel.reference.owned && rel.otherEntity.primaryKey)).map(arr => arr[0].reference)) { _%>
-
-    track<%= reference.relationship.otherEntity.entityAngularName %>By<%= reference.relationship.otherEntity.primaryKey.nameCapitalized %>(index: number, item: I<%= reference.relationship.otherEntity.entityAngularName %>): <%= getTypescriptKeyType(reference.relationship.otherEntity.primaryKey.type) %> {
-        return item.<%= reference.relationship.otherEntity.primaryKey.name %><%= isBuiltInUser(reference.relationship.otherEntity.entityAngularName) ? '' : '!' %>;
-    }
     <%_ } _%>
     <%_ for (reference of Object.values(differentRelationships).filter(arr => arr.some(rel => rel.relationshipType === 'many-to-many' && rel.reference.owned && rel.otherEntity.primaryKey)).map(arr => arr[0].reference)) { _%>
 
@@ -338,4 +264,68 @@ _%>
         return option;
     }
     <%_ } _%>
+
+<%_ for (relationship of embeddableRelationships) {
+        if (relationship.relationshipType === 'one-to-many') { _%>
+    add<%= relationship.relationshipNameCapitalized %>(): void {
+        const formGroup = create<%= relationship.otherEntity.entityAngularName %>FormGroup({});
+        // Disable backReference
+        formGroup.get('<%= relationship.otherRelationship.relationshipName %>')!.disable();
+        this.<%= relationship.relationshipName %>Forms.push(formGroup);
+    }
+
+    remove<%= relationship.relationshipNameCapitalized %>(index: number): void {
+        this.<%= relationship.relationshipName %>Forms.removeAt(index);
+    }
+
+    get <%= relationship.relationshipName %>Forms(): FormArray {
+        return this.editForm.get('<%= relationship.relationshipNamePlural %>') as FormArray;
+    }
+
+    get <%= relationship.relationshipName %>FormControls(): FormGroup[] {
+        return this.<%= relationship.relationshipName %>Forms.controls as FormGroup[];
+    }
+<%_     }
+    } _%>
 }
+
+<% if (embeddableEntity) { %>export <% } %>function create<%= entityAngularName %>FormGroup(<%= entityInstance %>?: I<%= entityAngularName %>): FormGroup {
+    return new FormGroup({
+<%_ for (field of fields) {
+    const fieldName = field.fieldName;
+    const fieldType = field.fieldType;
+    const fieldTypeBlobContent = field.fieldTypeBlobContent;
+_%>
+        <%= fieldName %>: new FormControl(
+        <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+            <%= entityInstance %>?.<%= fieldName %> ? <%= entityInstance %>?.<%= fieldName %>.format(DATE_TIME_FORMAT) : null
+        <%_ } else { _%> 
+            <%= entityInstance %>?.<%= fieldName _%>
+        <%_ } _%> 
+    <%_ if (field.fieldValidateRules && ['required', 'minlength', 'maxlength', 'min', 'max', 'pattern'].some(rule => field.fieldValidateRules.includes(rule))) { _%>
+            ,[
+        <%_ if (field.fieldValidateRules.includes('required')) { %>                Validators.required,<% } _%>
+        <%_ if (field.fieldValidateRules.includes('minlength')) { %>                Validators.minLength(<%= field.fieldValidateRulesMinlength %>),<% } _%>
+        <%_ if (field.fieldValidateRules.includes('maxlength')) { %>                Validators.maxLength(<%= field.fieldValidateRulesMaxlength %>),<% } _%>
+        <%_ if (field.fieldValidateRules.includes('min')) { %>                Validators.min(<%= field.fieldValidateRulesMin %>),<% } _%>
+        <%_ if (field.fieldValidateRules.includes('max')) { %>                Validators.max(<%= field.fieldValidateRulesMax %>),<% } _%>
+        <%_ if (field.fieldValidateRules.includes('pattern')) { %>                Validators.pattern('<%= field.fieldValidateRulesPattern.replace(/\\/g, '\\\\') %>'),<% } %>
+            ]
+    <% } %>
+        ),
+    <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+        <%= fieldName %>ContentType: new FormControl(<%= entityInstance %>?.<%= fieldName %>ContentType),
+    <%_ } _%>
+<%_ } _%>
+<%_ for (relationship of relationships.filter(rel => rel.reference.owned || rel.cascade)) {
+const reference = relationship.reference;
+const relationshipRequired = relationship.relationshipRequired;
+_%>
+    <%_ if (reference.collection && relationship.cascade) { %>
+        <%= reference.name %>: new FormArray((<%= entityInstance %>?.<%= reference.name %> ?? []).map(<%= relationship.relationshipName %> => create<%= relationship.otherEntity.entityAngularName %>FormGroup(<%= relationship.relationshipName %>))),
+    <%_ } else { %>
+        <%= reference.name %>: new FormControl(<%= entityInstance %>?.<%= reference.name %><% if (relationshipRequired) { %>, Validators.required<% } %>),
+    <%_ } %>
+<%_ } _%>
+    });
+};

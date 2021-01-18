@@ -18,6 +18,7 @@
 -%>
 <%
 const variablesWithTypes = generateEntityClientFields(primaryKey, fields, relationships, dto, undefined, embedded);
+const constructorVariablesWithTypes = generateEntityClientFields(primaryKey, fields, relationships, dto, undefined, embedded, true);
 const typeImports = generateEntityClientImports(relationships, dto);
 const defaultVariablesValues = generateEntityClientFieldDefaultValues(fields);
 const enumImports = generateEntityClientEnumImports(fields);
@@ -42,7 +43,7 @@ export interface I<%= entityAngularName %> {
 
 export class <%= entityAngularName %> implements I<%= entityAngularName %> {
     constructor(
-        <%_ variablesWithTypes.forEach(variablesWithType => { _%>
+        <%_ constructorVariablesWithTypes.forEach(variablesWithType => { _%>
         public <%- variablesWithType %>,
         <%_ }); _%>
     ) {
@@ -51,3 +52,9 @@ export class <%= entityAngularName %> implements I<%= entityAngularName %> {
         <%_ } _%>
     }
 }
+<%_ if (primaryKey) { _%>
+
+export function get<%= entityAngularName %>Identifier(<%= entityInstance %>: I<%= entityAngularName %>): <%= primaryKey.tsType %> | undefined {
+  return <%= entityInstance %>.<%= primaryKey.name %>;
+}
+<%_ } _%>

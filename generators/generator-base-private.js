@@ -904,7 +904,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
      * @param {boolean} embedded - either the actual entity is embedded or not
      * @returns variablesWithTypes: Array
      */
-    generateEntityClientFields(primaryKey, fields, relationships, dto, customDateType = 'dayjs.Dayjs', embedded = false) {
+    generateEntityClientFields(primaryKey, fields, relationships, dto, customDateType = 'dayjs.Dayjs', embedded = false, asConstructor) {
         const variablesWithTypes = [];
         if (!embedded && primaryKey) {
             const tsKeyType = this.getTypescriptKeyType(primaryKey);
@@ -952,7 +952,15 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
             if (nullable) {
                 fieldType += ' | null';
             }
-            variablesWithTypes.push(`${fieldName}?: ${fieldType}`);
+            if (relationship.cascade) {
+                if (asConstructor) {
+                    variablesWithTypes.push(`${fieldName}: ${fieldType} = []`);
+                } else {
+                    variablesWithTypes.push(`${fieldName}: ${fieldType}`);
+                }
+            } else {
+                variablesWithTypes.push(`${fieldName}?: ${fieldType}`);
+            }
         });
         return variablesWithTypes;
     }
@@ -1148,6 +1156,23 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
             return index === 0 ? "'9fec3727-3421-4967-b213-ba36557ca194'" : "'1361f429-3817-4123-8ee3-fdf8943310b2'";
         }
         return index === 0 ? 123 : 456;
+    }
+
+    /**
+     * Generate a test entity, according to the type
+     *
+     * @param {any} primaryKey - primary key definition.
+     * @param {number} [index] - index of the primary key sample, pass undefined for a random key.
+     */
+    generateTestEntityPrimaryKey(primaryKey, index) {
+        const entries = primaryKey.references.map(reference => {
+            const value =
+                index === undefined && reference.field
+                    ? reference.field.generateFakeData('ts')
+                    : this.generateTestEntityId(reference.type, index);
+            return `${reference.name}: ${value}`;
+        });
+        return `{${entries.join(',')}}`;
     }
 
     /**
