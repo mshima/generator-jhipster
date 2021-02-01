@@ -1644,18 +1644,18 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
   /**
    * Create a java getter of reference.
    *
-   * @param {object} reference
+   * @param {object|string[]} reference
    * @return {string}
    */
   buildJavaGet(reference) {
-    const refPath = Array.isArray(reference) ? reference : reference.path;
+    const refPath = Array.isArray(reference) ? reference : reference.path ? reference.path : [reference.name];
     return refPath.map(partialPath => `get${this.javaBeanCase(partialPath)}()`).join('.');
   }
 
   /**
    * Create a dotted path of reference.
    *
-   * @param {object} reference
+   * @param {object|string[]} reference
    * @return {string}
    */
   buildReferencePath(reference) {

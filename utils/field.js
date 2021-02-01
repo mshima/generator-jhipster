@@ -350,4 +350,4 @@ function fieldToReference(entity, field, pathPrefix = []) {
   };
 }
 
-module.exports = { prepareFieldForTemplates, fieldIsEnum, getEnumValuesWithCustomValues };
+module.exports = { prepareFieldForTemplates, fieldIsEnum, getEnumValuesWithCustomValues, fieldToReference };

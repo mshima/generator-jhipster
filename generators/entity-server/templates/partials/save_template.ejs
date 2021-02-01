@@ -42,9 +42,9 @@ if (isUsingMapsId === true) {
         if (dto === 'mapstruct') {
             resultEntity = asEntity(entityInstance); _%>
         <%= asEntity(entityClass) %> <%= asEntity(entityInstance) %> = <%= dtoToEntity %>(<%= instanceName %>);
-        <%_ if (isUsingMapsId === true) { _%>
-        <%= mapsIdAssoc.otherEntity.primaryKey.type %> <%= mapsIdAssoc.relationshipName %><%= mapsIdAssoc.otherEntity.primaryKey.nameCapitalized %> = <%= asEntity(entityInstance) %>.get<%= mapsIdAssoc.relationshipNameCapitalized %>().get<%= primaryKey.nameCapitalized %>();
-            <%_ if (primaryKey.composite) { _%>
+        <%_ for (const relationships of primaryKey.relationships) { _%>
+        <%= relationships.otherEntity.primaryKey.type %> <%= relationships.relationshipName %><%= relationships.otherEntity.primaryKey.nameCapitalized %> = <%= asEntity(entityInstance) %>.get<%= relationships.relationshipNameCapitalized %>().get<%= relationships.otherEntity.primaryKey.nameCapitalized %>();
+            <%_ if (!embedded && primaryKey.composite && primaryKey.relationships.length > 0) { _%>
 
         /*
          * Workaround @MapsId bugs:
@@ -52,7 +52,10 @@ if (isUsingMapsId === true) {
          */
         boolean newEntity = <%= asDto(entityInstance) %>.get<%= primaryKey.trackByField.fieldNameCapitalized %>() == null;
         <%= asEntity(entityInstance) %>.setNew(newEntity);
-        <%= asEntity(entityInstance) %>.set<%= primaryKey.nameCapitalized %>(<%= mapsIdAssoc.relationshipName %><%= mapsIdAssoc.otherEntity.primaryKey.nameCapitalized %>);
+                <%_ for (relationship of primaryKey.relationships) { _%>
+                    <%_ const field = relationship.derivedPrimaryKey.derivedFields[0] _%>
+        <%= asEntity(entityInstance) %>.get<%= primaryKey.nameCapitalized %>().set<%= field.fieldNameCapitalized %>(<%= field.fieldName %>);
+                <%_ } _%>
             <%_ } _%>
         <%= mapsIdRepoInstance %>.findById(<%= mapsIdAssoc.relationshipName %><%= mapsIdAssoc.otherEntity.primaryKey.nameCapitalized %>).ifPresent(<%= asEntity(entityInstance) %>::<%_ if (fluentMethods === false) { _%>set<%= mapsIdAssoc.relationshipNameCapitalized %> <%_ } else { _%><%= mapsIdAssoc.relationshipName %><%_ } _%>);
         <%_ } _%>

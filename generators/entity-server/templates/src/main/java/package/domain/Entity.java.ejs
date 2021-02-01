@@ -96,7 +96,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import javax.persistence.*;
     <%_ } _%>
-    <%_ if (!embedded && primaryKey.derived && primaryKey.composite) { _%>
+    <%_ if (!embedded && primaryKey.composite && primaryKey.relationships.length > 0) { _%>
 import org.springframework.data.domain.Persistable;
     <%_ } _%>
 
@@ -174,7 +174,7 @@ import static org.springframework.data.couchbase.core.mapping.id.GenerationStrat
 <%_ if (searchEngine === 'elasticsearch') { _%>
 @org.springframework.data.elasticsearch.annotations.Document(indexName = "<%= entityInstance.toLowerCase() %>")
 <%_ } _%>
-public class <%= asEntity(entityClass) %> implements <% if (!embedded && primaryKey.derived && primaryKey.composite) { %>Persistable<<%= primaryKey.type %>>, <% } %>Serializable {
+public class <%= asEntity(entityClass) %> implements <% if (!embedded && primaryKey.composite && primaryKey.relationships.length > 0) { %>Persistable<<%= primaryKey.type %>>, <% } %>Serializable {
 
     private static final long serialVersionUID = 1L;
     <%_ if (databaseType === 'couchbase' && !embedded) { _%>
@@ -364,6 +364,22 @@ relationships.forEach((relationship, idx) => {
 <%_ } else if (relationshipType === 'many-to-one') {
         if (databaseType === 'sql' && !reactive) {
     _%>
+        <%_ if (relationship.id === true && relationship.derivedPrimaryKey.derivedFields.length === 1) { %>
+    @MapsId<%- primaryKey.composite ? `("${relationship.derivedPrimaryKey.derivedFields[0].fieldName}")` : '' %>
+        <%_ } %>
+        <%_ if (relationship.id === true) { %>
+            <%_ if (!relationship.otherEntity.primaryKey.composite) { %>
+    @JoinColumn(name = "<%= relationship.derivedPrimaryKey.derivedFields[0].columnName %>")
+            <%_ } else { %>
+    @JoinColumns(
+        value = {
+                <%_ for (const field of relationship.derivedPrimaryKey.derivedFields) { %>
+            @JoinColumn(name = "<%= field.columnName %>", referencedColumnName = "<%= field.originalField.columnName %>"),
+                <%_ } _%>
+        }
+    )
+            <%_ } _%>
+        <%_ } _%>
     @ManyToOne<% if (relationshipRequired) { %>(optional = false)<% } %>
         <%_ if (relationshipValidate) { _%>
     <%- include('relationship_validators', { relationship }); -%>
@@ -464,10 +480,12 @@ relationships.forEach((relationship, idx) => {
             <%_ if (relationshipValidate) { _%>
     <%- include('relationship_validators', { relationship }); -%>
             <%_ } _%>
+            <%_ if (relationship.id === true && relationship.derivedPrimaryKey.derivedFields.length === 1) { %>
+    @MapsId<%- primaryKey.composite ? `("${relationship.derivedPrimaryKey.derivedFields[0].fieldName}")` : '' %>
+            <%_ } %>
             <%_ if (relationship.id === true) { %>
-    @MapsId<% if (primaryKey.composite) { %>("<%= primaryKey.name %>")<% } %>
                 <%_ if (!relationship.otherEntity.primaryKey.composite) { %>
-    @JoinColumn(name = "<%= relationship.reference.entity.primaryKey.fields[0].columnName %>")
+    @JoinColumn(name = "<%= relationship.derivedPrimaryKey.derivedFields[0].columnName %>")
                 <%_ } else { %>
     @JoinColumns(
         value = {
@@ -507,7 +525,7 @@ relationships.forEach((relationship, idx) => {
 <%_ }
 }); _%>
 
-<%_ if (!embedded && primaryKey.derived && primaryKey.composite) { _%>
+<%_ if (!embedded && primaryKey.composite && primaryKey.relationships.length > 0) { _%>
     @Transient
     private Boolean newEntity;
 <%_ } _%>
@@ -743,7 +761,7 @@ relationships.forEach((relationship, idx) => {
         <%_ } _%>
     <%_ } _%>
 <%_ } _%>
-<%_ if (!embedded && primaryKey.derived && primaryKey.composite) { _%>
+<%_ if (!embedded && primaryKey.composite && primaryKey.relationships.length > 0) { _%>
     public void setNew(boolean newEntity) {
         this.newEntity = newEntity;
     }
