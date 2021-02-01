@@ -95,7 +95,7 @@ _%>
                 </tr>
             </thead>
             <tbody<% if (pagination === 'infinite-scroll') { %> infinite-scroll (scrolled)="loadPage(page + 1)" [infiniteScrollDisabled]="page >= links['last']" [infiniteScrollDistance]="0"<% } %>>
-                <tr *ngFor="let <%= entityInstance %> of <%= entityInstancePlural %>; trackBy: track<%= primaryKey.nameCapitalized %>" data-cy="entityTable">
+                <tr *ngFor="let <%= entityInstance %> of <%= entityInstancePlural %>; trackBy: <%= entityInstance %>Service.track<%= entityAngularName %>" data-cy="entityTable">
                 <%_
                 const keys = idFields.map(idField => `${entityInstance}.${idField.fieldName}`);
                 const routerLink = idFields.length === 0 ? '' : ` [routerLink]="['/${ entityUrl }', ${ keys.join(', ') }, 'view']"`;

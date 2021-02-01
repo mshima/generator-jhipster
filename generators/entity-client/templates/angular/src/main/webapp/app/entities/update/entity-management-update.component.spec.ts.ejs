@@ -38,10 +38,10 @@ import { I<%= entityAngularName %>, <%= entityAngularName %> } from '../<%= enti
     <%_ const otherEntity = relationshipsByEntityNeedingOptions[0].otherEntity; _%>
     <%_ if (isBuiltInUser(otherEntity.entityAngularName)) { _%>
 
-import { IUser, User } from 'app/entities/user/user.model';
+import { IUser<% if (relationshipsByEntityNeedingOptions.some(rel => rel.relationshipType === 'many-to-many' && rel.reference.owned && rel.otherEntity.primaryKey)) { %>, User<% } %> } from 'app/entities/user/user.model';
 import { UserService } from 'app/entities/user/user.service';
     <%_ } else { _%>
-import { I<%= otherEntity.entityAngularName %>, <%= otherEntity.entityAngularName %> } from 'app/entities/<%= otherEntity.entityFolderName %>/<%= otherEntity.entityFileName %>.model';
+import { I<%= otherEntity.entityAngularName %><% if (relationshipsByEntityNeedingOptions.some(rel => rel.relationshipType === 'many-to-many' && rel.reference.owned && rel.otherEntity.primaryKey)) { %>, <%= otherEntity.entityAngularName %><% } %> } from 'app/entities/<%= otherEntity.entityFolderName %>/<%= otherEntity.entityFileName %>.model';
 import { <%= otherEntity.entityAngularName %>Service } from 'app/entities/<%= otherEntity.entityFolderName %>/service/<%= otherEntity.entityFileName %>.service';
     <%_ } _%>
 <%_ } _%>
@@ -201,26 +201,6 @@ describe('Component Tests', () => {
                 })
             );
         });
-<%_ const trackedEntities = Object.values(differentRelationships).filter(arr => arr.some(rel => rel.reference.owned && rel.otherEntity.primaryKey)).map(arr => arr[0].reference);
-    if (trackedEntities.length > 0) {
-_%>
-
-        describe('Tracking relationships identifiers', () => {
-    <%_ for (reference of trackedEntities) {
-            const otherEntity = reference.relationship.otherEntity;
-            const otherEntityTsKeyId = generateTestEntityId(otherEntity.primaryKey.type);
-    _%>
-            describe('track<%= otherEntity.entityAngularName %>By<%= otherEntity.primaryKey.nameCapitalized %>', () => {
-                it('Should return tracked <%= otherEntity.entityAngularName %> primary key', () => {
-                    const entity = new <%= otherEntity.entityAngularName %>(<%- otherEntityTsKeyId %><% if (isBuiltInUser(otherEntity.entityAngularName)) { %>, 'user'<% } %>);
-                    const trackResult = comp.track<%= otherEntity.entityAngularName %>By<%= otherEntity.primaryKey.nameCapitalized %>(0, entity);
-                    expect(trackResult).toEqual(entity.<%= otherEntity.primaryKey.name %>);
-                });
-            });
-
-    <%_ } _%>
-        });
-<%_ } _%>
 <%_ const selectableEntities = Object.values(differentRelationships).filter(arr => arr.some(rel => rel.relationshipType === 'many-to-many' && rel.reference.owned && rel.otherEntity.primaryKey)).map(arr => arr[0].reference);
     if (selectableEntities.length > 0) {
 _%>

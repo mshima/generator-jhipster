@@ -39,7 +39,7 @@ import { createRequestOption } from 'app/core/request/request-util';
 <%_ if (searchEngine !== false) { _%>
 import { <%= searchType %> } from 'app/core/request/request.model';
 <%_ } _%>
-import { I<%= entityAngularName %>, get<%= entityAngularName %>Identifier } from '../<%= entityFileName %>.model';
+import { I<%= entityAngularName %> } from '../<%= entityFileName %>.model';
 
 export type EntityResponseType = HttpResponse<I<%= entityAngularName %>>;
 export type EntityArrayResponseType = HttpResponse<I<%= entityAngularName %>[]>;
@@ -103,9 +103,9 @@ export class <%= entityAngularName %>Service {
     add<%= entityAngularName %>ToCollectionIfMissing(<%= entityInstance %>Collection: I<%= entityAngularName %>[], ...<%= entityInstancePlural %>ToCheck: (I<%= entityAngularName %> | null | undefined)[]): I<%= entityAngularName %>[] {
         const <%= entityInstancePlural %>: I<%= entityAngularName %>[] = <%= entityInstancePlural %>ToCheck.filter(isPresent);
         if (<%= entityInstancePlural %>.length > 0) {
-            const <%= entityInstance %>CollectionIdentifiers = <%= entityInstance %>Collection.map(<%= entityInstance %>Item => get<%= entityAngularName %>Identifier(<%= entityInstance %>Item)!);
+            const <%= entityInstance %>CollectionIdentifiers = <%= entityInstance %>Collection.map(<%= entityInstance %>Item => this.get<%= entityAngularName %>Identifier(<%= entityInstance %>Item)!);
             const <%= entityInstancePlural %>ToAdd = <%= entityInstancePlural %>.filter(<%= entityInstance %>Item => {
-                const <%= entityInstance %>Identifier = get<%= entityAngularName %>Identifier(<%= entityInstance %>Item);
+                const <%= entityInstance %>Identifier = this.get<%= entityAngularName %>Identifier(<%= entityInstance %>Item);
                 if (<%= entityInstance %>Identifier == null || <%= entityInstance %>CollectionIdentifiers.includes(<%= entityInstance %>Identifier)) {
                     return false;
                 }
@@ -115,6 +115,14 @@ export class <%= entityAngularName %>Service {
             return [...<%= entityInstancePlural %>ToAdd, ...<%= entityInstance %>Collection];
         }
         return <%= entityInstance %>Collection;
+    }
+
+    get<%= entityAngularName %>Identifier(<%= entityInstance %>: I<%= entityAngularName %>): <%= primaryKey.tsType %> | undefined {
+        return <%= entityInstance %>.<%= primaryKey.name %>;
+    }
+
+    track<%= entityAngularName %>(index: number, <%= entityInstance %>: I<%= entityAngularName %>): <%= primaryKey.tsType %> | undefined {
+        return this.get<%= entityAngularName %>Identifier(<%= entityInstance %>);
     }
 
 <%_ if (fieldsContainDate) { _%>
