@@ -1,15 +1,23 @@
-@ChangelogDate(20200804035360)
-entity EntityStringId {
-  @Id
-  value String
-}
-
 @ChangelogDate(20200804035361)
-entity EntityCompositeId {
+entity CompositeId {
   @Id
   idString Long
   @Id
   idUuid Long
 }
 
-dto JdlFieldTest, EntityCompositeId with mapstruct
+@ChangelogDate(20200804035360)
+entity CompositeIdOtherSide {
+}
+
+@ChangelogDate(20200804035363)
+entity CompositeIdRelation {
+  @Id
+  idString Long
+}
+
+relationship ManyToOne {
+  CompositeIdRelation to @Id CompositeIdOtherSide
+}
+
+dto CompositeId, CompositeIdOtherSide, CompositeIdRelation with mapstruct
