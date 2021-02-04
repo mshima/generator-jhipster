@@ -187,9 +187,7 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
       idCount++;
     }
 
-    if (idCount > 1) {
-      throw new Error('Composite id not implemented');
-    } else if (entityWithConfig.idRelationships.length > 0) {
+    if (entityWithConfig.idRelationships.length === 1) {
       const relationshipId = entityWithConfig.idRelationships[0];
       if (relationshipId.relationshipType === 'one-to-one' && idCount === 1) {
         relationshipId.id = true;
