@@ -101,7 +101,7 @@ const serverFiles = {
       ],
     },
     {
-      condition: generator => generator.primaryKey && generator.primaryKey.composite,
+      condition: generator => generator.primaryKey && generator.primaryKey.composite && !generator.primaryKey.derived,
       path: SERVER_MAIN_SRC_DIR,
       templates: [
         {
