@@ -35,9 +35,9 @@ import { isPresent } from 'app/core/util';
 import { DATE_FORMAT } from 'app/config/input.constants';
 <%_ } _%>
 import { ConfigService } from 'app/core/config';
-import { createRequestOption } from 'app/core/request/request-util';
+import { createRequestOption } from 'app/core/request';
 <%_ if (searchEngine !== false) { _%>
-import { <%= searchType %> } from 'app/core/request/request.model';
+import { <%= searchType %> } from 'app/core/request';
 <%_ } _%>
 import { I<%= entityAngularName %>, get<%= entityAngularName %>Identifier } from '../<%= entityFileName %>.model';
 

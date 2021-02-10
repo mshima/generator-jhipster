@@ -319,6 +319,7 @@ const files = {
         'core/interceptor/index.ts',
 
         // request
+        'core/request/index.ts',
         'core/request/request-util.ts',
         'core/request/request.model.ts',
       ],
