@@ -27,8 +27,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 <%_ if (prodDatabaseType !== 'cassandra') { _%>
 import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
 <%_ } _%>
-import { AccountService } from 'app/core/auth/account.service';
-import { Account } from 'app/core/auth/account.model';
+import { Account, AccountService } from 'app/core/auth';
 import { UserManagementService } from '../service/user-management.service';
 import { User } from '../user-management.model';
 import { UserManagementDeleteDialogComponent } from '../delete/user-management-delete-dialog.component';

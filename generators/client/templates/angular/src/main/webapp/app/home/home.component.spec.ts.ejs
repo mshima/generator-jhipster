@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-jest.mock('app/core/auth/account.service');
+jest.mock('app/core/auth');
 <%_ if (authenticationType !== 'oauth2') { _%>
 jest.mock('@angular/router');
 <% } else { %>
@@ -29,7 +29,7 @@ import { Router } from '@angular/router';
 <%_ } _%>
 import { of } from 'rxjs';
 
-import { AccountService } from 'app/core/auth/account.service';
+import { AccountService } from 'app/core/auth';
 <%_ if (authenticationType === 'oauth2') { _%>
 import { LoginService } from 'app/login/login.service';
 <%_ } _%>

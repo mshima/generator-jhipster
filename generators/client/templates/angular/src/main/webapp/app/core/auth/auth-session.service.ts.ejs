@@ -23,7 +23,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 <%_ } _%>
 
-import { ConfigService } from '../config';
+import { ConfigService } from 'app/core/config';
 <%_ if (authenticationType === 'oauth2') { _%>
 import { Logout } from 'app/login/logout.model';
 <%_ } else { _%>

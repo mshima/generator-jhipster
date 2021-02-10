@@ -16,16 +16,15 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Route } from '@angular/router';
-
-import { UserRouteAccessService } from 'app/core/auth';
-import { PasswordComponent } from './password.component';
-
-export const passwordRoute: Route = {
-  path: 'password',
-  component: PasswordComponent,
-  data: {
-    pageTitle: 'global.menu.account.password',
-  },
-  canActivate: [UserRouteAccessService],
-};
+export * from './account.model';
+export * from './account.service';
+<%_ if (authenticationType === 'jwt') { _%>
+export * from './auth-jwt.service';
+<%_ } else if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
+export * from './auth-session.service';
+<%_ } _%>
+<%_ if (authenticationType === 'session' && websocket === 'spring-websocket') { _%>
+export * from './csrf.service';
+<%_ } _%>
+export * from './state-storage.service';
+export * from './user-route-access.service';

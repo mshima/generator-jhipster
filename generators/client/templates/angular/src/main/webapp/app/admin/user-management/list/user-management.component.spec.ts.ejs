@@ -20,7 +20,7 @@
 const tsKeyId = generateTestEntityId(user.primaryKey.type);
 _%>
 jest.mock('@angular/router');
-jest.mock('app/core/auth/account.service');
+jest.mock('app/core/auth');
 
 import { ComponentFixture, TestBed, waitForAsync, inject, fakeAsync, tick } from '@angular/core/testing';
 import { HttpHeaders, HttpResponse } from '@angular/common/http';
@@ -30,7 +30,7 @@ import { of } from 'rxjs';
 
 import { UserManagementService } from '../service/user-management.service';
 import { User } from '../user-management.model';
-import { AccountService } from 'app/core/auth/account.service';
+import { AccountService } from 'app/core/auth';
 
 import { UserManagementComponent } from './user-management.component';
 

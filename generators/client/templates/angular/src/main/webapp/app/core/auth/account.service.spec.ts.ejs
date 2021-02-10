@@ -20,7 +20,7 @@ jest.mock('@angular/router');
 <%_ if (enableTranslation) { _%>
 jest.mock('@ngx-translate/core');
 <%_ } _%>
-jest.mock('app/core/auth/state-storage.service');
+jest.mock('./state-storage.service');
 <%_ if (websocket === 'spring-websocket') { _%>
 jest.mock('app/core/tracker/tracker.service');
 <%_ } _%>
@@ -33,14 +33,18 @@ import { TranslateService } from '@ngx-translate/core';
 <%_ } _%>
 import { NgxWebstorageModule } from 'ngx-webstorage';
 
-import { Account } from 'app/core/auth/account.model';
-import { Authority } from 'app/config/authority.constants';
-import { StateStorageService } from 'app/core/auth/state-storage.service';
+import { Account } from './account.model';
+import { StateStorageService } from './state-storage.service';
 <%_ if (websocket === 'spring-websocket') { _%>
 import { TrackerService } from 'app/core/tracker/tracker.service';
 <%_ } _%>
 
 import { AccountService } from './account.service';
+
+enum Authority {
+  ADMIN = 'ROLE_ADMIN',
+  USER = 'ROLE_USER',
+}
 
 function accountWithAuthorities(authorities: string[]): Account {
   return {
