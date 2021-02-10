@@ -251,6 +251,7 @@ const files = {
         'admin/tracker/tracker.module.ts',
         'admin/tracker/tracker.component.ts',
         { file: 'admin/tracker/tracker.component.html', method: 'processHtml' },
+        'core/tracker/index.ts',
         'core/tracker/tracker-activity.model.ts',
         'core/tracker/tracker.service.ts',
       ],

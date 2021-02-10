@@ -22,7 +22,7 @@ jest.mock('@ngx-translate/core');
 <%_ } _%>
 jest.mock('./state-storage.service');
 <%_ if (websocket === 'spring-websocket') { _%>
-jest.mock('app/core/tracker/tracker.service');
+jest.mock('app/core/tracker');
 <%_ } _%>
 
 import { Router } from '@angular/router';
@@ -36,7 +36,7 @@ import { NgxWebstorageModule } from 'ngx-webstorage';
 import { Account } from './account.model';
 import { StateStorageService } from './state-storage.service';
 <%_ if (websocket === 'spring-websocket') { _%>
-import { TrackerService } from 'app/core/tracker/tracker.service';
+import { TrackerService } from 'app/core/tracker';
 <%_ } _%>
 
 import { AccountService } from './account.service';
