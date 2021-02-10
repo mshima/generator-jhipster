@@ -348,13 +348,17 @@ const files = {
         'shared/index.ts',
         'shared/shared.module.ts',
         'shared/shared-libs.module.ts',
+        'shared/date/index.ts',
         'shared/date/duration.pipe.ts',
         'shared/date/format-medium-date.pipe.ts',
         'shared/date/format-medium-datetime.pipe.ts',
+        'shared/sort/index.ts',
         'shared/sort/sort.directive.ts',
         'shared/sort/sort-by.directive.ts',
+        'shared/pagination/index.ts',
         'shared/pagination/item-count.component.ts',
         // alert service code
+        'shared/alert/index.ts',
         'shared/alert/alert.component.ts',
         'shared/alert/alert.component.html',
         'shared/alert/alert-error.component.ts',
@@ -365,7 +369,7 @@ const files = {
     {
       condition: generator => generator.enableTranslation,
       path: ANGULAR_DIR,
-      templates: ['shared/language/find-language-from-key.pipe.ts', 'shared/language/translate.directive.ts'],
+      templates: ['shared/language/index.ts', 'shared/language/find-language-from-key.pipe.ts', 'shared/language/translate.directive.ts'],
     },
   ],
   angularAuthService: [
@@ -374,6 +378,7 @@ const files = {
       templates: [
         'core/auth/index.ts',
         'core/auth/state-storage.service.ts',
+        'shared/auth/index.ts',
         'shared/auth/has-any-authority.directive.ts',
         'core/auth/account.model.ts',
         'core/auth/account.service.ts',
