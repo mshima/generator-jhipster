@@ -342,6 +342,7 @@ const files = {
     {
       path: ANGULAR_DIR,
       templates: [
+        'shared/index.ts',
         'shared/shared.module.ts',
         'shared/shared-libs.module.ts',
         'shared/date/duration.pipe.ts',
