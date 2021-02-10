@@ -294,6 +294,7 @@ const files = {
         'core/config/config.service.ts',
         'core/config/config.service.spec.ts',
 
+        'core/util/index.ts',
         'core/util/data-util.service.ts',
         'core/util/parse-links.service.ts',
         'core/util/alert.service.ts',

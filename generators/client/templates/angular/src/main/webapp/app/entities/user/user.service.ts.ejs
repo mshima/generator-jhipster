@@ -22,7 +22,7 @@ import { Observable<% if (authenticationType !== 'oauth2' && databaseType !== 's
 
 import { ConfigService } from 'app/core/config';
 import { createRequestOption } from 'app/core/request/request-util';
-import { isPresent } from 'app/core/util/operators';
+import { isPresent } from 'app/core/util';
 import { Pagination } from 'app/core/request/request.model';
 import { IUser, getUserIdentifier } from './user.model';
 <%_ if (authenticationType !== 'oauth2' && databaseType !== 'sql' && databaseType !== 'mongodb' && databaseType !== 'couchbase') { _%>

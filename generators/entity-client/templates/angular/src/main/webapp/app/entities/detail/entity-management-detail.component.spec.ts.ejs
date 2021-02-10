@@ -25,7 +25,7 @@ import { of } from 'rxjs';
 
 import { <%= entityAngularName %> } from '../<%= entityFileName %>.model';
 <%_ if (fieldsContainBlob) { _%>
-import { DataUtils } from 'app/core/util/data-util.service';
+import { DataUtils } from 'app/core/util';
 <%_ } _%>
 
 import { <%= entityAngularName %>DetailComponent } from './<%= entityFileName %>-detail.component';
