@@ -85,8 +85,6 @@ const files = {
         { file: 'layouts/error/error.route.ts', method: 'processJs' },
         'layouts/error/error.component.ts',
         { file: 'layouts/error/error.component.html', method: 'processHtml' },
-        // login
-        'login/login.service.ts',
       ],
     },
     {
@@ -107,13 +105,13 @@ const files = {
         { file: 'login/login.route.ts', method: 'processJs' },
         'login/login.component.ts',
         { file: 'login/login.component.html', method: 'processHtml' },
-        'login/login.model.ts',
+        'core/auth/login.model.ts',
       ],
     },
     {
       path: ANGULAR_DIR,
       condition: generator => generator.authenticationType === 'oauth2',
-      templates: ['login/logout.model.ts'],
+      templates: ['core/auth/logout.model.ts'],
     },
   ],
   angularAccountModule: [
@@ -383,6 +381,8 @@ const files = {
         'core/auth/account.model.ts',
         'core/auth/account.service.ts',
         'core/auth/user-route-access.service.ts',
+        // login
+        'core/auth/login.service.ts',
       ],
     },
     {

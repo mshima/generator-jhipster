@@ -20,9 +20,14 @@ export * from './account.model';
 export * from './account.service';
 <%_ if (authenticationType === 'jwt') { _%>
 export * from './auth-jwt.service';
+export * from './login.model';
 <%_ } else if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
 export * from './auth-session.service';
 <%_ } _%>
+<%_ if (authenticationType === 'oauth2') { _%>
+export * from './logout.model';
+<%_ } _%>
+export * from './login.service';
 <%_ if (authenticationType === 'session' && websocket === 'spring-websocket') { _%>
 export * from './csrf.service';
 <%_ } _%>

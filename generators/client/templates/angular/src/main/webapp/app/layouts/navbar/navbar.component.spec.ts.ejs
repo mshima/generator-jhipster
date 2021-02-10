@@ -22,7 +22,6 @@ jest.mock('ngx-webstorage');
 jest.mock('@ngx-translate/core');
 <%_ } _%>
 jest.mock('app/core/auth');
-jest.mock('app/login/login.service');
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -34,9 +33,8 @@ import { TranslateService } from '@ngx-translate/core';
 <%_ } _%>
 
 import { ProfileInfo } from 'app/layouts/profiles/profile-info.model';
-import { AccountService } from 'app/core/auth';
+import { AccountService, LoginService } from 'app/core/auth';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
-import { LoginService } from 'app/login/login.service';
 
 import { NavbarComponent } from './navbar.component';
 

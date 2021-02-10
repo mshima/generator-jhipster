@@ -22,10 +22,13 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 <%_ } _%>
 
+import {
+  Account,
+  AccountService,
 <%_ if (authenticationType === 'oauth2') { _%>
-import { LoginService } from 'app/login/login.service';
+  LoginService,
 <%_ } _%>
-import { Account, AccountService } from 'app/core/auth';
+} from 'app/core/auth';
 
 @Component({
   selector: '<%= jhiPrefixDashed %>-home',

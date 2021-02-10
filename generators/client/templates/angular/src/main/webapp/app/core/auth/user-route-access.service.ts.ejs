@@ -23,7 +23,7 @@ import { map } from 'rxjs/operators';
 
 import { AccountService } from './account.service';
 <%_ if (authenticationType === 'oauth2') { _%>
-import { LoginService } from 'app/login/login.service';
+import { LoginService } from './login.service';
 <%_ } _%>
 import { StateStorageService } from './state-storage.service';
 
