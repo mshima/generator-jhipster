@@ -51,8 +51,7 @@ import { I<%= entityAngularName %>, <%= entityAngularName %> } from '../<%= enti
 import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
 <%_ if (fieldsContainBlob) { _%>
 import { AlertError } from 'app/shared/alert/alert-error.model';
-import { EventManager, EventWithContent } from 'app/core/util/event-manager.service';
-import { DataUtils, FileLoadError } from 'app/core/util/data-util.service';
+import { DataUtils, EventManager, EventWithContent, FileLoadError } from 'app/core/util';
 <%_ } _%>
 <%_
 Object.keys(differentRelationships).forEach(key => {

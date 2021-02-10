@@ -19,18 +19,13 @@
 import { NgModule } from '@angular/core';
 import { SharedLibsModule } from './shared-libs.module';
 <%_ if (enableTranslation) { _%>
-import { FindLanguageFromKeyPipe } from './language/find-language-from-key.pipe';
-import { TranslateDirective } from './language/translate.directive';
+import { FindLanguageFromKeyPipe, TranslateDirective } from 'app/shared/language';
 <%_ } _%>
-import { AlertComponent } from './alert/alert.component';
-import { AlertErrorComponent } from './alert/alert-error.component';
-import { HasAnyAuthorityDirective } from './auth/has-any-authority.directive';
-import { DurationPipe } from './date/duration.pipe';
-import { FormatMediumDatetimePipe } from './date/format-medium-datetime.pipe';
-import { FormatMediumDatePipe } from './date/format-medium-date.pipe';
-import { SortByDirective } from './sort/sort-by.directive';
-import { SortDirective } from './sort/sort.directive';
-import { ItemCountComponent } from './pagination/item-count.component';
+import { AlertComponent, AlertErrorComponent } from 'app/shared/alert';
+import { HasAnyAuthorityDirective } from 'app/shared/auth';
+import { DurationPipe, FormatMediumDatetimePipe, FormatMediumDatePipe } from 'app/shared/date';
+import { SortByDirective, SortDirective } from 'app/shared/sort';
+import { ItemCountComponent } from 'app/shared/pagination';
 
 @NgModule({
   imports: [SharedLibsModule],

@@ -24,16 +24,16 @@ import { Location } from '@angular/common';
 import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
-import { Account } from 'app/core/auth/account.model';
-import { AccountService } from 'app/core/auth/account.service';
+import { Account } from './account.model';
+import { AccountService } from './account.service';
 <%_ } _%>
-<%_ if (authenticationType === 'jwt') { _%>
-import { AuthServerProvider } from 'app/core/auth/auth-jwt.service';
-<%_ } else if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
-import { AuthServerProvider } from 'app/core/auth/auth-session.service';
+<%_ if (authenticationType === 'oauth2' || authenticationType === 'session') { _%>
+import { AuthServerProvider } from './auth-session.service';
+<%_ } else if (authenticationType === 'jwt') { _%>
+import { AuthServerProvider } from './auth-jwt.service';
 <%_ } _%>
 <%_ if (authenticationType === 'session') { _%>
-import { ConfigService } from 'app/core/config/config.service';
+import { ConfigService } from 'app/core/config';
 <%_ } _%>
 <%_ if (authenticationType === 'oauth2') { _%>
 import { Logout } from './logout.model';

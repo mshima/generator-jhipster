@@ -23,11 +23,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 <%_ } _%>
 
-import { ConfigService } from '../config/config.service';
+import { ConfigService } from 'app/core/config';
 <%_ if (authenticationType === 'oauth2') { _%>
-import { Logout } from 'app/login/logout.model';
+import { Logout } from './logout.model';
 <%_ } else { _%>
-import { Login } from 'app/login/login.model';
+import { Login } from './login.model';
 <%_ } _%>
 
 @Injectable({ providedIn: 'root' })

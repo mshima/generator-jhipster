@@ -85,8 +85,6 @@ const files = {
         { file: 'layouts/error/error.route.ts', method: 'processJs' },
         'layouts/error/error.component.ts',
         { file: 'layouts/error/error.component.html', method: 'processHtml' },
-        // login
-        'login/login.service.ts',
       ],
     },
     {
@@ -107,13 +105,13 @@ const files = {
         { file: 'login/login.route.ts', method: 'processJs' },
         'login/login.component.ts',
         { file: 'login/login.component.html', method: 'processHtml' },
-        'login/login.model.ts',
+        'core/auth/login.model.ts',
       ],
     },
     {
       path: ANGULAR_DIR,
       condition: generator => generator.authenticationType === 'oauth2',
-      templates: ['login/logout.model.ts'],
+      templates: ['core/auth/logout.model.ts'],
     },
   ],
   angularAccountModule: [
@@ -251,6 +249,7 @@ const files = {
         'admin/tracker/tracker.module.ts',
         'admin/tracker/tracker.component.ts',
         { file: 'admin/tracker/tracker.component.html', method: 'processHtml' },
+        'core/tracker/index.ts',
         'core/tracker/tracker-activity.model.ts',
         'core/tracker/tracker.service.ts',
       ],
@@ -290,9 +289,11 @@ const files = {
     {
       path: ANGULAR_DIR,
       templates: [
+        'core/config/index.ts',
         'core/config/config.service.ts',
         'core/config/config.service.spec.ts',
 
+        'core/util/index.ts',
         'core/util/data-util.service.ts',
         'core/util/parse-links.service.ts',
         'core/util/alert.service.ts',
@@ -317,6 +318,7 @@ const files = {
         'core/interceptor/index.ts',
 
         // request
+        'core/request/index.ts',
         'core/request/request-util.ts',
         'core/request/request.model.ts',
       ],
@@ -341,15 +343,20 @@ const files = {
     {
       path: ANGULAR_DIR,
       templates: [
+        'shared/index.ts',
         'shared/shared.module.ts',
         'shared/shared-libs.module.ts',
+        'shared/date/index.ts',
         'shared/date/duration.pipe.ts',
         'shared/date/format-medium-date.pipe.ts',
         'shared/date/format-medium-datetime.pipe.ts',
+        'shared/sort/index.ts',
         'shared/sort/sort.directive.ts',
         'shared/sort/sort-by.directive.ts',
+        'shared/pagination/index.ts',
         'shared/pagination/item-count.component.ts',
         // alert service code
+        'shared/alert/index.ts',
         'shared/alert/alert.component.ts',
         'shared/alert/alert.component.html',
         'shared/alert/alert-error.component.ts',
@@ -360,18 +367,22 @@ const files = {
     {
       condition: generator => generator.enableTranslation,
       path: ANGULAR_DIR,
-      templates: ['shared/language/find-language-from-key.pipe.ts', 'shared/language/translate.directive.ts'],
+      templates: ['shared/language/index.ts', 'shared/language/find-language-from-key.pipe.ts', 'shared/language/translate.directive.ts'],
     },
   ],
   angularAuthService: [
     {
       path: ANGULAR_DIR,
       templates: [
+        'core/auth/index.ts',
         'core/auth/state-storage.service.ts',
+        'shared/auth/index.ts',
         'shared/auth/has-any-authority.directive.ts',
         'core/auth/account.model.ts',
         'core/auth/account.service.ts',
         'core/auth/user-route-access.service.ts',
+        // login
+        'core/auth/login.service.ts',
       ],
     },
     {

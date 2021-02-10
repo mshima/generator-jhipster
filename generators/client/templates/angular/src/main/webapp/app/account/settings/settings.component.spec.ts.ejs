@@ -19,7 +19,7 @@
 <%_ if (enableTranslation) { _%>
 jest.mock('@ngx-translate/core');
 <%_ } _%>
-jest.mock('app/core/auth/account.service');
+jest.mock('app/core/auth');
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -29,8 +29,7 @@ import { throwError, of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 <%_ } _%>
 
-import { AccountService } from 'app/core/auth/account.service';
-import { Account } from 'app/core/auth/account.model';
+import { Account, AccountService } from 'app/core/auth';
 
 import { SettingsComponent } from './settings.component';
 

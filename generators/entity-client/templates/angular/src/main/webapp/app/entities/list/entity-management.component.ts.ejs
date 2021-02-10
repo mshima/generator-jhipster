@@ -37,10 +37,10 @@ import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %
 import { <%= entityAngularName %>DeleteDialogComponent } from '../delete/<%= entityFileName %>-delete-dialog.component';
 <%_ } _%>
 <%_ if (fieldsContainBlob) { _%>
-import { DataUtils } from 'app/core/util/data-util.service';
+import { DataUtils } from 'app/core/util';
 <%_ } _%>
 <%_ if (pagination === 'infinite-scroll') { _%>
-import { ParseLinks } from 'app/core/util/parse-links.service';
+import { ParseLinks } from 'app/core/util';
 <%_ } _%>
 
 @Component({

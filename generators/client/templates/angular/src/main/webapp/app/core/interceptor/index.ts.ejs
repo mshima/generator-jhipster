@@ -19,11 +19,11 @@
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 <%_ if (authenticationType === 'jwt') { _%>
-import { AuthInterceptor } from 'app/core/interceptor/auth.interceptor';
+import { AuthInterceptor } from './auth.interceptor';
 <%_ } _%>
-import { AuthExpiredInterceptor } from 'app/core/interceptor/auth-expired.interceptor';
-import { ErrorHandlerInterceptor } from 'app/core/interceptor/error-handler.interceptor';
-import { NotificationInterceptor } from 'app/core/interceptor/notification.interceptor';
+import { AuthExpiredInterceptor } from './auth-expired.interceptor';
+import { ErrorHandlerInterceptor } from './error-handler.interceptor';
+import { NotificationInterceptor } from './notification.interceptor';
 
 export const httpInterceptorProviders = [
   <%_ if (authenticationType === 'jwt') { _%>

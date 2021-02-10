@@ -438,13 +438,20 @@ const expectedFiles = {
     `${CLIENT_MAIN_SRC_DIR}app/shared/alert/alert-error.model.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/alert/alert.component.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/alert/alert.component.html`,
-    `${CLIENT_MAIN_SRC_DIR}app/core/auth/account.service.ts`,
+
     `${CLIENT_MAIN_SRC_DIR}app/config/font-awesome-icons.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/core/auth/index.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/auth/account.model.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/auth/account.service.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/auth/has-any-authority.directive.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/auth/state-storage.service.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/auth/user-route-access.service.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/core/config/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/config/config.service.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/config/config.service.ts`,
+
     `${CLIENT_MAIN_SRC_DIR}app/config/authority.constants.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/config/error.constants.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/config/input.constants.ts`,
@@ -456,41 +463,60 @@ const expectedFiles = {
     `${CLIENT_MAIN_SRC_DIR}app/shared/language/translate.directive.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/config/language.constants.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/config/translation.config.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/login/login.model.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/login/login.service.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/auth/login.model.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/auth/login.service.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/core/request/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/request/request-util.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/request/request.model.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/core/util/index.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/util/event-manager.service.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/util/event-manager.service.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/util/data-util.service.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/util/data-util.service.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/util/parse-links.service.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/util/parse-links.service.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/util/alert.service.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/core/util/alert.service.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/util/operators.spec.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/core/util/operators.ts`,
+
     `${CLIENT_MAIN_SRC_DIR}app/config/datepicker-adapter.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/shared/shared-libs.module.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/shared/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/shared.module.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/core/auth/account.model.ts`,
+    `${CLIENT_MAIN_SRC_DIR}app/shared/shared-libs.module.ts`,
+
     `${CLIENT_MAIN_SRC_DIR}content/scss/global.scss`,
     `${CLIENT_MAIN_SRC_DIR}content/scss/vendor.scss`,
     `${CLIENT_MAIN_SRC_DIR}content/scss/_bootstrap-variables.scss`,
     'jest.conf.js',
     `${CLIENT_MAIN_SRC_DIR}app/core/auth/account.service.spec.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/core/util/operators.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/core/util/operators.spec.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/core/util/event-manager.service.spec.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/core/util/data-util.service.spec.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/core/util/parse-links.service.spec.ts`,
-    `${CLIENT_MAIN_SRC_DIR}app/core/util/alert.service.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/home/home.component.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/login/login.component.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/layouts/main/main.component.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.component.spec.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/shared/pagination/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/pagination/item-count.component.spec.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/shared/alert/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/alert/alert.component.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/alert/alert-error.component.spec.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/shared/date/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/date/format-medium-date.pipe.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/date/format-medium-datetime.pipe.spec.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/shared/sort/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/sort/sort.directive.spec.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/sort/sort-by.directive.spec.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/shared/language/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/language/translate.directive.spec.ts`,
+
+    `${CLIENT_MAIN_SRC_DIR}app/shared/auth/index.ts`,
     `${CLIENT_MAIN_SRC_DIR}app/shared/auth/has-any-authority.directive.spec.ts`,
     'tsconfig.app.json',
     'tsconfig.spec.json',
@@ -649,7 +675,7 @@ const expectedFiles = {
     `${DOCKER_DIR}keycloak.yml`,
   ],
 
-  oauth2Client: [`${CLIENT_MAIN_SRC_DIR}app/login/logout.model.ts`],
+  oauth2Client: [`${CLIENT_MAIN_SRC_DIR}app/core/auth/logout.model.ts`],
 
   messageBroker: [
     `${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/config/KafkaProperties.java`,

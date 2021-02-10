@@ -30,14 +30,14 @@ import { map } from 'rxjs/operators';
 import * as dayjs from 'dayjs';
 <%_ } _%>
 
-import { isPresent } from 'app/core/util/operators';
+import { isPresent } from 'app/core/util';
 <%_ if (fieldsContainLocalDate) { _%>
 import { DATE_FORMAT } from 'app/config/input.constants';
 <%_ } _%>
-import { ConfigService } from 'app/core/config/config.service';
-import { createRequestOption } from 'app/core/request/request-util';
+import { ConfigService } from 'app/core/config';
+import { createRequestOption } from 'app/core/request';
 <%_ if (searchEngine !== false) { _%>
-import { <%= searchType %> } from 'app/core/request/request.model';
+import { <%= searchType %> } from 'app/core/request';
 <%_ } _%>
 import { I<%= entityAngularName %>, get<%= entityAngularName %>Identifier } from '../<%= entityFileName %>.model';
 

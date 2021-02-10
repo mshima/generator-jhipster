@@ -26,11 +26,11 @@ import { SessionStorageService } from 'ngx-webstorage';
 import { Observable, ReplaySubject, of } from 'rxjs';
 import { shareReplay, tap, catchError } from 'rxjs/operators';
 
-import { StateStorageService } from 'app/core/auth/state-storage.service';
-import { ConfigService } from '../config/config.service';
-import { Account } from 'app/core/auth/account.model';
+import { StateStorageService } from './state-storage.service';
+import { ConfigService } from 'app/core/config';
+import { Account } from './account.model';
 <%_ if (websocket === 'spring-websocket') { _%>
-import { TrackerService } from '../tracker/tracker.service';
+import { TrackerService } from 'app/core/tracker';
 <%_ } _%>
 
 @Injectable({ providedIn: 'root' })
