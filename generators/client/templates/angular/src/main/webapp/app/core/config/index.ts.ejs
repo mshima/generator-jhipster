@@ -16,17 +16,4 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-import { ConfigService } from 'app/core/config';
-
-@Injectable({ providedIn: 'root' })
-export class PasswordResetInitService {
-  constructor(private http: HttpClient, private configService: ConfigService) {}
-
-  save(mail: string): Observable<{}> {
-    return this.http.post(this.configService.getEndpointFor('api/account/reset-password/init'), mail);
-  }
-}
+export * from './config.service';

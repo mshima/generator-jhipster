@@ -34,7 +34,7 @@ import { isPresent } from 'app/core/util/operators';
 <%_ if (fieldsContainLocalDate) { _%>
 import { DATE_FORMAT } from 'app/config/input.constants';
 <%_ } _%>
-import { ConfigService } from 'app/core/config/config.service';
+import { ConfigService } from 'app/core/config';
 import { createRequestOption } from 'app/core/request/request-util';
 <%_ if (searchEngine !== false) { _%>
 import { <%= searchType %> } from 'app/core/request/request.model';

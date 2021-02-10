@@ -33,7 +33,7 @@ import { AuthServerProvider } from 'app/core/auth/auth-jwt.service';
 import { AuthServerProvider } from 'app/core/auth/auth-session.service';
 <%_ } _%>
 <%_ if (authenticationType === 'session') { _%>
-import { ConfigService } from 'app/core/config/config.service';
+import { ConfigService } from 'app/core/config';
 <%_ } _%>
 <%_ if (authenticationType === 'oauth2') { _%>
 import { Logout } from './logout.model';
