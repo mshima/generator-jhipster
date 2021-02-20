@@ -21,48 +21,51 @@ const through = require('through2');
 const prettier = require('prettier');
 const prettierPluginJava = require('prettier-plugin-java');
 const prettierPluginPackagejson = require('prettier-plugin-packagejson');
+const { pipe } = require('pipeline-pipe');
 
 const prettierTransform = function (options, generator, ignoreErrors = false) {
-  return through.obj((file, encoding, callback) => {
-    if (file.state === 'deleted') {
-      callback(null, file);
-      return;
-    }
-    /* resolve from the projects config */
-    let fileContent;
-    prettier
-      .resolveConfig(file.relative)
-      .then(function (resolvedDestinationFileOptions) {
-        const prettierOptions = {
-          plugins: [],
-          // Config from disk
-          ...resolvedDestinationFileOptions,
-          // for better errors
-          filepath: file.relative,
-        };
-        if (options.packageJson) {
-          prettierOptions.plugins.push(prettierPluginPackagejson);
-        }
-        if (options.java) {
-          prettierOptions.plugins.push(prettierPluginJava);
-        }
-        fileContent = file.contents.toString('utf8');
-        const data = prettier.format(fileContent, prettierOptions);
-        file.contents = Buffer.from(data);
-        callback(null, file);
-      })
-      .catch(error => {
-        const errorMessage = `Error parsing file ${file.relative}: ${error}
+  return pipe(
+    async file => {
+      if (file.state === 'deleted') {
+        return file;
+      }
+      /* resolve from the projects config */
+      let fileContent;
+      return prettier
+        .resolveConfig(file.relative)
+        .then(function (resolvedDestinationFileOptions) {
+          const prettierOptions = {
+            plugins: [],
+            // Config from disk
+            ...resolvedDestinationFileOptions,
+            // for better errors
+            filepath: file.relative,
+          };
+          if (options.packageJson) {
+            prettierOptions.plugins.push(prettierPluginPackagejson);
+          }
+          if (options.java) {
+            prettierOptions.plugins.push(prettierPluginJava);
+          }
+          fileContent = file.contents.toString('utf8');
+          const data = prettier.format(fileContent, prettierOptions);
+          file.contents = Buffer.from(data);
+          generator.env.sharedFs.emit('change', file.path);
+          return file;
+        })
+        .catch(error => {
+          const errorMessage = `Error parsing file ${file.relative}: ${error}
 
 At: ${fileContent}`;
-        if (ignoreErrors) {
-          generator.warning(errorMessage);
-          callback(null, file);
-        } else {
-          callback(new Error(errorMessage));
-        }
-      });
-  });
+          if (ignoreErrors) {
+            generator.warning(errorMessage);
+            return file;
+          }
+          throw new Error(errorMessage);
+        });
+    },
+    { ordered: true, maxParallel: 4 }
+  );
 };
 
 const generatedAnnotationTransform = generator => {
@@ -72,18 +75,21 @@ const generatedAnnotationTransform = generator => {
       !file.path.endsWith('MavenWrapperDownloader.java') &&
       path.extname(file.path) === '.java' &&
       file.state !== 'deleted' &&
-      !file.path.endsWith('GeneratedByJHipster.java')
+      !file.path.endsWith('GeneratedByJHipster.java') &&
+      file.contents
     ) {
       const packageName = generator.jhipsterConfig.packageName;
       const content = file.contents.toString('utf8');
-
-      if (!new RegExp(`import ${packageName.replace('.', '\\.')}.GeneratedByJHipster;`).test(content)) {
-        const newContent = content
-          // add the import statement just after the package statement, prettier will arrange it correctly
-          .replace(/(package [\w.]+;\n)/, `$1import ${packageName}.GeneratedByJHipster;\n`)
-          // add the annotation before class or interface
-          .replace(/\n([a-w ]*(class|interface|enum) )/g, '\n@GeneratedByJHipster\n$1');
-        file.contents = Buffer.from(newContent);
+      if (content) {
+        if (!new RegExp(`import ${packageName.replace('.', '\\.')}.GeneratedByJHipster;`).test(content)) {
+          const newContent = content
+            // add the import statement just after the package statement, prettier will arrange it correctly
+            .replace(/(package [\w.]+;\n)/, `$1import ${packageName}.GeneratedByJHipster;\n`)
+            // add the annotation before class or interface
+            .replace(/\n([a-w ]*(class|interface|enum) )/g, '\n@GeneratedByJHipster\n$1');
+          file.contents = Buffer.from(newContent);
+          generator.env.sharedFs.emit('change', file.path);
+        }
       }
     }
     this.push(file);

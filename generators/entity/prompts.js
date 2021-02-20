@@ -133,7 +133,7 @@ function askForUpdate() {
 function askForFields() {
   const context = this.context;
   // don't prompt if data is imported from a file
-  if (context.useConfigurationFile && context.updateEntity !== 'add') {
+  if ((context.useConfigurationFile && context.updateEntity !== 'add') || this.options.skipPrompts) {
     return undefined;
   }
 
@@ -188,6 +188,9 @@ function askForRelationships() {
   const context = this.context;
   // don't prompt if data is imported from a file
   if (context.useConfigurationFile && context.updateEntity !== 'add') {
+    return undefined;
+  }
+  if (this.options.skipPrompts) {
     return undefined;
   }
   if (context.databaseType === 'cassandra') {

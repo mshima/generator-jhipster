@@ -37,12 +37,14 @@ describe('jhipster:entities', () => {
         ]);
       });
 
-      it('should create files for the entity Bar', () => {
-        runResult.assertFile([
-          `${SERVER_MAIN_RES_DIR}config/liquibase/changelog/20160926101211_added_entity_Bar.xml`,
-          `${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/domain/Bar.java`,
-          `${CLIENT_MAIN_SRC_DIR}app/entities/bar/bar.model.ts`,
-        ]);
+      it('should create server files for the entity Bar', () => {
+        runResult.assertFile([`${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/domain/Bar.java`]);
+      });
+      it('should create client files for the entity Bar', () => {
+        runResult.assertFile([`${CLIENT_MAIN_SRC_DIR}app/entities/bar/bar.model.ts`]);
+      });
+      it('should create changelog files for the entity Bar', () => {
+        runResult.assertFile([`${SERVER_MAIN_RES_DIR}config/liquibase/changelog/20160926101211_added_entity_Bar.xml`]);
       });
 
       it('should not create files for the entity Skip', () => {

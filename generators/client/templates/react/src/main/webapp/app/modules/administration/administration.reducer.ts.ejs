@@ -43,27 +43,27 @@ const initialState = {
   errorMessage: null,
   <%_ if (applicationType === 'gateway' && serviceDiscoveryType) { _%>
   gateway: {
-    routes: []
+    routes: [],
   },
   <%_ } _%>
 <%_ if (withAdminUi) { _%>
   logs: {
-    loggers: [] as any[]
+    loggers: [] as any[],
   },
   health: {} as any,
   metrics: {} as any,
   threadDump: [],
   configuration: {
     configProps: {} as any,
-    env: {} as any
+    env: {} as any,
   },
 <%_ } _%>
   <%_ if (websocket === 'spring-websocket') { _%>
   tracker: {
-    activities: []
+    activities: [],
   },
   <%_ } _%>
-  totalItems: 0
+  totalItems: 0,
 };
 
 export type AdministrationState =  Readonly<typeof initialState>;

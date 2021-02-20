@@ -420,8 +420,8 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
       },
 
       composeEntities() {
-        if (!this.withEntities) return;
-        this.composeWithJHipster('entities', { skipInstall: true }, true);
+        if (!this.options.withEntities) return;
+        this.composeWithJHipster('entities', { skipInstall: true, skipPrompts: true }, true);
       },
 
       composePages() {
@@ -441,19 +441,6 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
   get composing() {
     if (useBlueprints) return;
     return this._composing();
-  }
-
-  _loading() {
-    return {
-      createUserManagementEntities() {
-        this.createUserManagementEntities();
-      },
-    };
-  }
-
-  get loading() {
-    if (useBlueprints) return;
-    return this._loading();
   }
 
   _default() {

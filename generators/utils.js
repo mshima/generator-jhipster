@@ -74,9 +74,8 @@ function rewriteFile(args, generator) {
   let fullPath;
   if (args.path) {
     fullPath = path.join(args.path, args.file);
-  } else {
-    fullPath = generator.destinationPath(args.file);
   }
+  fullPath = generator.destinationPath(args.file);
 
   args.haystack = generator.fs.read(fullPath);
   const body = rewrite(args);
@@ -189,6 +188,7 @@ function classify(string) {
  * @param {object} generator reference to the generator
  */
 function rewriteJSONFile(filePath, rewriteFile, generator) {
+  filePath = generator.destinationPath(filePath);
   const jsonObj = generator.fs.readJSON(filePath);
   rewriteFile(jsonObj, generator);
   generator.fs.writeJSON(filePath, jsonObj, null, 2);
@@ -626,7 +626,7 @@ function getBase64Secret(value, len = 50) {
  * @returns {boolean} true if string is in file, false otherwise
  */
 function checkStringInFile(path, search, generator) {
-  const fileContent = generator.fs.read(path);
+  const fileContent = generator.fs.read(generator.destinationPath(path));
   return fileContent.includes(search);
 }
 
@@ -638,7 +638,7 @@ function checkStringInFile(path, search, generator) {
  * @returns {boolean} true if regex is matched in file, false otherwise
  */
 function checkRegexInFile(path, regex, generator) {
-  const fileContent = generator.fs.read(path);
+  const fileContent = generator.fs.read(generator.destinationPath(path));
   return fileContent.match(regex);
 }
 

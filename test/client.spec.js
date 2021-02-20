@@ -13,12 +13,14 @@ const {
 
 const { CLIENT_TEST_SRC_DIR, CLIENT_MAIN_SRC_DIR } = constants;
 
+const DEFAULT_TEST_OPTIONS = { fromCli: true, skipInstall: true, skipChecks: true, skipPrettier: true };
+
 describe('JHipster client generator', () => {
   describe('generate client with React', () => {
     before(done => {
       helpers
         .run(path.join(__dirname, '../generators/client'))
-        .withOptions({ skipInstall: true, auth: 'jwt', experimental: true })
+        .withOptions({ ...DEFAULT_TEST_OPTIONS, auth: 'jwt', experimental: true })
         .withPrompts({
           baseName: 'jhipster',
           serviceDiscoveryType: false,
@@ -56,7 +58,7 @@ describe('JHipster client generator', () => {
     before(done => {
       helpers
         .run(path.join(__dirname, '../generators/client'))
-        .withOptions({ skipInstall: true, auth: 'jwt' })
+        .withOptions({ ...DEFAULT_TEST_OPTIONS, auth: 'jwt' })
         .withPrompts({
           baseName: 'jhipster',
           serviceDiscoveryType: false,
@@ -106,8 +108,7 @@ describe('JHipster client generator', () => {
           return helpers
             .create(require.resolve('../generators/app'))
             .withOptions({
-              fromCli: true,
-              skipInstall: true,
+              ...DEFAULT_TEST_OPTIONS,
               defaultLocalConfig: { ...appDefaultConfig, clientFramework, skipServer: true },
               skipJhipsterDependencies: true,
             })
@@ -136,8 +137,7 @@ describe('JHipster client generator', () => {
         return helpers
           .create(require.resolve('../generators/client'))
           .withOptions({
-            fromCli: true,
-            skipInstall: true,
+            ...DEFAULT_TEST_OPTIONS,
             defaultLocalConfig: { ...appDefaultConfig, clientFramework: ANGULAR, testFrameworks: ['cypress'] },
           })
           .run()
@@ -232,8 +232,7 @@ describe('JHipster client generator', () => {
         return helpers
           .create(require.resolve('../generators/client'))
           .withOptions({
-            fromCli: true,
-            skipInstall: true,
+            ...DEFAULT_TEST_OPTIONS,
             defaultLocalConfig: {
               ...appDefaultConfig,
               clientFramework: ANGULAR,
@@ -336,8 +335,7 @@ describe('JHipster client generator', () => {
         return helpers
           .create(require.resolve('../generators/client'))
           .withOptions({
-            fromCli: true,
-            skipInstall: true,
+            ...DEFAULT_TEST_OPTIONS,
             defaultLocalConfig: { ...appDefaultConfig, clientFramework: REACT, testFrameworks: ['cypress'] },
           })
           .run()
@@ -407,18 +405,10 @@ describe('JHipster client generator', () => {
         runResult.assertFileContent(
           `${CLIENT_MAIN_SRC_DIR}app/shared/layout/menus/admin.tsx`,
           `
-    <MenuItem icon="tachometer-alt" to="/admin/metrics">
-      <Translate contentKey="global.menu.admin.metrics">Metrics</Translate>
-    </MenuItem>
-    <MenuItem icon="heart" to="/admin/health">
-      <Translate contentKey="global.menu.admin.health">Health</Translate>
-    </MenuItem>
-    <MenuItem icon="cogs" to="/admin/configuration">
-      <Translate contentKey="global.menu.admin.configuration">Configuration</Translate>
-    </MenuItem>
-    <MenuItem icon="tasks" to="/admin/logs">
-      <Translate contentKey="global.menu.admin.logs">Logs</Translate>
-    </MenuItem>
+    <MenuItem icon="tachometer-alt" to="/admin/metrics"><Translate contentKey="global.menu.admin.metrics">Metrics</Translate></MenuItem>
+    <MenuItem icon="heart" to="/admin/health"><Translate contentKey="global.menu.admin.health">Health</Translate></MenuItem>
+    <MenuItem icon="cogs" to="/admin/configuration"><Translate contentKey="global.menu.admin.configuration">Configuration</Translate></MenuItem>
+    <MenuItem icon="tasks" to="/admin/logs"><Translate contentKey="global.menu.admin.logs">Logs</Translate></MenuItem>
 `
         );
       });
@@ -430,8 +420,7 @@ describe('JHipster client generator', () => {
         return helpers
           .create(require.resolve('../generators/client'))
           .withOptions({
-            fromCli: true,
-            skipInstall: true,
+            ...DEFAULT_TEST_OPTIONS,
             defaultLocalConfig: {
               ...appDefaultConfig,
               clientFramework: REACT,

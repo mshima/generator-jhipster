@@ -106,8 +106,8 @@ const mockBlueprintSubGen = class extends ServerGenerator {
 };
 
 describe('needle API server maven: JHipster server generator with blueprint', () => {
-  before(done => {
-    helpers
+  before(() => {
+    return helpers
       .run(path.join(__dirname, '../../generators/server'))
       .withOptions({
         fromCli: true,
@@ -133,8 +133,7 @@ describe('needle API server maven: JHipster server generator with blueprint', ()
         buildTool: 'maven',
         rememberMeKey: '5c37379956bd1242f5636c8cb322c2966ad81277',
         serverSideOptions: [],
-      })
-      .on('end', done);
+      });
   });
 
   it('Assert pom.xml has the dependency management added', () => {

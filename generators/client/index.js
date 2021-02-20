@@ -169,10 +169,6 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
         this.loadTranslationConfig();
       },
 
-      createUserManagementEntities() {
-        this.createUserManagementEntities();
-      },
-
       validateSkipServer() {
         if (
           this.jhipsterConfig.skipServer &&
