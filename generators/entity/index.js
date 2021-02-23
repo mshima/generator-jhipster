@@ -117,11 +117,6 @@ class EntityGenerator extends BaseBlueprintGenerator {
       type: Boolean,
     });
 
-    this.option('single-entity', {
-      desc: 'Regenerate only a single entity, relationships can be not correctly generated',
-      type: Boolean,
-    });
-
     if (this.options.help) {
       return;
     }
@@ -437,7 +432,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
         this.composeWithJHipster(
           'entities',
           {
-            entities: this.options.singleEntity ? [this.context.name] : undefined,
+            entities: [this.context.name],
             regenerate: true,
             writeEveryEntity: false,
             composedEntities: [this.context.name],

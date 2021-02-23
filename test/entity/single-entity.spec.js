@@ -6,7 +6,7 @@ const { SERVER_MAIN_RES_DIR, SERVER_MAIN_SRC_DIR, CLIENT_MAIN_SRC_DIR } = requir
 
 const DEFAULT_TEST_OPTIONS = { fromCli: true, skipInstall: true, skipChecks: true, skipPrettier: true };
 
-describe('jhipster:entity --single-entity', () => {
+describe('jhipster:entity', () => {
   context('when regenerating', () => {
     describe('with default configuration', () => {
       let runResult;
@@ -19,7 +19,7 @@ describe('jhipster:entity --single-entity', () => {
             fse.copySync(path.join(__dirname, '../templates/.jhipster/Simple2.json'), path.join(dir, '.jhipster/Bar.json'));
           })
           .withArguments(['Foo'])
-          .withOptions({ ...DEFAULT_TEST_OPTIONS, regenerate: true, force: true, singleEntity: true })
+          .withOptions({ ...DEFAULT_TEST_OPTIONS, regenerate: true, force: true })
           .run()
           .then(result => {
             runResult = result;
@@ -56,7 +56,7 @@ describe('jhipster:entity --single-entity', () => {
             fse.copySync(path.join(__dirname, '../templates/.jhipster/Simple2.json'), path.join(dir, '.jhipster/Bar.json'));
           })
           .withArguments(['Foo'])
-          .withOptions({ ...DEFAULT_TEST_OPTIONS, regenerate: true, force: true, singleEntity: true })
+          .withOptions({ ...DEFAULT_TEST_OPTIONS, regenerate: true, force: true })
           .run()
           .then(result => {
             runResult = result;
