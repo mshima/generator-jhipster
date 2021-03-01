@@ -205,19 +205,13 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
               autoGenerate: true,
               readonly: true,
               get fieldName() {
-                return idCount === 1 && !relationship.otherEntity.primaryKey.composite
-                  ? field.fieldName
-                  : `${relationship.otherEntity.entityInstance}${field.fieldNameCapitalized}`;
+                return idCount === 1 ? field.fieldName : `${relationship.otherEntity.entityInstance}${field.fieldNameCapitalized}`;
               },
               get fieldNameCapitalized() {
-                return idCount === 1 && !relationship.otherEntity.primaryKey.composite
-                  ? field.fieldNameCapitalized
-                  : `${relationship.otherEntity.entityClass}${field.fieldNameCapitalized}`;
+                return idCount === 1 ? field.fieldNameCapitalized : `${relationship.otherEntity.entityClass}${field.fieldNameCapitalized}`;
               },
               get columnName() {
-                return idCount === 1 && !relationship.otherEntity.primaryKey.composite
-                  ? field.columnName
-                  : `${generator.getColumnName(relationship.relationshipName)}_${field.columnName}`;
+                return idCount === 1 ? field.columnName : `${generator.getColumnName(relationship.relationshipName)}_${field.columnName}`;
               },
               get reference() {
                 return fieldToReference(entityWithConfig, this);
