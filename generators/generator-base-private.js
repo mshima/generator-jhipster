@@ -1158,6 +1158,12 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
         random && reference.field ? reference.field.generateFakeData('raw') : this.generateTestEntityId(reference.type, index, false);
       return [reference.name, value];
     });
+    if (!primaryKey.fields.includes(primaryKey.trackByField)) {
+      const trackValue = random
+        ? primaryKey.trackByField.generateFakeData('raw')
+        : this.generateTestEntityId(primaryKey.trackByField.fieldType, index, false);
+      entries.push([primaryKey.trackByField.fieldName, trackValue]);
+    }
     return JSON.stringify(Object.fromEntries(entries));
   }
 
