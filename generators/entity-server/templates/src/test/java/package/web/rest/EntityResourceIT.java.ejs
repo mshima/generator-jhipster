@@ -178,7 +178,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 <%_ } _%>
 import java.util.List;
-<%_ if (fieldsContainUUID || otherEntityPrimaryKeyTypes.includes('UUID') || (primaryKey && primaryKey.fields.some(f => !f.autoGenerate && f.fieldType === 'String')) || fields.some(f => f.unique && f.fieldType === 'String')) { _%>
+<%_ if (fieldsContainUUID || otherEntityPrimaryKeyTypes.includes('UUID') || (primaryKey && primaryKey.fields.some(f => f.fieldType === 'String')) || fields.some(f => f.unique && f.fieldType === 'String')) { _%>
 import java.util.UUID;
 <%_ } _%>
 <%_ if (!embedded && primaryKey.fields.some(field => field.fieldType === 'Long')) { _%>
