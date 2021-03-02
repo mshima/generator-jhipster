@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = generateTestEntityId(primaryKey.type);
+const tsKeyId = generateTestEntityId(primaryKey.trackByField.fieldType);
 const allRelationshipsByEntityNeedingOptions = Object
     .values(differentRelationships)
     .map(relationships => relationships.filter(rel => rel.ownerSide))
@@ -242,7 +242,7 @@ _%>
                 it('Should return tracked <%= otherEntity.entityAngularName %> primary key', () => {
                     const entity = <%- generateTestEntityPrimaryKey(otherEntity.primaryKey, 0) %>;
                     const trackResult = comp.track<%= otherEntity.entityAngularName %>By<%= otherEntity.primaryKey.nameCapitalized %>(0, entity);
-                    expect(trackResult).toEqual(entity.<%= otherEntity.primaryKey.name %>);
+                    expect(trackResult).toEqual(entity.<%= otherEntity.primaryKey.trackByField.fieldName %>);
                 });
             });
 

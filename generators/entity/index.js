@@ -575,6 +575,11 @@ class EntityGenerator extends BaseBlueprintGenerator {
         }
         const derivedFields = this.context.primaryKey.derivedFields;
         this.context.fields.unshift(...derivedFields);
+
+        // If trackByField is a mapping field, add to fields.
+        if (this.context.primaryKey.derived && this.context.primaryKey.trackByField.dynamic) {
+          this.context.fields.unshift(this.context.primaryKey.trackByField);
+        }
       },
 
       processEntityFields() {
