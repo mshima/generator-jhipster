@@ -1131,6 +1131,12 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
         random && reference.field ? reference.field.generateFakeData('raw') : this.generateTestEntityId(reference.type, index, false);
       return [reference.name, value];
     });
+    if (!primaryKey.fields.includes(primaryKey.trackByField)) {
+      const trackValue = random
+        ? primaryKey.trackByField.generateFakeData('raw')
+        : this.generateTestEntityId(primaryKey.trackByField.fieldType, index, false);
+      entries.push([primaryKey.trackByField.fieldName, trackValue]);
+    }
     return JSON.stringify(Object.fromEntries(entries));
   }
 
@@ -1236,6 +1242,25 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
       return 'UUID.randomUUID()';
     }
     return `${defaultValue}L`;
+  }
+
+  /**
+   * Returns a Java generator that randomizes a value.
+   *
+   * @param {string} type - Java type
+   * @returns {string} java primary key value
+   */
+  getJavaValueGenerator(type) {
+    if (type === 'String') {
+      return 'UUID.randomUUID().toString()';
+    }
+    if (type === 'UUID') {
+      return 'UUID.randomUUID()';
+    }
+    if (type === 'Long') {
+      return 'count.incrementAndGet()';
+    }
+    throw new Error(`Java type ${type} does not have a random generator implemented`);
   }
 
   /**
