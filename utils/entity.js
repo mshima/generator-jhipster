@@ -232,9 +232,6 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
         derived: true,
         // MapsId copy the id from the relationship.
         autoGenerate: true,
-        get trackByField() {
-          return relationshipId.otherEntity.primaryKey.trackByField;
-        },
         get fields() {
           return this.derivedFields;
         },
@@ -268,23 +265,9 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
       const composite = false;
       let primaryKeyName;
       let primaryKeyType;
-      let trackByField;
       if (composite) {
         primaryKeyName = 'id';
         primaryKeyType = `${entityWithConfig.entityClass}Id`;
-        trackByField = trackByField || {
-          fieldName: 'idMatrix',
-          fieldType: 'String',
-          hidden: true,
-          id: true,
-          dynamic: true,
-          get mapstructExpression() {
-            return `java(${entityWithConfig.primaryKey.fields
-              .map(field => `\\"${field.fieldName}=\\" + s.get${_.upperFirst(primaryKeyName)}().get${field.fieldNameCapitalized}()`)
-              .join(' + \\";\\" + ')})`;
-          },
-        };
-        entityWithConfig.fields.push(trackByField);
       } else {
         const idField = idFields[0];
         idField.dynamic = false;
@@ -294,12 +277,10 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
         }
         primaryKeyName = idField.fieldName;
         primaryKeyType = idField.fieldType;
-        trackByField = trackByField || idField;
       }
 
       entityWithConfig.primaryKey = {
         derived: false,
-        trackByField,
         name: primaryKeyName,
         nameCapitalized: _.upperFirst(primaryKeyName),
         type: primaryKeyType,
