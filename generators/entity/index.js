@@ -499,6 +499,19 @@ class EntityGenerator extends BaseBlueprintGenerator {
   // Public API method used by the getter and also by Blueprints
   _preparing() {
     return {
+      loadRelationships() {
+        this.context.relationships.forEach(relationship => {
+          const otherEntityName = this._.upperFirst(relationship.otherEntityName);
+          const otherEntity = this.configOptions.sharedEntities[otherEntityName];
+          if (!otherEntity) {
+            throw new Error(`Error looking for otherEntity ${otherEntityName}`);
+          }
+          relationship.otherEntity = otherEntity;
+          otherEntity.otherRelationships = otherEntity.otherRelationships || [];
+          otherEntity.otherRelationships.push(relationship);
+        });
+      },
+
       prepareEntityForTemplates() {
         const entity = this.context;
         prepareEntityForTemplates(entity, this);
@@ -510,6 +523,62 @@ class EntityGenerator extends BaseBlueprintGenerator {
         this.context.fields.forEach(field => {
           prepareFieldForTemplates(entity, field, this);
         });
+      },
+    };
+  }
+
+  get preparing() {
+    if (useBlueprints) return;
+    return this._preparing();
+  }
+
+  // Public API method used by the getter and also by Blueprints
+  _preparingRelationships() {
+    return {
+      prepareRelationshipsForTemplates() {
+        this.context.relationships.forEach(relationship => {
+          prepareRelationshipForTemplates(this.context, relationship, this);
+
+          // Load in-memory data for root
+          if (relationship.relationshipType === 'many-to-many' && relationship.ownerSide) {
+            this.context.fieldsContainOwnerManyToMany = true;
+          } else if (relationship.relationshipType === 'one-to-one' && !relationship.ownerSide) {
+            this.context.fieldsContainNoOwnerOneToOne = true;
+          } else if (relationship.relationshipType === 'one-to-one' && relationship.ownerSide) {
+            this.context.fieldsContainOwnerOneToOne = true;
+          } else if (relationship.relationshipType === 'one-to-many') {
+            this.context.fieldsContainOneToMany = true;
+          } else if (relationship.relationshipType === 'many-to-one') {
+            this.context.fieldsContainManyToOne = true;
+          }
+          if (relationship.otherEntityIsEmbedded) {
+            this.context.fieldsContainEmbedded = true;
+          }
+          if (relationship.relationshipValidate) {
+            this.context.validation = true;
+          }
+
+          const entityType = relationship.otherEntityNameCapitalized;
+          if (!this.context.differentTypes.includes(entityType)) {
+            this.context.differentTypes.push(entityType);
+          }
+          if (!this.context.differentRelationships[entityType]) {
+            this.context.differentRelationships[entityType] = [];
+          }
+          this.context.differentRelationships[entityType].push(relationship);
+        });
+      },
+
+      processDerivedPrimaryKey() {
+        if (!this.context.primaryKey) {
+          return;
+        }
+        const derivedFields = this.context.primaryKey.derivedFields;
+        this.context.fields.unshift(...derivedFields);
+        // If trackByField is a mapping field, add to fields.
+        if (this.context.primaryKey.derived && this.context.primaryKey.trackByField.dynamic) {
+          this.context.fields.unshift(this.context.primaryKey.trackByField);
+        }
       },
 
       processEntityFields() {
@@ -560,72 +629,6 @@ class EntityGenerator extends BaseBlueprintGenerator {
             entity.validation = true;
           }
         });
-      },
-
-      loadRelationships() {
-        this.context.relationships.forEach(relationship => {
-          const otherEntityName = this._.upperFirst(relationship.otherEntityName);
-          const otherEntity = this.configOptions.sharedEntities[otherEntityName];
-          if (!otherEntity) {
-            throw new Error(`Error looking for otherEntity ${otherEntityName}`);
-          }
-          relationship.otherEntity = otherEntity;
-          otherEntity.otherRelationships = otherEntity.otherRelationships || [];
-          otherEntity.otherRelationships.push(relationship);
-        });
-      },
-    };
-  }
-
-  get preparing() {
-    if (useBlueprints) return;
-    return this._preparing();
-  }
-
-  // Public API method used by the getter and also by Blueprints
-  _preparingRelationships() {
-    return {
-      prepareRelationshipsForTemplates() {
-        this.context.relationships.forEach(relationship => {
-          prepareRelationshipForTemplates(this.context, relationship, this);
-
-          // Load in-memory data for root
-          if (relationship.relationshipType === 'many-to-many' && relationship.ownerSide) {
-            this.context.fieldsContainOwnerManyToMany = true;
-          } else if (relationship.relationshipType === 'one-to-one' && !relationship.ownerSide) {
-            this.context.fieldsContainNoOwnerOneToOne = true;
-          } else if (relationship.relationshipType === 'one-to-one' && relationship.ownerSide) {
-            this.context.fieldsContainOwnerOneToOne = true;
-          } else if (relationship.relationshipType === 'one-to-many') {
-            this.context.fieldsContainOneToMany = true;
-          } else if (relationship.relationshipType === 'many-to-one') {
-            this.context.fieldsContainManyToOne = true;
-          }
-          if (relationship.otherEntityIsEmbedded) {
-            this.context.fieldsContainEmbedded = true;
-          }
-          if (relationship.relationshipValidate) {
-            this.context.validation = true;
-          }
-
-          const entityType = relationship.otherEntityNameCapitalized;
-          if (!this.context.differentTypes.includes(entityType)) {
-            this.context.differentTypes.push(entityType);
-          }
-          if (!this.context.differentRelationships[entityType]) {
-            this.context.differentRelationships[entityType] = [];
-          }
-          this.context.differentRelationships[entityType].push(relationship);
-        });
-      },
-
-      processDerivedPrimaryKey() {
-        if (!this.context.derivedPrimaryKey) {
-          return;
-        }
-        const idFields = this.context.primaryKey.derivedFields;
-        this.context.idFields = idFields;
-        this.context.fields.unshift(...idFields);
       },
 
       prepareReferences() {
@@ -684,7 +687,10 @@ class EntityGenerator extends BaseBlueprintGenerator {
       },
 
       processPrimaryKeyTypesForRelations() {
-        const types = this.context.relationships.filter(rel => rel.otherEntity.primaryKey).map(rel => rel.otherEntity.primaryKey.type);
+        const types = this.context.relationships
+          .filter(rel => rel.otherEntity.primaryKey)
+          .map(rel => rel.otherEntity.primaryKey.fields.map(f => f.fieldType))
+          .flat();
         this.context.otherEntityPrimaryKeyTypes = Array.from(new Set(types));
       },
 
