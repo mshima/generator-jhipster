@@ -41,7 +41,7 @@ let useBlueprints;
 
 class EntityGenerator extends BaseBlueprintGenerator {
   constructor(args, opts) {
-    super(args, { ...opts, unique: 'argument' });
+    super(args, opts, { unique: 'argument' });
 
     // This makes `name` a required argument.
     this.argument('name', {

@@ -31,7 +31,7 @@ const { prepareFieldForTemplates } = require('../../utils/field');
 
 module.exports = class extends BaseGenerator {
   constructor(args, options) {
-    super(args, { ...options, unique: 'namespace' });
+    super(args, options, { unique: 'namespace' });
 
     /*
      * When testing a generator with yeoman-test using 'withLocalConfig(localConfig)', it instantiates the

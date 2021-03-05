@@ -14,8 +14,8 @@ describe('JHipster generator for entity', () => {
   context('creation from CLI', () => {
     context('monolith with elasticsearch', () => {
       describe('search, no dto, no service, no pagination', () => {
-        before(done => {
-          helpers
+        before(() => {
+          return helpers
             .run(require.resolve('../generators/entity'))
             .inTmpDir(dir => {
               fse.copySync(path.join(__dirname, '../test/templates/default-elasticsearch'), dir);
@@ -27,8 +27,7 @@ describe('JHipster generator for entity', () => {
               dto: 'no',
               service: 'no',
               pagination: 'no',
-            })
-            .on('end', done);
+            });
         });
 
         it('does creates search files', () => {
