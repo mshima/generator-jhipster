@@ -428,9 +428,8 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
         if (!this.jhipsterConfig.pages || this.jhipsterConfig.pages.length === 0 || this.configOptions.skipComposePage) return;
         this.configOptions.skipComposePage = true;
         this.jhipsterConfig.pages.forEach(page => {
-          this.composeWithJHipster(page.generator || 'page', {
+          this.composeWithJHipster(page.generator || 'page', [page.name], {
             skipInstall: true,
-            arguments: [page.name],
             page,
           });
         });
