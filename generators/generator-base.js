@@ -1468,6 +1468,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
     }
 
     return this.env.composeWith(generator, args, {
+      ...this.options,
       configOptions: this.configOptions,
       ...options,
     });

@@ -157,7 +157,6 @@ function runGenerator(command, { cwd, fork, env }, generatorOptions = {}) {
     const oldCwd = process.cwd();
     process.chdir(cwd);
     env = env || EnvironmentBuilder.createDefaultBuilder(undefined, { cwd }).getEnvironment();
-    env.composeWith('jhipster:bootstrap', generatorOptions);
     return env.run(`${CLI_NAME}:${command}`, generatorOptions).then(
       () => {
         process.chdir(oldCwd);
