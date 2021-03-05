@@ -592,7 +592,9 @@ describe('Generator Base', () => {
       describe('with a future creationTimestamp option', () => {
         it('should throw', () => {
           options.creationTimestamp = '2030-01-01';
-          expect(() => new Base({ ...options, env: Environment.createEnv() })).to.throw(/^Creation timestamp should not be in the future: 2030-01-01\.$/);
+          expect(() => new Base({ ...options, env: Environment.createEnv() })).to.throw(
+            /^Creation timestamp should not be in the future: 2030-01-01\.$/
+          );
         });
       });
     });
