@@ -71,8 +71,12 @@ module.exports = {
  * @param {object} generator reference to the generator
  */
 function rewriteFile(args, generator) {
-  args.path = args.path || process.cwd();
-  const fullPath = path.join(args.path, args.file);
+  let fullPath;
+  if (args.path) {
+    fullPath = path.join(args.path, args.file);
+  } else {
+    fullPath = generator.destinationPath(args.file);
+  }
 
   args.haystack = generator.fs.read(fullPath);
   const body = rewrite(args);
@@ -736,7 +740,7 @@ function vueReplaceTranslation(generator, files) {
 }
 
 function vueAddPageToRouterImport(generator, pageName, pageFolderName, pageFilename = pageFolderName) {
-  this.rewriteFile(
+  rewriteFile(
     {
       file: `${generator.CLIENT_MAIN_SRC_DIR}/app/router/pages.ts`,
       needle: 'jhipster-needle-add-entity-to-router-import',
@@ -753,7 +757,7 @@ function vueAddPageToRouterImport(generator, pageName, pageFolderName, pageFilen
 }
 
 function vueAddPageToRouter(generator, pageName, pageFilename) {
-  this.rewriteFile(
+  rewriteFile(
     {
       file: `${generator.CLIENT_MAIN_SRC_DIR}/app/router/pages.ts`,
       needle: 'jhipster-needle-add-entity-to-router',
@@ -774,7 +778,7 @@ function vueAddPageToRouter(generator, pageName, pageFilename) {
 }
 
 function vueAddPageServiceToMainImport(generator, pageName, pageFolderName, pageFilename = pageFolderName) {
-  this.rewriteFile(
+  rewriteFile(
     {
       file: `${generator.CLIENT_MAIN_SRC_DIR}/app/main.ts`,
       needle: 'jhipster-needle-add-entity-service-to-main-import',
@@ -790,7 +794,7 @@ function vueAddPageServiceToMainImport(generator, pageName, pageFolderName, page
 }
 
 function vueAddPageServiceToMain(generator, pageName, pageInstance) {
-  this.rewriteFile(
+  rewriteFile(
     {
       file: `${generator.CLIENT_MAIN_SRC_DIR}/app/main.ts`,
       needle: 'jhipster-needle-add-entity-service-to-main',
@@ -806,7 +810,7 @@ function vueAddPageServiceToMain(generator, pageName, pageInstance) {
 }
 
 function vueAddPageProtractorConf(generator) {
-  this.rewriteFile(
+  rewriteFile(
     {
       file: `${generator.CLIENT_TEST_SRC_DIR}/protractor.conf.js`,
       needle: 'jhipster-needle-add-protractor-tests',
