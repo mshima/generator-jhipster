@@ -128,7 +128,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
     this.configOptions = this.options.configOptions || { sharedEntities: {} };
 
     /* Force config to use 'generator-jhipster' namespace. */
-    this.config = this._getStorage('generator-jhipster');
+    this._config = this._getStorage('generator-jhipster');
     /* JHipster config using proxy mode used as a plain object instead of using get/set. */
     this.jhipsterConfig = this.config.createProxy();
 
