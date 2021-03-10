@@ -1146,13 +1146,29 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
    * @param {any} primaryKey - primary key definition.
    * @param {number} [index] - index of the primary key sample, pass undefined for a random key.
    */
-  generateTestEntityPrimaryKey(primaryKey, index = 'random') {
+  generateTestEntityPrimaryKey(primaryKey, index) {
+    return JSON.stringify(
+      this.generateTestEntity(
+        primaryKey.fields.map(f => f.reference),
+        index
+      )
+    );
+  }
+
+  /**
+   * Generate a test entity, according to the type
+   *
+   * @param {any} primaryKey - primary key definition.
+   * @param {number} [index] - index of the primary key sample, pass undefined for a random key.
+   */
+  generateTestEntity(references, index = 'random') {
     const random = index === 'random';
-    const entries = primaryKey.ids.map(id => {
-      const value = random ? id.field.generateFakeData('raw') : this.generateTestEntityId(id.field.fieldType, index, false);
-      return [id.name, value];
+    const entries = references.map(reference => {
+      const value =
+        random && reference.field ? reference.field.generateFakeData('raw') : this.generateTestEntityId(reference.type, index, false);
+      return [reference.name, value];
     });
-    return JSON.stringify(Object.fromEntries(entries));
+    return Object.fromEntries(entries);
   }
 
   /**
