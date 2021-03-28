@@ -194,8 +194,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     <%_ if (['session','oauth2'].includes(authenticationType) && applicationType !== 'microservice') { _%>
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
         .and()
-    <%_ } else { _%>
-            .disable()
     <%_ } _%>
     <%_ if (applicationType !== 'microservice') { _%>
         <%_ if (authenticationType === 'jwt') { _%>
