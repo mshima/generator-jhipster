@@ -19,12 +19,12 @@ resetFakerSeed('entity-cypress');
 const entityFakeData = generateFakeData('cypress');
 const requiredRelationships = relationships.filter(rel => rel.relationshipRequired || rel.id);
 // We cannot generate a required entity with required relationship.
-const skipCreateTest = (requiredRelationships.length > 0 || !entityFakeData) ? '.skip' : '';
+const skipCreateTest = (requiredRelationships.map(rel => rel.otherEntity.relationships).flat().some(rel => rel.relationshipRequired || rel.id) || !entityFakeData) ? '.skip' : '';
 _%>
 
 describe('<%= entityClass %> e2e test', () => {
   <%_ if (authenticationType === 'oauth2') { _%>
-  beforeEach(() => {
+  before(() => {
     cy.getOauth2Data();
     cy.get('@oauth2Data').then(oauth2Data => {
       cy.oauthLogin(oauth2Data, Cypress.env('E2E_USERNAME') || "admin", Cypress.env('E2E_PASSWORD') || "admin");
@@ -34,7 +34,11 @@ describe('<%= entityClass %> e2e test', () => {
     cy.get(entityItemSelector).should('exist');
   });
 
-  afterEach(() => {
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce('session_id');
+  })
+
+  after(() => {
     cy.get('@oauth2Data').then(oauth2Data => {
       cy.oauthLogout(oauth2Data);
     });
@@ -57,7 +61,7 @@ describe('<%= entityClass %> e2e test', () => {
     cy.intercept('DELETE', '/<%= baseApi + entityApiUrl %>/*').as('deleteEntityRequest');
   });
 
-  it('should load <%= entityClassPlural %>', () => {
+  it('should load <%= entityClassPlural %> page', () => {
     cy.visit('/');
     cy.clickOnEntityMenuItem('<%= entityStateName %>');
     cy.wait('@entitiesRequest').then(({ response }) => {
@@ -71,6 +75,7 @@ describe('<%= entityClass %> e2e test', () => {
     cy.url().should('match', /\/<%= entityUrl %>(\?.*)?$/);
   });
 
+  describe('non transactional tests', () => {
   it('should load details <%= entityClass %> page', function() {
     cy.visit('/<%= entityUrl %>');
     cy.wait('@entitiesRequest').then(({ response }) => {
@@ -87,7 +92,9 @@ describe('<%= entityClass %> e2e test', () => {
     cy.url().should('match', /\/<%= entityUrl %>(\?.*)?$/);
   });
 
-  <%_ if (!readOnly) { _%>
+<%_ if (readOnly) { _%>
+  });
+<%_ } else { _%>
   it('should load create <%= entityClass %> page', () => {
     cy.visit('/<%= entityUrl %>');
     cy.wait('@entitiesRequest');
@@ -117,81 +124,97 @@ describe('<%= entityClass %> e2e test', () => {
     });
     cy.url().should('match', /\/<%= entityUrl %>(\?.*)?$/);
   });
-
-  it<%= skipCreateTest %>('should create an instance of <%= entityClass %>', () => {
-    cy.visit('/<%= entityUrl %>');
-    cy.get(entityCreateButtonSelector).click({force: true});
-    cy.getEntityCreateUpdateHeading('<%= entityClass %>');
-    <%_ fields.filter(field => (!field.id || !field.autoGenerate) && !field.hidden).forEach((field) => {
-      const fieldName = field.fieldName;
-      const fieldNameCapitalized = field.fieldNameCapitalized;
-      const fieldType = field.fieldType;
-      const fieldTypeBlobContent = field.fieldTypeBlobContent;
-      const fieldIsEnum = field.fieldIsEnum;
-      const fieldValue = !entityFakeData ? field.generateFakeData('cypress') : entityFakeData[field.fieldName];
-      if (fieldValue === undefined) {
-          warning(`Error generating a value for field ${fieldName}`);
-          return;
-      }
-    _%>
-
-    <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').invoke('val').should('equal', '<%= fieldValue %>');
-
-    <%_ } else if (fieldType === 'Duration' && clientFramework === 'react') { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('PT12S').should('have.value', 'PT12S');
-
-    <%_ } else if (fieldType === 'Duration' && clientFramework !== 'react') { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('PT12S').should('have.value', 'PT12S');
-
-    <%_ } else if (fieldType === 'Boolean') { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).should('not.be.checked');
-    cy.get(`[data-cy="<%= fieldName %>"]`).click().should('be.checked');
-    <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'text') { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>', { force: true }).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
-
-    <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
-    cy.setFieldImageAsBytesOfEntity('<%= fieldName %>', 'integration-test.png', 'image/png');
-
-    <%_ } else if (fieldIsEnum) { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).select('<%= fieldValue %>');
-
-    <%_ } else if (fieldType === 'UUID'){ _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').invoke('val').should('match', new RegExp('<%= fieldValue %>'));
-
-    <%_ } else if(['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'LocalDate', ].includes(fieldType)) { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').should('have.value', '<%= fieldValue %>');
-
-    <%_ } else { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>', { force: true }).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
-
-    <%_ } _%>
-    <%_ }); _%>
-    <%_ relationships.forEach((relationship) => {
-      const relationshipType = relationship.relationshipType;
-      const ownerSide = relationship.ownerSide;
-      const relationshipName = relationship.relationshipName;
-      const relationshipNameCapitalized = relationship.relationshipNameCapitalized;_%>
-    <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
-    cy.setFieldSelectToLastOfEntity('<%= relationshipName %>');
-
-    <%_ } else if ((relationshipType === 'many-to-many' && ownerSide === true)) { _%>
-    cy.setFieldSelectToLastOfEntity('<%= relationshipName %>');
-
-    <%_ } _%>
-    <%_ }); _%>
-    cy.get(entityCreateSaveButtonSelector).click({force: true});
-    cy.scrollTo('top', {ensureScrollable: false});
-    cy.get(entityCreateSaveButtonSelector).should('not.exist');
-    cy.wait('@postEntityRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(201);
-    });
-    cy.wait('@entitiesRequest').then(({ response }) => {
-      expect(response.statusCode).to.equal(200);
-    });
-    cy.url().should('match', /\/<%= entityUrl %>(\?.*)?$/);
   });
 
+  describe<%= skipCreateTest %>('update <%= entityClass %> page', () => {
+    let created<%= entityClass %>: any;
+<%_ if (requiredRelationships.length > 0) { _%>
+    <%_ for (relationship of requiredRelationships) { _%>
+    let <%= relationship.relationshipName %>;
+    <%_ } _%>
+
+    before(() => {
+    <%_ for (relationship of requiredRelationships) { _%>
+      // create an entity at the relationship entity:
+      cy.request('POST', '/<%= baseApi + relationship.otherEntity.entityApiUrl %>', <%- JSON.stringify(generateTestEntity(relationship.otherEntity.fields.filter(f => !f.autoGenerate).map(field => field.reference))) %>).then(response => {
+        <%= relationship.relationshipName %> = response.body;
+      });
+    <%_ } _%>
+    })
+<%_ } _%>
+
+    afterEach(() => {
+      cy.request({
+        method: 'DELETE',
+        url: `/<%= baseApi + entityApiUrl %>/${created<%= entityClass %>.<%= primaryKey.name %>}`,
+      }).then(response => {
+        expect(response.status).to.equal(204);
+      });
+    });
+
+    it('should create an instance of <%= entityClass %>', () => {
+      cy.visit('/<%= entityUrl %>');
+      cy.get(entityCreateButtonSelector).click({force: true});
+      cy.getEntityCreateUpdateHeading('<%= entityClass %>');
+<%_ fields.filter(field => (!field.id || !field.autoGenerate) && !field.hidden).forEach((field) => {
+    const fieldName = field.fieldName;
+    const fieldNameCapitalized = field.fieldNameCapitalized;
+    const fieldType = field.fieldType;
+    const fieldTypeBlobContent = field.fieldTypeBlobContent;
+    const fieldIsEnum = field.fieldIsEnum;
+    const fieldValue = !entityFakeData ? field.generateFakeData('cypress') : entityFakeData[field.fieldName];
+    if (fieldValue === undefined) {
+        warning(`Error generating a value for field ${fieldName}`);
+        return;
+    }
+_%>
+
+    <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').invoke('val').should('equal', '<%= fieldValue %>');
+    <%_ } else if (fieldType === 'Duration' && clientFramework === 'react') { _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('PT12S').should('have.value', 'PT12S');
+    <%_ } else if (fieldType === 'Duration' && clientFramework !== 'react') { _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('PT12S').should('have.value', 'PT12S');
+    <%_ } else if (fieldType === 'Boolean') { _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).should('not.be.checked');
+      cy.get(`[data-cy="<%= fieldName %>"]`).click().should('be.checked');
+    <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'text') { _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>', { force: true }).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
+    <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
+      cy.setFieldImageAsBytesOfEntity('<%= fieldName %>', 'integration-test.png', 'image/png');
+    <%_ } else if (fieldIsEnum) { _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).select('<%= fieldValue %>');
+    <%_ } else if (fieldType === 'UUID'){ _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').invoke('val').should('match', new RegExp('<%= fieldValue %>'));
+    <%_ } else if(['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'LocalDate', ].includes(fieldType)) { _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').should('have.value', '<%= fieldValue %>');
+    <%_ } else { _%>
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>', { force: true }).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
+    <%_ } _%>
+<%_ }); _%>
+
+<%_ for (relationship of requiredRelationships) {
+    const relationshipType = relationship.relationshipType;
+    const ownerSide = relationship.ownerSide;
+    const relationshipName = relationship.relationshipName;
+    const relationshipNameCapitalized = relationship.relationshipNameCapitalized;
+_%>
+      cy.get(`[data-cy="<%= relationshipName %>"]`).select(<%= relationshipName %>.<%= relationship.relatedField.fieldName %>);
+<%_ } _%>
+
+      cy.get(entityCreateSaveButtonSelector).click({force: true});
+      cy.wait('@postEntityRequest').then(({ response }) => {
+        expect(response.statusCode).to.equal(201);
+        created<%= entityClass %> = response.body;
+      });
+      cy.wait('@entitiesRequest').then(({ response }) => {
+        expect(response.statusCode).to.equal(200);
+      });
+      cy.url().should('match', /\/<%= entityUrl %>(\?.*)?$/);
+    });
+  });
+
+  describe('<%= entityClass %> page operations', () => {
   it<%= skipCreateTest %>('should delete last instance of <%= entityClass %>', function() {
     <%_ if (clientFramework === 'react') { _%>
     cy.intercept('GET', '/<%= baseApi + entityApiUrl %>/*').as('dialogDeleteRequest');
@@ -217,6 +240,7 @@ describe('<%= entityClass %> e2e test', () => {
         this.skip();
       }
     });
+  });
   });
   <%_ } _%>
 });
