@@ -18,7 +18,9 @@ moveEntity() {
 }
 
 prepareFolder() {
-    rm -rf "$JHI_FOLDER_APP"
+    if [[$(dirname $(pwd)) != $(dirname $JHI_FOLDER_APP)]]; then
+      rm -rf "$JHI_FOLDER_APP"
+    fi
     mkdir -p "$JHI_FOLDER_APP"/.jhipster/
 }
 #-------------------------------------------------------------------------------

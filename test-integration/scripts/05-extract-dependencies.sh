@@ -22,27 +22,12 @@ if [[ "$JHI_HOME" == "" ]]; then
     JHI_HOME=$(init_var "$BUILD_REPOSITORY_LOCALPATH" "$GITHUB_WORKSPACE" "$JHI_DETECTED_DIR")
 fi
 
-# folder for test-integration
-if [[ "$JHI_INTEG" == "" ]]; then
-    JHI_INTEG="$JHI_HOME"/test-integration
+# set node version
+if [[ "$JHI_NODE_VERSION" == "" ]]; then
+    JHI_NODE_VERSION=$(grep -o "NODE_VERSION = '[^']*'" $JHI_HOME/generators/generator-constants.js | cut -f2 -d "'")
 fi
 
-# folder for samples
-if [[ "$JHI_SAMPLES" == "" ]]; then
-    JHI_SAMPLES="$JHI_INTEG"/samples
-fi
-
-# folder for scripts
-if [[ "$JHI_SCRIPTS" == "" ]]; then
-    JHI_SCRIPTS="$JHI_INTEG"/scripts
-fi
-
-# folder for app
-if [[ "$JHI_FOLDER_APP" == "" ]]; then
-    JHI_FOLDER_APP="$HOME"/app
-fi
-
-# set correct OpenJDK version
-if [[ "$JHI_JDK" == "11" && "$JHI_GITHUB_CI" != "true" ]]; then
-    JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")
+# set node version
+if [[ "$JHI_NPM_VERSION" == "" ]]; then
+    JHI_NPM_VERSION=$(grep -o '"npm": "[^"]*"' $JHI_HOME/generators/common/templates/package.json | cut -f4 -d '"')
 fi
