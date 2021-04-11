@@ -19,6 +19,8 @@
 
 name: Angular
 on:
+  schedule:
+    - cron: '0 0 * * *'
   push:
     branches-ignore:
       - 'dependabot/**'
@@ -34,27 +36,8 @@ on:
       - 'generators/*client/templates/react/**'
       - 'generators/*client/templates/vue/**'
 env:
-  JHI_RUN_APP: 1
   JHI_JDK: 11
-  JHI_LIB_REPO: https://github.com/jhipster/jhipster-bom.git
-  JHI_LIB_BRANCH: main
-  JHI_GEN_REPO: https://github.com/jhipster/generator-jhipster.git
-  JHI_GEN_BRANCH: main
-  SPRING_OUTPUT_ANSI_ENABLED: ALWAYS
-  SPRING_JPA_SHOW_SQL: false
-  JHI_DISABLE_WEBPACK_LOGS: true
-  JHI_E2E_HEADLESS: true
-  JHI_HOME: ${{ github.workspace }}/generator-jhipster
-  JHI_SCRIPTS: ${{ github.workspace }}/generator-jhipster/test-integration/scripts
-  JHI_FOLDER_APP: ${{ github.workspace }}/app
-  NG_CLI_ANALYTICS: 'false'
-  JHI_GITHUB_CI: true
   FORCE_COLOR: 1
-  # https://github.com/actions/virtual-environments/issues/1499#issuecomment-689467080
-  MAVEN_OPTS: >-
-    -Dhttp.keepAlive=false
-    -Dmaven.wagon.http.pool=false
-    -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
 jobs:
   applications:
     name: ${{ matrix.app-type }}
@@ -161,15 +144,6 @@ jobs:
             war: 1
             e2e: 1
             testcontainers: 0
-    env:
-      JHI_GENERATE_SKIP_CONFIG: 1
-      JHI_ENTITY: ${{ matrix.entity }}
-      JHI_JDL_ENTITY: ${{ matrix.jdl-entity }}
-      JHI_APP: ${{ matrix.jhi-app-type || matrix.app-type }}
-      JHI_PROFILE: ${{ matrix.environment }}
-      JHI_WAR: ${{ matrix.war }}
-      JHI_E2E: ${{ matrix.e2e }}
-      SPRING_PROFILES_ACTIVE: ${{ fromJson('["", "testcontainers"]')[matrix.testcontainers] }}
     steps:
       #----------------------------------------------------------------------
       # Install all tools and check configuration
@@ -179,12 +153,6 @@ jobs:
         with:
           path: generator-jhipster
           fetch-depth: 2
-      - name: 'SETUP: Create required structure'
-        run: |
-          mkdir app
-          mkdir -p base/generator-jhipster
-          mkdir -p base/app
-        working-directory: ${{ github.workspace }}
       - uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ matrix.node_version }}
@@ -192,6 +160,15 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '11.x'
+      - name: 'SETUP: environment'
+        uses: ./generator-jhipster/.github/actions/setup
+        with:
+          entities-sample: ${{ matrix.entity }}
+          jdl-entities-sample: ${{ matrix.jdl-entity }}
+          application-sample: ${{ matrix.jhi-app-type || matrix.app-type }}
+          application-environment: ${{ matrix.environment }}
+          application-packaging: ${{ matrix.war || 'jar' }}
+          enable-testcontainers: ${{ matrix.testcontainers != 0 }}
       - name: 'SETUP: Get date'
         id: get-date
         run: |
@@ -199,22 +176,26 @@ jobs:
       - name: 'SETUP: load npm cache'
         uses: actions/cache@v2.1.4
         with:
-          path: |
-            ~/.npm
-            ~/.cache/Cypress/
-          key: ${{ runner.os }}-node-${{ steps.get-date.outputs.date }}-${{ matrix.cache }}-${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json') }}
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ matrix.cache }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json.ejs') }}
           restore-keys: |
-            ${{ runner.os }}-node-${{ steps.get-date.outputs.date }}-${{ matrix.cache }}-
-            ${{ runner.os }}-node-${{ steps.get-date.outputs.date }}-
-            ${{ runner.os }}-node-${{ steps.get-date.outputs.date }}
+            ${{ runner.os }}-node-${{ matrix.cache }}-${{ steps.get-date.outputs.date }}-
       - name: 'SETUP: load maven cache'
+        if: "!contains(matrix.app-type, 'gradle')"
         uses: actions/cache@v2.1.4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ steps.get-date.outputs.date }}-${{ hashFiles('generator-jhipster/**/pom.xml.ejs') }}
           restore-keys: |
             ${{ runner.os }}-maven-${{ steps.get-date.outputs.date }}-
-            ${{ runner.os }}-maven-${{ steps.get-date.outputs.date }}
+      - name: 'SETUP: load jhipster-bom maven cache'
+        if: contains(matrix.app-type, 'gradle')
+        uses: actions/cache@v2.1.4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-jhipster-bom-${{ steps.get-date.outputs.date }}-
+          restore-keys: |
+            ${{ runner.os }}-maven-jhipster-bom-
       - name: 'SETUP: load gradle cache'
         if: contains(matrix.app-type, 'gradle')
         uses: actions/cache@v2.1.4
@@ -222,29 +203,31 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ steps.get-date.outputs.date }}-${{ hashFiles('generator-jhipster/**/build.gradle.ejs') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('generator-jhipster/**/build.gradle.ejs') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-${{ steps.get-date.outputs.date }}-
-            ${{ runner.os }}-gradle-${{ steps.get-date.outputs.date }}
-      - name: 'ENV: display variables'
-        run: $JHI_SCRIPTS/01-display-configuration.sh
+            ${{ runner.os }}-gradle-
+      - name: 'SETUP: load e2e cache'
+        if: matrix.e2e == 1
+        uses: actions/cache@v2.1.4
+        with:
+          path: ~/.cache/Cypress/
+          key: ${{ runner.os }}-cypress-${{ hashFiles('generator-jhipster/client/common/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cypress-
       - name: 'TOOLS: configure tools installed by the system'
         run: $JHI_SCRIPTS/03-system.sh
       - name: 'TOOLS: configure git'
         run: $JHI_SCRIPTS/04-git-config.sh
       #----------------------------------------------------------------------
-      # Install JHipster and generate project+entities
+      # Install JHipster
       #----------------------------------------------------------------------
       - name: 'GENERATION: install JHipster'
-        run: $JHI_SCRIPTS/10-install-jhipster.sh
-      - name: 'GENERATION: config'
-        run: $JHI_SCRIPTS/11-generate-config.sh
-      - name: 'GENERATION: project'
-        run: $JHI_SCRIPTS/12-generate-project.sh
-      - name: 'GENERATION: replace version in generated project'
-        run: $JHI_SCRIPTS/13-replace-version-generated-project.sh
-      - name: 'GENERATION: jhipster info'
-        run: $JHI_SCRIPTS/14-jhipster-info.sh
+        uses: ./generator-jhipster/.github/actions/install
+      #----------------------------------------------------------------------
+      # Install Generate project+entities
+      #----------------------------------------------------------------------
+      - name: 'GENERATION: generate config and project'
+        uses: ./generator-jhipster/.github/actions/generate
       #----------------------------------------------------------------------
       # Detect changes against base commit
       #----------------------------------------------------------------------
@@ -252,31 +235,25 @@ jobs:
         continue-on-error: true
         id: base-checkout
         if: github.event.pull_request
-        working-directory: ${{ github.workspace }}/base/generator-jhipster
+        working-directory: ${{ github.workspace }}/generator-jhipster
         run: |
-          git clone ${{ github.workspace }}/generator-jhipster .
           git checkout @~1
           git log
-          npm uninstall -g generator-jhipster
           npm install
-          npm install -g .
-      - name: 'MERGE: merge base project'
+      - name: 'MERGE: generate merge base project'
+        uses: ./generator-jhipster/.github/actions/generate
         continue-on-error: true
         id: base-app
         if: steps.base-checkout.outcome == 'success'
-        working-directory: ${{ github.workspace }}/base/app
-        run: |
-          $JHI_SCRIPTS/11-generate-config.sh
-          # 11-generate-entities.sh removes current dir, we need to switch to the new one
-          cd ../app
-          $JHI_SCRIPTS/12-generate-project.sh --skip-install --skip-git
+        with:
+          generation-args: --skip-install --skip-git
         env:
-          JHI_FOLDER_APP: ${{ github.workspace }}/base/app
+          JHI_FOLDER_APP: ${{ github.workspace }}/base-app
       - name: 'MERGE: merge project diff'
         continue-on-error: true
         id: merge-is-equal
-        if: steps.base-app.outcome == 'success'
-        working-directory: ${{ github.workspace }}/base/app
+        if: steps.base-app.outputs.generation-outcome == 'success'
+        working-directory: ${{ github.workspace }}/base-app
         run: |
           # Copy git repository (clone without the files)
           cp -a ${{ github.workspace }}/app/.git .
@@ -296,41 +273,24 @@ jobs:
       #----------------------------------------------------------------------
       # Launch tests
       #----------------------------------------------------------------------
-      - name: 'TESTS: Start docker-compose containers for e2e and backend tests'
-        if: steps.tests-should-be-skipped.outputs.skip-tests != 'true' && matrix.testcontainers != 1
-        run: npm run ci:e2e:prepare
-      - name: 'TESTS: backend'
-        id: backend
+      - name: 'TESTS: launch tests'
+        uses: ./generator-jhipster/.github/actions/run-tests
+        id: tests
         if: steps.tests-should-be-skipped.outputs.skip-tests != 'true'
-        run: npm run ci:backend:test
-      - name: 'TESTS: frontend'
-        if: steps.tests-should-be-skipped.outputs.skip-tests != 'true'
-        run: npm run ci:frontend:test
-      - name: 'TESTS: packaging'
-        if: steps.tests-should-be-skipped.outputs.skip-tests != 'true'
-        run: npm run ci:e2e:package
-      - name: 'TESTS: Start docker-compose containers for e2e tests'
-        if: steps.tests-should-be-skipped.outputs.skip-tests != 'true' && matrix.testcontainers == 1
-        run: npm run ci:e2e:prepare
-      - name: 'E2E: Run'
-        id: e2e
-        if: steps.tests-should-be-skipped.outputs.skip-tests != 'true'
-        run: npm run ci:e2e:run --if-present
-      - name: 'E2E: Teardown'
-        if: always() && matrix.e2e == 1 && steps.tests-should-be-skipped.outputs.skip-tests != 'true'
-        run: npm run ci:e2e:teardown
+        with:
+          e2e: ${{ matrix.e2e != 0 }}
       - name: 'BACKEND: Store failure logs'
         uses: actions/upload-artifact@v2
-        if: always() && steps.backend.outcome == 'failure'
+        if: always() && (steps.tests.output.backend-outcome == 'failure')
         with:
           name: log-${{ matrix.app-type }}
-          path: ${{ github.workspace }}/app/build/test-results/**/*.xml
+          path: ${{ env.JHI_FOLDER_APP }}/build/test-results/**/*.xml
       - name: 'E2E: Store failure screenshots'
         uses: actions/upload-artifact@v2
-        if: always() && steps.e2e.outcome == 'failure'
+        if: always() && (steps.tests.output.e2e_outcome == 'failure')
         with:
           name: screenshots-${{ matrix.app-type }}
-          path: ${{ github.workspace }}/app/*/cypress/screenshots
+          path: ${{ env.JHI_FOLDER_APP }}/*/cypress/screenshots
       - name: 'ANALYSIS: Sonar analysis'
         if: steps.tests-should-be-skipped.outputs.skip-tests != 'true' && matrix.sonar-analyse == 1
         run: $JHI_SCRIPTS/25-sonar-analyze.sh

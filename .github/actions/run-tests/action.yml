@@ -1,0 +1,82 @@
+#
+# Copyright 2013-2021 the original author or authors from the JHipster project.
+#
+# This file is part of the JHipster project, see https://www.jhipster.tech/
+# for more information.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: 'Run JHipster app tests'
+description: 'Run JHipster app tests'
+inputs:
+  application-directory:
+    description: 'Application path'
+    required: false
+    default: ${{ github.workspace }}
+  backend:
+    description: 'Run backend tests'
+    required: false
+    default: 'true'
+  frontend:
+    description: 'Run frontend tests'
+    required: false
+    default: 'true'
+  e2e:
+    description: 'Run E2E tests'
+    required: false
+    default: 'true'
+outputs:
+  backend-outcome:
+    description: 'Backend outcome'
+    value: ${{ steps.backend.outcome }}
+  frontend-outcome:
+    description: 'E2E outcome'
+    value: ${{ steps.frontend.outcome }}
+  e2e-outcome:
+    description: 'E2E outcome'
+    value: ${{ steps.e2e.outcome }}
+runs:
+  using: 'composite'
+  steps:
+    - name: 'TESTS: Start docker-compose containers for e2e and backend tests tests'
+      run: bash -c 'if (($JHI_TESTCONTAINERS != 'true')); then npm run ci:e2e:prepare; fi'
+      shell: bash
+      working-directory: ${{ env.JHI_FOLDER_APP }}
+    - name: 'TESTS: backend'
+      id: backend
+      run: bash -c 'if (("${{inputs.backend}}" == "true")); then npm run ci:backend:test; fi'
+      shell: bash
+      working-directory: ${{ env.JHI_FOLDER_APP }}
+    - name: 'TESTS: frontend'
+      id: frontend
+      run: bash -c 'if (("${{inputs.frontend}}" == "true")); then npm run ci:frontend:test; fi'
+      shell: bash
+      working-directory: ${{ env.JHI_FOLDER_APP }}
+    - name: 'TESTS: packaging'
+      run: bash -c 'if (("${{inputs.e2e}}" == "true")); then npm run ci:e2e:package; fi'
+      shell: bash
+      working-directory: ${{ env.JHI_FOLDER_APP }}
+    - name: 'TESTS: Start docker-compose containers for e2e tests'
+      run: bash -c 'if (("${{inputs.e2e}}" == "true" && $JHI_TESTCONTAINERS == "true")); then npm run ci:e2e:prepare; fi'
+      shell: bash
+      working-directory: ${{ env.JHI_FOLDER_APP }}
+    - name: 'E2E: Run'
+      id: e2e
+      run: bash -c 'if (("${{inputs.e2e}}" == "true")); then npm run ci:e2e:run; fi'
+      shell: bash
+      working-directory: ${{ env.JHI_FOLDER_APP }}
+    - name: 'E2E: Teardown'
+      run: bash -c 'if (("${{inputs.e2e}}" == "true")); then npm run ci:e2e:teardown; fi'
+      shell: bash
+      working-directory: ${{ env.JHI_FOLDER_APP }}
