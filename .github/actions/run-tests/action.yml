@@ -23,7 +23,6 @@ inputs:
   application-directory:
     description: 'Application path'
     required: false
-    default: ${{ github.workspace }}
   backend:
     description: 'Run backend tests'
     required: false
@@ -52,31 +51,31 @@ runs:
     - name: 'TESTS: Start docker-compose containers for e2e and backend tests tests'
       run: bash -c 'if (($JHI_TESTCONTAINERS != 'true')); then npm run ci:e2e:prepare; fi'
       shell: bash
-      working-directory: ${{ env.JHI_FOLDER_APP }}
+      working-directory: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'TESTS: backend'
       id: backend
       run: bash -c 'if (("${{inputs.backend}}" == "true")); then npm run ci:backend:test; fi'
       shell: bash
-      working-directory: ${{ env.JHI_FOLDER_APP }}
+      working-directory: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'TESTS: frontend'
       id: frontend
       run: bash -c 'if (("${{inputs.frontend}}" == "true")); then npm run ci:frontend:test; fi'
       shell: bash
-      working-directory: ${{ env.JHI_FOLDER_APP }}
+      working-directory: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'TESTS: packaging'
       run: bash -c 'if (("${{inputs.e2e}}" == "true")); then npm run ci:e2e:package; fi'
       shell: bash
-      working-directory: ${{ env.JHI_FOLDER_APP }}
+      working-directory: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'TESTS: Start docker-compose containers for e2e tests'
       run: bash -c 'if (("${{inputs.e2e}}" == "true" && $JHI_TESTCONTAINERS == "true")); then npm run ci:e2e:prepare; fi'
       shell: bash
-      working-directory: ${{ env.JHI_FOLDER_APP }}
+      working-directory: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'E2E: Run'
       id: e2e
       run: bash -c 'if (("${{inputs.e2e}}" == "true")); then npm run ci:e2e:run; fi'
       shell: bash
-      working-directory: ${{ env.JHI_FOLDER_APP }}
+      working-directory: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'E2E: Teardown'
       run: bash -c 'if (("${{inputs.e2e}}" == "true")); then npm run ci:e2e:teardown; fi'
       shell: bash
-      working-directory: ${{ env.JHI_FOLDER_APP }}
+      working-directory: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}

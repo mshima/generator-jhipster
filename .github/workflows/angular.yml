@@ -167,8 +167,8 @@ jobs:
           jdl-entities-sample: ${{ matrix.jdl-entity }}
           application-sample: ${{ matrix.jhi-app-type || matrix.app-type }}
           application-environment: ${{ matrix.environment }}
-          application-packaging: ${{ matrix.war || 'jar' }}
-          enable-testcontainers: ${{ matrix.testcontainers != 0 }}
+          application-packaging: ${{ fromJson('["jar", "war"]')[matrix.war || 0] }}
+          enable-testcontainers: ${{ matrix.testcontainers == 1 }}
       - name: 'SETUP: Get date'
         id: get-date
         run: |

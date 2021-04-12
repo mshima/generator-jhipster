@@ -23,6 +23,9 @@ inputs:
   generation-args:
     description: 'Arguments to pass to jhipster command'
     required: false
+  application-directory:
+    description: 'Application path'
+    required: false
 outputs:
   generation-outcome:
     description: 'Generation outcome'
@@ -33,16 +36,26 @@ runs:
     - name: 'ENV: display variables'
       run: $JHI_SCRIPTS/01-display-configuration.sh
       shell: bash
+      env:
+        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'GENERATION: config'
       run: $JHI_SCRIPTS/11-generate-config.sh
       shell: bash
+      env:
+        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'GENERATION: project'
       id: generation
       run: $JHI_SCRIPTS/12-generate-project.sh ${{ inputs.extra-args }}
       shell: bash
+      env:
+        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'GENERATION: replace version in generated project'
       run: $JHI_SCRIPTS/13-replace-version-generated-project.sh
       shell: bash
+      env:
+        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
     - name: 'GENERATION: jhipster info'
       run: $JHI_SCRIPTS/14-jhipster-info.sh
       shell: bash
+      env:
+        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
