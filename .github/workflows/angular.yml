@@ -259,8 +259,7 @@ jobs:
         with:
           generation-args: --skip-install --skip-git
           replace-lib-version: false
-        env:
-          JHI_FOLDER_APP: ${{ github.workspace }}/base/app
+          application-path: ${{ github.workspace }}/base/app
       - name: 'MERGE: merge project diff'
         continue-on-error: true
         id: merge-is-equal
@@ -296,13 +295,13 @@ jobs:
         if: always() && (steps.tests.output.backend-outcome == 'failure')
         with:
           name: log-${{ matrix.app-type }}
-          path: ${{ env.JHI_FOLDER_APP }}/build/test-results/**/*.xml
+          path: ${{ steps.setup.outputs.application-path }}/*/test-results/**/*.xml
       - name: 'E2E: Store failure screenshots'
         uses: actions/upload-artifact@v2
         if: always() && (steps.tests.output.e2e_outcome == 'failure')
         with:
           name: screenshots-${{ matrix.app-type }}
-          path: ${{ env.JHI_FOLDER_APP }}/*/cypress/screenshots
+          path: ${{ steps.setup.outputs.application-path }}/*/cypress/screenshots
       - name: 'ANALYSIS: Sonar analysis'
         if: steps.tests-should-be-skipped.outputs.skip-tests != 'true' && matrix.sonar-analyse == 1
         run: $JHI_SCRIPTS/25-sonar-analyze.sh

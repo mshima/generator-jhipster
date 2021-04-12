@@ -15,7 +15,9 @@ init_var() {
 }
 
 # uri of repo
-JHI_REPO=$(init_var "$BUILD_REPOSITORY_URI" "$GITHUB_WORKSPACE" )
+if [[ "$JHI_REPO" == "" ]]; then
+    JHI_REPO=$(init_var "$BUILD_REPOSITORY_URI" "$GITHUB_WORKSPACE" )
+fi
 
 # folder where the generator-jhipster repo is cloned
 if [[ "$JHI_HOME" == "" ]]; then

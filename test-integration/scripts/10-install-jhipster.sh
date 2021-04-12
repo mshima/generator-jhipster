@@ -7,16 +7,16 @@ source $(dirname $0)/00-init-env.sh
 # Install JHipster Dependencies and Server-side library
 #-------------------------------------------------------------------------------
 cd "$HOME"
-if [[ "$JHI_REPO" == *"/jhipster" ]]; then
+if [[ "$JHI_LIB_BRANCH" == "release" || "$JHI_LIB_BRANCH" == "ignore" ]]; then
+    echo "*** jhipster: use release version"
+
+elif [[ "$JHI_REPO" == *"/jhipster" ]]; then
     echo "*** jhipster: use local version at JHI_REPO=$JHI_REPO"
 
     cd "$JHI_HOME"
     git --no-pager log -n 10 --graph --pretty='%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 
     ./mvnw -ntp clean install -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true --batch-mode
-
-elif [[ "$JHI_LIB_BRANCH" == "release" ]]; then
-    echo "*** jhipster: use release version"
 
 else
     echo "*** jhipster: JHI_LIB_REPO=$JHI_LIB_REPO with JHI_LIB_BRANCH=$JHI_LIB_BRANCH"
@@ -42,7 +42,11 @@ fi
 # Install JHipster Generator
 #-------------------------------------------------------------------------------
 cd "$HOME"
-if [[ "$JHI_REPO" == *"/generator-jhipster" ]]; then
+if [[ "$JHI_GEN_BRANCH" == "release" ]]; then
+    echo "*** generator-jhipster: use release version"
+    npm install -g generator-jhipster
+
+elif [[ "$JHI_REPO" == *"/generator-jhipster" ]]; then
     echo "*** generator-jhipster: use local version at JHI_REPO=$JHI_REPO"
 
     cd "$JHI_HOME"
@@ -50,9 +54,6 @@ if [[ "$JHI_REPO" == *"/generator-jhipster" ]]; then
     npm install -g npm@$(node -e "console.log(require('./generators/generator-constants').NPM_VERSION);") || true
     npm ci
     npm install -g "$JHI_HOME"
-elif [[ "$JHI_GEN_BRANCH" == "release" ]]; then
-    echo "*** generator-jhipster: use release version"
-    npm install -g generator-jhipster
 
 else
     echo "*** generator-jhipster: JHI_GEN_REPO=$JHI_GEN_REPO with JHI_GEN_BRANCH=$JHI_GEN_BRANCH"

@@ -23,7 +23,7 @@ inputs:
   generation-args:
     description: 'Arguments to pass to jhipster command'
     required: false
-  application-directory:
+  application-path:
     description: 'Application path'
     required: false
   replace-lib-version:
@@ -41,12 +41,12 @@ runs:
       run: $JHI_SCRIPTS/01-display-configuration.sh
       shell: bash
       env:
-        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
+        JHI_FOLDER_APP: ${{ inputs.application-path || env.JHI_FOLDER_APP }}
     - name: 'GENERATION: config'
       run: $JHI_SCRIPTS/11-generate-config.sh
       shell: bash
       env:
-        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
+        JHI_FOLDER_APP: ${{ inputs.application-path || env.JHI_FOLDER_APP }}
     - name: 'GENERATION: project'
       id: generation
       run: |
@@ -54,14 +54,14 @@ runs:
         echo "::set-output name=outcome::success"
       shell: bash
       env:
-        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
+        JHI_FOLDER_APP: ${{ inputs.application-path || env.JHI_FOLDER_APP }}
     - name: 'GENERATION: replace version in generated project'
       run: test ${{ inputs.replace-lib-version }} != true || $JHI_SCRIPTS/13-replace-version-generated-project.sh
       shell: bash
       env:
-        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
+        JHI_FOLDER_APP: ${{ inputs.application-path || env.JHI_FOLDER_APP }}
     - name: 'GENERATION: jhipster info'
       run: $JHI_SCRIPTS/14-jhipster-info.sh
       shell: bash
       env:
-        JHI_FOLDER_APP: ${{ inputs.application-directory || env.JHI_FOLDER_APP }}
+        JHI_FOLDER_APP: ${{ inputs.application-path || env.JHI_FOLDER_APP }}

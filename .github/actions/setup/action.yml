@@ -20,7 +20,7 @@
 name: 'Install jhipster-bom and generator-jhipster'
 description: 'Install JHipster using test-integration scripts'
 inputs:
-  application-directory:
+  application-path:
     description: 'Application path'
     required: false
     default: ${{ github.workspace }}/app
@@ -75,20 +75,23 @@ outputs:
   npm-version:
     description: 'NPM version'
     value: ${{ steps.dependencies.outputs.npm-version }}
+  application-path:
+    description: 'Application path'
+    value: ${{ steps.variables.outputs.application-path }}
 runs:
   using: 'composite'
   steps:
     - name: 'ENV: setup variables'
+      id: variables
       run: |
         echo "JHI_LIB_REPO=${{inputs.jhipster-bom-repository}}" >> $GITHUB_ENV
         echo "JHI_LIB_BRANCH=${{inputs.jhipster-bom-branch}}" >> $GITHUB_ENV
         echo "JHI_GEN_REPO=${{inputs.jhipster-generator-repository}}" >> $GITHUB_ENV
         echo "JHI_GEN_BRANCH=${{inputs.jhipster-generator-branch}}" >> $GITHUB_ENV
-        echo "JHI_FOLDER_APP=${{inputs.application-directory}}" >> $GITHUB_ENV
+        echo "JHI_FOLDER_APP=${{inputs.application-path}}" >> $GITHUB_ENV
 
         echo "JHI_HOME=${{ inputs.jhipster-generator-directory }}" >> $GITHUB_ENV
         echo "JHI_SCRIPTS=${{ inputs.jhipster-generator-directory }}/test-integration/scripts" >> $GITHUB_ENV
-        echo "JHI_FOLDER_APP=${{inputs.application-directory}}" >> $GITHUB_ENV
 
         echo "JHI_ENTITY=${{inputs.entities-sample}}" >> $GITHUB_ENV
         echo "JHI_JDL_ENTITY=${{inputs.jdl-entities-sample}}" >> $GITHUB_ENV
@@ -108,6 +111,8 @@ runs:
 
         # https://github.com/actions/virtual-environments/issues/1499#issuecomment-689467080
         echo "MAVEN_OPTS=-Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120" >> $GITHUB_ENV
+
+        echo "::set-output name=application-path::${{inputs.application-path}}"
       shell: bash
     - name: 'ENV: Load dependencies versions'
       id: dependencies
@@ -115,8 +120,8 @@ runs:
         source $JHI_HOME/test-integration/scripts/00-init-env.sh
         source $JHI_HOME/test-integration/scripts/05-extract-dependencies.sh
 
-        echo "::set-output name=node-version::$JHI_NPM_VERSION"
-        echo "::set-output name=npm-version::$JHI_NODE_VERSION"
+        echo "::set-output name=node-version::$JHI_NODE_VERSION"
+        echo "::set-output name=npm-version::$JHI_NPM_VERSION"
       shell: bash
     - name: 'ENV: display variables'
       run: $JHI_SCRIPTS/01-display-configuration.sh
