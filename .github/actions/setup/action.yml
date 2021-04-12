@@ -87,9 +87,9 @@ runs:
         echo "JHI_JDL_ENTITY=${{inputs.jdl-entities-sample}}" >> $GITHUB_ENV
         echo "JHI_APP=${{inputs.application-sample}}" >> $GITHUB_ENV
         echo "JHI_PROFILE=${{inputs.application-environment}}" >> $GITHUB_ENV
-        bash -c 'if (("${{inputs.application-packaging}}" == 'war')); then echo "JHI_WAR=1" >> $GITHUB_ENV; fi'
-        bash -c 'if (("${{inputs.enable-testcontainers}}" == 'true')); then echo "JHI_TESTCONTAINERS=true" >> $GITHUB_ENV; fi'
-        bash -c 'if (("${{inputs.enable-testcontainers}}" == 'true')); then echo "SPRING_PROFILES_ACTIVE=testcontainers" >> $GITHUB_ENV; fi'
+        test ${{inputs.application-packaging}} != war || echo "JHI_WAR=1" >> $GITHUB_ENV
+        test ${{inputs.enable-testcontainers}} != true || echo "JHI_TESTCONTAINERS=true" >> $GITHUB_ENV
+        test ${{inputs.enable-testcontainers}} != true || echo "SPRING_PROFILES_ACTIVE=testcontainers" >> $GITHUB_ENV
 
         echo "JHI_GENERATE_SKIP_CONFIG=1" >> $GITHUB_ENV
         echo "JHI_DISABLE_WEBPACK_LOGS=true" >> $GITHUB_ENV
