@@ -2295,6 +2295,9 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
     if (options.reproducible !== undefined) {
       dest.reproducible = options.reproducible;
     }
+    if (options.recreateInitialChangelog) {
+      dest.recreateInitialChangelog = options.recreateInitialChangelog;
+    }
   }
 
   /**
@@ -2313,9 +2316,6 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
     if (options.incrementalChangelog !== undefined) {
       this.jhipsterConfig.incrementalChangelog = options.incrementalChangelog;
     }
-    if (options.recreateInitialChangelog) {
-      this.configOptions.recreateInitialChangelog = options.recreateInitialChangelog;
-    }
     if (options.withAdminUi !== undefined) {
       this.jhipsterConfig.withAdminUi = options.withAdminUi;
     }
@@ -2331,15 +2331,15 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
     if (options.skipFakeData) {
       this.jhipsterConfig.skipFakeData = true;
     }
-    if (options.skipUserManagement) {
-      this.jhipsterConfig.skipUserManagement = true;
+    if (options.skipUserManagement !== undefined) {
+      this.jhipsterConfig.skipUserManagement = options.skipUserManagement;
     }
-    if (options.skipCheckLengthOfIdentifier) {
-      this.jhipsterConfig.skipCheckLengthOfIdentifier = true;
+    if (options.skipCheckLengthOfIdentifier !== undefined) {
+      this.jhipsterConfig.skipCheckLengthOfIdentifier = options.skipCheckLengthOfIdentifier;
     }
 
-    if (options.skipCommitHook) {
-      this.jhipsterConfig.skipCommitHook = true;
+    if (options.skipCommitHook !== undefined) {
+      this.jhipsterConfig.skipCommitHook = options.skipCommitHook;
     }
 
     if (options.baseName) {

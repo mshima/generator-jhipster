@@ -58,7 +58,14 @@ const commonFiles = {
   commitHooks: [
     {
       condition: generator => !generator.skipCommitHook,
-      templates: ['.huskyrc', '.lintstagedrc.js'],
+      templates: [
+        '.lintstagedrc.js',
+        '.husky/.gitignore',
+        {
+          file: '.husky/pre-commit',
+          method: 'copy',
+        },
+      ],
     },
   ],
 };
