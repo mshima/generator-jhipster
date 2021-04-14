@@ -152,6 +152,8 @@ jobs:
         run: jhipster jdl *.jdl --skip-jhipster-dependencies --skip-install --workspaces
       - name: 'GENERATION: replace version in generated project'
         run: $JHI_SCRIPTS/13-replace-version-generated-project.sh
+      - name: Install workspaces deps
+        run: npm install
       - name: Build cache
         run: npm run backend:build-cache || true
         continue-on-error: true
@@ -215,6 +217,8 @@ jobs:
         run: jhipster jdl *.jdl --skip-jhipster-dependencies --skip-install --build gradle --workspaces
       - name: 'GENERATION: replace version in generated project'
         run: $JHI_SCRIPTS/13-replace-version-generated-project.sh
+      - name: Install workspaces deps
+        run: npm install
       - name: Build cache
         run: npm run backend:build-cache || true
         continue-on-error: true
