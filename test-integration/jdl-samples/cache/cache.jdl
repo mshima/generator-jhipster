@@ -2,7 +2,7 @@ application {
   config {
     baseName app1
     packageName com.example.app1
-    applicationType gateway
+    applicationType monolith
     prodDatabaseType postgresql
     searchEngine elasticsearch
     messageBroker kafka
@@ -11,7 +11,7 @@ application {
     cacheProvider ehcache
     authenticationType session
     testFrameworks [gatling]
-    creationTimestamp 1617901618890
+    creationTimestamp 1617901618891
   }
 }
 
@@ -19,12 +19,12 @@ application {
   config {
     baseName app2
     packageName com.example.app2
-  	applicationType gateway
+    applicationType microservice
     prodDatabaseType mysql
     serviceDiscoveryType eureka
     cacheProvider caffeine
     authenticationType oauth2
-    creationTimestamp 1617901618891
+    creationTimestamp 1617901618892
   }
 }
 
@@ -32,11 +32,11 @@ application {
   config {
     baseName app3
     packageName com.example.app3
-  	applicationType microservice
+    applicationType microservice
     databaseType mongodb
     cacheProvider hazelcast
     authenticationType jwt
-    creationTimestamp 1617901618892
+    creationTimestamp 1617901618893
   }
 }
 
@@ -44,10 +44,10 @@ application {
   config {
     baseName app4
     packageName com.example.app4
-  	applicationType microservice
+    applicationType microservice
     databaseType cassandra
     cacheProvider infinispan
-    creationTimestamp 1617901618892
+    creationTimestamp 1617901618894
   }
 }
 
@@ -55,9 +55,21 @@ application {
   config {
     baseName app5
     packageName com.example.app6
-  	applicationType microservice
+    applicationType microservice
     prodDatabaseType mariadb
     cacheProvider memcached
-    creationTimestamp 1617901618892
+    creationTimestamp 1617901618895
+  }
+}
+
+application {
+  config {
+    baseName app6
+    packageName com.example.app6
+    applicationType gateway
+    prodDatabaseType postgresql
+    serviceDiscoveryType eureka
+    authenticationType oauth2
+    creationTimestamp 1617901618896
   }
 }
