@@ -18,6 +18,7 @@
  */
 /* eslint-disable consistent-return */
 const _ = require('lodash');
+const fs = require('fs');
 
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const writeFiles = require('./files').writeFiles;
@@ -66,6 +67,22 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   get initializing() {
     if (useBlueprints) return;
     return this._initializing();
+  }
+
+  // Public API method used by the getter and also by Blueprints
+  _configuring() {
+    return {
+      checkHuskyCompatibility() {
+        if (!this.options.monorepository || this.jhipsterConfig.skipCommitHook !== undefined) return;
+        // When inside a monorepository, it needs to be a submodule, otherwise husky will fail.
+        this.jhipsterConfig.skipCommitHook = !fs.existsSync(this.destinationPath('.git'));
+      },
+    };
+  }
+
+  get configuring() {
+    if (useBlueprints) return;
+    return this._configuring();
   }
 
   // Public API method used by the getter and also by Blueprints
@@ -132,6 +149,12 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   // Public API method used by the getter and also by Blueprints
   _writing() {
     return {
+      cleanup() {
+        if (this.isJhipsterVersionLessThan('7.0.2')) {
+          this.removeFile('.huskyrc');
+        }
+      },
+
       writePrettierConfig() {
         // Prettier configuration needs to be the first written files - all subgenerators considered - for prettier transform to work
         return this.writeFilesToDisk(prettierConfigFiles);
@@ -144,5 +167,33 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   get writing() {
     if (useBlueprints) return;
     return this._writing();
+  }
+
+  // Public API method used by the getter and also by Blueprints
+  _postWriting() {
+    return {
+      async addHusky() {
+        if (
+          this.skipCommitHook ||
+          // Tests require that the common generator don't write package.json by itself. Condition can be dropped if tests are refactored.
+          Object.keys(this.packageJson.getAll()).length === 0
+        )
+          return;
+        this.packageJson.merge({
+          devDependencies: {
+            husky: this.dependabotPackageJson.devDependencies.husky,
+            'lint-staged': this.dependabotPackageJson.devDependencies['lint-staged'],
+          },
+        });
+        let prepareScript = this.packageJson.getPath('scripts.prepare') || '';
+        prepareScript = `husky install${prepareScript ? ` && ${prepareScript}` : ''}`;
+        this.packageJson.setPath('scripts.prepare', prepareScript);
+      },
+    };
+  }
+
+  get postWriting() {
+    if (useBlueprints) return;
+    return this._postWriting();
   }
 };
