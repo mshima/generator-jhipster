@@ -29,11 +29,18 @@ const packagejs = require('../../package.json');
 const constants = require('../generator-constants');
 const statistics = require('../statistics');
 const { clientDefaultConfig } = require('../generator-defaults');
-const { TestGenerators } = require('../generator-list');
+const { GENERATOR_CYPRESS, GENERATOR_COMMON, GENERATOR_LANGUAGES, GENERATOR_CLIENT } = require('../generator-list');
 
-const { GENERATOR_CYPRESS } = TestGenerators;
 const { ANGULAR, REACT, VUE } = constants.SUPPORTED_CLIENT_FRAMEWORKS;
 const { CYPRESS } = require('../../jdl/jhipster/test-framework-types');
+const { OAUTH2 } = require('../../jdl/jhipster/authentication-types');
+const databaseTypes = require('../../jdl/jhipster/database-types');
+
+const NO_DATABASE = databaseTypes.NO;
+const { CommonDBTypes } = require('../../jdl/jhipster/field-types');
+
+const TYPE_STRING = CommonDBTypes.STRING;
+const TYPE_UUID = CommonDBTypes.UUID;
 
 let useBlueprints;
 
@@ -68,7 +75,7 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
 
     this.existingProject = !!this.jhipsterConfig.clientFramework;
 
-    useBlueprints = !this.fromBlueprint && this.instantiateBlueprints('client');
+    useBlueprints = !this.fromBlueprint && this.instantiateBlueprints(GENERATOR_CLIENT);
   }
 
   // Public API method used by the getter and also by Blueprints
@@ -141,18 +148,18 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
   _composing() {
     return {
       composeCommon() {
-        this.composeWithJHipster('common', true);
+        this.composeWithJHipster(GENERATOR_COMMON, true);
       },
       composeCypress() {
         const testFrameworks = this.jhipsterConfig.testFrameworks;
         if (!Array.isArray(testFrameworks) || !testFrameworks.includes(CYPRESS)) return;
-        this.composeWithJHipster(GENERATOR_CYPRESS, true);
+        this.composeWithJHipster(GENERATOR_CYPRESS, { existingProject: this.existingProject }, true);
       },
       composeLanguages() {
         // We don't expose client/server to cli, composing with languages is used for test purposes.
         if (this.jhipsterConfig.enableTranslation === false) return;
 
-        this.composeWithJHipster('languages', true);
+        this.composeWithJHipster(GENERATOR_LANGUAGES, true);
       },
     };
   }
@@ -167,8 +174,11 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
     return {
       loadSharedConfig() {
         this.loadAppConfig();
+        this.loadDerivedAppConfig();
         this.loadClientConfig();
+        this.loadDerivedClientConfig();
         this.loadServerConfig();
+        this.loadDerivedServerConfig();
         this.loadTranslationConfig();
       },
 
@@ -235,7 +245,7 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
         this.lowercaseBaseName = this.baseName.toLowerCase();
         this.humanizedBaseName = this.baseName.toLowerCase() === 'jhipster' ? 'JHipster' : _.startCase(this.baseName);
 
-        if (this.authenticationType === 'oauth2' || this.databaseType === 'no') {
+        if (this.authenticationType === OAUTH2 || this.databaseType === NO_DATABASE) {
           this.skipUserManagement = true;
         }
       },
@@ -253,13 +263,15 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
       ...super._missingPreDefault(),
 
       loadUserManagementEntities() {
-        if (!this.configOptions.sharedEntities) return;
+        if (!this.configOptions.sharedEntities || !this.configOptions.sharedEntities.User) return;
         // Make user entity available to templates.
         this.user = this.configOptions.sharedEntities.User;
+        this.userPrimaryKeyTypeString = this.user.primaryKey.type === TYPE_STRING;
+        this.userPrimaryKeyTypeUUID = this.user.primaryKey.type === TYPE_UUID;
       },
 
       insight() {
-        statistics.sendSubGenEvent('generator', 'client', {
+        statistics.sendSubGenEvent('generator', GENERATOR_CLIENT, {
           app: {
             clientFramework: this.clientFramework,
             enableTranslation: this.enableTranslation,
@@ -336,16 +348,6 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
         } else {
           scriptsStorage.set('ci:frontend:build', 'npm run webapp:build:$npm_package_config_default_environment');
           scriptsStorage.set('ci:frontend:test', 'npm run ci:frontend:build && npm test');
-        }
-
-        if (scriptsStorage.get('e2e')) {
-          scriptsStorage.set({
-            'ci:server:await':
-              'echo "Waiting for server at port $npm_package_config_backend_port to start" && wait-on http-get://localhost:$npm_package_config_backend_port/management/health && echo "Server at port $npm_package_config_backend_port started"',
-            'pree2e:headless': 'npm run ci:server:await',
-            'ci:e2e:run': 'concurrently -k -s first "npm run ci:e2e:server:start" "npm run e2e:headless"',
-            'e2e:dev': 'concurrently -k -s first "./mvnw" "e2e"',
-          });
         }
       },
     };

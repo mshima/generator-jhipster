@@ -16,35 +16,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _ = require('lodash');
-const ora = require('ora');
+const MapperTypes = {
+  MAPSTRUCT: 'mapstruct',
+  NO: 'no',
+};
 
-/**
- * Wraps the promise in a CLI spinner
- * @param promise
- * @param text
- * @param spinnerIcon
- */
-function spinner(promise, text = 'loading', spinnerIcon = 'monkey') {
-  const spinner = ora({ spinner: spinnerIcon, text }).start();
-  return new Promise((resolve, reject) => {
-    promise
-      .then(resolved => {
-        spinner.stop();
-        resolve(resolved);
-      })
-      .catch(err => {
-        spinner.stop();
-        reject(err);
-      });
-  });
-}
+const ServiceTypes = {
+  SERVICE_CLASS: 'serviceClass',
+  SERVICE_IMPL: 'serviceImpl',
+  NO: 'no',
+};
 
-function formatRDSUsername(username) {
-  return _.chain(username).replace('_', '').truncate({ length: 16, omission: '' }).value();
-}
+const PaginationTypes = {
+  PAGINATION: 'pagination',
+  INFINITE_SCROLL: 'infinite-scroll',
+  NO: 'no',
+};
+
+const SearchTypes = {
+  ELASTICSEARCH: 'elasticsearch',
+  COUCHBASE: 'couchbase',
+};
+
+const FilteringTypes = {
+  JPA_METAMODEL: 'jpaMetamodel',
+  NO: 'no',
+};
 
 module.exports = {
-  spinner,
-  formatRDSUsername,
+  MapperTypes,
+  ServiceTypes,
+  PaginationTypes,
+  SearchTypes,
+  FilteringTypes,
 };

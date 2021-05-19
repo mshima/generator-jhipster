@@ -17,14 +17,17 @@
  * limitations under the License.
  */
 /* eslint-disable consistent-return */
-const chalk = require('chalk');
 const _ = require('lodash');
+const chalk = require('chalk');
+const { defaultConfig } = require('../generator-defaults');
 const prompts = require('./prompts');
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const statistics = require('../statistics');
 const packagejs = require('../../package.json');
 const constants = require('../generator-constants');
 const { OptionNames } = require('../../jdl/jhipster/application-options');
+const { MAVEN, GRADLE } = require('../../jdl/jhipster/build-tool-types');
+const { GENERATOR_CICD } = require('../generator-list');
 
 const {
   BASE_NAME,
@@ -40,8 +43,6 @@ const {
   TEST_FRAMEWORKS,
   CACHE_PROVIDER,
 } = OptionNames;
-
-const { MAVEN, GRADLE } = require('../../jdl/jhipster/build-tool-types');
 
 const REACT = constants.SUPPORTED_CLIENT_FRAMEWORKS.REACT;
 
@@ -93,7 +94,7 @@ module.exports = class extends BaseBlueprintGenerator {
       description: 'Automatically configure CircleCI',
     });
 
-    useBlueprints = !this.fromBlueprint && this.instantiateBlueprints('ci-cd');
+    useBlueprints = !this.fromBlueprint && this.instantiateBlueprints(GENERATOR_CICD);
   }
 
   // Public API method used by the getter and also by Blueprints
@@ -169,7 +170,7 @@ module.exports = class extends BaseBlueprintGenerator {
     return {
       insight() {
         if (this.abort) return;
-        statistics.sendSubGenEvent('generator', 'ci-cd');
+        statistics.sendSubGenEvent('generator', GENERATOR_CICD);
       },
       setTemplateConstants() {
         if (this.abort) return;
@@ -191,6 +192,38 @@ module.exports = class extends BaseBlueprintGenerator {
   get configuring() {
     if (useBlueprints) return;
     return this._configuring();
+  }
+
+  _loadPlatformConfig(config = _.defaults({}, this.jhipsterConfig, defaultConfig), dest = this) {
+    super.loadPlatformConfig(config, dest);
+    dest.cicdIntegrationsSnyk = config.cicdIntegrations || [];
+    dest.cicdIntegrationsSnyk = dest.cicdIntegrations.includes('snyk');
+    dest.cicdIntegrationsSonar = dest.cicdIntegrations.includes('sonar');
+    dest.cicdIntegrationsHeroku = dest.cicdIntegrations.includes('heroku');
+    dest.cicdIntegrationsDeploy = dest.cicdIntegrations.includes('deploy');
+    dest.cicdIntegrationsPublishDocker = dest.cicdIntegrations.includes('publishDocker');
+    dest.cicdIntegrationsCypressDashboard = dest.cicdIntegrations.includes('cypressDashboard');
+  }
+
+  // Public API method used by the getter and also by Blueprints
+  _loading() {
+    return {
+      loadSharedConfig() {
+        this.loadAppConfig();
+        this.loadDerivedAppConfig();
+        this.loadClientConfig();
+        this.loadDerivedClientConfig();
+        this.loadServerConfig();
+        this.loadDerivedServerConfig();
+        this.loadTranslationConfig();
+        this._loadPlatformConfig();
+      },
+    };
+  }
+
+  get loading() {
+    if (useBlueprints) return;
+    return this._loading();
   }
 
   // Public API method used by the getter and also by Blueprints

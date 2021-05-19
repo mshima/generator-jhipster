@@ -35,6 +35,10 @@ module.exports = class JHipsterBaseBlueprintGenerator extends BaseGenerator {
   constructor(args, opts, features) {
     super(args, opts, features);
 
+    if (this.options.help) {
+      return;
+    }
+
     // Add base template folder.
     this.jhipsterTemplatesFolders = [this.templatePath()];
 
@@ -103,6 +107,22 @@ module.exports = class JHipsterBaseBlueprintGenerator extends BaseGenerator {
   }
 
   /**
+   * Public API method used by the getter and also by Blueprints
+   * @returns {Object} tasks
+   */
+  _preparingFields() {
+    return {};
+  }
+
+  /**
+   * Public API method used by the getter and also by Blueprints
+   * @returns {Object} tasks
+   */
+  _preparingRelationships() {
+    return {};
+  }
+
+  /**
    * @private
    * Execute custom priorities if they are not declared
    * Should be used by jhipster official generators only.
@@ -119,6 +139,9 @@ module.exports = class JHipsterBaseBlueprintGenerator extends BaseGenerator {
     }
     if (this._isPriorityMissing('preparing', 'default')) {
       tasks = { ...tasks, ...this._preparing() };
+    }
+    if (this._isPriorityMissing('preparingFields', 'default')) {
+      tasks = { ...tasks, ...this._preparingFields() };
     }
     if (this._isPriorityMissing('preparingRelationships', 'default')) {
       tasks = { ...tasks, ...this._preparingRelationships() };
@@ -274,8 +297,12 @@ module.exports = class JHipsterBaseBlueprintGenerator extends BaseGenerator {
       otherModules.push(...blueprints);
     }
 
-    this.jhipsterConfig.blueprints = blueprints;
-    this.jhipsterConfig.otherModules = otherModules;
+    if (blueprints.length > 0) {
+      this.jhipsterConfig.blueprints = blueprints;
+    }
+    if (otherModules.length > 0) {
+      this.jhipsterConfig.otherModules = otherModules;
+    }
 
     if (!this.options.skipChecks) {
       const namespaces = blueprints.map(blueprint => packageNameToNamespace(blueprint.name));

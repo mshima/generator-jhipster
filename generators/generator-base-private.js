@@ -39,6 +39,7 @@ const ANGULAR = constants.SUPPORTED_CLIENT_FRAMEWORKS.ANGULAR;
 const REACT = constants.SUPPORTED_CLIENT_FRAMEWORKS.REACT;
 const VUE = constants.SUPPORTED_CLIENT_FRAMEWORKS.VUE;
 const dbTypes = require('../jdl/jhipster/field-types');
+const { REQUIRED } = require('../jdl/jhipster/validations');
 
 const {
   STRING: TYPE_STRING,
@@ -63,6 +64,8 @@ const databaseTypes = require('../jdl/jhipster/database-types');
 const { MONGODB, NEO4J, COUCHBASE, CASSANDRA, SQL, ORACLE, MYSQL, POSTGRESQL, MARIADB, MSSQL, H2_DISK, H2_MEMORY } = databaseTypes;
 
 const { MAVEN } = require('../jdl/jhipster/build-tool-types');
+const { GATEWAY } = require('../jdl/jhipster/application-types');
+const { SPRING_WEBSOCKET } = require('../jdl/jhipster/websocket-types');
 
 /**
  * This is the Generator base private class.
@@ -109,7 +112,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
   installI18nClientFilesByLanguage(_this, webappDir, lang) {
     const generator = _this || this;
     const prefix = this.fetchFromInstalledJHipster('languages/templates');
-    if (generator.applicationType === 'gateway' && generator.serviceDiscoveryType) {
+    if (generator.applicationType === GATEWAY && generator.serviceDiscoveryType) {
       generator.copyI18nFilesByName(generator, webappDir, 'gateway.json', lang);
     }
     if (generator.withAdminUi) {
@@ -127,7 +130,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     generator.copyI18nFilesByName(generator, webappDir, 'user-management.json', lang);
 
     // tracker.json for Websocket
-    if (this.websocket === 'spring-websocket') {
+    if (this.websocket === SPRING_WEBSOCKET) {
       generator.copyI18nFilesByName(generator, webappDir, 'tracker.json', lang);
     }
 
@@ -689,6 +692,69 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
   }
 
   /**
+   * Initialize git repository.
+   */
+  initializeGitRepository() {
+    if (this.gitInstalled || this.isGitInstalled()) {
+      const gitDir = this.gitExec('rev-parse --is-inside-work-tree', { trace: false }).stdout;
+      // gitDir has a line break to remove (at least on windows)
+      if (gitDir && gitDir.trim() === 'true') {
+        this.gitInitialized = true;
+      } else {
+        const shellStr = this.gitExec('init', { trace: false });
+        this.gitInitialized = shellStr.code === 0;
+        if (this.gitInitialized) this.log(chalk.green.bold('Git repository initialized.'));
+        else this.warning(`Failed to initialize Git repository.\n ${shellStr.stderr}`);
+      }
+    } else {
+      this.warning('Git repository could not be initialized, as Git is not installed on your system');
+    }
+  }
+
+  /**
+   * Commit pending files to git.
+   */
+  commitFilesToGit(commitMsg, done) {
+    if (this.gitInitialized) {
+      this.debug('Committing files to git');
+      this.gitExec('log --oneline -n 1 -- .', { trace: false }, (code, commits) => {
+        if (code !== 0 || !commits || !commits.trim()) {
+          // if no files in Git from current folder then we assume that this is initial application generation
+          this.gitExec('add .', { trace: false }, code => {
+            if (code === 0) {
+              this.gitExec(`commit -m "${commitMsg}" -- .`, { trace: false }, code => {
+                if (code === 0) {
+                  this.log(chalk.green.bold(`Application successfully committed to Git from ${process.cwd()}.`));
+                } else {
+                  this.log(chalk.red.bold(`Application commit to Git failed from ${process.cwd()}. Try to commit manually.`));
+                }
+                done();
+              });
+            } else {
+              this.warning(`The generated application could not be committed to Git, because ${chalk.bold('git add')} command failed.`);
+              done();
+            }
+          });
+        } else {
+          // if found files in Git from current folder then we assume that this is application regeneration
+          // if there are changes in current folder then inform user about manual commit needed
+          this.gitExec('diff --name-only .', { trace: false }, (code, diffs) => {
+            if (code === 0 && diffs && diffs.trim()) {
+              this.log(
+                `Found commits in Git from ${process.cwd()}. So we assume this is application regeneration. Therefore automatic Git commit is not done. You can do Git commit manually.`
+              );
+            }
+            done();
+          });
+        }
+      });
+    } else {
+      this.warning('The generated application could not be committed to Git, as a Git repository could not be initialized.');
+      done();
+    }
+  }
+
+  /**
    * Get Option From Array
    *
    * @param {Array} array - array
@@ -821,11 +887,17 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
       } else {
         const javaVersion = stderr.match(/(?:java|openjdk) version "(.*)"/)[1];
         if (
-          !javaVersion.match(new RegExp('12'.replace('.', '\\.'))) &&
-          !javaVersion.match(new RegExp('11'.replace('.', '\\.'))) &&
-          !javaVersion.match(new RegExp(constants.JAVA_VERSION.replace('.', '\\.')))
+          !javaVersion.match(new RegExp('16')) &&
+          !javaVersion.match(new RegExp('15')) &&
+          !javaVersion.match(new RegExp('14')) &&
+          !javaVersion.match(new RegExp('13')) &&
+          !javaVersion.match(new RegExp('12')) &&
+          !javaVersion.match(new RegExp('11')) &&
+          !javaVersion.match(new RegExp('1.8'.replace('.', '\\.')))
         ) {
-          this.warning(`Java 8, 11, or 12 are not found on your computer. Your Java version is: ${chalk.yellow(javaVersion)}`);
+          this.warning(
+            `Java 8, 11, 12, 13, 14, 15 or 16 are not found on your computer. Your Java version is: ${chalk.yellow(javaVersion)}`
+          );
         }
       }
       done();
@@ -890,10 +962,10 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     if (typeof primaryKey === 'object') {
       primaryKey = primaryKey.type;
     }
-    if (primaryKey === TYPE_STRING || primaryKey === TYPE_UUID) {
-      return 'string';
+    if ([TYPE_INTEGER, TYPE_LONG, TYPE_FLOAT, TYPE_DOUBLE, TYPE_BIG_DECIMAL].includes(primaryKey)) {
+      return 'number';
     }
-    return 'number';
+    return 'string';
   }
 
   /**
@@ -942,7 +1014,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     relationships.forEach(relationship => {
       let fieldType;
       let fieldName;
-      const nullable = !relationship.relationshipValidateRules || !relationship.relationshipValidateRules.includes('required');
+      const nullable = !relationship.relationshipValidateRules || !relationship.relationshipValidateRules.includes(REQUIRED);
       const relationshipType = relationship.relationshipType;
       if (relationshipType === 'one-to-many' || relationshipType === 'many-to-many') {
         fieldType = `I${relationship.otherEntityAngularName}[]`;
@@ -1153,10 +1225,9 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
    */
   generateTestEntityPrimaryKey(primaryKey, index = 'random') {
     const random = index === 'random';
-    const entries = primaryKey.references.map(reference => {
-      const value =
-        random && reference.field ? reference.field.generateFakeData('raw') : this.generateTestEntityId(reference.type, index, false);
-      return [reference.name, value];
+    const entries = primaryKey.ids.map(id => {
+      const value = random ? id.field.generateFakeData('raw') : this.generateTestEntityId(id.field.fieldType, index, false);
+      return [id.name, value];
     });
     return JSON.stringify(Object.fromEntries(entries));
   }
@@ -1255,14 +1326,27 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     const primaryKeyType = typeof primaryKey === 'string' ? primaryKey : primaryKey.type;
     if (primaryKeyType === TYPE_STRING) {
       if (databaseType === SQL && defaultValue === 0) {
-        return 'UUID.randomUUID().toString()';
+        return this.getJavaValueGeneratorForType(primaryKeyType);
       }
       return `"id${defaultValue}"`;
     }
     if (primaryKeyType === TYPE_UUID) {
-      return 'UUID.randomUUID()';
+      return this.getJavaValueGeneratorForType(primaryKeyType);
     }
     return `${defaultValue}L`;
+  }
+
+  getJavaValueGeneratorForType(type) {
+    if (type === 'String') {
+      return 'UUID.randomUUID().toString()';
+    }
+    if (type === 'UUID') {
+      return 'UUID.randomUUID()';
+    }
+    if (type === 'Long') {
+      return 'count.incrementAndGet()';
+    }
+    throw new Error(`Java type ${type} does not have a random generator implemented`);
   }
 
   /**

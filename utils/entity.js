@@ -24,6 +24,19 @@ const { parseLiquibaseChangelogDate } = require('./liquibase');
 const { entityDefaultConfig } = require('../generators/generator-defaults');
 const { stringHashCode } = require('../generators/utils');
 const { fieldToReference } = require('./field');
+const { PaginationTypes, ServiceTypes } = require('../jdl/jhipster/entity-options');
+const { GATEWAY, MICROSERVICE } = require('../jdl/jhipster/application-types');
+const { MapperTypes } = require('../jdl/jhipster/entity-options');
+const { OAUTH2 } = require('../jdl/jhipster/authentication-types');
+const { CommonDBTypes } = require('../jdl/jhipster/field-types');
+
+const { BOOLEAN, LONG, STRING, UUID } = CommonDBTypes;
+const { MAPSTRUCT } = MapperTypes;
+const { PAGINATION, INFINITE_SCROLL } = PaginationTypes;
+const { SERVICE_IMPL } = ServiceTypes;
+const NO_SERVICE = ServiceTypes.NO;
+const NO_PAGINATION = PaginationTypes.NO;
+const NO_MAPPER = MapperTypes.NO;
 
 const BASE_TEMPLATE_DATA = {
   primaryKey: undefined,
@@ -56,10 +69,6 @@ const BASE_TEMPLATE_DATA = {
     return [];
   },
 
-  get idFields() {
-    return [];
-  },
-
   get enums() {
     return [];
   },
@@ -81,6 +90,20 @@ const BASE_TEMPLATE_DATA = {
   },
 };
 
+function _derivedProperties(entityWithConfig) {
+  const pagination = entityWithConfig.pagination;
+  const dto = entityWithConfig.dto;
+  const service = entityWithConfig.service;
+  _.defaults(entityWithConfig, {
+    paginationPagination: pagination === PAGINATION,
+    paginationInfiniteScroll: pagination === INFINITE_SCROLL,
+    paginationNo: pagination === NO_PAGINATION,
+    dtoMapstruct: dto === MAPSTRUCT,
+    serviceImpl: service === SERVICE_IMPL,
+    serviceNo: service === NO_SERVICE,
+  });
+}
+
 function prepareEntityForTemplates(entityWithConfig, generator) {
   const entityName = entityWithConfig.name;
   _.defaults(entityWithConfig, entityDefaultConfig, BASE_TEMPLATE_DATA);
@@ -89,6 +112,7 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
   entityWithConfig.faker = entityWithConfig.faker || createFaker(generator.jhipsterConfig.nativeLanguage);
   entityWithConfig.resetFakerSeed = (suffix = '') =>
     entityWithConfig.faker.seed(stringHashCode(entityWithConfig.name.toLowerCase() + suffix));
+  entityWithConfig.resetFakerSeed();
 
   entityWithConfig.entityAngularJSSuffix = entityWithConfig.angularJSSuffix;
   if (entityWithConfig.entityAngularJSSuffix && !entityWithConfig.entityAngularJSSuffix.startsWith('-')) {
@@ -96,7 +120,7 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
   }
 
   entityWithConfig.useMicroserviceJson = entityWithConfig.useMicroserviceJson || entityWithConfig.microserviceName !== undefined;
-  if (generator.jhipsterConfig.applicationType === 'gateway' && entityWithConfig.useMicroserviceJson) {
+  if (generator.jhipsterConfig.applicationType === GATEWAY && entityWithConfig.useMicroserviceJson) {
     if (!entityWithConfig.microserviceName) {
       throw new Error('Microservice name for the entity is not found. Entity cannot be generated!');
     }
@@ -112,7 +136,7 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
     entityNamePlural: pluralize(entityName),
   });
 
-  const dto = entityWithConfig.dto === 'mapstruct';
+  const dto = entityWithConfig.dto === MAPSTRUCT;
   if (dto) {
     _.defaults(entityWithConfig, {
       dtoClass: generator.asDto(entityWithConfig.entityClass),
@@ -179,148 +203,10 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
 
   const hasBuiltInUserField = entityWithConfig.relationships.some(relationship => generator.isBuiltInUser(relationship.otherEntityName));
   entityWithConfig.saveUserSnapshot =
-    entityWithConfig.applicationType === 'microservice' &&
-    entityWithConfig.authenticationType === 'oauth2' &&
+    entityWithConfig.applicationType === MICROSERVICE &&
+    entityWithConfig.authenticationType === OAUTH2 &&
     hasBuiltInUserField &&
-    entityWithConfig.dto === 'no';
-
-  if (!entityWithConfig.embedded) {
-    const idFields = entityWithConfig.fields.filter(field => field.id);
-    const idRelationships = entityWithConfig.relationships.filter(relationship => relationship.id);
-    let idCount = idFields.length + idRelationships.length;
-
-    if (idCount === 0) {
-      let idField = entityWithConfig.fields.find(field => field.fieldName === 'id');
-      if (idField) {
-        idField.id = true;
-      } else {
-        idField = {
-          fieldName: 'id',
-          id: true,
-          fieldNameHumanized: 'ID',
-          fieldTranslationKey: 'global.field.id',
-          autoGenerate: true,
-        };
-        entityWithConfig.fields.unshift(idField);
-      }
-      idFields.push(idField);
-      idCount++;
-    } else if (idRelationships.length > 0) {
-      idRelationships.forEach(relationship => {
-        // deprecated property
-        relationship.useJPADerivedIdentifier = true;
-        // relationships id data are not available at this point, so calculate it when needed.
-        relationship.derivedPrimaryKey = {
-          get derivedFields() {
-            return relationship.otherEntity.primaryKey.fields.map(field => ({
-              originalField: field,
-              ...field,
-              derived: true,
-              derivedEntity: relationship.otherEntity,
-              jpaGeneratedValue: false,
-              liquibaseAutoIncrement: false,
-              // Mapsid is generated by relationship select
-              autoGenerate: true,
-              readonly: true,
-              get fieldName() {
-                return idCount === 1 ? field.fieldName : `${relationship.otherEntity.entityInstance}${field.fieldNameCapitalized}`;
-              },
-              get fieldNameCapitalized() {
-                return idCount === 1 ? field.fieldNameCapitalized : `${relationship.otherEntity.entityClass}${field.fieldNameCapitalized}`;
-              },
-              get columnName() {
-                return idCount === 1 ? field.columnName : `${generator.getColumnName(relationship.relationshipName)}_${field.columnName}`;
-              },
-              get reference() {
-                return fieldToReference(entityWithConfig, this);
-              },
-            }));
-          },
-        };
-      });
-    }
-
-    if (idCount === 1 && idRelationships.length === 1) {
-      const relationshipId = idRelationships[0];
-      // One-To-One relationships with id uses @MapsId.
-      // Almost every info is taken from the parent, except some info like autoGenerate and derived.
-      // calling fieldName as id is for backward compatibility, in the future we may want to prefix it with relationship name.
-      entityWithConfig.primaryKey = {
-        fieldName: 'id',
-        derived: true,
-        // MapsId copy the id from the relationship.
-        autoGenerate: true,
-        get fields() {
-          return this.derivedFields;
-        },
-        get derivedFields() {
-          return relationshipId.derivedPrimaryKey.derivedFields;
-        },
-        get ownFields() {
-          return relationshipId.otherEntity.primaryKey.ownFields;
-        },
-        relationships: idRelationships,
-        get name() {
-          return relationshipId.otherEntity.primaryKey.name;
-        },
-        get nameCapitalized() {
-          return relationshipId.otherEntity.primaryKey.nameCapitalized;
-        },
-        get type() {
-          return relationshipId.otherEntity.primaryKey.type;
-        },
-        get tsType() {
-          return relationshipId.otherEntity.primaryKey.tsType;
-        },
-        get references() {
-          return this.derivedFields.map(field => field.reference);
-        },
-        get composite() {
-          return relationshipId.otherEntity.primaryKey.composite;
-        },
-      };
-    } else {
-      const composite = false;
-      let primaryKeyName;
-      let primaryKeyType;
-      if (composite) {
-        primaryKeyName = 'id';
-        primaryKeyType = `${entityWithConfig.entityClass}Id`;
-      } else {
-        const idField = idFields[0];
-        idField.dynamic = false;
-        // Allow ids type to be empty and fallback to default type for the database.
-        if (!idField.fieldType) {
-          idField.fieldType = generator.getPkType(entityWithConfig.databaseType);
-        }
-        primaryKeyName = idField.fieldName;
-        primaryKeyType = idField.fieldType;
-      }
-
-      entityWithConfig.primaryKey = {
-        derived: false,
-        name: primaryKeyName,
-        nameCapitalized: _.upperFirst(primaryKeyName),
-        type: primaryKeyType,
-        tsType: generator.getTypescriptKeyType(primaryKeyType),
-        composite,
-        relationships: idRelationships,
-        ownFields: idFields,
-        get fields() {
-          return [...this.ownFields, ...this.derivedFields];
-        },
-        get autoGenerate() {
-          return this.composite ? false : this.fields[0].autoGenerate;
-        },
-        get references() {
-          return this.fields.map(field => field.reference);
-        },
-        get derivedFields() {
-          return this.relationships.map(rel => rel.derivedPrimaryKey.derivedFields).flat();
-        },
-      };
-    }
-  }
+    entityWithConfig.dto === NO_MAPPER;
 
   entityWithConfig.generateFakeData = type => {
     const fieldsToGenerate =
@@ -337,8 +223,209 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
     }
     return Object.fromEntries(fieldEntries);
   };
+  _derivedProperties(entityWithConfig);
 
   return entityWithConfig;
+}
+
+function derivedPrimaryKeyProperties(primaryKey) {
+  _.defaults(primaryKey, {
+    hasUUID: primaryKey.fields && primaryKey.fields.some(field => field.fieldType === UUID),
+    hasLong: primaryKey.fields && primaryKey.fields.some(field => field.fieldType === LONG),
+    typeUUID: primaryKey.type === UUID,
+    typeString: primaryKey.type === STRING,
+    typeLong: primaryKey.type === LONG,
+    typeNumeric: !primaryKey.composite && primaryKey.fields[0].fieldTypeNumeric,
+  });
+}
+
+function prepareEntityPrimaryKeyForTemplates(entityWithConfig, generator, enableCompositeId = true) {
+  const idFields = entityWithConfig.fields.filter(field => field.id);
+  const idRelationships = entityWithConfig.relationships.filter(relationship => relationship.id);
+  let idCount = idFields.length + idRelationships.length;
+
+  if (idCount === 0) {
+    let idField = entityWithConfig.fields.find(field => field.fieldName === 'id');
+    if (idField) {
+      idField.id = true;
+    } else {
+      idField = {
+        fieldName: 'id',
+        id: true,
+        fieldNameHumanized: 'ID',
+        fieldTranslationKey: 'global.field.id',
+        autoGenerate: true,
+      };
+      entityWithConfig.fields.unshift(idField);
+    }
+    idFields.push(idField);
+    idCount++;
+  } else if (idRelationships.length > 0) {
+    idRelationships.forEach(relationship => {
+      // deprecated property
+      relationship.useJPADerivedIdentifier = true;
+      // relationships id data are not available at this point, so calculate it when needed.
+      relationship.derivedPrimaryKey = {
+        get derivedFields() {
+          return relationship.otherEntity.primaryKey.fields.map(field => ({
+            originalField: field,
+            ...field,
+            derived: true,
+            derivedEntity: relationship.otherEntity,
+            jpaGeneratedValue: false,
+            liquibaseAutoIncrement: false,
+            // Mapsid is generated by relationship select
+            autoGenerate: true,
+            readonly: true,
+            get derivedPath() {
+              if (field.derivedPath) {
+                if (relationship.otherEntity.primaryKey.derived) {
+                  return [relationship.relationshipName, ...field.derivedPath.splice(1)];
+                }
+                return [relationship.relationshipName, ...field.derivedPath];
+              }
+              return [relationship.relationshipName, field.fieldName];
+            },
+            get path() {
+              return [relationship.relationshipName, ...field.path];
+            },
+            get fieldName() {
+              return idCount === 1 ? field.fieldName : `${relationship.relationshipName}${field.fieldNameCapitalized}`;
+            },
+            get fieldNameCapitalized() {
+              return idCount === 1
+                ? field.fieldNameCapitalized
+                : `${relationship.relationshipNameCapitalized}${field.fieldNameCapitalized}`;
+            },
+            get columnName() {
+              return idCount === 1 ? field.columnName : `${generator.getColumnName(relationship.relationshipName)}_${field.columnName}`;
+            },
+            get reference() {
+              return fieldToReference(entityWithConfig, this);
+            },
+            get relationshipsPath() {
+              return [relationship, ...field.relationshipsPath];
+            },
+          }));
+        },
+      };
+    });
+  }
+
+  if (idCount === 1 && idRelationships.length === 1) {
+    const relationshipId = idRelationships[0];
+    // One-To-One relationships with id uses @MapsId.
+    // Almost every info is taken from the parent, except some info like autoGenerate and derived.
+    // calling fieldName as id is for backward compatibility, in the future we may want to prefix it with relationship name.
+    entityWithConfig.primaryKey = {
+      fieldName: 'id',
+      derived: true,
+      // MapsId copy the id from the relationship.
+      autoGenerate: true,
+      get fields() {
+        return this.derivedFields;
+      },
+      get derivedFields() {
+        return relationshipId.derivedPrimaryKey.derivedFields;
+      },
+      get ownFields() {
+        return relationshipId.otherEntity.primaryKey.ownFields;
+      },
+      relationships: idRelationships,
+      get name() {
+        return relationshipId.otherEntity.primaryKey.name;
+      },
+      get nameCapitalized() {
+        return relationshipId.otherEntity.primaryKey.nameCapitalized;
+      },
+      get type() {
+        return relationshipId.otherEntity.primaryKey.type;
+      },
+      get tsType() {
+        return relationshipId.otherEntity.primaryKey.tsType;
+      },
+      get composite() {
+        return relationshipId.otherEntity.primaryKey.composite;
+      },
+      get ids() {
+        return this.fields.map(field => fieldToId(field));
+      },
+    };
+  } else {
+    const composite = enableCompositeId ? idCount > 1 : false;
+    let primaryKeyName;
+    let primaryKeyType;
+    if (composite) {
+      primaryKeyName = 'id';
+      primaryKeyType = `${entityWithConfig.entityClass}Id`;
+    } else {
+      const idField = idFields[0];
+      idField.dynamic = false;
+      // Allow ids type to be empty and fallback to default type for the database.
+      if (!idField.fieldType) {
+        idField.fieldType = generator.getPkType(entityWithConfig.databaseType);
+      }
+      primaryKeyName = idField.fieldName;
+      primaryKeyType = idField.fieldType;
+    }
+
+    entityWithConfig.primaryKey = {
+      derived: false,
+      name: primaryKeyName,
+      nameCapitalized: _.upperFirst(primaryKeyName),
+      type: primaryKeyType,
+      tsType: generator.getTypescriptKeyType(primaryKeyType),
+      composite,
+      relationships: idRelationships,
+      // Fields declared in this entity
+      ownFields: idFields,
+      // Fields declared and inherited
+      get fields() {
+        return [...this.ownFields, ...this.derivedFields];
+      },
+      get autoGenerate() {
+        return this.composite ? false : this.fields[0].autoGenerate;
+      },
+      // Fields inherited from id relationships.
+      get derivedFields() {
+        return this.relationships.map(rel => rel.derivedPrimaryKey.derivedFields).flat();
+      },
+      get ids() {
+        return this.fields.map(field => fieldToId(field));
+      },
+    };
+  }
+  return entityWithConfig;
+}
+
+function fieldToId(field) {
+  return {
+    field,
+    get name() {
+      return field.fieldName;
+    },
+    get nameCapitalized() {
+      return field.fieldNameCapitalized;
+    },
+    get nameDotted() {
+      return field.derivedPath ? field.derivedPath.join('.') : field.fieldName;
+    },
+    get nameDottedAsserted() {
+      return field.derivedPath ? `${field.derivedPath.join('!.')}!` : `${field.fieldName}!`;
+    },
+    get setter() {
+      return `set${this.nameCapitalized}`;
+    },
+    get getter() {
+      return (field.fieldType === BOOLEAN ? 'is' : 'get') + this.nameCapitalized;
+    },
+    get autoGenerate() {
+      return !!field.autoGenerate;
+    },
+    get relationshipsPath() {
+      return field.relationshipsPath;
+    },
+  };
 }
 
 /**
@@ -363,4 +450,9 @@ function loadRequiredConfigIntoEntity(entity, config) {
   return entity;
 }
 
-module.exports = { prepareEntityForTemplates, loadRequiredConfigIntoEntity };
+module.exports = {
+  prepareEntityForTemplates,
+  prepareEntityPrimaryKeyForTemplates,
+  loadRequiredConfigIntoEntity,
+  derivedPrimaryKeyProperties,
+};

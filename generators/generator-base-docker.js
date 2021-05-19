@@ -16,14 +16,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const _ = require('lodash');
+
 const prompts = require('./docker-prompts');
-const BaseGenerator = require('./generator-base');
+const BlueprintBaseGenerator = require('./generator-base-blueprint');
+const { GENERATOR_DOCKER_COMPOSE } = require('./generator-list');
 const { loadFromYoRc, checkDocker, checkImages, generateJwtSecret, setAppsFolderPaths } = require('./docker-base');
 const statistics = require('./statistics');
 
 const constants = require('./generator-constants');
 
-module.exports = class extends BaseGenerator {
+const { CONSUL, EUREKA } = require('../jdl/jhipster/service-discovery-types');
+const { OptionNames } = require('../jdl/jhipster/application-options');
+const { PROMETHEUS, ELK } = require('../jdl/jhipster/monitoring-types');
+const { Options: DeploymentOptions } = require('../jdl/jhipster/deployment-options');
+
+const { JWT_SECRET_KEY, SERVICE_DISCOVERY_TYPE } = OptionNames;
+
+module.exports = class extends BlueprintBaseGenerator {
   constructor(args, opts, features) {
     super(args, opts, features);
 
@@ -33,17 +43,19 @@ module.exports = class extends BaseGenerator {
       type: Boolean,
       defaults: false,
     });
+
     // This adds support for a `--skip-prompts` flag
     this.option('skip-prompts', {
       desc: 'Generate pre-existing configuration',
       type: Boolean,
       defaults: false,
     });
+
     this.regenerate = this.options.skipPrompts;
     this.skipChecks = this.options.skipChecks;
   }
 
-  get initializing() {
+  _initializing() {
     return {
       validateFromCli() {
         this.checkInvocationFromCLI();
@@ -88,7 +100,11 @@ module.exports = class extends BaseGenerator {
     };
   }
 
-  get prompting() {
+  get initializing() {
+    return this._initializing();
+  }
+
+  _prompting() {
     return {
       askForApplicationType: prompts.askForApplicationType,
       askForGatewayType: prompts.askForGatewayType,
@@ -102,15 +118,56 @@ module.exports = class extends BaseGenerator {
     };
   }
 
-  get configuring() {
+  get prompting() {
+    return this._prompting();
+  }
+
+  _configuring() {
     return {
       insight() {
-        statistics.sendSubGenEvent('generator', 'docker-compose');
+        statistics.sendSubGenEvent('generator', GENERATOR_DOCKER_COMPOSE);
       },
 
       checkImages,
       generateJwtSecret,
       setAppsFolderPaths,
     };
+  }
+
+  get configuring() {
+    return this._configuring();
+  }
+
+  loadDeploymentConfig(
+    config = _.defaults({}, this.jhipsterConfig, DeploymentOptions.defaults(this.jhipsterConfig.deploymentType)),
+    dest = this
+  ) {
+    dest.appsFolders = config.appsFolders;
+    dest.directoryPath = config.directoryPath;
+    dest.gatewayType = config.gatewayType;
+    dest.clusteredDbApps = config.clusteredDbApps;
+    dest.monitoring = config.monitoring;
+    dest.dockerRepositoryName = config.dockerRepositoryName;
+    dest.dockerPushCommand = config.dockerPushCommand;
+    dest.serviceDiscoveryType = config[SERVICE_DISCOVERY_TYPE];
+    dest.adminPassword = config.adminPassword;
+    dest.jwtSecretKey = config[JWT_SECRET_KEY];
+
+    if (dest.serviceDiscoveryType === undefined) {
+      dest.serviceDiscoveryType = EUREKA;
+    }
+
+    this.loadDerivedDeploymentConfig(config, dest);
+  }
+
+  loadDerivedDeploymentConfig(
+    config = _.defaults({}, this.jhipsterConfig, DeploymentOptions.defaults(this.jhipsterConfig.deploymentType)),
+    dest = this
+  ) {
+    dest.serviceDiscoveryConsul = config.serviceDiscoveryType === CONSUL;
+    dest.serviceDiscoveryEureka = config.serviceDiscoveryType === EUREKA;
+
+    dest.monitoringPrometheus = config.monitoring === PROMETHEUS;
+    dest.monitoringELK = config.monitoring === ELK;
   }
 };

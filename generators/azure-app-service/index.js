@@ -16,30 +16,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* eslint-disable consistent-return */
+const _ = require('lodash');
 const fs = require('fs');
 const exec = require('child_process').exec;
 const chalk = require('chalk');
-const BaseGenerator = require('../generator-base');
+const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const statistics = require('../statistics');
+const { defaultConfig } = require('../generator-defaults');
 
 // Global constants
 const constants = require('../generator-constants');
 
-const cacheTypes = require('../../jdl/jhipster/cache-types');
-const { MEMCACHED } = require('../../jdl/jhipster/cache-types');
-
-const NO_CACHE_PROVIDER = cacheTypes.NO;
-
 const { OptionNames } = require('../../jdl/jhipster/application-options');
 
 const { MAVEN } = require('../../jdl/jhipster/build-tool-types');
+const { GENERATOR_AZURE_APP_SERVICE } = require('../generator-list');
 
 // Local constants
 const AZURE_WEBAPP_MAVEN_PLUGIN_VERSION = '1.8.0';
 const AZURE_WEBAPP_RUNTIME = 'JAVA|11-java11';
 const AZURE_APP_INSIGHTS_STARTER_VERSION = '2.5.1';
 
-module.exports = class extends BaseGenerator {
+let useBlueprints;
+/* eslint-disable consistent-return */
+module.exports = class extends BaseBlueprintGenerator {
   constructor(args, opts) {
     super(args, opts);
 
@@ -64,43 +65,40 @@ module.exports = class extends BaseGenerator {
     this.azureSpringCloudSkipBuild = this.options.skipBuild;
     this.azureSpringCloudSkipDeploy = this.options.skipDeploy || this.options.skipBuild;
     this.azureSpringCloudSkipInsights = this.options.skipInsights;
+    useBlueprints = !this.fromBlueprint && this.instantiateBlueprints(GENERATOR_AZURE_APP_SERVICE);
   }
 
-  initializing() {
-    if (!this.options.fromCli) {
-      this.warning(
-        `Deprecated: JHipster seems to be invoked using Yeoman command. Please use the JHipster CLI. Run ${chalk.red(
-          'jhipster <command>'
-        )} instead of ${chalk.red('yo jhipster:<command>')}`
-      );
-    }
-    this.log(chalk.bold('Azure App Service configuration is starting'));
-    this.env.options.appPath = this.config.get('appPath') || constants.CLIENT_MAIN_SRC_DIR;
-    this.baseName = this.config.get(OptionNames.BASE_NAME);
-    this.packageName = this.config.get(OptionNames.PACKAGE_NAME);
-    this.packageFolder = this.config.get(OptionNames.PACKAGE_FOLDER);
-    this.authenticationType = this.config.get(OptionNames.AUTHENTICATION_TYPE);
-    this.jwtSecretKey = this.config.get(OptionNames.JWT_SECRET_KEY);
-    this.cacheProvider = this.config.get(OptionNames.CACHE_PROVIDER) || this.config.get('hibernateCache') || NO_CACHE_PROVIDER; // TODO is hibernate cache an option?
-    this.enableHibernateCache =
-      this.config.get(OptionNames.ENABLE_HIBERNATE_CACHE) && ![NO_CACHE_PROVIDER, MEMCACHED].includes(this.cacheProvider);
-    this.databaseType = this.config.get(OptionNames.DATABASE_TYPE);
-    this.prodDatabaseType = this.config.get(OptionNames.PROD_DATABASE_TYPE);
-    this.searchEngine = this.config.get(OptionNames.SEARCH_ENGINE);
-    this.frontendAppName = this.getFrontendAppName();
-    this.buildTool = this.config.get(OptionNames.BUILD_TOOL);
-    this.applicationType = this.config.get(OptionNames.APPLICATION_TYPE);
-    this.serviceDiscoveryType = this.config.get(OptionNames.SERVICE_DISCOVERY_TYPE);
-    this.azureAppServiceResourceGroupName = ''; // This is not saved, as it is better to get the Azure default variable
-    this.azureAppServicePlan = this.config.get('azureAppServicePlan');
-    this.azureAppServiceName = this.config.get('azureAppServiceName');
-    this.azureApplicationInsightsName = this.config.get('azureApplicationInsightsName');
-    this.azureAppServiceDeploymentType = this.config.get('azureAppServiceDeploymentType');
-    this.azureAppInsightsInstrumentationKey = '';
-    this.azureGroupId = '';
+  _initializing() {
+    return {
+      getConfig() {
+        if (!this.options.fromCli) {
+          this.warning(
+            `Deprecated: JHipster seems to be invoked using Yeoman command. Please use the JHipster CLI. Run ${chalk.red(
+              'jhipster <command>'
+            )} instead of ${chalk.red('yo jhipster:<command>')}`
+          );
+        }
+        this.log(chalk.bold('Azure App Service configuration is starting'));
+        this.baseName = this.config.get(OptionNames.BASE_NAME);
+        this.buildTool = this.config.get(OptionNames.BUILD_TOOL);
+        this.azureAppServiceResourceGroupName = ''; // This is not saved, as it is better to get the Azure default variable
+        this.azureLocation = this.config.get('azureLocation');
+        this.azureAppServicePlan = this.config.get('azureAppServicePlan');
+        this.azureAppServiceName = this.config.get('azureAppServiceName');
+        this.azureApplicationInsightsName = this.config.get('azureApplicationInsightsName');
+        this.azureAppServiceDeploymentType = this.config.get('azureAppServiceDeploymentType');
+        this.azureAppInsightsInstrumentationKey = '';
+        this.azureGroupId = '';
+      },
+    };
   }
 
-  get prompting() {
+  get initializing() {
+    if (useBlueprints) return;
+    return this._initializing();
+  }
+
+  _prompting() {
     return {
       checkBuildTool() {
         if (this.abort) return;
@@ -136,6 +134,7 @@ ${chalk.red('https://docs.microsoft.com/en-us/cli/azure/install-azure-cli/?WT.mc
           if (err) {
             this.config.set({
               azureAppServiceResourceGroupName: null,
+              azureLocation: 'eastus',
             });
             this.abort = true;
             this.error('Could not retrieve your Azure default configuration.');
@@ -145,6 +144,9 @@ ${chalk.red('https://docs.microsoft.com/en-us/cli/azure/install-azure-cli/?WT.mc
               if (json[key].name === 'group') {
                 this.azureAppServiceResourceGroupName = json[key].value;
               }
+              if (json[key].name === 'location') {
+                this.azureLocation = json[key].value;
+              }
             });
             if (this.azureAppServiceResourceGroupName === '') {
               this.log(
@@ -152,6 +154,9 @@ ${chalk.red('https://docs.microsoft.com/en-us/cli/azure/install-azure-cli/?WT.mc
                                 '${chalk.yellow('az configure --defaults group=<resource group name>')}`
               );
               this.azureAppServiceResourceGroupName = '';
+            }
+            if (this.azureLocation === '') {
+              this.azureLocation = 'eastus';
             }
           }
           done();
@@ -168,6 +173,12 @@ ${chalk.red('https://docs.microsoft.com/en-us/cli/azure/install-azure-cli/?WT.mc
             name: 'azureAppServiceResourceGroupName',
             message: 'Azure resource group name:',
             default: this.azureAppServiceResourceGroupName,
+          },
+          {
+            type: 'input',
+            name: 'azureLocation',
+            message: 'Azure location:',
+            default: this.azureLocation,
           },
           {
             type: 'input',
@@ -191,6 +202,7 @@ ${chalk.red('https://docs.microsoft.com/en-us/cli/azure/install-azure-cli/?WT.mc
 
         this.prompt(prompts).then(props => {
           this.azureAppServiceResourceGroupName = props.azureAppServiceResourceGroupName;
+          this.azureLocation = props.azureLocation;
           this.azureAppServicePlan = props.azureAppServicePlan;
           this.azureApplicationInsightsName = props.azureApplicationInsightsName;
           this.azureAppServiceName = props.azureAppServiceName;
@@ -228,7 +240,12 @@ ${chalk.red('https://docs.microsoft.com/en-us/cli/azure/install-azure-cli/?WT.mc
     };
   }
 
-  get configuring() {
+  get prompting() {
+    if (useBlueprints) return;
+    return this._prompting();
+  }
+
+  _configuring() {
     return {
       saveConfig() {
         if (this.abort) return;
@@ -242,7 +259,12 @@ ${chalk.red('https://docs.microsoft.com/en-us/cli/azure/install-azure-cli/?WT.mc
     };
   }
 
-  get default() {
+  get configuring() {
+    if (useBlueprints) return;
+    return this._configuring();
+  }
+
+  _default() {
     return {
       insight() {
         statistics.sendSubGenEvent('generator', 'azure-app-service');
@@ -283,7 +305,7 @@ ${chalk.red('https://docs.microsoft.com/en-us/cli/azure/install-azure-cli/?WT.mc
               if (!servicePlanAlreadyExists) {
                 this.log(`Service plan '${this.azureAppServicePlan}' doesn't exist, creating it...`);
                 exec(
-                  `az appservice plan create --name ${this.azureAppServicePlan} --is-linux --sku B1 --resource-group ${this.azureAppServiceResourceGroupName}`,
+                  `az appservice plan create --name ${this.azureAppServicePlan} --is-linux --sku B1 --resource-group ${this.azureAppServiceResourceGroupName} --location ${this.azureLocation}`,
                   err => {
                     if (err) {
                       this.abort = true;
@@ -376,7 +398,7 @@ which is free for the first 30 days`);
         if (this.abort) return;
         const done = this.async();
         this.log(chalk.bold('\nAdding Azure Web App Maven plugin'));
-        if (this.buildTool === 'maven') {
+        if (this.buildTool === MAVEN) {
           this.render('pom-plugin.xml.ejs', rendered => {
             this.addMavenPlugin('com.microsoft.azure', 'azure-webapp-maven-plugin', AZURE_WEBAPP_MAVEN_PLUGIN_VERSION, rendered);
           });
@@ -421,7 +443,7 @@ which is free for the first 30 days`);
             if (err) {
               this.log('Azure Application Insights instance does not exist, creating it...');
               exec(
-                `az monitor app-insights component create --app ${this.azureApplicationInsightsName} --resource-group ${this.azureAppServiceResourceGroupName}`,
+                `az monitor app-insights component create --app ${this.azureApplicationInsightsName} --resource-group ${this.azureAppServiceResourceGroupName} --location ${this.azureLocation}`,
                 (err, stdout) => {
                   if (err) {
                     this.log(err);
@@ -454,8 +476,36 @@ which is free for the first 30 days`);
         this.log(`The Application Insights instrumentation key used is: '${chalk.bold(this.azureAppInsightsInstrumentationKey)}'`);
         done();
       },
+    };
+  }
 
-      copyAzureAppServiceFiles() {
+  get default() {
+    if (useBlueprints) return;
+    return this._default();
+  }
+
+  _loadPlatformConfig(config = _.defaults({}, this.jhipsterConfig, defaultConfig), dest = this) {
+    super.loadPlatformConfig(config, dest);
+    dest.azureAppInsightsInstrumentationKeyEmpty = config.azureAppInsightsInstrumentationKey === '';
+  }
+
+  // Public API method used by the getter and also by Blueprints
+  _loading() {
+    return {
+      loadSharedConfig() {
+        this._loadPlatformConfig();
+      },
+    };
+  }
+
+  get loading() {
+    if (useBlueprints) return;
+    return this._loading();
+  }
+
+  _writing() {
+    return {
+      writeFiles() {
         if (this.abort) return;
         this.log(chalk.bold('\nCreating Azure App Service deployment files'));
         this.template('application-azure.yml.ejs', `${constants.SERVER_MAIN_RES_DIR}/config/application-azure.yml`);
@@ -466,7 +516,12 @@ which is free for the first 30 days`);
     };
   }
 
-  get end() {
+  get writing() {
+    if (useBlueprints) return;
+    return this._writing();
+  }
+
+  _end() {
     return {
       gitHubAction() {
         if (this.abort) return;
@@ -583,5 +638,10 @@ You need a GitHub project correctly configured in order to use GitHub Actions.`
         });
       },
     };
+  }
+
+  get end() {
+    if (useBlueprints) return;
+    return this._end();
   }
 };
