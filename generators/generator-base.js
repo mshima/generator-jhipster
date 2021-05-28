@@ -1621,6 +1621,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
    * @return {object} when in synchronous mode, this returns a ShellString. Otherwise, this returns the child process object.
    */
   gitExec(args, options, callback) {
+    args = [].concat(args).concat(this.destinationPath());
     return jhipsterUtils.gitExec(args, options, callback);
   }
 
@@ -1827,7 +1828,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
    */
   generateKeyStore() {
     const done = this.async();
-    const keyStoreFile = `${SERVER_MAIN_RES_DIR}config/tls/keystore.p12`;
+    const keyStoreFile = this.destinationPath(`${SERVER_MAIN_RES_DIR}config/tls/keystore.p12`);
     if (this.fs.exists(keyStoreFile)) {
       this.log(chalk.cyan(`\nKeyStore '${keyStoreFile}' already exists. Leaving unchanged.\n`));
       done();

@@ -21,7 +21,10 @@ const fs = require('fs');
 const _ = require('lodash');
 const path = require('path');
 const pluralize = require('pluralize');
+const workerpool = require('workerpool');
 const { fork: forkProcess } = require('child_process');
+
+const pool = workerpool.pool(`${__dirname}/environment-worker.js`);
 
 const EnvironmentBuilder = require('./environment-builder');
 const { CLI_NAME, GENERATOR_NAME, logger, toString, printSuccess, getOptionAsArgs } = require('./utils');
@@ -90,7 +93,7 @@ const shouldForce = processor => {
  */
 const shouldFork = processor => {
   if (processor.options.fork !== undefined) {
-    return processor.options.fork;
+    return processor.options.fork || processor.options.thread;
   }
   if (Object.values(processor.importState.exportedApplicationsWithEntities).length > 1 && allNewApplications(processor)) {
     return true;
@@ -143,7 +146,7 @@ function writeApplicationConfig(applicationWithEntities, basePath) {
  * @param {Object} generatorOptions
  * @param {Promise}
  */
-function runGenerator(command, { cwd, fork, env }, generatorOptions = {}) {
+function runGenerator(command, { cwd, fork, thread, env }, generatorOptions = {}) {
   generatorOptions = {
     ...generatorOptions,
     // Remove jdl command exclusive options
@@ -158,21 +161,26 @@ function runGenerator(command, { cwd, fork, env }, generatorOptions = {}) {
     fromJdl: true,
   };
 
+  if (thread) {
+    logger.debug(`Thread will be triggered for ${command} with cwd: ${cwd}`);
+    return pool.exec('runEnvironment', [`${CLI_NAME}:${command}`, generatorOptions, cwd]);
+  }
   if (!fork) {
     const oldCwd = process.cwd();
     process.chdir(cwd);
-    env = env || EnvironmentBuilder.createDefaultBuilder(undefined, { cwd }).getEnvironment();
-    return env.run(`${CLI_NAME}:${command}`, generatorOptions).then(
-      () => {
+    return EnvironmentBuilder.runEnvironment(`${CLI_NAME}:${command}`, generatorOptions, cwd, env)
+      .then(
+        () => {
+          logger.info(`Generator ${command} succeed`);
+        },
+        error => {
+          logger.error(`Error running generator ${command}: ${error}`, error);
+          return Promise.reject(error);
+        }
+      )
+      .finally(() => {
         process.chdir(oldCwd);
-        logger.info(`Generator ${command} succeed`);
-      },
-      error => {
-        process.chdir(oldCwd);
-        logger.error(`Error running generator ${command}: ${error}`, error);
-        return Promise.reject(error);
-      }
-    );
+      });
   }
   logger.debug(`Child process will be triggered for ${command} with cwd: ${cwd}`);
   const args = [command, ...getOptionAsArgs(generatorOptions)];
@@ -263,7 +271,7 @@ const generateDeploymentFiles = ({ processor, deployment }) => {
  */
 const generateApplicationFiles = ({ processor, applicationWithEntities }) => {
   logger.debug(`Generating application: ${JSON.stringify(applicationWithEntities.config, null, 2)}`);
-  const { inFolder, fork, force, reproducible } = processor;
+  const { inFolder, fork, thread, force, reproducible } = processor;
   const baseName = applicationWithEntities.config.baseName;
   const cwd = inFolder ? path.join(processor.pwd, baseName) : processor.pwd;
   if (processor.options.jsonOnly) {
@@ -280,7 +288,7 @@ const generateApplicationFiles = ({ processor, applicationWithEntities }) => {
     generatorOptions.applicationWithEntities = applicationWithEntities;
   }
 
-  return runGenerator('app', { cwd, fork }, generatorOptions);
+  return runGenerator('app', { cwd, fork, thread }, generatorOptions);
 };
 
 /**
@@ -291,7 +299,7 @@ const generateApplicationFiles = ({ processor, applicationWithEntities }) => {
  * @return Promise
  */
 const generateEntityFiles = (processor, exportedEntities, env) => {
-  const { fork, inFolder, force } = processor;
+  const { fork, inFolder, force, thread } = processor;
   const generatorOptions = {
     force,
     ...processor.options,
@@ -315,7 +323,7 @@ const generateEntityFiles = (processor, exportedEntities, env) => {
     logger.info(`Generating entities for application ${baseName} in a new parallel process`);
 
     logger.debug(`Child process will be triggered for ${jhipsterCli} with cwd: ${cwd}`);
-    return runGenerator('entities', { cwd, env, fork }, generatorOptions);
+    return runGenerator('entities', { cwd, env, fork, thread }, generatorOptions);
   };
 
   if (fork) {
@@ -366,6 +374,7 @@ class JDLProcessor {
   config() {
     this.interactive = shouldRunInteractively(this);
     this.fork = shouldFork(this);
+    this.thread = this.options.thread;
     this.reproducible = allNewApplications(this);
     this.inFolder = shouldRunInFolder(this);
     this.force = shouldForce(this);
@@ -488,6 +497,9 @@ module.exports = (jdlFiles, options = {}, env) => {
       .then(() => {
         printSuccess();
         return jdlFiles;
+      })
+      .finally(() => {
+        pool.terminate();
       });
   } catch (e) {
     logger.error(`Error during import-jdl: ${e}`, e);
