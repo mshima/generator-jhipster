@@ -67,6 +67,11 @@ module.exports = class EnvironmentBuilder {
       ._loadSharedOptions();
   }
 
+  static runEnvironment(generatorNamespace, options, cwd, env) {
+    env = env || EnvironmentBuilder.createDefaultBuilder(undefined, { cwd }).getEnvironment();
+    return env.run(generatorNamespace, options);
+  }
+
   /**
    * Class to manipulate yeoman environment for jhipster needs.
    * - Registers jhipster generators.
