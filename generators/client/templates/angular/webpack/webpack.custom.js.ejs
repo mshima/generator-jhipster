@@ -21,7 +21,7 @@ const { merge } = require('webpack-merge');
 const path = require('path');
 <%_ if (enableTranslation) { _%>
 const { hashElement } = require('folder-hash');
-const MergeJsonWebpackPlugin = require('merge-jsons-webpack-plugin');
+const MergeJsonWebpackPlugin = require('merge-json-webpack-plugin');
 <%_ } _%>
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
@@ -149,11 +149,11 @@ module.exports = async (config, options, targetOptions) => {
     }),
     <%_ if (enableTranslation) { _%>
     new MergeJsonWebpackPlugin({
-      output: {
-        groupBy: [
+      cwd: path.resolve(__dirname, '..'),
+      mergeFn: merge,
+      groups: [
         // jhipster-needle-i18n-language-webpack - JHipster will add/remove languages in this array
-        ],
-      },
+      ],
     })
     <%_ } _%>
   );

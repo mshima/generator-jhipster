@@ -269,23 +269,28 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
    * @param languages
    */
   updateLanguagesInWebpackAngular(languages) {
-    const fullPath = 'webpack/webpack.custom.js';
+    return this.updateLanguagesInWebpack(languages, 'webpack/webpack.custom.js');
+  }
+
+  /**
+   * Update Languages In Webpack
+   *
+   * @param languages
+   */
+  updateLanguagesInWebpack(languages, webpackConfigPath) {
     try {
-      let content = 'groupBy: [\n';
-      // prettier-ignore
-      languages.forEach((language, i) => {
-                content += `                    { pattern: "./${this.CLIENT_MAIN_SRC_DIR}i18n/${language}/*.json", fileName: "./i18n/${language}.json" }${
-                    i !== languages.length - 1 ? ',' : ''
-                }\n`;
-            });
-      content +=
-        '                    // jhipster-needle-i18n-language-webpack - JHipster will add/remove languages in this array\n' +
-        '                ]';
+      const partials = languages.map(
+        language => `                    { pattern: "${this.CLIENT_MAIN_SRC_DIR}i18n/${language}/*.json", to: "i18n/${language}.json" }`
+      );
+      const content = `groups: [
+${partials.join(',\n')}
+                  // jhipster-needle-i18n-language-webpack - JHipster will add/remove languages in this array
+                ],`;
 
       jhipsterUtils.replaceContent(
         {
-          file: fullPath,
-          pattern: /groupBy:.*\[([^\]]*jhipster-needle-i18n-language-webpack[^\]]*)\]/g,
+          file: webpackConfigPath,
+          pattern: /groups:.*\[([^\]]*jhipster-needle-i18n-language-webpack[^\]]*)\],/g,
           content,
         },
         this
@@ -293,7 +298,7 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     } catch (e) {
       this.log(
         chalk.yellow('\nUnable to find ') +
-          fullPath +
+          webpackConfigPath +
           chalk.yellow(' or missing required jhipster-needle. Webpack language task not updated with languages: ') +
           languages +
           chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
