@@ -248,6 +248,12 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
         if (this.authenticationType === OAUTH2 || this.databaseType === NO_DATABASE) {
           this.skipUserManagement = true;
         }
+
+        this.devServerBasePort = this.clientFrameworkAngular ? 4200 : 9060;
+
+        if (!this.devServerPort) {
+          this.devServerPort = this.devServerBasePort;
+        }
       },
     };
   }
