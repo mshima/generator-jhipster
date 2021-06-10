@@ -112,6 +112,10 @@ const defaultCommands = {
         desc: "Don't filter jdl entities",
         default: true,
       },
+      {
+        option: '--use-generator',
+        desc: 'Use experimental jdl generator instead of jdl command',
+      },
     ],
     desc: `Create entities from the JDL file/URL/content passed in argument.
     Use the '--fork' or '--interactive' flag to change the process forking behavior when generating multiple applications.`,

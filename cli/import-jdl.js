@@ -267,12 +267,12 @@ const generateDeploymentFiles = ({ processor, deployment }) => {
  * @param {any} config
  * @returns Promise
  */
-const generateApplicationFiles = ({ processor, applicationWithEntities }) => {
+const generateApplicationFiles = ({ processor, options, applicationWithEntities }) => {
   logger.debug(`Generating application: ${JSON.stringify(applicationWithEntities.config, null, 2)}`);
   const { inFolder, fork, force, reproducible } = processor;
   const baseName = applicationWithEntities.config.baseName;
   const cwd = inFolder ? path.join(processor.pwd, baseName) : processor.pwd;
-  if (processor.options.jsonOnly) {
+  if (options.jsonOnly) {
     writeApplicationConfig(applicationWithEntities, cwd);
     return Promise.resolve();
   }
@@ -281,7 +281,7 @@ const generateApplicationFiles = ({ processor, applicationWithEntities }) => {
   }
 
   const withEntities = applicationWithEntities.entities.length > 0 ? true : undefined;
-  const generatorOptions = { reproducible, force, withEntities, ...processor.options };
+  const generatorOptions = { reproducible, force, withEntities, ...options };
   if (!fork) {
     generatorOptions.applicationWithEntities = applicationWithEntities;
   }
@@ -376,6 +376,7 @@ class JDLProcessor {
     this.reproducible = allNewApplications(this);
     this.inFolder = shouldRunInFolder(this);
     this.force = shouldForce(this);
+    this.multiplesApplications = multiplesApplications(this);
     return this;
   }
 
@@ -383,16 +384,16 @@ class JDLProcessor {
     statistics.sendSubGenEvent('generator', 'import-jdl');
   }
 
-  generateWorkspaces(options) {
-    if (!options.workspaces || !multiplesApplications(this)) {
+  generateWorkspaces(options = {}) {
+    if (!options.workspaces || !this.multiplesApplications) {
       return Promise.resolve();
     }
     return EnvironmentBuilder.createDefaultBuilder()
       .getEnvironment()
-      .run('jhipster:workspaces', { workspaces: false, ...options, importState: this.importState });
+      .run('jhipster:workspaces', { workspaces: false, ...this.options, ...options, importState: this.importState });
   }
 
-  generateApplications() {
+  generateApplications(options = {}) {
     if (this.options.ignoreApplication) {
       logger.debug('Applications not generated');
       return Promise.resolve();
@@ -401,6 +402,7 @@ class JDLProcessor {
       try {
         return generateApplicationFiles({
           processor: this,
+          options: { ...this.options, ...options },
           applicationWithEntities,
         });
       } catch (error) {
@@ -508,7 +510,7 @@ module.exports = (jdlFiles, options = {}, env) => {
     jdlImporter.config();
 
     return jdlImporter
-      .generateWorkspaces(options)
+      .generateWorkspaces()
       .then(() => jdlImporter.generateApplications())
       .then(() => jdlImporter.generateEntities(env))
       .then(() => jdlImporter.generateDeployments())
@@ -521,3 +523,5 @@ module.exports = (jdlFiles, options = {}, env) => {
     return Promise.reject(new Error(`Error during import-jdl: ${e.message}`));
   }
 };
+
+module.exports.JDLProcessor = JDLProcessor;

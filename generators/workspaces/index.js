@@ -61,14 +61,17 @@ module.exports = class extends BaseBlueprintGenerator {
 
         const applications = importState.exportedApplicationsWithEntities;
         const packages = Object.keys(applications);
-        const clientPackageManager = applications[packages[0]].config.clientPackageManager;
         const dockerCompose = importState.exportedDeployments.some(
           deployment => deployment[GENERATOR_JHIPSTER].deploymentType === DOCKERCOMPOSE
         );
 
         this.workspacesConfig.dockerCompose = dockerCompose;
         this.workspacesConfig.packages = packages;
-        this.workspacesConfig.clientPackageManager = clientPackageManager;
+
+        if (this.workspacesConfig.clientPackageManager === undefined) {
+          const clientPackageManager = applications[packages[0]].config.clientPackageManager;
+          this.workspacesConfig.clientPackageManager = clientPackageManager;
+        }
       },
 
       async configureUsingFiles() {
@@ -96,6 +99,12 @@ module.exports = class extends BaseBlueprintGenerator {
 
         this.workspacesConfig.dockerCompose = dockerCompose;
         this.workspacesConfig.packages = packages;
+      },
+
+      configureOptions() {
+        if (this.options.clientPackageManager !== undefined) {
+          this.workspacesConfig.clientPackageManager = this.options.clientPackageManager;
+        }
       },
 
       configurePackageManager() {
@@ -134,7 +143,7 @@ module.exports = class extends BaseBlueprintGenerator {
           {
             base: [
               {
-                templates: ['.gitignore'],
+                templates: ['.gitignore', '.npmrc'],
               },
             ],
           },
@@ -171,8 +180,8 @@ module.exports = class extends BaseBlueprintGenerator {
             'ci:e2e:package': 'npm run ci:docker:build --workspaces --if-present && npm run java:docker --workspaces --if-present',
             'ci:e2e:run': 'npm run e2e:headless --workspaces --if-present',
             ...this._getOtherScripts(),
-            ...this._createConcurrentyScript('watch', 'backend:build-cache'),
-            ...this._createWorkspacesScript('ci:backend:test', 'ci:frontend:test', 'webapp:test'),
+            ...this._createConcurrentyScripts('watch', 'backend:build-cache'),
+            ...this._createWorkspacesScripts('ci:backend:test', 'ci:frontend:test', 'webapp:test'),
           },
         });
       },
@@ -184,7 +193,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   // Public API method used by the getter and also by Blueprints
-  _install() {
+  _preConflicts() {
     return {
       validateGit() {
         if (!this.options.monorepository) return;
@@ -196,11 +205,30 @@ module.exports = class extends BaseBlueprintGenerator {
         if (!this.options.monorepository) return;
         this.initializeGitRepository();
       },
+
+      initialCommit() {
+        if (!this.options.monorepository) return;
+        this.commitFilesToGit('Initial workspace commit', this.async());
+      },
     };
   }
 
-  get install() {
-    return this.useBlueprints ? undefined : this._install();
+  get preConflicts() {
+    return this.useBlueprints ? undefined : this._preConflicts();
+  }
+
+  // Public API method used by the getter and also by Blueprints
+  _end() {
+    return {
+      initialCommit() {
+        if (!this.options.monorepository) return;
+        this.commitFilesToGit('Workspace commit', this.async());
+      },
+    };
+  }
+
+  get end() {
+    return this.useBlueprints ? undefined : this._end();
   }
 
   _detectNodePackageManager() {
@@ -230,21 +258,23 @@ module.exports = class extends BaseBlueprintGenerator {
     return {};
   }
 
-  _createConcurrentyScript(...scripts) {
-    const scriptsList = scripts
-      .map(script => {
-        const packageScripts = this.packages.map(packageName => [
-          `${script}:${packageName}`,
-          `npm run ${script} --workspace ${packageName} --if-present`,
-        ]);
-        packageScripts.push([script, `concurrently ${this.packages.map(packageName => `npm:${script}:${packageName}`).join(' ')}`]);
-        return packageScripts;
-      })
-      .flat();
-    return Object.fromEntries(scriptsList);
+  _createConcurrentyScripts(...scripts) {
+    return Object.fromEntries(
+      scripts
+        .map(script => {
+          return this._createPackageScriptListForScript(script).concat([
+            [script, `concurrently ${this.packages.map(packageName => `npm:${script}:${packageName}`).join(' ')}`],
+          ]);
+        })
+        .flat()
+    );
   }
 
-  _createWorkspacesScript(...scripts) {
+  _createWorkspacesScripts(...scripts) {
     return Object.fromEntries(scripts.map(script => [`${script}`, `npm run ${script} --workspaces --if-present`]));
+  }
+
+  _createPackageScriptListForScript(script) {
+    return this.packages.map(packageName => [`${script}:${packageName}`, `npm run ${script} --workspace ${packageName} --if-present`]);
   }
 };

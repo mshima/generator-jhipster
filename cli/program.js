@@ -168,8 +168,12 @@ const buildCommands = ({ program, commands = {}, envBuilder, env, loadCommand })
         };
 
         if (opts.cliOnly) {
-          logger.debug('Executing CLI only script');
-          return loadCommand(cmdName)(args, options, env, envBuilder);
+          const useGenerator = options.useGenerator === undefined ? options.workspaces : options.useGenerator;
+          if (!useGenerator) {
+            logger.debug('Executing CLI only script');
+            return loadCommand(cmdName)(args, options, env, envBuilder);
+          }
+          options.commandOptions = { ...options };
         }
         env.composeWith('jhipster:bootstrap', options);
 

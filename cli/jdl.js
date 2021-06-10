@@ -52,11 +52,16 @@ module.exports = ([jdlFiles = []], options = {}, env, forkProcess) => {
   if (!jdlFiles || jdlFiles.length === 0) {
     logger.fatal(chalk.red('\nAt least one jdl file is required.\n'));
   }
-  const promises = jdlFiles.map(toJdlFile).map(filename => {
-    if (!fs.existsSync(filename)) {
-      return download([[filename]], options);
-    }
-    return Promise.resolve(filename);
-  });
-  return Promise.all(promises).then(jdlFiles => importJdl(jdlFiles.flat(), options, env, forkProcess));
+  return module.exports.downloadJDLs(jdlFiles, options).then(jdlFiles => importJdl(jdlFiles.flat(), options, env, forkProcess));
+};
+
+module.exports.downloadJDLs = function downloadJDLs(jdlFiles, options = {}) {
+  return Promise.all(
+    jdlFiles.map(toJdlFile).map(filename => {
+      if (!fs.existsSync(filename)) {
+        return download([[filename]], options);
+      }
+      return Promise.resolve(filename);
+    })
+  );
 };
