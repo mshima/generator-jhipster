@@ -21,8 +21,8 @@ import { Location } from '@angular/common';
 import { Router, NavigationEnd, Event } from '@angular/router';
 import { Subscription, ReplaySubject, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import * as SockJS from 'sockjs-client';
-import * as Stomp from 'webstomp-client';
+import SockJS from 'sockjs-client';
+import Stomp from 'webstomp-client';
 
 <%_ if (authenticationTypeSession) { _%>
 import { CSRFService } from 'app/core/auth/csrf.service';
