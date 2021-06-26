@@ -4,12 +4,12 @@ const packageJson = require('./../package.json');
 <%_ } _%>
 
 module.exports = {
-  NODE_ENV: '"production"',
-  SERVER_API_URL: '""',
+  DEVELOPMENT: true,
+  SERVER_API_URL: '',
 <%_ if (buildToolUnknown) { _%>
-  VERSION: `'${packageJson.version}'`,
+  VERSION: packageJson.version,
 <%_ } else { _%>
   // APP_VERSION is passed as an environment variable from the Gradle / Maven build tasks.
-  VERSION: `'${process.env.hasOwnProperty('APP_VERSION') ? process.env.APP_VERSION : 'UNKNOWN'}'`,
+  VERSION: process.env.hasOwnProperty('APP_VERSION') ? process.env.APP_VERSION : 'UNKNOWN',
 <%_ } _%>
 };

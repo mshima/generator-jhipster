@@ -113,13 +113,13 @@ function compile(tokens: Array<Token>, values: any) {
         if (mode === 'named') {
           compiled.push(values[token.value]);
         } else {
-          if (process.env.NODE_ENV !== 'production') {
+          if (DEVELOPMENT) {
             warn("Type of token '" + token.type + "' and format of value '" + mode + "' don't match!");
           }
         }
         break;
       case 'unknown':
-        if (process.env.NODE_ENV !== 'production') {
+        if (DEVELOPMENT) {
           warn("Detect 'unknown' type of token!");
         }
         break;

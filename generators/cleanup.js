@@ -317,6 +317,14 @@ function cleanupOldFiles(generator) {
       generator.removeFile(`${REACT_DIR}config/devtools.tsx`);
     }
   }
+
+  if (generator.isJhipsterVersionLessThan('7.1.1') && generator.jhipsterConfig) {
+    if (generator.jhipsterConfig.clientFramework === VUE) {
+      generator.removeFile('webpack/env.js');
+      generator.removeFile('webpack/dev.env.js');
+      generator.removeFile('webpack/prod.env.js');
+    }
+  }
 }
 
 /**

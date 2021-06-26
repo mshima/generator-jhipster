@@ -7,14 +7,16 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { hashElement } = require('folder-hash');
 const MergeJsonWebpackPlugin = require('merge-jsons-webpack-plugin');
 <%_ } _%>
-const { DefinePlugin } = require('webpack');
+const { DefinePlugin, EnvironmentPlugin } = require('webpack');
 const vueLoaderConfig = require('./loader.conf');
+const environment = require('./environment');
 
 function resolve(dir) {
   return path.join(__dirname, '..', dir);
 }
 
 module.exports = async env => {
+  const development = env.env === 'development';
 <%_ if (enableTranslation) { _%>
   const languagesHash = await hashElement(path.resolve(__dirname, '../<%= MAIN_SRC_DIR %>i18n'), {
     algo: 'md5',
@@ -23,10 +25,8 @@ module.exports = async env => {
   });
 
 <%_ } _%>
-
   return merge(
 {
-  mode: 'development',
   context: path.resolve(__dirname, '../'),
   entry: {
     app: './<%= CLIENT_MAIN_SRC_DIR %>app/main.ts'
@@ -58,7 +58,11 @@ module.exports = async env => {
       // 2. Add your config as buildDependency to get cache invalidation on config change
       config: [
         __filename,
-        path.resolve(__dirname, `webpack.${env.env == 'development' ? 'dev' : 'prod'}.js`),
+        path.resolve(__dirname, `webpack.${development ? 'dev' : 'prod'}.js`),
+        path.resolve(__dirname, 'config.js'),
+        path.resolve(__dirname, 'environment.js'),
+        path.resolve(__dirname, 'loader.conf.js'),
+        path.resolve(__dirname, 'vue.utils.js'),
         path.resolve(__dirname, 'utils.js'),
         path.resolve(__dirname, '../.postcssrc.js'),
         path.resolve(__dirname, '../tsconfig.json')
@@ -70,7 +74,7 @@ module.exports = async env => {
       {
         test: /\.vue$/,
         loader: 'vue-loader',
-        options: vueLoaderConfig
+        options: vueLoaderConfig(!development)
       },
       {
         test: /\.ts$/,
@@ -116,11 +120,17 @@ module.exports = async env => {
     ]
   },
   plugins: [
+    new EnvironmentPlugin({
+      // Required by vuelidate https://github.com/vuelidate/vuelidate/issues/365
+      BUILD: 'web',
+    }),
     new DefinePlugin({
 <%_ if (enableTranslation) { _%>
       I18N_HASH: JSON.stringify(languagesHash.hash),
 <%_ } _%>
-      'process.env': require(env.env == 'development' ? './dev.env' : './prod.env'),
+      VERSION: JSON.stringify(environment.VERSION),
+      SERVER_API_URL: JSON.stringify(environment.SERVER_API_URL),
+      DEVELOPMENT: JSON.stringify(development),
     }),
     new VueLoaderPlugin(),
     new CopyWebpackPlugin({
