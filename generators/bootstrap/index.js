@@ -30,6 +30,7 @@ const {
 const { hasState, setModifiedFileState } = State;
 
 const BaseGenerator = require('../generator-base');
+const { default: MultiStepTransform } = require('../../lib/utils/multi-step-transform');
 const { defaultConfig } = require('../generator-defaults');
 const { prettierTransform, generatedAnnotationTransform } = require('../generator-transforms');
 const { formatDateForChangelog, prepareFieldForLiquibaseTemplates } = require('../../utils/liquibase');
@@ -166,6 +167,7 @@ module.exports = class extends BaseGenerator {
           }
           return file;
         }),
+        new MultiStepTransform(),
       ];
 
       if (this.jhipsterConfig.withGeneratedFlag) {
