@@ -1490,6 +1490,11 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
    */
   composeWithJHipster(generator, args, options, once = false) {
     const namespace = generator.includes(':') ? generator : `jhipster:${generator}`;
+    let immediately = false;
+    if (typeof once === 'object') {
+      immediately = once.immediately;
+      once = false;
+    }
     if (typeof args === 'boolean') {
       once = args;
       args = [];
@@ -1519,11 +1524,27 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
       }
     }
 
-    return this.env.composeWith(generator, args, {
-      ...this.options,
-      configOptions: this.configOptions,
-      ...options,
-    });
+    return this.env.composeWith(
+      generator,
+      args,
+      {
+        ...this.options,
+        configOptions: this.configOptions,
+        ...options,
+      },
+      !immediately
+    );
+  }
+
+  /**
+   * Compose with a jhipster generator using default jhipster config, but queue it immediately.
+   * @param {string} generator - jhipster generator.
+   * @param {object} [options] - options to pass
+   * @param {boolean} [once] - compose once with the generator
+   * @return {object} the composed generator
+   */
+  dependsOnJHipster(generator, args, options) {
+    return this.composeWithJHipster(generator, args, options, { immediately: true });
   }
 
   /**

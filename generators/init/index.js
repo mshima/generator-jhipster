@@ -41,10 +41,17 @@ module.exports = class extends BaseBlueprintGenerator {
       this.configureInit();
     }
 
-    this.composeWithJHipster(GENERATOR_PROJECT_NAME);
-
     if (!this.fromBlueprint) {
       this.instantiateBlueprints(GENERATOR_INIT);
+    }
+  }
+
+  /**
+   * Callback that executes before queueing tasks.
+   */
+  async _beforeQueue() {
+    if (!this.fromBlueprint) {
+      await this.dependsOnJHipster(GENERATOR_PROJECT_NAME);
     }
   }
 
