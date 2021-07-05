@@ -30,18 +30,24 @@ module.exports = class extends BaseBlueprintGenerator {
   constructor(args, opts) {
     super(args, opts, { unique: 'namespace' });
 
+    this.argument('generators', {
+      type: Array,
+      required: false,
+      description: 'Generators to compose with',
+    });
+
     this.registerCommonOptions();
     this.registerProjectNameOptions();
     this.registerInitOptions();
 
     if (this.options.help) return;
 
-    if (this.options.defaults) {
-      this.configureProjectName();
-      this.configureInit();
-    }
-
     if (!this.fromBlueprint) {
+      if (this.options.defaults) {
+        this.configureProjectName();
+        this.configureInit();
+      }
+
       this.instantiateBlueprints(GENERATOR_INIT);
     }
   }
@@ -119,6 +125,23 @@ module.exports = class extends BaseBlueprintGenerator {
   get configuring() {
     if (this.fromBlueprint) return;
     return this._configuring();
+  }
+
+  _composing() {
+    return {
+      async composing() {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const generator of this.arguments) {
+          // eslint-disable-next-line no-await-in-loop
+          await this.composeWithJHipster(generator);
+        }
+      },
+    };
+  }
+
+  get composing() {
+    if (this.fromBlueprint) return;
+    return this._composing();
   }
 
   _loading() {
