@@ -35,9 +35,14 @@ module.exports = class extends BaseBlueprintGenerator {
     if (this.options.defaults) {
       this.configureProjectName();
     }
+  }
 
+  /**
+   * Async initialization before queueing.
+   */
+  async _beforeQueue() {
     if (!this.fromBlueprint) {
-      this.instantiateBlueprints(GENERATOR_PROJECT);
+      await this.composeWithBlueprints(GENERATOR_PROJECT);
     }
   }
 
@@ -57,7 +62,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get initializing() {
-    if (this.fromBlueprint) return;
+    if (this.delegateToBlueprint) return;
     return this._initializing();
   }
 
@@ -90,7 +95,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get prompting() {
-    if (this.fromBlueprint) return;
+    if (this.delegateToBlueprint) return;
     return this._prompting();
   }
 
@@ -103,7 +108,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get configuring() {
-    if (this.fromBlueprint) return;
+    if (this.delegateToBlueprint) return;
     return this._configuring();
   }
 
@@ -116,7 +121,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get loading() {
-    if (this.fromBlueprint) return;
+    if (this.delegateToBlueprint) return;
     return this._loading();
   }
 

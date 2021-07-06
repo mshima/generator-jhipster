@@ -1468,6 +1468,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
   }
 
   /**
+   * @deprecated
    * Register the composed generator for compose once.
    * @param {string} namespace - jhipster generator.
    * @return {boolean} false if already composed
@@ -1658,6 +1659,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
   }
 
   /**
+   * @deprecated
    * executes a Git command using shellJS
    * gitExec(args [, options] [, callback])
    *
@@ -2817,6 +2819,7 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
   }
 
   /**
+   * @deprecated
    * Get all the generator configuration from the .yo-rc.json file
    * @param {string} yoRcPath - .yo-rc.json folder.
    */
