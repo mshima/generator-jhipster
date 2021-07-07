@@ -3,6 +3,7 @@ const expect = require('expect');
 const { access } = require('fs/promises');
 const normalizePath = require('normalize-path');
 
+const { testBlueprintSupport } = require('../support');
 const { skipPrettierHelpers: helpers } = require('../utils/utils');
 const { defaultConfig } = require('../../generators/init/config');
 
@@ -143,4 +144,5 @@ describe('JHipster init generator', () => {
       });
     });
   });
+  describe('blueprint support', () => testBlueprintSupport('init'));
 });
