@@ -24,6 +24,11 @@ const commonOptions = {
     desc: 'Use default config',
     type: Boolean,
   },
+  reproducible: {
+    desc: 'Force a reproducible project for testing',
+    type: Boolean,
+    hide: true,
+  },
 };
 
 module.exports = {

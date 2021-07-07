@@ -39,6 +39,7 @@ const {
   javaPackageNameDefaultConfig,
   javaPackageNameRequiredConfig,
   projectNameDefaultConfig,
+  projectNameReproducibleConfig,
   projectNameRequiredConfig,
 } = require('./config');
 const { commonOptions, initOptions, javaPackageNameOptions, projectNameOptions } = require('./options');
@@ -2600,6 +2601,9 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
    * Load required project-name configs into config.
    */
   configureProjectName() {
+    if (this.options.reproducible) {
+      this.config.defaults(projectNameReproducibleConfig);
+    }
     this.config.defaults({
       ...projectNameRequiredConfig,
       baseName: this.getDefaultAppName(),

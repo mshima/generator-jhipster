@@ -6,10 +6,10 @@ Object {
     "contents": "{
   \\"generator-jhipster\\": {
     \\"baseName\\": \\"existing\\",
-    \\"jhipsterVersion\\": \\"0.0.0\\",
     \\"projectName\\": \\"JHipster project\\",
     \\"prettierDefaultIndent\\": 4,
-    \\"prettierJavaIndent\\": 2
+    \\"prettierJavaIndent\\": 2,
+    \\"jhipsterVersion\\": \\"0.0.0\\"
   }
 }
 ",
@@ -23,11 +23,11 @@ Object {
   ".yo-rc.json": Object {
     "contents": "{
   \\"generator-jhipster\\": {
-    \\"jhipsterVersion\\": \\"0.0.0\\",
     \\"baseName\\": \\"jhipster\\",
     \\"projectName\\": \\"JHipster project\\",
     \\"prettierDefaultIndent\\": 4,
-    \\"prettierJavaIndent\\": 2
+    \\"prettierJavaIndent\\": 2,
+    \\"jhipsterVersion\\": \\"0.0.0\\"
   }
 }
 ",
@@ -41,8 +41,8 @@ Object {
   ".yo-rc.json": Object {
     "contents": "{
   \\"generator-jhipster\\": {
-    \\"jhipsterVersion\\": \\"0.0.0\\",
     \\"baseName\\": \\"jhipster\\",
+    \\"jhipsterVersion\\": \\"0.0.0\\",
     \\"projectName\\": \\"JHipster project\\"
   }
 }
@@ -73,8 +73,8 @@ Object {
   ".yo-rc.json": Object {
     "contents": "{
   \\"generator-jhipster\\": {
-    \\"jhipsterVersion\\": \\"0.0.0\\",
     \\"baseName\\": \\"jhipster\\",
+    \\"jhipsterVersion\\": \\"0.0.0\\",
     \\"projectName\\": \\"JHipster project\\"
   }
 }
