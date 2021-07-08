@@ -29,6 +29,10 @@ const commonOptions = {
     type: Boolean,
     hide: true,
   },
+  add: {
+    desc: 'Compose with a generator at current project',
+    type: Boolean,
+  },
 };
 
 module.exports = {

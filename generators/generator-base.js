@@ -2934,6 +2934,16 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
   }
 
   /**
+   * Check if prompts must be skipped.
+   * @return {Boolean}
+   */
+  skipPrompts() {
+    return (
+      this.options.defaults || this.options.skipPrompts || (!this.options.add && this.existingModularProject && !this.options.askAnswered)
+    );
+  }
+
+  /**
    * Load config for simulating existing project.
    */
   parseTestOptions() {
