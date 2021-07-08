@@ -69,7 +69,7 @@ module.exports = class extends BaseBlueprintGenerator {
   _prompting() {
     return {
       async showPrompts() {
-        if (this.options.defaults || this.options.skipPrompts || (this.existingModularProject && !this.options.askAnswered)) return;
+        if (this.skipPrompts()) return;
         await this.prompt(
           [
             {
