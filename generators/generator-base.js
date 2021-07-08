@@ -33,7 +33,11 @@ const constants = require('./generator-constants');
 const PrivateBase = require('./generator-base-private');
 const NeedleApi = require('./needle-api');
 const { defaultConfig, defaultConfigMicroservice } = require('./generator-defaults');
+const { BUILD_TOOL } = require('./application-options');
+const { BUILD_TOOL_MAVEN, BUILD_TOOL_GRADLE } = require('./application-option-values');
 const {
+  buildToolDefaultConfig,
+  buildToolRequiredConfig,
   initDefaultConfig,
   initRequiredConfig,
   javaPackageNameDefaultConfig,
@@ -42,7 +46,7 @@ const {
   projectNameReproducibleConfig,
   projectNameRequiredConfig,
 } = require('./config');
-const { commonOptions, initOptions, javaPackageNameOptions, projectNameOptions } = require('./options');
+const { commonOptions, buildToolOptions, initOptions, javaPackageNameOptions, projectNameOptions } = require('./options');
 const { detectLanguage } = require('../utils/language');
 const { formatDateForChangelog } = require('../utils/liquibase');
 const { calculateDbNameWithLimit, hibernateSnakeCase } = require('../utils/db');
@@ -2513,6 +2517,42 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
    */
   registerCommonOptions() {
     this.jhipsterOptions(commonOptions);
+  }
+
+  /**
+   * Register and parse build-tool options.
+   */
+  registerBuildToolOptions() {
+    this.jhipsterOptions(buildToolOptions);
+  }
+
+  /**
+   * Load required build-tool configs into config.
+   */
+  configureBuildTool() {
+    this.config.defaults(buildToolRequiredConfig);
+  }
+
+  /**
+   * Load build-tool configs into dest.
+   * all variables should be set to dest,
+   * all variables should be referred from config,
+   * @param {any} config - config to load config from
+   * @param {any} dest - destination context to use default is context
+   */
+  loadBuildToolConfig(config = _.defaults({}, this.jhipsterConfig, buildToolDefaultConfig), dest = this) {
+    dest[BUILD_TOOL] = config[BUILD_TOOL];
+  }
+
+  /**
+   * Load derived build-tool configs into dest.
+   * all variables should be set to dest,
+   * all variables should be referred from config,
+   * @param {any} dest - source/destination context
+   */
+  loadDerivedBuildToolConfig(dest = this) {
+    dest.buildToolMaven = dest[BUILD_TOOL] === BUILD_TOOL_MAVEN;
+    dest.buildToolGradle = dest[BUILD_TOOL] === BUILD_TOOL_GRADLE;
   }
 
   /**

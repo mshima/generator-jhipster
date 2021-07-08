@@ -22,6 +22,7 @@ const Generators = {
   GENERATOR_BOOTSTRAP: 'bootstrap',
   GENERATOR_AZURE_APP_SERVICE: 'azure-app-service',
   GENERATOR_AZURE_SPRING_CLOUD: 'azure-spring-cloud',
+  GENERATOR_BUILD_TOOL: 'build-tool',
   GENERATOR_CICD: 'ci-cd',
   GENERATOR_CLIENT: 'client',
   GENERATOR_CLOUDFOUNDRY: 'cloudfoundry',

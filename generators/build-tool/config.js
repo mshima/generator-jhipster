@@ -16,29 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { options: buildToolOptions } = require('./build-tool/options');
-const { options: initOptions } = require('./init/options');
-const { options: projectNameOptions } = require('./project-name/options');
+const {
+  constants: { BUILD_TOOL, DEFAULT_BUILD_TOOL },
+} = require('./options');
 
-const commonOptions = {
-  defaults: {
-    desc: 'Use default config',
-    type: Boolean,
-  },
-  reproducible: {
-    desc: 'Force a reproducible project for testing',
-    type: Boolean,
-    hide: true,
-  },
-  add: {
-    desc: 'Compose with a generator at current project',
-    type: Boolean,
-  },
+/** Required config */
+const requiredConfig = {
+  [BUILD_TOOL]: DEFAULT_BUILD_TOOL,
 };
 
-module.exports = {
-  commonOptions,
-  buildToolOptions,
-  initOptions,
-  projectNameOptions,
+/** Init default config for templates */
+const defaultConfig = {
+  ...requiredConfig,
 };
+
+module.exports = { requiredConfig, defaultConfig };

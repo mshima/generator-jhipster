@@ -21,6 +21,7 @@ const {
   requiredConfig: javaPackageNameRequiredConfig,
   defaultConfig: javaPackageNameDefaultConfig,
 } = require('./java-package-name/config');
+const { defaultConfig: buildToolDefaultConfig, requiredConfig: buildToolRequiredConfig } = require('./build-tool/config');
 const {
   requiredConfig: projectNameRequiredConfig,
   defaultConfig: projectNameDefaultConfig,
@@ -28,6 +29,8 @@ const {
 } = require('./project-name/config');
 
 module.exports = {
+  buildToolDefaultConfig,
+  buildToolRequiredConfig,
   initDefaultConfig,
   initRequiredConfig,
   javaPackageNameDefaultConfig,

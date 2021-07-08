@@ -30,6 +30,9 @@ const defaultCommands = {
   'azure-spring-cloud': {
     desc: 'Deploy the current application to Azure Spring Cloud',
   },
+  'build-tool': {
+    desc: 'Generate build-tool',
+  },
   'ci-cd': {
     desc: 'Create pipeline scripts for popular Continuous Integration/Continuous Deployment tools',
   },
