@@ -50,7 +50,7 @@ const basicTests = data => {
       before(async () => {
         runResult = await contextBuilder().withPrompts(customPrompts).run();
       });
-      it('should write expected config to .yo-rc.json', () => {
+      it('should show prompts and write prompt values to .yo-rc.json', () => {
         runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: customPrompts });
       });
     });
@@ -58,7 +58,7 @@ const basicTests = data => {
       before(async () => {
         runResult = await contextBuilder().withOptions({ defaults: true }).withPrompts(customPrompts).run();
       });
-      it('should write default config to .yo-rc.json', () => {
+      it('should not show prompts and write default config to .yo-rc.json', () => {
         runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: defaultConfig });
       });
     });
@@ -67,7 +67,7 @@ const basicTests = data => {
       before(async () => {
         runResult = await contextBuilder().withOptions({ skipPrompts: true }).withPrompts(customPrompts).run();
       });
-      it('should write default config to .yo-rc.json', () => {
+      it('should not show prompts and write required config to .yo-rc.json', () => {
         runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: requiredConfig });
       });
     });
@@ -79,7 +79,7 @@ const basicTests = data => {
           .withPrompts(customPrompts)
           .run();
       });
-      it('should not override default config to .yo-rc.json', () => {
+      it('should not show prompts and write required config to .yo-rc.json', () => {
         runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: { ...requiredConfig, baseName: 'existing' } });
       });
     });
@@ -91,7 +91,7 @@ const basicTests = data => {
           .withPrompts(customPrompts)
           .run();
       });
-      it('should write expected config to .yo-rc.json', () => {
+      it('should show prompts and write prompt values to .yo-rc.json', () => {
         runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: customPrompts });
       });
     });
@@ -150,14 +150,14 @@ const testBlueprintSupport = generatorName => {
     before(async () => {
       const context = helpers
         .run(path.join(__dirname, `../../generators/${generatorName}`))
-        .withMockedGenerators([`jhipster-foo:${generatorName}`])
-        .withOptions({ blueprint: 'foo', skipChecks: true })
+        .withMockedGenerators([`jhipster-foo-sbs:${generatorName}`])
+        .withOptions({ blueprint: 'foo-sbs', skipChecks: true })
         .on('ready', generator => {
           spy = addSpies(generator);
         });
 
       // simulate a sbs blueprint
-      Object.defineProperty(context.mockedGenerators[`jhipster-foo:${generatorName}`].prototype, 'sbsBlueprint', {
+      Object.defineProperty(context.mockedGenerators[`jhipster-foo-sbs:${generatorName}`].prototype, 'sbsBlueprint', {
         get() {
           return true;
         },
@@ -168,9 +168,9 @@ const testBlueprintSupport = generatorName => {
       result = await context;
     });
     it('should compose with blueprints', () => {
-      expect(result.mockedGenerators[`jhipster-foo:${generatorName}`].callCount).toBe(1);
+      expect(result.mockedGenerators[`jhipster-foo-sbs:${generatorName}`].callCount).toBe(1);
     });
-    it('should not call any priority', () => {
+    it('should call every priority', () => {
       expect(spy[0].callCount).toBe(spy[1]);
     });
   });
