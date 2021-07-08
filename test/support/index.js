@@ -2,7 +2,101 @@ const expect = require('expect');
 const path = require('path');
 const sinon = require('sinon');
 
+const { GENERATOR_JHIPSTER } = require('../../generators/generator-constants');
 const { skipPrettierHelpers: helpers } = require('../utils/utils');
+
+const testOptions = data => {
+  const { generatorPath, customOptions, contextBuilder = () => helpers.create(generatorPath) } = data;
+  let runResult;
+  before(async () => {
+    runResult = await contextBuilder()
+      .withOptions({ ...customOptions })
+      .run();
+  });
+  it('should write options to .yo-rc.json', () => {
+    runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: customOptions });
+  });
+};
+
+const basicTests = data => {
+  const { generatorPath, customPrompts, requiredConfig, defaultConfig, contextBuilder = () => helpers.create(generatorPath) } = data;
+  describe('with default options', () => {
+    let runResult;
+    before(async () => {
+      runResult = await contextBuilder().run();
+    });
+    it('should write default config to .yo-rc.json', () => {
+      runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: requiredConfig });
+    });
+    it('should load default config into the generator', () => {
+      expect(runResult.generator).toMatchObject(requiredConfig);
+    });
+  });
+  describe('with defaults option', () => {
+    let runResult;
+    before(async () => {
+      runResult = await contextBuilder().withOptions({ defaults: true }).run();
+    });
+    it('should write default config to .yo-rc.json', () => {
+      runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: requiredConfig });
+    });
+    it('should load default config into the generator', () => {
+      expect(runResult.generator).toMatchObject(requiredConfig);
+    });
+  });
+  describe('with custom prompt values', () => {
+    let runResult;
+    describe('and default options', () => {
+      before(async () => {
+        runResult = await contextBuilder().withPrompts(customPrompts).run();
+      });
+      it('should write expected config to .yo-rc.json', () => {
+        runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: customPrompts });
+      });
+    });
+    describe('and defaults option', () => {
+      before(async () => {
+        runResult = await contextBuilder().withOptions({ defaults: true }).withPrompts(customPrompts).run();
+      });
+      it('should write default config to .yo-rc.json', () => {
+        runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: defaultConfig });
+      });
+    });
+    describe('and skipPrompts option', () => {
+      let runResult;
+      before(async () => {
+        runResult = await contextBuilder().withOptions({ skipPrompts: true }).withPrompts(customPrompts).run();
+      });
+      it('should write default config to .yo-rc.json', () => {
+        runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: requiredConfig });
+      });
+    });
+    describe('and existing config', () => {
+      let runResult;
+      before(async () => {
+        runResult = await contextBuilder()
+          .withOptions({ localConfig: { baseName: 'existing' } })
+          .withPrompts(customPrompts)
+          .run();
+      });
+      it('should not override default config to .yo-rc.json', () => {
+        runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: { ...requiredConfig, baseName: 'existing' } });
+      });
+    });
+    describe('and askAnswered option on an existing project', () => {
+      let runResult;
+      before(async () => {
+        runResult = await contextBuilder()
+          .withOptions({ askAnswered: true, localConfig: { baseName: 'existing' } })
+          .withPrompts(customPrompts)
+          .run();
+      });
+      it('should write expected config to .yo-rc.json', () => {
+        runResult.assertJsonFileContent('.yo-rc.json', { [GENERATOR_JHIPSTER]: customPrompts });
+      });
+    });
+  });
+};
 
 const testBlueprintSupport = generatorName => {
   const priorities = [
@@ -83,5 +177,7 @@ const testBlueprintSupport = generatorName => {
 };
 
 module.exports = {
+  basicTests,
   testBlueprintSupport,
+  testOptions,
 };

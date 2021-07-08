@@ -20,7 +20,7 @@
 const chalk = require('chalk');
 
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
-const { GENERATOR_PROJECT } = require('../generator-list');
+const { GENERATOR_PROJECT_NAME } = require('../generator-list');
 const { defaultConfig } = require('./config');
 
 module.exports = class extends BaseBlueprintGenerator {
@@ -42,7 +42,7 @@ module.exports = class extends BaseBlueprintGenerator {
    */
   async _beforeQueue() {
     if (!this.fromBlueprint) {
-      await this.composeWithBlueprints(GENERATOR_PROJECT);
+      await this.composeWithBlueprints(GENERATOR_PROJECT_NAME);
     }
   }
 
