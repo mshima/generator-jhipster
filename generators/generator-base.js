@@ -73,13 +73,6 @@ const { GATLING, CUCUMBER, PROTRACTOR, CYPRESS } = require('../jdl/jhipster/test
 const { GATEWAY, MICROSERVICE, MONOLITH } = require('../jdl/jhipster/application-types');
 const { ELASTICSEARCH } = require('../jdl/jhipster/search-engine-types');
 
-/* Taken from commander.js source code, options camelCase must match */
-function camelcase(str) {
-  return str.split('-').reduce((str, word) => {
-    return str + word[0].toUpperCase() + word.slice(1);
-  });
-}
-
 // Reverse order.
 const CUSTOM_PRIORITIES = [
   {
@@ -2978,7 +2971,7 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
     Object.entries(options).forEach(([optionName, optionDesc]) => {
       this.option(optionName, optionDesc);
       if (!optionDesc.scope) return;
-      const camelCaseName = camelcase(optionName);
+      const camelCaseName = _.camelCase(optionName);
       const optionValue = this.options[camelCaseName];
       if (optionValue !== undefined) {
         if (optionDesc.scope === 'storage') {
