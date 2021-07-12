@@ -1,0 +1,46 @@
+/**
+ * Copyright 2013-2021 the original author or authors from the JHipster project.
+ *
+ * This file is part of the JHipster project, see https://www.jhipster.tech/
+ * for more information.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const { defaults } = require('lodash');
+
+const { PACKAGE_NAME, BUILD_TOOL } = require('./constants');
+const { DEFAULT_BUILD_TOOL } = require('./options');
+const { MAVEN } = require('../maven/constants');
+
+/** Required config to be skipped */
+const requiredConfig = {
+  [PACKAGE_NAME]: 'com.mycompany.myapp',
+  [BUILD_TOOL]: DEFAULT_BUILD_TOOL,
+};
+
+/** Init default config for templates */
+const defaultConfig = {
+  ...requiredConfig,
+};
+
+function loadConfig(config, into) {
+  config = defaults({}, config, defaultConfig);
+  into[PACKAGE_NAME] = config[PACKAGE_NAME];
+  into[BUILD_TOOL] = config[BUILD_TOOL];
+}
+
+function loadDerivedConfig(fromInto) {
+  fromInto.buildToolMaven = fromInto.buildTool === MAVEN;
+}
+
+module.exports = { requiredConfig, defaultConfig, loadConfig, loadDerivedConfig };

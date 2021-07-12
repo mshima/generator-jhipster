@@ -16,14 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Required config to be skipped */
-const requiredConfig = {
-  packageName: 'com.mycompany.myapp',
-};
+const { loadConstants: loadJavaConfigConstants } = require('./java-config/constants');
 
-/** Init default config for templates */
-const defaultConfig = {
-  ...requiredConfig,
+module.exports = {
+  loadJavaConfigConstants,
 };
-
-module.exports = { requiredConfig, defaultConfig };

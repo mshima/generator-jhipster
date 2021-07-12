@@ -20,8 +20,10 @@
 const chalk = require('chalk');
 
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
-const { GENERATOR_MAVEN, GENERATOR_PROJECT_NAME, GENERATOR_JAVA_PACKAGE_NAME } = require('../generator-list');
+const { GENERATOR_JAVA_CONFIG, GENERATOR_MAVEN } = require('../generator-list');
 const { files } = require('./files');
+const { MAVEN } = require('./constants');
+const { BUILD_TOOL } = require('../java-config/constants');
 
 module.exports = class extends BaseBlueprintGenerator {
   constructor(args, opts) {
@@ -29,20 +31,19 @@ module.exports = class extends BaseBlueprintGenerator {
 
     this.registerCommonOptions();
     this.registerProjectNameOptions();
-    this.registerJavaPackageNameOptions();
+    this.registerJavaConfigOptions();
 
     if (this.options.help) return;
 
     if (this.options.defaults) {
       this.configureProjectName();
-      this.configureJavaPackageName();
+      this.configureJavaConfig();
     }
   }
 
   async _beforeQueue() {
     if (!this.fromBlueprint) {
-      await this.dependsOnJHipster(GENERATOR_PROJECT_NAME);
-      await this.dependsOnJHipster(GENERATOR_JAVA_PACKAGE_NAME);
+      await this.dependsOnJHipster(GENERATOR_JAVA_CONFIG, [], { [BUILD_TOOL]: MAVEN });
       await this.composeWithBlueprints(GENERATOR_MAVEN);
     }
   }
@@ -71,7 +72,7 @@ module.exports = class extends BaseBlueprintGenerator {
     return {
       configure() {
         this.configureProjectName();
-        this.configureJavaPackageName();
+        this.configureJavaConfig();
       },
     };
   }
@@ -85,11 +86,11 @@ module.exports = class extends BaseBlueprintGenerator {
     return {
       loadConfig() {
         this.loadProjectNameConfig();
-        this.loadJavaPackageNameConfig();
+        this.loadJavaConfigConfig();
       },
       loadDerivedConfig() {
         this.loadDerivedProjectNameConfig();
-        this.loadDerivedJavaPackageNameConfig();
+        this.loadDerivedJavaConfigConfig();
       },
     };
   }

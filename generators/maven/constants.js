@@ -16,11 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-module.exports.options = {
-  'package-name': {
-    desc: 'Application package name',
-    type: String,
-    scope: 'storage',
-  },
+module.exports = {
+  MAVEN: 'maven',
+  MAVEN_DESCRIPTION: 'Maven',
 };

@@ -68,8 +68,8 @@ const defaultCommands = {
   init: {
     desc: 'Init project (alpha)',
   },
-  'java-package-name': {
-    desc: 'Configure Java package name (alpha)',
+  'java-config': {
+    desc: 'Configure a java project (alpha)',
   },
   jdl: {
     alias: 'import-jdl',

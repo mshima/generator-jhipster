@@ -16,29 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { options: initOptions } = require('./init/options');
-const { options: projectNameOptions } = require('./project-name/options');
-const { options: javaConfigOptions } = require('./java-config/options');
+const { kebabCase } = require('lodash');
 
-const commonOptions = {
-  defaults: {
-    desc: 'Use default config',
-    type: Boolean,
-  },
-  reproducible: {
-    desc: 'Force a reproducible project for testing',
-    type: Boolean,
-    hide: true,
-  },
-  add: {
-    desc: 'Compose with a generator at current project',
-    type: Boolean,
-  },
-};
+const BUILD_TOOL = 'buildTool';
+const PACKAGE_NAME = 'packageName';
+
+const JAVA_VERSION = '11';
+const JAVA_COMPATIBLE_VERSIONS = ['1.8', '1.9', '10', '11', '12', '13', '14', '15', '16'];
+const JHIPSTER_BOM_VERSION = '7.1.1-SNAPSHOT';
+
+function loadConstants(into) {
+  into.JAVA_VERSION = JAVA_VERSION;
+  into.JAVA_COMPATIBLE_VERSIONS = JAVA_COMPATIBLE_VERSIONS;
+  into.JHIPSTER_BOM_VERSION = JHIPSTER_BOM_VERSION;
+}
 
 module.exports = {
-  commonOptions,
-  initOptions,
-  projectNameOptions,
-  javaConfigOptions,
+  BUILD_TOOL,
+  BUILD_TOOL_OPTION_NAME: kebabCase(BUILD_TOOL),
+  BUILD_TOOL_DESCRIPTION: 'Build tool',
+  PACKAGE_NAME,
+  PACKAGE_NAME_OPTION_NAME: kebabCase(PACKAGE_NAME),
+  PACKAGE_NAME_DESCRIPTION: 'Application package name',
+  JAVA_VERSION,
+  JAVA_COMPATIBLE_VERSIONS,
+  loadConstants,
 };

@@ -36,13 +36,15 @@ const { defaultConfig, defaultConfigMicroservice } = require('./generator-defaul
 const {
   initDefaultConfig,
   initRequiredConfig,
-  javaPackageNameDefaultConfig,
-  javaPackageNameRequiredConfig,
+  javaConfigRequiredConfig,
+  loadDerivedJavaConfigConfig,
+  loadJavaConfigConfig,
   projectNameDefaultConfig,
   projectNameReproducibleConfigForTests,
   projectNameRequiredConfig,
 } = require('./config');
-const { commonOptions, initOptions, javaPackageNameOptions, projectNameOptions } = require('./options');
+const { loadJavaConfigConstants } = require('./constants');
+const { commonOptions, initOptions, javaConfigOptions, projectNameOptions } = require('./options');
 const { detectLanguage } = require('../utils/language');
 const { formatDateForChangelog } = require('../utils/liquibase');
 const { calculateDbNameWithLimit, hibernateSnakeCase } = require('../utils/db');
@@ -2551,37 +2553,45 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
   loadDerivedInitConfig(dest = this) {}
 
   /**
-   * Register and parse java-package-name options.
+   * Register and parse java-config options.
    */
-  registerJavaPackageNameOptions() {
-    this.jhipsterOptions(javaPackageNameOptions);
+  registerJavaConfigOptions() {
+    this.jhipsterOptions(javaConfigOptions);
   }
 
   /**
-   * Load required java-package-name configs into config.
+   * Load required java-config configs into config.
    */
-  configureJavaPackageName() {
-    this.config.defaults(javaPackageNameRequiredConfig);
+  configureJavaConfig() {
+    this.config.defaults(javaConfigRequiredConfig);
   }
 
   /**
-   * Load java-package-name configs into dest.
-   * all variables should be set to dest,
+   * Load java-config configs into into.
+   * all variables should be set to into,
    * all variables should be referred from config,
    * @param {any} config - config to load config from
-   * @param {any} dest - destination context to use default is context
+   * @param {any} into - destination context to use default is context
    */
-  loadJavaPackageNameConfig(config = _.defaults({}, this.jhipsterConfig, javaPackageNameDefaultConfig), dest = this) {
-    dest.packageName = config.packageName;
+  loadJavaConfigConfig(config = this.jhipsterConfig, into = this) {
+    loadJavaConfigConfig(config, into);
   }
 
   /**
-   * Load derived java-package-name configs into dest.
-   * all variables should be set to dest,
-   * all variables should be referred from config,
-   * @param {any} dest - source/destination context
+   * Load derived java-config configs into fromInto.
+   * @param {any} fromInto - source/destination context
    */
-  loadDerivedJavaPackageNameConfig(dest = this) {}
+  loadDerivedJavaConfigConfig(fromInto = this) {
+    loadDerivedJavaConfigConfig(fromInto);
+  }
+
+  /**
+   * Load derived java-config configs into 'into'.
+   * @param {Object} into - destination context
+   */
+  loadJavaConfigConstants(into = this) {
+    loadJavaConfigConstants(into);
+  }
 
   /**
    * Register and parse project-name options.

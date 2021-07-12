@@ -20,26 +20,29 @@
 const chalk = require('chalk');
 
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
-const { GENERATOR_JAVA_PACKAGE_NAME } = require('../generator-list');
+const { GENERATOR_JAVA_CONFIG, GENERATOR_PROJECT_NAME } = require('../generator-list');
 const { defaultConfig } = require('./config');
+const { PACKAGE_NAME, BUILD_TOOL } = require('./constants');
+const { loadOptionsConstants } = require('./options');
 
 module.exports = class extends BaseBlueprintGenerator {
   constructor(args, opts) {
     super(args, opts, { unique: 'namespace' });
 
     this.registerCommonOptions();
-    this.registerJavaPackageNameOptions();
+    this.registerJavaConfigOptions();
 
     if (this.options.help) return;
 
     if (this.options.defaults) {
-      this.configureJavaPackageName();
+      this.configureJavaConfig();
     }
   }
 
   async _beforeQueue() {
     if (!this.fromBlueprint) {
-      await this.composeWithBlueprints(GENERATOR_JAVA_PACKAGE_NAME);
+      await this.dependsOnJHipster(GENERATOR_PROJECT_NAME);
+      await this.composeWithBlueprints(GENERATOR_JAVA_CONFIG);
     }
   }
 
@@ -50,10 +53,13 @@ module.exports = class extends BaseBlueprintGenerator {
       },
       sayHello() {
         if (!this.showHello()) return;
-        this.log(chalk.white('⬢ Welcome to the JHipster Java Package Name ⬢'));
+        this.log(chalk.white('⬢ Welcome to the JHipster Java Config ⬢'));
       },
       loadRuntimeOptions() {
         this.loadRuntimeOptions();
+      },
+      loadConstants() {
+        loadOptionsConstants(this);
       },
     };
   }
@@ -70,12 +76,18 @@ module.exports = class extends BaseBlueprintGenerator {
         await this.prompt(
           [
             {
-              name: 'packageName',
-              when: () => !this.abort,
+              name: PACKAGE_NAME,
               type: 'input',
               validate: input => this._validatePackageName(input),
               message: 'What is your default Java package name?',
               default: () => this._getDefaultPackageName(),
+            },
+            {
+              name: BUILD_TOOL,
+              type: 'list',
+              choices: () => this.BUILD_TOOL_PROMPT_CHOICES,
+              message: 'What tool do you want to use to build backend?',
+              default: () => this.DEFAULT_BUILD_TOOL,
             },
           ],
           this.config
@@ -92,7 +104,8 @@ module.exports = class extends BaseBlueprintGenerator {
   _configuring() {
     return {
       configure() {
-        this.configureJavaPackageName();
+        this.configureProjectName();
+        this.configureJavaConfig();
       },
     };
   }
@@ -106,7 +119,7 @@ module.exports = class extends BaseBlueprintGenerator {
     return {
       loadConfig() {
         this.loadProjectNameConfig();
-        this.loadJavaPackageNameConfig();
+        this.loadJavaConfigConfig();
       },
     };
   }
