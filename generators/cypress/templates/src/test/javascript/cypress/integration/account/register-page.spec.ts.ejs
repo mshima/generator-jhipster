@@ -27,7 +27,7 @@ import {
 } from '../../support/commands';
 
 describe('/account/register', () => {
-  before(() => {
+  beforeEach(() => {
     cy.window().then((win) => {
       win.sessionStorage.clear()
     });
@@ -35,111 +35,78 @@ describe('/account/register', () => {
     cy.clearCookie('SESSION');
 <%_ } _%>
     cy.clearCookies();
-    cy.visit('');
-    cy.clickOnRegisterItem();
+    cy.visit('account/register');
+
+    cy.intercept('POST', '/api/register').as('registerSave');
   });
 
-  beforeEach(() => {
-    cy.intercept('POST', '/api/register').as('registerSave');
+  it('should load the register page using the menu', () => {
+    cy.visit('');
+    cy.clickOnRegisterItem();
+    cy.get(submitRegisterSelector).should('be.visible');
   });
 
   it('should load the register page', () => {
     cy.get(submitRegisterSelector).should('be.visible');
   });
 
-  it('requires username', () => {
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
-    cy.get(usernameRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('test');
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
-    cy.get(usernameRegisterSelector).should('have.class', classValid)
-      .clear();
-  });
-
-  it('requires email', () => {
-    cy.get(emailRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('testtest.fr');
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
-    cy.get(emailRegisterSelector).should('have.class', classInvalid)
-      .clear();
-  });
-
-  it('requires email in correct format', () => {
-    cy.get(emailRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('test@test.fr');
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
-    cy.get(emailRegisterSelector).should('have.class', classValid)
-      .clear();
-  });
-
-  it('requires first password', () => {
-    cy.get(firstPasswordRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('test@test.fr');
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
-    cy.get(firstPasswordRegisterSelector).should('have.class', classValid)
-      .clear();
-  });
-
-  it('requires password and confirm password to be same', () => {
-    cy.get(firstPasswordRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('test');
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
-    cy.get(firstPasswordRegisterSelector).should('have.class', classValid);
-    cy.get(secondPasswordRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('test');
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
-    cy.get(secondPasswordRegisterSelector).should('have.class', classValid);
-    cy.get(firstPasswordRegisterSelector).clear();
-    cy.get(secondPasswordRegisterSelector).clear();
-  });
-
-  it('requires password and confirm password have not the same value', () => {
-    cy.get(firstPasswordRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('test');
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
-    cy.get(firstPasswordRegisterSelector).should('have.class', classValid);
-<%_ if (clientFrameworkAngular) { _%>
-    cy.get(secondPasswordRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('otherPassword');
-    cy.get(submitRegisterSelector).should('be.disabled');
-<%_ } else { _%>
-    cy.get(secondPasswordRegisterSelector)
-      .should('have.class', classInvalid)
-      .type('otherPassword');
-    <%_ if (clientFrameworkReact) { _%>
-    cy.get(submitRegisterSelector).click({ force: true });
-    <%_ } _%>
+  it('should mark required fields as invalid with an empty form', () => {
+    cy.get(submitRegisterSelector).click({force: true});
+    cy.get(usernameRegisterSelector).should('have.class', classInvalid);
+    cy.get(emailRegisterSelector).should('have.class', classInvalid);
+    cy.get(firstPasswordRegisterSelector).should('have.class', classInvalid);
     cy.get(secondPasswordRegisterSelector).should('have.class', classInvalid);
-<%_ } _%>
-    cy.get(firstPasswordRegisterSelector).clear();
-    cy.get(secondPasswordRegisterSelector).clear();
   });
 
-  it('register a valid user', () => {
+  it('should mark username as valid with a valid value', () => {
+    cy.get(usernameRegisterSelector)
+      .focus()
+      .blur()
+      .should('have.class', classInvalid)
+      .type('test')
+      .blur()
+      .should('have.class', classValid);
+  });
+
+  it('should mark email as valid with a valid value', () => {
+    cy.get(emailRegisterSelector)
+      .focus()
+      .blur()
+      .should('have.class', classInvalid)
+      .type('testtest.fr')
+      .blur()
+      .should('have.class', classInvalid)
+      .type('test@test.fr')
+      .blur()
+      .should('have.class', classValid);
+  });
+
+  it('should mark password as valid with a valid value', () => {
+    cy.get(firstPasswordRegisterSelector)
+      .focus()
+      .blur()
+      .should('have.class', classInvalid)
+      .type('test@test.fr')
+      .blur()
+      .should('have.class', classValid);
+  });
+
+  it('should mark confirmation password as valid when matches password', () => {
+    cy.get(firstPasswordRegisterSelector).type('test');
+    cy.get(secondPasswordRegisterSelector)
+      .focus()
+      .blur()
+      .should('have.class', classInvalid)
+      .type('otherPassword')
+      .blur()
+      .should('have.class', classInvalid)
+      .clear()
+      .type('test')
+      .blur()
+      .should('have.class', classValid);
+  });
+
+  it('should register a valid user', () => {
     const randomEmail = '<%= faker.internet.email() %>';
     const randomUsername = '<%= faker.internet.userName() %>';
     cy.get(usernameRegisterSelector).type(randomUsername);
