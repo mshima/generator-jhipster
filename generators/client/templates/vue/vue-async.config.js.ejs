@@ -1,0 +1,40 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const commonWebpack = require('./webpack/webpack.common');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const devWebpack = require('./webpack/webpack.dev');
+
+const configureWebpack = {
+  resolve: {
+    alias: {
+      vue$: 'vue/dist/vue.esm.js',
+      '@': __dirname + '/<%= MAIN_SRC_DIR %>app',
+    },
+  },
+  entry: {
+    global: './<%= MAIN_SRC_DIR %>content/scss/global.scss',
+    app: './<%= MAIN_SRC_DIR %>app/main.ts',
+  },
+};
+
+module.exports = (api, options) => {
+  api.registerCommand('build:async', async args => {
+    // Force extract for development mode, otherwise css assets are not emitted.
+    options.css.extract = true;
+    const webpackConfig = await commonWebpack(api.service);
+    api.configureWebpack(webpackConfig);
+    api.configureWebpack(configureWebpack);
+    await api.service.run('build', args);
+  });
+  api.registerCommand('serve:async', async args => {
+    const webpackConfig = await commonWebpack(api.service);
+    api.configureWebpack(webpackConfig);
+    api.configureWebpack(devWebpack);
+    api.configureWebpack(configureWebpack);
+    await api.service.run('serve', args);
+  });
+};
+
+module.exports.defaultModes = {
+  'build:async': 'production',
+  'serve:async': 'development',
+};

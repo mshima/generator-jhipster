@@ -231,10 +231,10 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
           this.fs.readJSON(this.fetchFromInstalledJHipster('client', 'templates', 'common', 'package.json'))
         );
         // Load client package.json into packageJson
-        const clientFramewok = this.jhipsterConfig.clientFramework === ANGULAR ? 'angular' : this.jhipsterConfig.clientFramework;
+        const clientFramework = this.jhipsterConfig.clientFramework === ANGULAR ? 'angular' : this.jhipsterConfig.clientFramework;
         _.merge(
           this.dependabotPackageJson,
-          this.fs.readJSON(this.fetchFromInstalledJHipster('client', 'templates', clientFramewok, 'package.json'))
+          this.fs.readJSON(this.fetchFromInstalledJHipster('client', 'templates', clientFramework, 'package.json'))
         );
       },
     };
@@ -315,6 +315,18 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
   // Public API method used by the getter and also by Blueprints
   _writing() {
     return {
+      cleanupVue() {
+        if (!this.clientFrameworkVue) return;
+        if (this.isJhipsterVersionLessThan('7.1.1')) {
+          this.removeFile('webpack/dev.env.js');
+          this.removeFile('webpack/env.js');
+          this.removeFile('webpack/loader.conf.js');
+          this.removeFile('webpack/prod.env.js');
+          this.removeFile('webpack/utils.js');
+          this.removeFile('webpack/vue.utils.js');
+          this.removeFile('webpack/webpack.prod.js');
+        }
+      },
       write() {
         if (this.skipClient) return;
         switch (this.clientFramework) {
