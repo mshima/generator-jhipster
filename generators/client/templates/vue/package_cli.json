@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "register-service-worker": "1.7.2"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "5.0.0-beta.3",
+    "eslint": "7.32.0",
+    "vue-jest": "3.0.7",
+    "webpack-notifier": "1.13.0"
+  }
+}

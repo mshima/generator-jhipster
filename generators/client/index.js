@@ -236,6 +236,12 @@ module.exports = class JHipsterClientGenerator extends BaseBlueprintGenerator {
           this.dependabotPackageJson,
           this.fs.readJSON(this.fetchFromInstalledJHipster('client', 'templates', clientFramework, 'package.json'))
         );
+        if (clientFramework === 'vue') {
+          _.merge(
+            this.dependabotPackageJson,
+            this.fs.readJSON(this.fetchFromInstalledJHipster('client', 'templates', clientFramework, 'package_cli.json'))
+          );
+        }
       },
     };
   }
