@@ -587,6 +587,19 @@ class EntityGenerator extends BaseBlueprintGenerator {
         const entity = this.context;
         prepareEntityForTemplates(entity, this);
       },
+
+      loadDomain() {
+        const entity = this.context;
+        const { entityDomain, packageName, packageFolder, persistClass } = entity;
+        let { entityDomainPackage = packageName, entityDomainFolder = packageFolder } = entity;
+        if (entityDomain) {
+          entityDomainPackage = [packageName, entityDomain].join('.');
+          entityDomainFolder = path.join(packageFolder, entityDomain);
+        }
+        entity.entityDomainPackage = entityDomainPackage;
+        entity.entityDomainFolder = entityDomainFolder;
+        entity.entityAbsoluteClass = `${entityDomainPackage}.domain.${persistClass}`;
+      },
     };
   }
 

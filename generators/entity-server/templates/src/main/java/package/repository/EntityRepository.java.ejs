@@ -16,9 +16,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>.repository;
+package <%= entityDomainPackage %>.repository;
 
-import <%= packageName %>.domain.<%= persistClass %>;
+import <%= entityDomainPackage %>.domain.<%= persistClass %>;
 
 <%_ if (relationshipsContainEagerLoad) { _%>
 import org.springframework.data.domain.Page;
@@ -38,7 +38,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 <%_ } _%>
 <%_ if (databaseTypeCouchbase) { _%>
-import <%= packageName %>.repository.search.SearchCouchbaseRepository;
+import <%= entityDomainPackage %>.repository.search.SearchCouchbaseRepository;
   <%_ if (relationshipsContainEagerLoad) { _%>
 import org.springframework.data.couchbase.core.query.Query;
   <%_ } _%>
