@@ -1,0 +1,14 @@
+@ChangelogDate(20200804035400)
+@EntityDomain(custom)
+entity CustomDomainParent
+
+@ChangelogDate(20200804035401)
+@EntityDomain(custom)
+entity CustomDomainChild
+
+relationship OneToMany {
+  CustomDomainParent to CustomDomainChild
+}
+
+dto CustomDomainParent, CustomDomainChild with mapstruct
+service CustomDomainParent, CustomDomainChild with serviceClass
