@@ -16,6 +16,23 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
+<&_
+  // Register sections and max allowed fragments, 0 for unlimited.
+  fragments.registerSections({
+    parentSection: 1,
+    repositoriesSection: 0,
+    pluginRepositoriesSection: 0,
+    propertiesSection: 0,
+    propertiesStartClassSection: 1,
+    dependenciesSection: 0,
+    dependencyManagementDependenciesSection: 0,
+    buildSection: 0,
+    buildPluginsSection: 0,
+    buildPluginManagementPluginsSection: 0,
+    profilesSection: 0,
+  });
+-&>
+
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -29,6 +46,7 @@
     <packaging>jar</packaging>
     <name><%= humanizedBaseName %></name>
 
+<&- fragments.parentSection('\n\n') -&>
     <repositories>
 <%_ if (SPRING_BOOT_VERSION.indexOf('M') > -1 || SPRING_BOOT_VERSION.indexOf('RC') > -1) { _%>
         <repository>
@@ -46,6 +64,7 @@
         </repository>
 <%_ } _%>
         <!-- jhipster-needle-maven-repository -->
+<&- fragments.repositoriesSection() -&>
     </repositories>
 
     <pluginRepositories>
@@ -56,6 +75,7 @@
             <url>https://repo.spring.io/milestone</url>
         </pluginRepository>
 <%_ } _%>
+<&- fragments.pluginRepositoriesSection() -&>
         <!-- jhipster-needle-maven-plugin-repository -->
     </pluginRepositories>
 
@@ -63,6 +83,11 @@
 
     <properties>
         <!-- Build properties -->
+<&- fragments.propertiesStartClassSection() -&>
+<&_ if (!fragments.propertiesStartClassSection()) { -&>
+        <start-class><%= packageName %>.<%= mainClass %></start-class>
+
+<&_ } -&>
         <maven.version>3.3.9</maven.version>
         <java.version><%= JAVA_VERSION %></java.version>
 <%_ if (!skipClient) { _%>
@@ -75,7 +100,6 @@
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <start-class><%= packageName %>.<%= mainClass %></start-class>
         <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx256m</argLine>
         <m2e.apt.activation>jdt_apt</m2e.apt.activation>
         <run.addResources>false</run.addResources>
@@ -180,6 +204,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+<&- fragments.dependencyManagementDependenciesSection() -&>
             <!-- jhipster-needle-maven-add-dependency-management -->
         </dependencies>
     </dependencyManagement>
@@ -888,6 +913,7 @@
             <scope>test</scope>
         </dependency>
 <%_ } _%>
+<&- fragments.dependenciesSection() -&>
         <!-- jhipster-needle-maven-add-dependency -->
     </dependencies>
 
@@ -903,6 +929,7 @@
             </testResource>
         </testResources>
 <%_ } _%>
+<&- fragments.buildSection() -&>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -976,6 +1003,7 @@
                 <artifactId>openapi-generator-maven-plugin</artifactId>
             </plugin>
 <%_ } _%>
+<&- fragments.buildPluginsSection() -&>
             <!-- jhipster-needle-maven-add-plugin -->
         </plugins>
         <pluginManagement>
@@ -1489,12 +1517,13 @@
                         <jvmArguments>-Djgroups.tcp.address=NON_LOOPBACK -Djava.net.preferIPv4Stack=true</jvmArguments>
 <%_ } _%>
                     </configuration>
-
                 </plugin>
+<&- fragments.buildPluginManagementPluginsSection() -&>
                 <!-- jhipster-needle-maven-add-plugin-management -->
             </plugins>
         </pluginManagement>
     </build>
+
     <profiles>
 <%_ if (databaseTypeSql) { _%>
         <profile>
@@ -1842,92 +1871,6 @@
 <%_ } _%>
             </dependencies>
         </profile>
-        <profile>
-            <!-- This is automatically activated when working in Eclipse -->
-            <id>eclipse</id>
-            <activation>
-                <property>
-                    <name>m2e.version</name>
-                </property>
-            </activation>
-            <dependencies>
-                <!-- The following dependency is added due to issue #9175-->
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-undertow</artifactId>
-                </dependency>
-            </dependencies>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <!--
-                            This plugin's configuration is used to store Eclipse m2e settings only.
-                            It has no influence on the Maven build itself.
-                            Remove when the m2e plugin can correctly bind to Maven lifecycle
-                        -->
-                        <plugin>
-                            <groupId>org.eclipse.m2e</groupId>
-                            <artifactId>lifecycle-mapping</artifactId>
-                            <version>${lifecycle-mapping.version}</version>
-                            <configuration>
-                                <lifecycleMappingMetadata>
-                                    <pluginExecutions>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>org.jacoco</groupId>
-                                                <artifactId>
-                                                    jacoco-maven-plugin
-                                                </artifactId>
-                                                <versionRange>
-                                                    ${jacoco-maven-plugin.version}
-                                                </versionRange>
-                                                <goals>
-                                                    <goal>prepare-agent</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <ignore/>
-                                            </action>
-                                        </pluginExecution>
-<%_ if (!skipClient) { _%>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>com.github.eirslett</groupId>
-                                                <artifactId>frontend-maven-plugin</artifactId>
-                                                <versionRange>${frontend-maven-plugin.version}</versionRange>
-                                                <goals>
-                                                    <goal>install-node-and-npm</goal>
-                                                    <goal>npm</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <ignore/>
-                                            </action>
-                                        </pluginExecution>
-<%_ } _%>
-<%_ if (enableSwaggerCodegen) { _%>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>org.openapitools</groupId>
-                                                <artifactId>openapi-generator-maven-plugin</artifactId>
-                                                <versionRange>${openapi-generator-maven-plugin.version}</versionRange>
-                                                <goals>
-                                                    <goal>generate</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <ignore />
-                                            </action>
-                                        </pluginExecution>
-<%_ } _%>
-                                    </pluginExecutions>
-                                </lifecycleMappingMetadata>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
 <%_ if (cypressTests || protractorTests) { _%>
         <profile>
             <id>e2e</id>
@@ -1952,6 +1895,7 @@
             </build>
         </profile>
 <%_ } _%>
+<&- fragments.profilesSection() -&>
         <!-- jhipster-needle-maven-add-profile -->
     </profiles>
 </project>
