@@ -65,8 +65,6 @@ const SUPPORTED_VALIDATION_RULES = constants.SUPPORTED_VALIDATION_RULES;
 const ANGULAR = constants.SUPPORTED_CLIENT_FRAMEWORKS.ANGULAR;
 const JHIPSTER_CONFIG_DIR = constants.JHIPSTER_CONFIG_DIR;
 
-let useBlueprints;
-
 class EntityGenerator extends BaseBlueprintGenerator {
   constructor(args, options, features) {
     super(args, options, { unique: 'argument', ...features });
@@ -148,11 +146,9 @@ class EntityGenerator extends BaseBlueprintGenerator {
       desc: 'Regenerate only a single entity, relationships can be not correctly generated',
       type: Boolean,
     });
+  }
 
-    if (this.options.help) {
-      return;
-    }
-
+  async _postConstruct() {
     const name = _.upperFirst(this.options.name).replace('.json', '');
     this.entityStorage = this.getEntityConfig(name, true);
     this.entityConfig = this.entityStorage.createProxy();
@@ -169,14 +165,15 @@ class EntityGenerator extends BaseBlueprintGenerator {
       configurationFileExists: this.fs.exists(this.destinationPath(filename)),
     };
 
-    this._setupEntityOptions(this, this, this.context);
-    useBlueprints =
-      !this.fromBlueprint &&
-      this.instantiateBlueprints(GENERATOR_ENTITY, {
+    if (!this.fromBlueprint) {
+      await this.composeWithBlueprints(GENERATOR_ENTITY, {
         entityExisted,
         configExisted,
         arguments: [name],
       });
+    }
+
+    this._setupEntityOptions(this, this, this.context);
   }
 
   // Public API method used by the getter and also by Blueprints
@@ -304,7 +301,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get initializing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._initializing();
   }
 
@@ -326,7 +323,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get prompting() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._prompting();
   }
 
@@ -456,7 +453,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get configuring() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._configuring();
   }
 
@@ -482,7 +479,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get composing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._composing();
   }
 
@@ -546,7 +543,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get loading() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._loading();
   }
 
@@ -591,7 +588,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get preparingFields() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._preparingFields();
   }
 
@@ -617,7 +614,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get preparing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._preparing();
   }
 
@@ -724,7 +721,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get preparingRelationships() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._preparingRelationships();
   }
 
@@ -821,7 +818,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get default() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._default();
   }
 
@@ -847,7 +844,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get writing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._writing();
   }
 
@@ -877,7 +874,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get install() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._install();
   }
 
@@ -891,7 +888,7 @@ class EntityGenerator extends BaseBlueprintGenerator {
   }
 
   get end() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._end();
   }
 

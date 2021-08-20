@@ -30,8 +30,6 @@ const ANGULAR = constants.SUPPORTED_CLIENT_FRAMEWORKS.ANGULAR;
 const REACT = constants.SUPPORTED_CLIENT_FRAMEWORKS.REACT;
 const VUE = constants.SUPPORTED_CLIENT_FRAMEWORKS.VUE;
 
-let useBlueprints;
-
 module.exports = class extends BaseBlueprintGenerator {
   constructor(args, options, features) {
     super(args, options, { unique: 'namespace', ...features });
@@ -89,10 +87,12 @@ module.exports = class extends BaseBlueprintGenerator {
         }
       });
     }
+  }
 
-    useBlueprints =
-      !this.fromBlueprint &&
-      this.instantiateBlueprints('languages', { languages: this.languagesToApply, arguments: this.options.languages });
+  async _postConstruct() {
+    if (!this.fromBlueprint) {
+      await this.composeWithBlueprints('languages', { languages: this.languagesToApply, arguments: this.options.languages });
+    }
   }
 
   // Public API method used by the getter and also by Blueprints
@@ -117,7 +117,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get initializing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._initializing();
   }
 
@@ -130,7 +130,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get prompting() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._prompting();
   }
 
@@ -169,7 +169,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get configuring() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._configuring();
   }
 
@@ -189,7 +189,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get loading() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._loading();
   }
 
@@ -212,7 +212,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get preparing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._preparing();
   }
 
@@ -227,7 +227,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get default() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._default();
   }
 
@@ -251,7 +251,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get writing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._writing();
   }
 
@@ -285,7 +285,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get postWriting() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._postWriting();
   }
 };

@@ -32,7 +32,6 @@ const NO_CACHE_PROVIDER = cacheTypes.NO;
 const { MAVEN } = require('../../jdl/jhipster/build-tool-types');
 const { GENERATOR_AZURE_SPRING_CLOUD } = require('../generator-list');
 
-let useBlueprints;
 /* eslint-disable consistent-return */
 module.exports = class extends BaseBlueprintGenerator {
   constructor(args, options, features) {
@@ -52,7 +51,12 @@ module.exports = class extends BaseBlueprintGenerator {
 
     this.azureSpringCloudSkipBuild = this.options.skipBuild;
     this.azureSpringCloudSkipDeploy = this.options.skipDeploy || this.options.skipBuild;
-    useBlueprints = !this.fromBlueprint && this.instantiateBlueprints(GENERATOR_AZURE_SPRING_CLOUD);
+  }
+
+  async _postConstruct() {
+    if (!this.fromBlueprint) {
+      await this.composeWithBlueprints(GENERATOR_AZURE_SPRING_CLOUD);
+    }
   }
 
   _initializing() {
@@ -86,7 +90,7 @@ module.exports = class extends BaseBlueprintGenerator {
   }
 
   get initializing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._initializing();
   }
 
@@ -252,7 +256,7 @@ ${chalk.red('az extension add --name spring-cloud')}`
   }
 
   get prompting() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._prompting();
   }
 
@@ -269,7 +273,7 @@ ${chalk.red('az extension add --name spring-cloud')}`
   }
 
   get configuring() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._configuring();
   }
 
@@ -312,7 +316,7 @@ ${chalk.red('az extension add --name spring-cloud')}`
   }
 
   get default() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._default();
   }
 
@@ -328,7 +332,7 @@ ${chalk.red('az extension add --name spring-cloud')}`
   }
 
   get loading() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._loading();
   }
 
@@ -356,7 +360,7 @@ ${chalk.red('az extension add --name spring-cloud')}`
   }
 
   get writing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._writing();
   }
 
@@ -482,7 +486,7 @@ for more detailed information.`
   }
 
   get end() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._end();
   }
 };

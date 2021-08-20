@@ -25,8 +25,6 @@ const prettierConfigFiles = require('./files').prettierConfigFiles;
 const constants = require('../generator-constants');
 const packageJson = require('../../package.json');
 
-let useBlueprints;
-
 module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   constructor(args, options, features) {
     super(args, options, { unique: 'namespace', ...features });
@@ -37,8 +35,12 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
 
     this.loadStoredAppOptions();
     this.loadRuntimeOptions();
+  }
 
-    useBlueprints = !this.fromBlueprint && this.instantiateBlueprints('common');
+  async _postConstruct() {
+    if (!this.fromBlueprint) {
+      await this.composeWithBlueprints('common');
+    }
   }
 
   // Public API method used by the getter and also by Blueprints
@@ -64,7 +66,7 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   }
 
   get initializing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._initializing();
   }
 
@@ -98,7 +100,7 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   }
 
   get loading() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._loading();
   }
 
@@ -113,7 +115,7 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   }
 
   get preparing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._preparing();
   }
 
@@ -125,7 +127,7 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   }
 
   get default() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._default();
   }
 
@@ -142,7 +144,7 @@ module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
   }
 
   get writing() {
-    if (useBlueprints) return;
+    if (this.delegateToBlueprint) return {};
     return this._writing();
   }
 };
