@@ -27,7 +27,8 @@ const { OAUTH2, SESSION } = require('../../jdl/jhipster/authentication-types');
 const { CASSANDRA, COUCHBASE, MARIADB, MSSQL, MYSQL, ORACLE, POSTGRESQL, SQL } = require('../../jdl/jhipster/database-types');
 const { CAFFEINE, EHCACHE, HAZELCAST, INFINISPAN, MEMCACHED, REDIS } = require('../../jdl/jhipster/cache-types');
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
-const writeFiles = require('./files').writeFiles;
+const { writeFiles } = require('./files');
+const { writeCouchbaseFiles } = require('./files-couchbase');
 const packagejs = require('../../package.json');
 const constants = require('../generator-constants');
 const statistics = require('../statistics');
@@ -365,7 +366,11 @@ module.exports = class JHipsterServerGenerator extends BaseBlueprintGenerator {
 
   // Public API method used by the getter and also by Blueprints
   _writing() {
-    return { ...writeFiles(), ...super._missingPostWriting() };
+    return {
+      ...writeFiles(),
+      ...writeCouchbaseFiles(),
+      ...super._missingPostWriting(),
+    };
   }
 
   get writing() {

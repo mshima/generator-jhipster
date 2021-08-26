@@ -105,128 +105,6 @@ const mongoDbFiles = {
   ],
 };
 
-const couchbaseFiles = {
-  docker: [
-    {
-      path: DOCKER_DIR,
-      templates: ['couchbase-cluster.yml', 'couchbase/Couchbase.Dockerfile', 'couchbase/scripts/configure-node.sh'],
-    },
-  ],
-  serverJavaConfig: [
-    {
-      path: SERVER_MAIN_SRC_DIR,
-      templates: [
-        {
-          file: 'package/config/couchbase/CustomCouchbaseRepositoryFactory.java',
-          renameTo: generator => `${generator.javaDir}config/couchbase/CustomCouchbaseRepositoryFactory.java`,
-        },
-        {
-          file: 'package/config/couchbase/CustomCouchbaseRepositoryFactoryBean.java',
-          renameTo: generator => `${generator.javaDir}config/couchbase/CustomCouchbaseRepositoryFactoryBean.java`,
-        },
-        {
-          file: 'package/config/couchbase/CustomCouchbaseRepositoryQuery.java',
-          renameTo: generator => `${generator.javaDir}config/couchbase/CustomCouchbaseRepositoryQuery.java`,
-        },
-        {
-          file: 'package/config/couchbase/CustomN1qlQueryCreator.java',
-          renameTo: generator => `${generator.javaDir}config/couchbase/CustomN1qlQueryCreator.java`,
-        },
-        {
-          file: 'package/config/couchbase/CustomN1qlRepositoryQueryExecutor.java',
-          renameTo: generator => `${generator.javaDir}config/couchbase/CustomN1qlRepositoryQueryExecutor.java`,
-        },
-        {
-          file: 'package/config/couchbase/package-info.java',
-          renameTo: generator => `${generator.javaDir}config/couchbase/package-info.java`,
-        },
-      ],
-    },
-    {
-      condition: generator => !shouldSkipUserManagement(generator) && generator.authenticationType === SESSION && !generator.reactive,
-      path: SERVER_MAIN_SRC_DIR,
-      templates: [
-        {
-          file: 'package/repository/PersistentTokenRepository_couchbase.java',
-          renameTo: generator => `${generator.javaDir}repository/PersistentTokenRepository.java`,
-        },
-      ],
-    },
-    {
-      condition: generator => !generator.reactive,
-      path: SERVER_MAIN_SRC_DIR,
-      templates: [
-        {
-          file: 'package/repository/CustomCouchbaseRepository.java',
-          renameTo: generator => `${generator.javaDir}repository/CustomCouchbaseRepository.java`,
-        },
-        {
-          file: 'package/repository/N1qlCouchbaseRepository.java',
-          renameTo: generator => `${generator.javaDir}repository/N1qlCouchbaseRepository.java`,
-        },
-      ],
-    },
-    {
-      condition: generator => generator.reactive,
-      path: SERVER_MAIN_SRC_DIR,
-      templates: [
-        {
-          file: 'package/repository/CustomReactiveCouchbaseRepository.java',
-          renameTo: generator => `${generator.javaDir}repository/CustomReactiveCouchbaseRepository.java`,
-        },
-      ],
-    },
-    {
-      condition: generator => generator.searchEngine === COUCHBASE,
-      path: SERVER_MAIN_SRC_DIR,
-      templates: [
-        {
-          file: 'package/repository/search/SearchCouchbaseRepository.java',
-          renameTo: generator => `${generator.javaDir}repository/search/SearchCouchbaseRepository.java`,
-        },
-      ],
-    },
-    {
-      condition: generator => generator.searchEngine === COUCHBASE,
-      path: SERVER_TEST_SRC_DIR,
-      templates: [
-        {
-          file: 'package/repository/CustomCouchbaseRepositoryTest.java',
-          renameTo: generator => `${generator.testDir}repository/CustomCouchbaseRepositoryTest.java`,
-        },
-      ],
-    },
-  ],
-  serverResource: [
-    {
-      condition: generator => generator.databaseTypeCouchbase,
-      path: SERVER_MAIN_RES_DIR,
-      templates: ['config/couchmove/changelog/V0__create_indexes.n1ql'],
-    },
-    {
-      condition: generator => !generator.skipUserManagement || generator.authenticationType === OAUTH2,
-      path: SERVER_MAIN_RES_DIR,
-      templates: [
-        'config/couchmove/changelog/V0.1__initial_setup/ROLE_ADMIN.json',
-        'config/couchmove/changelog/V0.1__initial_setup/ROLE_USER.json',
-        'config/couchmove/changelog/V0.1__initial_setup/user__admin.json',
-        'config/couchmove/changelog/V0.1__initial_setup/user__user.json',
-      ],
-    },
-  ],
-  serverTestFw: [
-    {
-      path: SERVER_TEST_SRC_DIR,
-      templates: [
-        {
-          file: 'package/CouchbaseTestContainerExtension.java',
-          renameTo: generator => `${generator.testDir}CouchbaseTestContainerExtension.java`,
-        },
-      ],
-    },
-  ],
-};
-
 const neo4jFiles = {
   serverResource: [
     {
@@ -1831,7 +1709,6 @@ const serverFiles = mergeSections(
   addSectionsCondition(h2Files, context => context.devDatabaseTypeH2Any),
   addSectionsCondition(liquibaseFiles, context => context.databaseTypeSql),
   addSectionsCondition(mongoDbFiles, context => context.databaseTypeMongodb),
-  addSectionsCondition(couchbaseFiles, context => context.databaseTypeCouchbase),
   addSectionsCondition(neo4jFiles, context => context.databaseTypeNeo4j),
   addSectionsCondition(cassandraFiles, context => context.databaseTypeCassandra)
 );
