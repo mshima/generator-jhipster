@@ -1,0 +1,22 @@
+{
+  "include": [
+    {
+      "app-sample": "ngx-couchbase",
+      "cache": "angular",
+      "entity": "couchbase",
+      "environment": "prod",
+      "war": 0,
+      "e2e": 1,
+      "testcontainers": 1
+    },
+    {
+      "app-sample": "ngx-gradle-couchbase-search",
+      "cache": "angular",
+      "entity": "couchbase",
+      "environment": "prod",
+      "war": 0,
+      "e2e": 1,
+      "testcontainers": 1
+    }
+  ]
+}
