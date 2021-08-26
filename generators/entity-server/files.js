@@ -52,16 +52,6 @@ const serverFiles = {
         },
       ],
     },
-    {
-      condition: generator => generator.searchEngine === COUCHBASE && !generator.skipDbChangelog,
-      path: SERVER_MAIN_RES_DIR,
-      templates: [
-        {
-          file: 'config/couchmove/changelog/entity.fts',
-          renameTo: generator => `config/couchmove/changelog/V${generator.changelogDate}__${generator.entityInstance.toLowerCase()}.fts`,
-        },
-      ],
-    },
   ],
   server: [
     {
@@ -128,16 +118,6 @@ const serverFiles = {
       ],
     },
     {
-      condition: generator => generator.databaseTypeCouchbase,
-      path: SERVER_MAIN_SRC_DIR,
-      templates: [
-        {
-          file: 'package/domain/Entity.java.jhi.spring_data_couchbase',
-          renameTo: generator => `${generator.packageFolder}/domain/${generator.persistClass}.java.jhi.spring_data_couchbase`,
-        },
-      ],
-    },
-    {
       condition: generator => generator.databaseTypeSql && !generator.reactive && generator.enableHibernateCache,
       path: SERVER_MAIN_SRC_DIR,
       templates: [
@@ -197,16 +177,6 @@ const serverFiles = {
       templates: [
         {
           file: 'package/repository/EntityRepository.java',
-          renameTo: generator => `${generator.packageFolder}/repository/${generator.entityClass}Repository.java`,
-        },
-      ],
-    },
-    {
-      condition: generator => !generator.reactive && !generator.embedded && generator.databaseType === COUCHBASE,
-      path: SERVER_MAIN_SRC_DIR,
-      templates: [
-        {
-          file: 'package/repository/EntityRepository_couchbase.java',
           renameTo: generator => `${generator.packageFolder}/repository/${generator.entityClass}Repository.java`,
         },
       ],
