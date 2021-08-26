@@ -19,6 +19,7 @@
 /* eslint-disable consistent-return */
 const constants = require('../generator-constants');
 const { writeFiles, customizeFiles } = require('./files');
+const { writeEntityCouchbaseFiles } = require('./files-couchbase');
 const utils = require('../utils');
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const { GENERATOR_ENTITY_SERVER } = require('../generator-list');
@@ -170,7 +171,11 @@ module.exports = class extends BaseBlueprintGenerator {
 
   // Public API method used by the getter and also by Blueprints
   _writing() {
-    return { ...writeFiles(), ...super._missingPostWriting() };
+    return {
+      ...writeFiles(),
+      ...writeEntityCouchbaseFiles(),
+      ...super._missingPostWriting(),
+    };
   }
 
   get writing() {
