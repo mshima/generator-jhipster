@@ -29,6 +29,7 @@ const { ELASTICSEARCH } = require('../../jdl/jhipster/search-engine-types');
 const { KAFKA } = require('../../jdl/jhipster/message-broker-types');
 const { CONSUL, EUREKA } = require('../../jdl/jhipster/service-discovery-types');
 const { addSectionsCondition, mergeSections } = require('../utils');
+const { writeCouchbaseFiles } = require('./files-couchbase');
 
 /* Constants use throughout */
 const NO_DATABASE = databaseTypes.NO;
@@ -1733,6 +1734,8 @@ function writeFiles() {
     writeFiles() {
       return this.writeFilesToDisk(serverFiles);
     },
+
+    ...writeCouchbaseFiles(),
   };
 }
 

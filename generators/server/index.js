@@ -28,7 +28,6 @@ const { CASSANDRA, COUCHBASE, MARIADB, MSSQL, MYSQL, ORACLE, POSTGRESQL, SQL } =
 const { CAFFEINE, EHCACHE, HAZELCAST, INFINISPAN, MEMCACHED, REDIS } = require('../../jdl/jhipster/cache-types');
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const { writeFiles } = require('./files');
-const { writeCouchbaseFiles } = require('./files-couchbase');
 const packagejs = require('../../package.json');
 const constants = require('../generator-constants');
 const statistics = require('../statistics');
@@ -368,7 +367,6 @@ module.exports = class JHipsterServerGenerator extends BaseBlueprintGenerator {
   _writing() {
     return {
       ...writeFiles(),
-      ...writeCouchbaseFiles(),
       ...super._missingPostWriting(),
     };
   }
