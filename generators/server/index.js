@@ -25,7 +25,6 @@ const { GENERATOR_COMMON, GENERATOR_LANGUAGES, GENERATOR_SERVER } = require('../
 const databaseTypes = require('../../jdl/jhipster/database-types');
 const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const { writeFiles } = require('./files');
-const { writeCouchbaseFiles } = require('./files-couchbase');
 const packagejs = require('../../package.json');
 const constants = require('../generator-constants');
 const statistics = require('../statistics');
@@ -389,7 +388,6 @@ module.exports = class JHipsterServerGenerator extends BaseBlueprintGenerator {
   _writing() {
     return {
       ...writeFiles(),
-      ...writeCouchbaseFiles(),
       ...super._missingPostWriting(),
     };
   }
