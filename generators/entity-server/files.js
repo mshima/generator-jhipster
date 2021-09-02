@@ -25,6 +25,7 @@ const { CASSANDRA, COUCHBASE, MONGODB, NEO4J, SQL } = require('../../jdl/jhipste
 const { ELASTICSEARCH } = require('../../jdl/jhipster/search-engine-types');
 const { MapperTypes, ServiceTypes } = require('../../jdl/jhipster/entity-options');
 const { EHCACHE, CAFFEINE, INFINISPAN, REDIS } = require('../../jdl/jhipster/cache-types');
+const { writeEntityCouchbaseFiles } = require('./files-couchbase');
 
 const { MAPSTRUCT } = MapperTypes;
 const { SERVICE_CLASS, SERVICE_IMPL } = ServiceTypes;
@@ -365,6 +366,7 @@ function writeFiles() {
         }
       });
     },
+    ...writeEntityCouchbaseFiles(),
   };
 }
 
