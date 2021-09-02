@@ -94,7 +94,6 @@ const couchbaseFiles = {
   ],
   serverResource: [
     {
-      condition: generator => generator.databaseTypeCouchbase,
       path: SERVER_MAIN_RES_DIR,
       templates: ['config/couchmove/changelog/V0__create_indexes.n1ql'],
     },
