@@ -122,6 +122,19 @@ module.exports = class extends BaseDockerGenerator {
     return this._configuring();
   }
 
+  _loading() {
+    return {
+      loadPlatformConfig() {
+        this.loadDeploymentConfig(this);
+      },
+    };
+  }
+
+  get loading() {
+    if (useBlueprints) return;
+    return this._loading();
+  }
+
   _preparing() {
     return {
       loadConfig() {
@@ -266,19 +279,6 @@ module.exports = class extends BaseDockerGenerator {
   get preparing() {
     if (useBlueprints) return;
     return this._preparing();
-  }
-
-  _loading() {
-    return {
-      loadPlatformConfig() {
-        this.loadDeploymentConfig(this);
-      },
-    };
-  }
-
-  get loading() {
-    if (useBlueprints) return;
-    return this._loading();
   }
 
   _writing() {
