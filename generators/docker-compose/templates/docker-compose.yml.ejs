@@ -16,10 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-services:
-<%_ for(let i = 0; i < appConfigs.length; i++) { _%>
-<%- appsYaml[i] %>
-<%_ } _%>
+<%- yamlFile %>
 <%_ if (useKafka) { _%>
   zookeeper:
     image: <%= DOCKER_ZOOKEEPER %>

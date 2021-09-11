@@ -77,7 +77,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=jhgate
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   mscouchbase:
     image: mscouchbase
     environment:
@@ -207,7 +206,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=jhgate
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   mscassandra:
     image: mscassandra
     environment:
@@ -351,7 +349,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=jhgate
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   msmysql:
     image: msmysql
     environment:
@@ -365,7 +362,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=msmysql
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   mspsql:
     image: mspsql
     environment:
@@ -381,7 +377,6 @@ eureka:
       - POSTGRES_PASSWORD=
   mspsql-elasticsearch:
     image: elasticsearch:2.4.6
-
   msmongodb:
     image: msmongodb
     environment:
@@ -392,7 +387,6 @@ eureka:
       - JHIPSTER_REGISTRY_PASSWORD=admin
   msmongodb-mongodb:
     image: mongo:4.4.8
-
   msmariadb:
     image: msmariadb
     environment:
@@ -518,7 +512,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=jhgate
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   msmysql:
     image: msmysql
     environment:
@@ -532,7 +525,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=msmysql
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   mspsql:
     image: mspsql
     environment:
@@ -548,7 +540,6 @@ eureka:
       - POSTGRES_PASSWORD=
   mspsql-elasticsearch:
     image: elasticsearch:2.4.6
-
   msmongodb:
     image: msmongodb
     environment:
@@ -687,7 +678,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=jhgate
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   msmysql:
     image: msmysql
     environment:
@@ -701,7 +691,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=msmysql
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   mspsql:
     image: mspsql
     environment:
@@ -717,7 +706,6 @@ eureka:
       - POSTGRES_PASSWORD=
   mspsql-elasticsearch:
     image: elasticsearch:2.4.6
-
   mscouchbase:
     image: mscouchbase
     environment:
@@ -732,7 +720,6 @@ eureka:
       dockerfile: couchbase/Couchbase.Dockerfile
     environment:
       - BUCKET=mscouchbase
-
   msmariadb:
     image: msmariadb
     environment:
@@ -853,7 +840,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=jhgate
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   msmysql:
     image: msmysql
     environment:
@@ -972,7 +958,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=jhgate
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   msmysql:
     image: msmysql
     environment:
@@ -1117,7 +1102,6 @@ eureka:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=jhgate
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-
   msmysql:
     image: msmysql
     environment:

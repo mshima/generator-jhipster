@@ -4,7 +4,7 @@
     "baseName": "oracle-mono",
     "packageName": "com.mycompany.myapp",
     "packageFolder": "com/mycompany/myapp",
-    "serverPort": "8081",
+    "serverPort": "8080",
     "authenticationType": "jwt",
     "cacheProvider": "hazelcast",
     "enableHibernateCache": true,
