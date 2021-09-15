@@ -84,10 +84,17 @@ inputs:
     description: 'Executable'
     required: false
     default: jhipster
+  setup-java:
+    description: 'Setup java'
+    required: false
+    default: 'true'
 outputs:
   java-version:
     description: 'Java version'
     value: ${{ steps.variables.outputs.java-version }}
+  java-distribution:
+    description: 'Java distribution'
+    value: temurin
   node-version:
     description: 'Node version'
     value: ${{ steps.variables.outputs.node-version }}
@@ -168,3 +175,6 @@ runs:
     - name: 'SETUP: configure git'
       run: $JHI_SCRIPTS/04-git-config.sh
       shell: bash
+    - uses: actions/setup-node@v2.4.0
+      with:
+        node-version: ${{ steps.variables.outputs.node-version }}
