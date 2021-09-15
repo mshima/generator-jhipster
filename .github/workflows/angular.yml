@@ -178,21 +178,12 @@ jobs:
           application-environment: ${{ matrix.environment }}
           application-packaging: ${{ (matrix.war == 1 && 'war') || 'jar' }}
           enable-testcontainers: ${{ matrix.testcontainers == 1 }}
+          npm-cache: ${{ matrix.cache }}
+          npm-cache-hash: ${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json') }}
       - uses: actions/setup-java@v2
         with:
           distribution: ${{ steps.setup.outputs.java-distribution }}
           java-version: ${{ steps.setup.outputs.java-version }}
-      - name: 'SETUP: load npm cache'
-        uses: actions/cache@v2.1.6
-        with:
-          path: |
-            ~/.npm
-            ~/.cache/Cypress/
-          key: ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-${{ matrix.cache }}-${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-${{ matrix.cache }}-
-            ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-
-            ${{ runner.os }}-node-${{ steps.setup.outputs.date }}
       - name: 'SETUP: load maven cache'
         uses: actions/cache@v2.1.6
         with:
