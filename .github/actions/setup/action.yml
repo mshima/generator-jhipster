@@ -88,6 +88,14 @@ inputs:
     description: 'Setup java'
     required: false
     default: 'true'
+  setup-java-distribution:
+    description: 'Setup java'
+    required: false
+    default: 'temurin'
+  cache-date:
+    description: 'Date for caches'
+    required: false
+    default: ''
   npm-cache:
     description: 'NPM cache'
     required: false
@@ -96,13 +104,29 @@ inputs:
     description: 'Hash for NPM cache'
     required: false
     default: ''
+  maven-cache:
+    description: 'Maven cache'
+    required: false
+    default: 'maven'
+  maven-cache-hash:
+    description: 'Hash for Maven cache'
+    required: false
+    default: ''
+  gradle-cache:
+    description: 'Gradle cache'
+    required: false
+    default: 'gradle'
+  gradle-cache-hash:
+    description: 'Hash for Gradle cache'
+    required: false
+    default: ''
 outputs:
   java-version:
     description: 'Java version'
     value: ${{ steps.variables.outputs.java-version }}
   java-distribution:
     description: 'Java distribution'
-    value: temurin
+    value: ${{ inputs.setup-java-distribution }}
   node-version:
     description: 'Node version'
     value: ${{ steps.variables.outputs.node-version }}
@@ -183,6 +207,7 @@ runs:
     - name: 'SETUP: configure git'
       run: $JHI_SCRIPTS/04-git-config.sh
       shell: bash
+
     - uses: actions/setup-node@v2.4.0
       with:
         node-version: ${{ steps.variables.outputs.node-version }}
@@ -192,8 +217,31 @@ runs:
         path: |
           ~/.npm
           ~/.cache/Cypress/
-        key: ${{ runner.os }}-node-${{ steps.variables.outputs.date }}-${{ inputs.npm-cache }}-${{ inputs.npm-cache-hash }}
+        key: ${{ runner.os }}-node-${{ inputs.cache-date || steps.variables.outputs.date }}-${{ inputs.npm-cache }}-${{ inputs.npm-cache-hash }}
         restore-keys: |
-          ${{ runner.os }}-node-${{ steps.variables.outputs.date }}-${{ inputs.npm-cache }}-
-          ${{ runner.os }}-node-${{ steps.variables.outputs.date }}-
-          ${{ runner.os }}-node-${{ steps.variables.outputs.date }}
+          ${{ runner.os }}-node-${{ inputs.cache-date || steps.variables.outputs.date }}-${{ inputs.npm-cache }}-
+          ${{ runner.os }}-node-${{ inputs.cache-date || steps.variables.outputs.date }}-
+          ${{ runner.os }}-node-${{ inputs.cache-date || steps.variables.outputs.date }}
+
+    - uses: actions/setup-java@v2.3.0
+      with:
+        distribution: ${{ inputs.setup-java-distribution }}
+        java-version: ${{ steps.variables.outputs.java-version }}
+    - name: 'SETUP: load maven cache'
+      uses: actions/cache@v2.1.6
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-${{ inputs.maven-cache }}-${{ inputs.cache-date || steps.variables.outputs.date }}-${{ inputs.maven-cache-hash }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.maven-cache }}-${{ inputs.cache-date || steps.variables.outputs.date }}-
+          ${{ runner.os }}-${{ inputs.maven-cache }}-${{ inputs.cache-date || steps.variables.outputs.date }}
+    - name: 'SETUP: load gradle cache'
+      uses: actions/cache@v2.1.6
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-${{ inputs.gradle-cache }}-${{ inputs.cache-date || steps.variables.outputs.date }}-${{ inputs.gradle-cache-hash }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.gradle-cache }}-${{ inputs.cache-date || inputs.date }}-
+          ${{ runner.os }}-${{ inputs.gradle-cache }}-${{ inputs.cache-date || inputs.date }}

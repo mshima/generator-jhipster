@@ -180,29 +180,9 @@ jobs:
           enable-testcontainers: ${{ matrix.testcontainers == 1 }}
           npm-cache: ${{ matrix.cache }}
           npm-cache-hash: ${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json') }}
-      - uses: actions/setup-java@v2
-        with:
-          distribution: ${{ steps.setup.outputs.java-distribution }}
-          java-version: ${{ steps.setup.outputs.java-version }}
-      - name: 'SETUP: load maven cache'
-        uses: actions/cache@v2.1.6
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ steps.setup.outputs.date }}-${{ hashFiles('generator-jhipster/**/pom.xml.ejs') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-${{ steps.setup.outputs.date }}-
-            ${{ runner.os }}-maven-${{ steps.setup.outputs.date }}
-      - name: 'SETUP: load gradle cache'
-        if: contains(matrix.app-sample, 'gradle')
-        uses: actions/cache@v2.1.6
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ steps.setup.outputs.date }}-${{ hashFiles('generator-jhipster/**/build.gradle.ejs') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-${{ steps.setup.outputs.date }}-
-            ${{ runner.os }}-gradle-${{ steps.setup.outputs.date }}
+          maven-cache-hash: ${{ hashFiles('generator-jhipster/**/pom.xml.ejs') }}
+          gradle-cache: ${{ (contains(matrix.app-sample, 'gradle') && 'gradle') || 'false' }}
+          gradle-cache-hash: ${{ hashFiles('generator-jhipster/**/build.gradle.ejs') }}
       - name: 'TOOLS: configure tools installed by the system'
         run: $JHI_SCRIPTS/03-system.sh
       - name: 'TOOLS: configure git'
