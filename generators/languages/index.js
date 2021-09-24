@@ -166,6 +166,15 @@ module.exports = class extends BaseBlueprintGenerator {
           this.cancelCancellableTasks();
         }
       },
+      migrateLanguages() {
+        if (this.jhipsterConfig.languages && this.jhipsterConfig.languages.includes('in')) {
+          this.info('Indonesian lang value migrated from in to id');
+          this.jhipsterConfig.languages = this.jhipsterConfig.languages.filter(lang => !['in', 'id'].includes(lang)).concat('id');
+        }
+        if (this.languagesToApply && this.languagesToApply.includes('id')) {
+          this.languagesToApply = this.languagesToApply.filter(lang => !['in', 'id'].includes(lang)).concat('id');
+        }
+      },
     };
   }
 
