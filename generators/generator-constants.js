@@ -242,19 +242,7 @@ const LANGUAGES = [
   { name: 'Greek', dispName: 'Ελληνικά', value: 'el' },
   { name: 'Hindi', dispName: 'हिंदी', value: 'hi' },
   { name: 'Hungarian', dispName: 'Magyar', value: 'hu' },
-  {
-    name: 'Indonesian',
-    dispName: 'Bahasa Indonesia',
-    /*
-           To fix a nasty bug in the JDK ("Indonesian Locale does not comply with ISO 639")
-           The locale is set to "in" for Indonesia
-           See https://bugs.openjdk.java.net/browse/JDK-6457127
-           And https://github.com/jhipster/generator-jhipster/issues/9494
-        */
-    value: 'in',
-    localeId: 'id',
-    dayjsLocaleId: 'id',
-  },
+  { name: 'Indonesian', dispName: 'Bahasa Indonesia', value: 'id' },
   { name: 'Italian', dispName: 'Italiano', value: 'it' },
   { name: 'Japanese', dispName: '日本語', value: 'ja' },
   { name: 'Korean', dispName: '한국어', value: 'ko' },
