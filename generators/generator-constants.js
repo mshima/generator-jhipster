@@ -176,6 +176,10 @@ const LANGUAGES = [
     dispName: 'Shqip',
     value: 'al',
     dayjsLocaleId: 'sq',
+    angularLocaleId: 'sq',
+    /**
+     * @deprecated
+     */
     localeId: 'sq',
   },
   {
@@ -184,6 +188,10 @@ const LANGUAGES = [
     value: 'ar-ly',
     rtl: true,
     skipForLocale: true,
+    angularLocaleId: 'ar-LY',
+    /**
+     * @deprecated
+     */
     localeId: 'ar-LY',
   },
   {
@@ -197,6 +205,10 @@ const LANGUAGES = [
     dispName: 'Беларускі',
     value: 'by',
     dayjsLocaleId: 'be',
+    angularLocaleId: 'be',
+    /**
+     * @deprecated
+     */
     localeId: 'be',
   },
   {
@@ -215,12 +227,20 @@ const LANGUAGES = [
     name: 'Chinese (Simplified)',
     dispName: '中文（简体）',
     value: 'zh-cn',
+    angularLocaleId: 'zh-Hans',
+    /**
+     * @deprecated
+     */
     localeId: 'zh-Hans',
   },
   {
     name: 'Chinese (Traditional)',
     dispName: '繁體中文',
     value: 'zh-tw',
+    angularLocaleId: 'zh-Hant',
+    /**
+     * @deprecated
+     */
     localeId: 'zh-Hant',
   },
   { name: 'Croatian', dispName: 'Hrvatski', value: 'hr' },
@@ -253,14 +273,22 @@ const LANGUAGES = [
     name: 'Portuguese (Brazilian)',
     dispName: 'Português (Brasil)',
     value: 'pt-br',
+    angularLocaleId: 'pt',
+    /**
+     * @deprecated
+     */
     localeId: 'pt',
   },
   {
     name: 'Portuguese',
     dispName: 'Português',
     value: 'pt-pt',
-    localeId: 'pt-PT',
+    angularLocaleId: 'pt-PT',
     dayjsLocaleId: 'pt',
+    /**
+     * @deprecated
+     */
+    localeId: 'pt-PT',
   },
   {
     name: 'Punjabi',
@@ -283,22 +311,34 @@ const LANGUAGES = [
     name: 'Ukrainian',
     dispName: 'Українська',
     value: 'ua',
-    localeId: 'uk',
+    angularLocaleId: 'uk',
     dayjsLocaleId: 'uk',
+    /**
+     * @deprecated
+     */
+    localeId: 'uk',
   },
   {
     name: 'Uzbek (Cyrillic)',
     dispName: 'Ўзбекча',
     value: 'uz-Cyrl-uz',
-    localeId: 'uz-Cyrl',
+    angularLocaleId: 'uz-Cyrl',
     dayjsLocaleId: 'uz',
+    /**
+     * @deprecated
+     */
+    localeId: 'uz-Cyrl',
   },
   {
     name: 'Uzbek (Latin)',
     dispName: 'O`zbekcha',
     value: 'uz-Latn-uz',
-    localeId: 'uz-Latn',
+    angularLocaleId: 'uz-Latn',
     dayjsLocaleId: 'uz-latn',
+    /**
+     * @deprecated
+     */
+    localeId: 'uz-Latn',
   },
   { name: 'Vietnamese', dispName: 'Tiếng Việt', value: 'vi' },
 ];

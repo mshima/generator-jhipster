@@ -614,6 +614,7 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
   }
 
   /**
+   * @deprecated
    * return the localeId from the given language key (from constants.LANGUAGES)
    * if no localeId is defined, return the language key (which is a localeId itself)
    * @param {string} language - language key
@@ -621,6 +622,16 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
   getLocaleId(language) {
     const langObj = this.getAllSupportedLanguageOptions().find(langObj => langObj.value === language);
     return langObj.localeId || language;
+  }
+
+  /**
+   * return the angularLocaleId from the given language key (from constants.LANGUAGES)
+   * if no angularLocaleId is defined, return the language key (which is a localeId itself)
+   * @param {string} language - language key
+   */
+  getAngularLocaleId(language) {
+    const langObj = this.getAllSupportedLanguageOptions().find(langObj => langObj.value === language);
+    return langObj.angularLocaleId || language;
   }
 
   /**

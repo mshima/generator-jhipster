@@ -17,12 +17,12 @@
  limitations under the License.
 -%>
 <%_
-  const localeId = getLocaleId(nativeLanguage);
+  const angularLocaleId = getAngularLocaleId(nativeLanguage);
 _%>
 import { NgModule, LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import { <% if (enableTranslation) { %>HttpClient, <% } %>HttpClientModule } from '@angular/common/http';
-import locale from '@angular/common/locales/<%= localeId %>';
+import locale from '@angular/common/locales/<%= angularLocaleId %>';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
@@ -92,7 +92,7 @@ import { ErrorComponent } from './layouts/error/error.component';
 <%_ if (authenticationTypeSession && communicationSpringWebsocket) { _%>
     CookieService,
 <%_ } _%>
-    { provide: LOCALE_ID, useValue: '<%= skipLanguageForLocale(nativeLanguage) ? 'en' : localeId %>' },
+    { provide: LOCALE_ID, useValue: '<%= skipLanguageForLocale(nativeLanguage) ? 'en' : angularLocaleId %>' },
     { provide: NgbDateAdapter, useClass: NgbDateDayjsAdapter },
 <%_ if (enableI18nRTL) { _%>
     FindLanguageFromKeyPipe,
