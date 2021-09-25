@@ -112,14 +112,15 @@ module.exports = class JHipsterBasePrivateGenerator extends Generator {
     const generator = _this || this;
     const prefix = this.fetchFromInstalledJHipster('languages/templates');
     const langJavaProp = languageToJavaLanguage(lang);
+    const destJavaLocaleId = this.getJavaLocaleId(lang);
     generator.template(
       `${prefix}/${resourceDir}i18n/messages_${langJavaProp}.properties.ejs`,
-      `${resourceDir}i18n/messages_${langJavaProp}.properties`
+      `${resourceDir}i18n/messages_${destJavaLocaleId}.properties`
     );
     if (!this.skipUserManagement) {
       generator.template(
         `${prefix}/${testResourceDir}i18n/messages_${langJavaProp}.properties.ejs`,
-        `${testResourceDir}i18n/messages_${langJavaProp}.properties`
+        `${testResourceDir}i18n/messages_${destJavaLocaleId}.properties`
       );
     }
   }

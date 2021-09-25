@@ -262,7 +262,7 @@ const LANGUAGES = [
   { name: 'Greek', dispName: 'Ελληνικά', value: 'el' },
   { name: 'Hindi', dispName: 'हिंदी', value: 'hi' },
   { name: 'Hungarian', dispName: 'Magyar', value: 'hu' },
-  { name: 'Indonesian', dispName: 'Bahasa Indonesia', value: 'id' },
+  { name: 'Indonesian', dispName: 'Bahasa Indonesia', value: 'id', javaLocaleId: JAVA_VERSION === '17' ? 'id' : 'in' },
   { name: 'Italian', dispName: 'Italiano', value: 'it' },
   { name: 'Japanese', dispName: '日本語', value: 'ja' },
   { name: 'Korean', dispName: '한국어', value: 'ko' },
