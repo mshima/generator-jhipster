@@ -80,16 +80,6 @@ jobs:
       matrix:
         os: [ubuntu-20.04]
         cache: [angular]
-        suite:
-          - webflux-mongodb
-          - webflux-mongodb-es-session
-          - webflux-mongodb-oauth2
-          - webflux-gateway-jwt
-          - webflux-gateway-oauth2
-          - webflux-psql
-          - webflux-psql-additional
-          - webflux-mariadb-gradle
-          - webflux-couchbase
         include:
           - suite: webflux-mongodb
             app-sample: webflux-mongodb
