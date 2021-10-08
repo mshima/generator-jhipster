@@ -87,7 +87,7 @@ describe('Component Tests', () => {
             comp = fixture.componentInstance;
             service = TestBed.inject(<%= entityAngularName %>Service);
 
-            const headers = new HttpHeaders().append('link', 'link;link');
+            const headers = new HttpHeaders();
             jest.spyOn(service, 'query').mockReturnValue(
                 of(
                     new HttpResponse({
