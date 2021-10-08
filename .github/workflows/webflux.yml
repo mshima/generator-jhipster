@@ -57,7 +57,7 @@ jobs:
         uses: ./.github/actions/build-matrix
   applications:
     name: ${{ matrix.suite }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-20.04
     needs: build-matrix
     defaults:
       run:
@@ -78,8 +78,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
-        cache: [angular]
         include:
           - suite: webflux-mongodb
             app-sample: webflux-mongodb
@@ -171,9 +169,9 @@ jobs:
           path: |
             ~/.npm
             ~/.cache/Cypress/
-          key: ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-${{ matrix.cache }}-${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json') }}
+          key: ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-angular-${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-${{ matrix.cache }}-
+            ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-angular-
             ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-
             ${{ runner.os }}-node-${{ steps.setup.outputs.date }}
       - name: 'SETUP: load maven cache'
