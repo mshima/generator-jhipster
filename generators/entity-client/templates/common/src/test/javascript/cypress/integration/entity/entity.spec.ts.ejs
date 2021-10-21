@@ -52,24 +52,14 @@ describe('<%= entityClass %> e2e test', () => {
 <%_ } _%>
 
 <%_ if (authenticationTypeOauth2) { _%>
-  beforeEach(() => {
+  before(() => {
     cy.getOauth2Data();
     cy.get('@oauth2Data').then(oauth2Data => {
       cy.oauthLogin(oauth2Data, username, password);
     });
-    cy.intercept('GET', '/<%= baseApi + entityApiUrl %>').as('entitiesRequest');
-    cy.visit('');
-    cy.get(entityItemSelector).should('exist');
   });
-
-  beforeEach(() => {
-    Cypress.Cookies.preserveOnce('XSRF-TOKEN', 'JSESSIONID');
-  })
 <%_ } else { _%>
   before(() => {
-    cy.window().then((win) => {
-      win.sessionStorage.clear()
-    });
     cy.visit('');
     cy.login(username, password);
     cy.get(entityItemSelector).should('exist');
@@ -156,7 +146,7 @@ describe('<%= entityClass %> e2e test', () => {
 <%_ } _%>
 <%_ if (authenticationTypeOauth2) { _%>
 
-  afterEach(() => {
+  after(() => {
     cy.oauthLogout();
     cy.clearCache();
   });

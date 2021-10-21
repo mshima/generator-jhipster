@@ -68,11 +68,23 @@ Cypress.Commands.add('keycloakLogin', (oauth2Data: any, username: string, passwo
       cy.request({
         url: '/oauth2/authorization/oidc',
         followRedirect: true,
-    })
-    .then(() => {
-      cy.visit('/');
+      }).then(() => {
+        cy.visit('/');
+
+        cy.getCookies().then(cookies => {
+          const jsessionidCookies = cookies.filter(cookie => cookie.name === 'JSESSIONID');
+          if (jsessionidCookies.length > 1) {
+            // Backend is setting 2 JSESSIONID cookies, one for path '/' another for '/auth'
+            // Remove duplicated JSESSIONID to workaround https://github.com/cypress-io/cypress/issues/15166
+            const jsessionidCookie = jsessionidCookies.find(cookie => cookie.path === '/');
+            if (jsessionidCookie) {
+              cy.clearCookie('JSESSIONID');
+              cy.setCookie('JSESSIONID', jsessionidCookie!.value, jsessionidCookie);
+            }
+          }
+        });
+      });
     });
-  })
 });
 
 Cypress.Commands.add('auth0Login', (oauth2Data: any, username: string, password: string) => {
