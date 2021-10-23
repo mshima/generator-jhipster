@@ -2670,6 +2670,11 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
     if (options.clientPackageManager) {
       this.jhipsterConfig.clientPackageManager = options.clientPackageManager;
     }
+
+    if (options.testFrameworks) {
+      this.jhipsterConfig.testFrameworks = [...new Set([...this.jhipsterConfig.testFrameworks, ...options.testFrameworks])];
+    }
+
     if (this.jhipsterConfig.clientPackageManager) {
       const usingNpm = this.jhipsterConfig.clientPackageManager === 'npm';
       if (!usingNpm) {

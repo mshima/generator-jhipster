@@ -259,6 +259,11 @@ module.exports = class JHipsterAppGenerator extends BaseBlueprintGenerator {
       type: Boolean,
     });
 
+    this.option('test-frameworks', {
+      desc: 'Test frameworks',
+      type: Array,
+    });
+
     // Just constructing help, stop here
     if (this.options.help) {
       return;
