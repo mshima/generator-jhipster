@@ -52,12 +52,21 @@ describe('<%= entityClass %> e2e test', () => {
 <%_ } _%>
 
 <%_ if (authenticationTypeOauth2) { _%>
-  before(() => {
+  <%= clientFrameworkVue && communicationSpringWebsocket ? 'beforeEach' : 'before' _%>(() => {
     cy.getOauth2Data();
     cy.get('@oauth2Data').then(oauth2Data => {
       cy.oauthLogin(oauth2Data, username, password);
     });
+  <%_ if (clientFrameworkVue && communicationSpringWebsocket) { _%>
+    cy.intercept('GET', '/<%= baseApi + entityApiUrl %>').as('entitiesRequest');
+    cy.visit('');
+    cy.get(entityItemSelector).should('exist');
+  <%_ } _%>
   });
+
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce('XSRF-TOKEN', 'JSESSIONID');
+  })
 <%_ } else { _%>
   before(() => {
     cy.visit('');
@@ -146,7 +155,7 @@ describe('<%= entityClass %> e2e test', () => {
 <%_ } _%>
 <%_ if (authenticationTypeOauth2) { _%>
 
-  after(() => {
+  <%= clientFrameworkVue && communicationSpringWebsocket ? 'afterEach' : 'after' _%>(() => {
     cy.oauthLogout();
     cy.clearCache();
   });

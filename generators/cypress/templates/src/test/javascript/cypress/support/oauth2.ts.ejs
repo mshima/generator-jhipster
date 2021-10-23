@@ -18,6 +18,7 @@
 -%>
 // eslint-disable-next-line spaced-comment
 /// <reference types="cypress" />
+import { entityItemSelector } from './commands';
 
 Cypress.Commands.add('getOauth2Data', () => {
   cy.request({
@@ -70,6 +71,8 @@ Cypress.Commands.add('keycloakLogin', (oauth2Data: any, username: string, passwo
         followRedirect: true,
       }).then(() => {
         cy.visit('/');
+        cy.get(entityItemSelector).should('exist');
+<%_ if (!clientFrameworkVue || !communicationSpringWebsocket) { _%>
 
         cy.getCookies().then(cookies => {
           const jsessionidCookies = cookies.filter(cookie => cookie.name === 'JSESSIONID');
@@ -83,6 +86,7 @@ Cypress.Commands.add('keycloakLogin', (oauth2Data: any, username: string, passwo
             }
           }
         });
+<%_ } _%>
       });
     });
 });

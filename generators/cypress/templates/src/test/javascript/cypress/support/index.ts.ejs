@@ -41,7 +41,7 @@ import './management';
 <%_ if (authenticationTypeOauth2) { _%>
 import './oauth2';
 <%_ } _%>
-<%_ if (authenticationTypeSession || authenticationTypeOauth2) { _%>
+<%_ if (authenticationTypeSession) { _%>
 Cypress.Cookies.defaults({
   preserve: ['XSRF-TOKEN', 'SESSION', 'JSESSIONID'],
 });
