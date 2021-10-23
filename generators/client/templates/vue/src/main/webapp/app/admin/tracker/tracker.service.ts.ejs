@@ -15,7 +15,7 @@ export default class TrackerService {
 
   private router: VueRouter;
 
-  constructor(router: VueRouter<%_ if (authenticationTypeSession) { _%>, private cookie: any<%_ } _%>) {
+  constructor(router: VueRouter<%_ if (authenticationTypeSession || authenticationTypeOauth2) { _%>, private cookie: any<%_ } _%>) {
     this.router = router;
     this.connection = this.createConnection();
     this.listener = this.createListener();
@@ -40,8 +40,8 @@ export default class TrackerService {
     const socket = new SockJS(url);
     this.stompClient = Stomp.over(socket, { protocols: ['v12.stomp'] });
     const headers = {};
-<%_ if (authenticationTypeSession) { _%>
-    headers['X-XSRF-TOKEN'] = this.cookie.get('JSESSIONID') || this.cookie.get('XSRF-TOKEN');
+<%_ if (authenticationTypeSession || authenticationTypeOauth2) { _%>
+    headers['X-XSRF-TOKEN'] = this.cookie.get('XSRF-TOKEN');
 <%_ } _%>
     this.stompClient.connect(headers, () => this.afterConnect());
   }

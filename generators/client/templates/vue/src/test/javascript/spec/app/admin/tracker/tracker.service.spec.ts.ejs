@@ -10,7 +10,7 @@ describe('Tracker Service', () => {
     routerStub = sinon.createStubInstance<VueRouter>(VueRouter);
     routerStub.afterEach = sinon.spy();
     
-    trackerService = new TrackerService(routerStub<%_ if (authenticationTypeSession) { _%>,{ get: jest.fn()}<%_ } %>);
+    trackerService = new TrackerService(routerStub<%_ if (authenticationTypeSession || authenticationTypeOauth2) { _%>,{ get: jest.fn()}<%_ } %>);
   });
 
   it('Should connetion and listener be initialized', () => {
