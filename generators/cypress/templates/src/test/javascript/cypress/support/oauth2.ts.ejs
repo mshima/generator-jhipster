@@ -75,6 +75,7 @@ Cypress.Commands.add('keycloakLogin', (oauth2Data: any, username: string, passwo
 <%_ if (!clientFrameworkVue || !communicationSpringWebsocket) { _%>
 
         cy.getCookies().then(cookies => {
+          cy.log(cookies);
           const jsessionidCookies = cookies.filter(cookie => cookie.name === 'JSESSIONID');
           if (jsessionidCookies.length > 1) {
             // Backend is setting 2 JSESSIONID cookies, one for path '/' another for '/auth'
