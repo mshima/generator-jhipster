@@ -223,3 +223,30 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  summary:
+    name: Summary
+    runs-on: ubuntu-20.04
+    needs: [build-matrix, applications]
+    if: >-
+      ${{ always() }} &&
+      github.event.action != 'closed' # &&
+      #needs.build-matrix.outputs.any != 'false'
+    steps:
+      - name: Find Comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'JHipster Bot(jhipster-bot@jhipster.tech)'
+          body-includes: Summary
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Summary
+            ${{ toJSON(needs.applications) }}
+          edit-mode: append
