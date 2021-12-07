@@ -87,6 +87,7 @@ jobs:
             extra-args: --workspaces --monorepository
             skip-backend-tests: 1
     outputs:
+      suite: ${{ matrix.suite }}
       generated_equals: ${{ steps.compare.outputs.equals }}
     steps:
       #----------------------------------------------------------------------
@@ -246,9 +247,12 @@ jobs:
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v1
         with:
+          comment-author: 'JHipster Bot(jhipster-bot@jhipster.tech)'
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             Summary
-            ${{ toJSON(needs.applications) }}
+            <!--
+              ${{ toJSON(needs.applications) }}
+            -->
           edit-mode: append
