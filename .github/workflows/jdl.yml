@@ -86,6 +86,8 @@ jobs:
           - suite: vue-blog-store-microfrontend
             extra-args: --workspaces --monorepository
             skip-backend-tests: 1
+    outputs:
+      generated_equals: ${{ steps.compare.outputs.equals }}
     steps:
       #----------------------------------------------------------------------
       # Install all tools and check configuration
