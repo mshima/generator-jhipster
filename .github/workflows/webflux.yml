@@ -107,8 +107,6 @@ jobs:
             war: 0
             e2e: 1
             testcontainers: 1
-            # Mongodb tests are failing due to unknown reason https://github.com/jhipster/generator-jhipster/pull/16787
-            continue-on-backend-tests-error: true
           - suite: webflux-mongodb-oauth2
             app-sample: webflux-mongodb-oauth2
             entity: mongodb
@@ -116,8 +114,6 @@ jobs:
             war: 0
             e2e: 1
             testcontainers: 1
-            # Mongodb tests are failing due to unknown reason https://github.com/jhipster/generator-jhipster/pull/16787
-            continue-on-backend-tests-error: true
           - suite: webflux-gateway-jwt
             app-sample: webflux-gateway-jwt
             entity: none
@@ -125,8 +121,6 @@ jobs:
             war: 0
             e2e: 1
             testcontainers: 1
-            # Mongodb tests are failing due to unknown reason https://github.com/jhipster/generator-jhipster/pull/16787
-            continue-on-backend-tests-error: true
           - suite: webflux-gateway-oauth2
             app-sample: webflux-gateway-oauth2
             entity: none
@@ -134,8 +128,6 @@ jobs:
             war: 0
             e2e: 1
             testcontainers: 1
-            # Mongodb tests are failing due to unknown reason https://github.com/jhipster/generator-jhipster/pull/16787
-            continue-on-backend-tests-error: true
           - suite: webflux-psql
             app-sample: webflux-psql
             entity: sql
