@@ -274,6 +274,9 @@ class UserResourceIT <% if (databaseTypeCassandra) { %>extends AbstractCassandra
 <%_ if (!databaseTypeSql || reactive) { _%>
         userRepository.deleteAll()<% if (reactive) { %>.block()<% } %>;
 <%_ } _%>
+<%_ if (reactive && databaseTypeMongodb) { _%>
+    	try { Thread.sleep(1000); } catch (InterruptedException ex) {}
+<%_ } _%>
         <%= asEntity('User') %> user = createEntity(<% if (databaseTypeSql ) { %>em<% } _%>);
 <%_ if (databaseTypeSql) { _%>
         user.setLogin(DEFAULT_LOGIN);

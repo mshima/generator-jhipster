@@ -588,6 +588,9 @@ _%>
 <%_ } else if (databaseTypeSql && reactive) {  _%>
         deleteEntities(em);
 <%_ } _%>
+<%_ if (reactive && databaseTypeMongodb) { _%>
+    	try { Thread.sleep(500); } catch (InterruptedException ex) {}
+<%_ } _%>
         <%= persistInstance %> = createEntity(<% if (databaseTypeSql) { %>em<% } %>);
     }
 <%_ if (!readOnly) { _%>

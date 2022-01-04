@@ -151,6 +151,9 @@ class AccountResourceIT <% if (databaseTypeCassandra) { %>extends AbstractCassan
     @BeforeEach
     public void setup() {
         userRepository.deleteAll()<% if (reactive) { %>.block()<% } %>;
+<%_ if (reactive && databaseTypeMongodb) { _%>
+    	try { Thread.sleep(1000); } catch (InterruptedException ex) {}
+<%_ } _%>
     }
 
 <%_ } _%>

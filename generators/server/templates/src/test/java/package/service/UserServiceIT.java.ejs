@@ -204,6 +204,9 @@ class UserServiceIT <% if (databaseTypeCassandra) { %>extends AbstractCassandraT
 <%_ if ((reactive && !databaseTypeNo) || databaseTypeMongodb || databaseTypeNeo4j || databaseTypeCassandra || databaseTypeCouchbase) { _%>
         userRepository.deleteAll()<% if (reactive) { %>.block()<% } %>;
 <%_ } _%>
+<%_ if (reactive && databaseTypeMongodb) { _%>
+    	try { Thread.sleep(1000); } catch (InterruptedException ex) {}
+<%_ } _%>
 <%_ if (!databaseTypeNo) { _%>
         user = new <%= asEntity('User') %>();
   <%_ if (databaseTypeCassandra) { _%>
