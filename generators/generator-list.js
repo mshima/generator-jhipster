@@ -57,6 +57,7 @@ const Generators = {
   GENERATOR_KUBERNETES_KNATIVE: 'kubernetes-knative',
   GENERATOR_LANGUAGES: 'languages',
   GENERATOR_MAVEN: 'maven',
+  GENERATOR_MIGRATE: 'migrate',
   GENERATOR_OPENAPI_CLIENT: 'openapi-client',
   GENERATOR_OPENSHIFT: 'openshift',
   GENERATOR_PAGE: 'page',

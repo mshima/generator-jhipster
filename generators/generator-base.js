@@ -3228,4 +3228,20 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
       LANG: 'en',
     });
   }
+
+  /**
+   * Check git.
+   */
+  async checkGitVersion(minVersion) {
+    try {
+      const rawVersion = await this.createGit().raw('--version');
+      const gitVersion = String(rawVersion.match(/([0-9]+\.[0-9]+\.[0-9]+)/g));
+      if (minVersion) {
+        return semver.gte(gitVersion, minVersion);
+      }
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 };

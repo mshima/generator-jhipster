@@ -34,7 +34,7 @@ const { LOADING_PRIORITY, PRE_CONFLICTS_PRIORITY } = require('../../lib/constant
 
 const { MultiStepTransform } = require('../../utils/multi-step-transform');
 const { defaultConfig } = require('../generator-defaults');
-const { GENERATOR_UPGRADE } = require('../generator-list');
+const { GENERATOR_MIGRATE, GENERATOR_UPGRADE } = require('../generator-list');
 const { prettierTransform, generatedAnnotationTransform } = require('../generator-transforms');
 const { formatDateForChangelog, prepareFieldForLiquibaseTemplates } = require('../../utils/liquibase');
 const { prepareEntityForTemplates, prepareEntityPrimaryKeyForTemplates, loadRequiredConfigIntoEntity } = require('../../utils/entity');
@@ -155,7 +155,7 @@ module.exports = class extends BaseGenerator {
 
     // JDL writes directly to disk, set the file as modified so prettier will be applied
     const { commandName, ignoreErrors } = this.options;
-    if (commandName !== GENERATOR_UPGRADE) {
+    if (commandName !== GENERATOR_MIGRATE && commandName !== GENERATOR_UPGRADE) {
       stream = stream.pipe(
         patternSpy(file => {
           if (file.contents && !hasState(file) && !this.options.reproducibleTests) {
@@ -181,7 +181,7 @@ module.exports = class extends BaseGenerator {
     const createApplyPrettierTransform = () => {
       const prettierOptions = { packageJson: true, java: !this.skipServer && !this.jhipsterConfig.skipServer };
       // Prettier is clever, it uses correct rules and correct parser according to file extension.
-      const ignoreErrors = commandName === GENERATOR_UPGRADE || ignoreErrors;
+      const ignoreErrors = commandName === GENERATOR_UPGRADE || commandName === GENERATOR_MIGRATE || ignoreErrors;
       return prettierTransform(prettierOptions, this, ignoreErrors);
     };
 

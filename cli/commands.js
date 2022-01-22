@@ -168,6 +168,9 @@ const defaultCommands = {
   maven: {
     desc: 'Create Maven project (alpha)',
   },
+  migrate: {
+    desc: 'Migrate JHipster version or configuration',
+  },
   openshift: {
     desc: 'Deploy the current application to OpenShift',
   },
