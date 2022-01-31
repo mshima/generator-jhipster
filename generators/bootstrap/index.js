@@ -34,6 +34,7 @@ const { LOADING_PRIORITY, PRE_CONFLICTS_PRIORITY } = require('../../lib/constant
 
 const { MultiStepTransform } = require('../../utils/multi-step-transform');
 const { defaultConfig } = require('../generator-defaults');
+const { GENERATOR_UPGRADE } = require('../generator-list');
 const { prettierTransform, generatedAnnotationTransform } = require('../generator-transforms');
 const { formatDateForChangelog, prepareFieldForLiquibaseTemplates } = require('../../utils/liquibase');
 const { prepareEntityForTemplates, prepareEntityPrimaryKeyForTemplates, loadRequiredConfigIntoEntity } = require('../../utils/entity');
@@ -153,13 +154,16 @@ module.exports = class extends BaseGenerator {
     const { withGeneratedFlag } = this.jhipsterConfig;
 
     // JDL writes directly to disk, set the file as modified so prettier will be applied
-    stream = stream.pipe(
-      patternSpy(file => {
-        if (file.contents && !hasState(file) && !this.options.reproducibleTests) {
-          setModifiedFileState(file);
-        }
-      }, '**/{.yo-rc.json,.jhipster/*.json}').name('jhipster:config-files:modify')
-    );
+    const { commandName, ignoreErrors } = this.options;
+    if (commandName !== GENERATOR_UPGRADE) {
+      stream = stream.pipe(
+        patternSpy(file => {
+          if (file.contents && !hasState(file) && !this.options.reproducibleTests) {
+            setModifiedFileState(file);
+          }
+        }, '**/{.yo-rc.json,.jhipster/*.json}').name('jhipster:config-files:modify')
+      );
+    }
 
     const conflicterStatus = {
       fileActions: [
@@ -177,7 +181,7 @@ module.exports = class extends BaseGenerator {
     const createApplyPrettierTransform = () => {
       const prettierOptions = { packageJson: true, java: !this.skipServer && !this.jhipsterConfig.skipServer };
       // Prettier is clever, it uses correct rules and correct parser according to file extension.
-      const ignoreErrors = this.options.commandName === 'upgrade' || this.options.ignoreErrors;
+      const ignoreErrors = commandName === GENERATOR_UPGRADE || ignoreErrors;
       return prettierTransform(prettierOptions, this, ignoreErrors);
     };
 
