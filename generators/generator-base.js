@@ -209,10 +209,13 @@ module.exports = class JHipsterBaseGenerator extends PrivateBase {
       if (!baseName) {
         throw new Error('baseName is required');
       }
-      if (!this.options.sharedData[baseName]) {
-        this.options.sharedData[baseName] = {};
+      if (!this.options.sharedData.applications) {
+        this.options.sharedData.applications = {};
       }
-      this._sharedData = new SharedData(this.options.sharedData[baseName]);
+      if (!this.options.sharedData.applications[baseName]) {
+        this.options.sharedData.applications[baseName] = {};
+      }
+      this._sharedData = new SharedData(this.options.sharedData.applications[baseName]);
     }
     return this._sharedData;
   }

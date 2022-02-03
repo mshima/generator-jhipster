@@ -143,7 +143,7 @@ class JHipsterBaseEntitiesGenerator extends BaseBlueprintGenerator {
   getEntitiesFieldsDataToPrepare() {
     return this.getEntitiesDataToPrepare()
       .map(({ entity, entityName, ...data }) => {
-        if (!entity.fields) return [];
+        if (!entity || !entity.fields) return [];
 
         return entity.fields.map(field => ({
           entity,
@@ -165,7 +165,7 @@ class JHipsterBaseEntitiesGenerator extends BaseBlueprintGenerator {
   getEntitiesRelationshipsDataToPrepare() {
     return this.getEntitiesDataToPrepare()
       .map(({ entity, entityName, ...data }) => {
-        if (!entity.relationships) return [];
+        if (!entity || !entity.relationships) return [];
 
         return entity.relationships.map(relationship => ({
           entity,

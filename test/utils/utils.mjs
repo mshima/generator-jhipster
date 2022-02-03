@@ -18,6 +18,44 @@
  */
 import utils from './utils.js';
 
+export function filterEntityField(entity, field) {
+  return {
+    ...field,
+    entity: `[entity] ${entity.entityName}`,
+    generateFakeData: '[generateFakeData] function',
+    createRandexp: '[createRandexp] function',
+    reference: '[reference]',
+  };
+}
+
+export function filterEntityRelationship(entity, relationship) {
+  return {
+    ...relationship,
+    otherEntity: `[otherEntity] ${entity.entityName}`,
+  };
+}
+
+export function filterEntity(entity) {
+  return {
+    ...entity,
+    faker: '[faker] function',
+    resetFakerSeed: '[resetFakerSeed] function',
+    generateFakeData: '[generateFakeData] function',
+    fields: entity.fields.map(field => filterEntityField(entity, field)),
+    relationships: entity.relationships.map(relationship => filterEntityRelationship(entity, relationship)),
+    primaryKey: {
+      ...entity.primaryKey,
+      ownFields: '[ownFields] getter',
+      fields: '[fields] getter',
+      derivedFields: '[derivedFields] getter',
+      ids: entity.primaryKey.ids.map(id => ({
+        ...id,
+        field: `[field] ${id.field.fieldName}`,
+      })),
+    },
+  };
+}
+
 export const {
   DEFAULT_TEST_OPTIONS,
   basicHelpers,

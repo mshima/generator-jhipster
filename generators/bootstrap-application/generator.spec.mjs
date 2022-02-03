@@ -22,7 +22,7 @@ import { basename, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 import Generator from './index.mjs';
-import { dryRunHelpers as helpers } from '../../test/utils/utils.mjs';
+import { dryRunHelpers as helpers, filterEntity } from '../../test/utils/utils.mjs';
 import fieldTypes from '../../jdl/jhipster/field-types.js';
 
 const {
@@ -36,34 +36,6 @@ const __dirname = dirname(__filename);
 
 const generatorPath = join(__dirname, 'index.mjs');
 const generator = basename(__dirname);
-
-const filterEntity = entity => ({
-  ...entity,
-  faker: '[faker] function',
-  resetFakerSeed: '[resetFakerSeed] function',
-  generateFakeData: '[generateFakeData] function',
-  fields: entity.fields.map(field => ({
-    ...field,
-    entity: `[entity] ${entity.entityName}`,
-    generateFakeData: '[generateFakeData] function',
-    createRandexp: '[createRandexp] function',
-    reference: '[reference]',
-  })),
-  relationships: entity.relationships.map(relationship => ({
-    ...relationship,
-    otherEntity: `[otherEntity] ${entity.entityName}`,
-  })),
-  primaryKey: {
-    ...entity.primaryKey,
-    ownFields: '[ownFields] getter',
-    fields: '[fields] getter',
-    derivedFields: '[derivedFields] getter',
-    ids: entity.primaryKey.ids.map(id => ({
-      ...id,
-      field: `[field] ${id.field.fieldName}`,
-    })),
-  },
-});
 
 describe(`JHipster ${generator} generator`, () => {
   it('generator-list constant matches folder name', async () => {
@@ -129,7 +101,7 @@ Object {
 `);
       });
       it('should prepare entities', () => {
-        expect(Object.keys(runResult.env.sharedOptions.sharedData.jhipster.sharedEntities)).toMatchInlineSnapshot(`
+        expect(Object.keys(runResult.env.sharedOptions.sharedData.applications.jhipster.sharedEntities)).toMatchInlineSnapshot(`
 Array [
   "User",
   "EntityA",
@@ -137,7 +109,7 @@ Array [
 `);
       });
       it('should prepare User', () => {
-        const entity = runResult.env.sharedOptions.sharedData.jhipster.sharedEntities.User;
+        const entity = runResult.env.sharedOptions.sharedData.applications.jhipster.sharedEntities.User;
         expect(filterEntity(entity)).toMatchInlineSnapshot(`
 Object {
   "authenticationType": "jwt",
@@ -543,7 +515,7 @@ Object {
 `);
       });
       it('should prepare EntityA', () => {
-        const entity = runResult.env.sharedOptions.sharedData.jhipster.sharedEntities.EntityA;
+        const entity = runResult.env.sharedOptions.sharedData.applications.jhipster.sharedEntities.EntityA;
         expect(filterEntity(entity)).toMatchInlineSnapshot(`
 Object {
   "authenticationType": "jwt",
@@ -800,14 +772,14 @@ Object {
 `);
       });
       it('should prepare entities', () => {
-        expect(Object.keys(runResult.env.sharedOptions.sharedData.jhipster.sharedEntities)).toMatchInlineSnapshot(`
+        expect(Object.keys(runResult.env.sharedOptions.sharedData.applications.jhipster.sharedEntities)).toMatchInlineSnapshot(`
 Array [
   "EntityA",
 ]
 `);
       });
       it('should prepare EntityA', () => {
-        const entity = runResult.env.sharedOptions.sharedData.jhipster.sharedEntities.EntityA;
+        const entity = runResult.env.sharedOptions.sharedData.applications.jhipster.sharedEntities.EntityA;
         expect(filterEntity(entity)).toMatchInlineSnapshot(`
 Object {
   "authenticationType": "jwt",
