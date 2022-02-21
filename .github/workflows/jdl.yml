@@ -74,7 +74,8 @@ jobs:
         cache: [angular]
         suite:
           - ms-ngx-eureka-oauth2
-          - ms-react-jwt-consul
+          - ms-react-consul-jwt
+          - ms-vue-eureka-jwt
           - mf-ngx-eureka-jwt
           - mf-vue-consul-oauth2
         include:
@@ -82,7 +83,11 @@ jobs:
             extra-args: --workspaces --monorepository
             # Scripts wait for gateway to start, delay for microservices to start.
             e2e-delay: 120
-          - suite: ms-react-jwt-consul
+          - suite: ms-react-consul-jwt
+            extra-args: --workspaces --monorepository
+            # Scripts wait for gateway to start, delay for microservices to start.
+            e2e-delay: 120
+          - suite: ms-vue-eureka-jwt
             extra-args: --workspaces --monorepository
             # Scripts wait for gateway to start, delay for microservices to start.
             e2e-delay: 120
@@ -172,16 +177,16 @@ jobs:
       - name: 'MERGE: generate base'
         continue-on-error: true
         id: base-app
-        if: >-
-          github.event.pull_request &&
-          !contains(github.event.pull_request.labels.*.name, 'pr: jdl-disable-compare')
+        if: github.event.pull_request
         uses: ./generator-jhipster/.github/actions/compare-base
         with:
           extra-args: '--skip-jhipster-dependencies ${{ matrix.extra-args }}'
       - name: 'MERGE: compare changes'
         continue-on-error: true
         id: compare
-        if: steps.base-app.outcome == 'success'
+        if: >-
+          steps.base-app.outcome == 'success' &&
+          !contains(github.event.pull_request.labels.*.name, 'pr: jdl-disable-compare')
         uses: ./generator-jhipster/.github/actions/compare
         with:
           application-path: ${{ steps.base-app.outputs.application-path }}
