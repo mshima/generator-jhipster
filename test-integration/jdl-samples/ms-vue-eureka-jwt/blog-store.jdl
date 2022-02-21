@@ -1,10 +1,11 @@
 /*
- * This is a microfrontend stack sample to test compilation
- * - buildTool: maven
+ * This is a microservice stack sample to test compilation
+ * - buildTool: maven, gradle
  * - serviceDiscovery: eureka
  * - authenticationType: jwt
- * - databaseType: sql
- * - prodDatabaseType: postgresql, mysql, mariadb
+ * - databaseType: cassandra
+ * - enableHibernateCache: true
+ * - cacheProvider: ehcache, hazelcast, caffeine
  */
  
 application {
@@ -12,8 +13,8 @@ application {
     applicationType gateway
     authenticationType jwt
     baseName gateway
-    clientFramework angular
-    prodDatabaseType mysql
+    clientFramework vue
+    databaseType cassandra
     packageName com.okta.developer.gateway
     testFrameworks [cypress]
     creationTimestamp 1617901618886
@@ -24,15 +25,14 @@ application {
 
 application {
   config {
-    baseName blog
-    packageName com.okta.developer.blog
     applicationType microservice
-    clientFramework angular
     authenticationType jwt
-    prodDatabaseType postgresql
+    baseName blog
+    buildTool gradle
+    databaseType cassandra
+    packageName com.okta.developer.blog
     reactive true
     serverPort 8081
-    testFrameworks [cypress]
     creationTimestamp 1617901618887
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
   }
@@ -41,19 +41,33 @@ application {
 
 application {
   config {
-    baseName store,
-    packageName com.okta.developer.store
     applicationType microservice
-    clientFramework angular
     authenticationType jwt
-    prodDatabaseType mariadb
-    reactive true
+    baseName store,
+    cacheProvider ehcache
+    databaseType cassandra
+    packageName com.okta.developer.store
     serverPort 8082
-    testFrameworks [cypress]
     creationTimestamp 1617901618888
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
   }
   entities Product
+}
+
+application {
+  config {
+    applicationType microservice
+    authenticationType jwt
+    baseName notification,
+    buildTool gradle
+    cacheProvider caffeine
+    databaseType couchbase
+    packageName com.okta.developer.notification
+    serverPort 8083
+    creationTimestamp 1617901618889
+    jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
+  }
+  entities Notification
 }
 
 @ChangelogDate(20210408164809)
@@ -84,11 +98,14 @@ entity Product {
   image ImageBlob
 }
 
-/*
+@ChangelogDate(20210408164814)
+entity Notification {
+  title String required
+}
+
 relationship OneToOne {
   @Id UserData{user(login)} to User
 }
-*/
 
 relationship ManyToOne {
   Post{blog(name)} to Blog
@@ -98,15 +115,13 @@ relationship ManyToMany {
   Post{tag(name)} to Tag{post}
 }
 
-paginate Post, Tag with infinite-scroll
-paginate Product with pagination
-
 microservice Product with store
 microservice Blog, Post, Tag with blog
+microservice Notification with notification
 
 deployment {
   deploymentType docker-compose,
-  appsFolders [store, blog, gateway]
+  appsFolders [gateway, store, blog, notification]
   dockerRepositoryName "hipsterslabs"
   monitoring no
   serviceDiscoveryType eureka
