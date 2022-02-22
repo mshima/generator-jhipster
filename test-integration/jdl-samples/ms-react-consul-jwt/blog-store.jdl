@@ -1,23 +1,29 @@
-
 /*
- * This is a microservice blog sample with Gateway and two microservice applications
- * This uses JHipster registry for service discovery and OIDC authentication
+ * This is a microservice stack sample to test compilation
+ * - buildTool: gradle
+ * - serviceDiscovery: consul
+ * - authenticationType: jwt
+ * - databaseType: sql
+ * - prodDatabaseType: postgresql, mysql, mariadb
+ * - enableHibernateCache: false
+ * - cacheProvider: infinispan, memcached, redis
  */
- 
+
 application {
   config {
-    baseName gateway
-    packageName com.okta.developer.gateway
     applicationType gateway
-    clientFramework react
     authenticationType jwt
+    baseName gateway
+    buildTool gradle
+    clientFramework react
+    packageName com.okta.developer.gateway
     prodDatabaseType postgresql
     serviceDiscoveryType consul
-    testFrameworks [cypress]
+    testFrameworks [cypress, cucumber, gatling]
     creationTimestamp 1617901618886
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
   }
-  entities Blog, Post, Tag, Product
+  entities UserData, Blog, Post, Tag, Product
 }
 
 application {
@@ -27,9 +33,11 @@ application {
     applicationType microservice
     authenticationType jwt
     prodDatabaseType postgresql
+    cacheProvider infinispan
     serviceDiscoveryType consul
-    searchEngine elasticsearch
+    enableHibernateCache false
     serverPort 8081
+    testFrameworks [cucumber, gatling]
     creationTimestamp 1617901618887
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
   }
@@ -42,14 +50,41 @@ application {
     packageName com.okta.developer.store
     applicationType microservice
     authenticationType jwt
-    prodDatabaseType postgresql
+    prodDatabaseType mysql
+    cacheProvider memcached
     serviceDiscoveryType consul
     enableHibernateCache false
     serverPort 8082
+    testFrameworks [cucumber, gatling]
     creationTimestamp 1617901618888
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
   }
   entities Product
+}
+
+application {
+  config {
+    baseName notification,
+    packageName com.okta.developer.notification
+    applicationType microservice
+    authenticationType jwt
+    prodDatabaseType mariadb
+    cacheProvider redis
+    serviceDiscoveryType consul
+    enableHibernateCache false
+    serverPort 8083
+    entitySuffix Entity
+    dtoSuffix Rest
+    testFrameworks [cucumber, gatling]
+    creationTimestamp 1617901618889
+    jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
+  }
+  entities Notification
+}
+
+@ChangelogDate(20210408164809)
+entity UserData {
+  address String
 }
 
 @ChangelogDate(20210408164810)
@@ -75,6 +110,15 @@ entity Product {
   image ImageBlob
 }
 
+@ChangelogDate(20210408164814)
+entity Notification {
+  title String required
+}
+
+relationship OneToOne {
+  @Id UserData{user(login)} to User
+}
+
 relationship ManyToOne {
   Post{blog(name)} to Blog
 }
@@ -88,11 +132,12 @@ paginate Product with pagination
 
 microservice Product with store
 microservice Blog, Post, Tag with blog
+microservice Notification with notification
 service all with serviceImpl
 
 deployment {
   deploymentType docker-compose,
-  appsFolders [store, blog, gateway]
+  appsFolders [gateway, store, blog, notification]
   dockerRepositoryName "hipsterslabs"
   monitoring no
   serviceDiscoveryType consul
