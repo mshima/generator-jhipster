@@ -859,8 +859,11 @@ class EntityGenerator extends BaseBlueprintGenerator {
                 (this.context.paginate !== PAGINATION &&
                   relationship.ownerSide &&
                   // Fetch relationships if otherEntityField differs otherwise the id is enough
-                  (relationship.collection || relationship.otherEntity.primaryKey.name !== relationship.otherEntityField)));
-            relationship.bagRelationship = relationship.ownerSide && relationship.collection;
+                  (relationship.collection || relationship.otherEntity.primaryKey.name !== relationship.otherEntityField))) &&
+              // Neo4j & Couchbase eagerly loads relations by default
+              ![CASSANDRA].includes(this.context.databaseType) &&
+              (this.context.reactive || [SQL, MONGODB].includes(this.context.databaseType));
+            relationship.bagRelationship = relationship.relationshipEagerLoad && relationship.collection;
           });
         this.context.relationshipsContainEagerLoad = this.context.relationships.some(relationship => relationship.relationshipEagerLoad);
         this.context.eagerRelations = this.context.relationships.filter(rel => rel.relationshipEagerLoad);

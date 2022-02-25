@@ -138,10 +138,8 @@ public interface <%= entityClass %>Repository extends <% if (databaseTypeSql) { 
 
     @Override
     Mono<Void> deleteById(<%= primaryKey.type %> id);
-<%_ } _%>
-
 }
-<%_ if (databaseTypeSql) { _%>
+
 interface <%= entityClass %>RepositoryInternal {
     <S extends <%= persistClass %>> Mono<S> save(S entity);
 
@@ -162,8 +160,6 @@ interface <%= entityClass %>RepositoryInternal {
     Flux<<%= persistClass %>> findAllWithEagerRelationships(Pageable page);
 
     Mono<Void> deleteById(<%= primaryKey.type %> id);
-
   <%_ } _%>
-
-}
 <%_ } _%>
+}
