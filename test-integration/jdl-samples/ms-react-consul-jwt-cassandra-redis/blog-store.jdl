@@ -131,6 +131,8 @@ entity Notification {
   title String required
 }
 
+// Disable relationships for cassandra
+/*
 relationship OneToOne {
   @Id UserData{user(login)} to User
 }
@@ -142,6 +144,7 @@ relationship ManyToOne {
 relationship ManyToMany {
   Post{tag(name)} to Tag{post}
 }
+*/
 
 // Cassandra not compatible with pagination
 // paginate Post, Tag with infinite-scroll
