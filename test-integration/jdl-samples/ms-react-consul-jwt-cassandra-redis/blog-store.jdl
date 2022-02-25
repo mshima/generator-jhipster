@@ -84,13 +84,14 @@ application {
     baseName notification,
     buildTool maven
     creationTimestamp 1617901618889
-    databaseType cassandra
+    // TODO switch to cassandra
+    // databaseType cassandra
     prodDatabaseType postgresql
     dtoSuffix Rest
     entitySuffix Entity
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
     packageName com.okta.developer.notification
-    reactive false // TODO switch to reactive
+    reactive true
     serverPort 8083
     serviceDiscoveryType consul
     testFrameworks [cucumber, gatling]
