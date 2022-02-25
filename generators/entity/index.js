@@ -850,25 +850,25 @@ class EntityGenerator extends BaseBlueprintGenerator {
        * Process relationships that should be loaded eagerly.
        */
       processEagerLoadRelationships() {
-        this.context.relationships
-          .filter(relationship => relationship.relationshipEagerLoad === undefined)
-          .forEach(relationship => {
+        this.context.relationships.forEach(relationship => {
+          relationship.bagRelationship = !relationship.embedded && relationship.ownerSide && relationship.collection;
+          if (relationship.relationshipEagerLoad === undefined) {
             relationship.relationshipEagerLoad =
-              !relationship.embedded &&
-              (this.context.eagerLoad ||
-                (this.context.paginate !== PAGINATION &&
-                  relationship.ownerSide &&
-                  // Fetch relationships if otherEntityField differs otherwise the id is enough
-                  (relationship.collection || relationship.otherEntity.primaryKey.name !== relationship.otherEntityField))) &&
-              // Neo4j & Couchbase eagerly loads relations by default
-              ![CASSANDRA].includes(this.context.databaseType) &&
-              (this.context.reactive || [SQL, MONGODB].includes(this.context.databaseType));
-            relationship.bagRelationship = relationship.relationshipEagerLoad && relationship.collection;
-          });
+              relationship.bagRelationship ||
+              this.context.eagerLoad ||
+              // Fetch relationships if otherEntityField differs otherwise the id is enough
+              (relationship.ownerSide && relationship.otherEntity.primaryKey.name !== relationship.otherEntityField);
+          }
+        });
         this.context.relationshipsContainEagerLoad = this.context.relationships.some(relationship => relationship.relationshipEagerLoad);
+        this.context.containsBagRelationships = this.context.relationships.some(relationship => relationship.bagRelationship);
+        this.context.implementsEagerLoadApis = // Cassandra doesn't provides *WithEagerReationships apis
+          ![CASSANDRA].includes(this.context.databaseType) &&
+          // Only sql and mongodb provides *WithEagerReationships apis for imperative implementation
+          (this.context.reactive || [SQL, MONGODB].includes(this.context.databaseType)) &&
+          this.context.relationshipsContainEagerLoad;
         this.context.eagerRelations = this.context.relationships.filter(rel => rel.relationshipEagerLoad);
         this.context.regularEagerRelations = this.context.eagerRelations.filter(rel => rel.id !== true);
-        this.context.containsBagRelationships = this.context.relationships.some(relationship => relationship.bagRelationship);
 
         this.context.reactiveEagerRelations = this.context.relationships.filter(
           rel => rel.relationshipType === 'many-to-one' || (rel.relationshipType === 'one-to-one' && rel.ownerSide === true)
