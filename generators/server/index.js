@@ -68,7 +68,7 @@ const NO_WEBSOCKET = websocketTypes.FALSE;
 
 const { SERVER_MAIN_SRC_DIR, SERVER_MAIN_RES_DIR, SERVER_TEST_SRC_DIR, SERVER_TEST_RES_DIR, MAIN_DIR, TEST_DIR } = constants;
 
-const WAIT_TIMEOUT = 3 * 60000;
+const WAIT_TIMEOUT = 4 * 60000;
 
 module.exports = class JHipsterServerGenerator extends BaseBlueprintGenerator {
   constructor(args, options, features) {
