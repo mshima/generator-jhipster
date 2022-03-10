@@ -324,7 +324,9 @@ function prepareEntityPrimaryKeyForTemplates(entityWithConfig, generator, enable
                 : `${relationship.relationshipNameCapitalized}${field.fieldNameCapitalized}`;
             },
             get columnName() {
-              return idCount === 1 ? field.columnName : `${generator.getColumnName(relationship.relationshipName)}_${field.columnName}`;
+              return idCount === 1 && relationship.id
+                ? field.columnName
+                : `${generator.getColumnName(relationship.relationshipName)}_${field.columnName}`;
             },
             get reference() {
               return fieldToReference(entityWithConfig, this);
