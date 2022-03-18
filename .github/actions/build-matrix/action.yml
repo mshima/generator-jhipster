@@ -64,6 +64,18 @@ outputs:
   any:
     description: 'Any files has changed'
     value: ${{ steps.build-changes.outputs.any }}
+  any-common:
+    description: 'Server or common client has changed'
+    value: ${{ steps.build-changes.outputs.any-common }}
+  angular:
+    description: 'Angular client has changed'
+    value: ${{ steps.build-changes.outputs.angular }}
+  react:
+    description: 'Angular client has changed'
+    value: ${{ steps.build-changes.outputs.react }}
+  vue:
+    description: 'Angular client has changed'
+    value: ${{ steps.build-changes.outputs.vue }}
 runs:
   using: 'composite'
   steps:
@@ -79,6 +91,7 @@ runs:
         WORKSPACES=false
         E2E=false
         ANY=false
+        ANY_COMMON=false
         if [[ "true" == "${{inputs.skip-workflow}}" ]]; then
           echo "::set-output name=angular::false"
           echo "::set-output name=react::false"
@@ -141,7 +154,7 @@ runs:
           ':^**/react/**' \
           ':^*-vue*' \
           ':^**/vue/**' \
-          || CLIENT_COMMON=true
+          || CLIENT_COMMON=true ANY_COMMON=true
         echo "::endgroup::"
 
         echo "::group::Check Client"
@@ -155,7 +168,7 @@ runs:
           'generators/*server/**' \
           'generators/database-changelog' \
           'generators/database-changelog-liquibase' \
-          || SERVER=true E2E=true ANY=true
+          || SERVER=true E2E=true ANY=true ANY_COMMON=true
         echo "::endgroup::"
 
         echo "::group::Check Common"
@@ -173,13 +186,13 @@ runs:
           'lib' \
           'test-integration' \
           'utils' \
-          || CLIENT=true SERVER=true COMMON=true E2E=true ANY=true
+          || CLIENT=true SERVER=true COMMON=true E2E=true ANY=true ANY_COMMON=true
         echo "::endgroup::"
 
         echo "::group::Check E2E"
         git -c color.ui=always diff --exit-code @~1 -- \
           'generators/cypress' \
-          || E2E=true ANY=true
+          || E2E=true ANY=true ANY_COMMON=true
         echo "::endgroup::"
 
         echo "::group::Check Workspaces"
@@ -200,6 +213,7 @@ runs:
         echo "::set-output name=workspaces::${WORKSPACES}"
         echo "::set-output name=e2e::${E2E}"
         echo "::set-output name=any::${ANY}"
+        echo "::set-output name=any-common::${ANY_COMMON}"
       shell: bash
 
     - name: 'Build matrix'

@@ -17,28 +17,16 @@
 # limitations under the License.
 #
 
-name: Angular
-concurrency:
-  # Group PRs by head_ref, push to main branch by commit id, and others branch by ref.
-  group: ${{ github.workflow }}-${{ github.head_ref || (github.ref == 'refs/heads/main' && github.sha) || github.ref }}
-  cancel-in-progress: true
+name: Base workflow
 on:
-  push:
-    branches-ignore:
-      - 'dependabot/**'
-      - 'skip_ci*'
-    paths-ignore:
-      - 'package*.json'
-      - 'generators/*client/templates/react/**'
-      - 'generators/*client/templates/vue/**'
-  pull_request:
-    types: [closed, opened, synchronize, reopened]
-    branches:
-      - '*'
-    paths-ignore:
-      - 'package*.json'
-      - 'generators/*client/templates/react/**'
-      - 'generators/*client/templates/vue/**'
+  workflow_call:
+    inputs:
+      frontend:
+        required: true
+        type: string
+      samples-file:
+        required: true
+        type: string
 jobs:
   build-matrix:
     runs-on: ubuntu-20.04
@@ -56,7 +44,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-matrix
         with:
-          workflow-samples-file: angular
+          workflow-samples-file: ${{ inputs.samples-file }}
   applications:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os || 'ubuntu-20.04' }}
@@ -64,18 +52,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ github.workspace }}/app
-    if: >-
-      !contains(github.event.head_commit.message, '[react]') &&
-      !contains(github.event.head_commit.message, '[vue]') &&
-      !contains(github.event.pull_request.title, '[react]') &&
-      !contains(github.event.pull_request.title, '[vue]') &&
-      !contains(github.event.head_commit.message, '[ci skip]') &&
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      !contains(github.event.pull_request.title, '[skip ci]') &&
-      !contains(github.event.pull_request.title, '[ci skip]') &&
-      github.event.action != 'closed' &&
-      !contains(github.event.pull_request.labels.*.name, 'pr: skip-ci') &&
-      needs.build-matrix.outputs.any != 'false'
+    if: needs.build-matrix.outputs.any != 'false'
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -114,9 +91,9 @@ jobs:
           path: |
             ~/.npm
             ~/.cache/Cypress/
-          key: ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-${{ matrix.npm-cache || 'angular' }}-${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json') }}
+          key: ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-${{ matrix.npm-cache || inputs.frontend }}-${{ hashFiles('generator-jhipster/package-lock.json', 'generator-jhipster/**/package.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-${{ matrix.npm-cache || 'angular' }}-
+            ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-${{ matrix.npm-cache || inputs.frontend }}-
             ${{ runner.os }}-node-${{ steps.setup.outputs.date }}-
             ${{ runner.os }}-node-${{ steps.setup.outputs.date }}
       - name: 'SETUP: load maven cache'
@@ -229,12 +206,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  angular-checks:
-    runs-on: ubuntu-latest
-    needs: [applications]
-    if: >-
-      always() &&
-      (needs.applications.result == 'skipped' || needs.applications.result == 'success') &&
-      github.event.action != 'closed'
-    steps:
-      - run: echo '${{ toJSON(needs) }}'
