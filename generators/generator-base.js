@@ -2805,6 +2805,7 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
     dest.skipUserManagement = config.skipUserManagement;
     dest.skipCheckLengthOfIdentifier = config.skipCheckLengthOfIdentifier;
     dest.microfrontend = config.microfrontend;
+    dest.microfrontends = config.microfrontends;
 
     dest.skipServer = config.skipServer;
     dest.skipCommitHook = config.skipCommitHook;
@@ -2860,7 +2861,14 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
       dest.endpointPrefix = !dest.applicationType || dest.applicationTypeMicroservice ? `services/${dest.lowercaseBaseName}` : '';
     }
 
-    if (dest.remotes) {
+    if (dest.microfrontends && dest.microfrontends.length > 0) {
+      dest.microfrontends.forEach(microfrontend => {
+        const { baseName } = microfrontend;
+        microfrontend.lowercaseBaseName = baseName.toLowerCase();
+        microfrontend.capitalizedBaseName = _.upperFirst(baseName);
+        microfrontend.endpointPrefix = `services/${microfrontend.lowercaseBaseName}`;
+      });
+    } else if ((!dest.microfrontends || dest.microfrontends.length === 0) && dest.remotes) {
       dest.remotes.forEach(app => this.loadDerivedAppConfig(app));
       dest.microfrontends = dest.remotes.filter(r => r.clientFramework && r.clientFramework !== CLIENT_FRAMEWORK_NO);
     }
@@ -2868,6 +2876,10 @@ templates: ${JSON.stringify(existingTemplates, null, 2)}`;
       dest.microfrontend ||
       (dest.applicationTypeMicroservice && !dest.skipClient) ||
       (dest.applicationTypeGateway && dest.microfrontends && dest.microfrontends.length > 0);
+
+    if (dest.microfrontend && dest.applicationTypeMicroservice && !dest.gatewayServerPort) {
+      dest.gatewayServerPort = 8080;
+    }
 
     dest.authenticationTypeSession = dest.authenticationType === SESSION;
     dest.authenticationTypeJwt = dest.authenticationType === JWT;
