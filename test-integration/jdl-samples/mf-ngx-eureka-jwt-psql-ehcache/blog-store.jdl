@@ -30,7 +30,7 @@ application {
     prodDatabaseType postgresql
     serviceDiscoveryType eureka
     testFrameworks [cypress]
-    microfrontends [blog, notification, store]
+    microfrontends [blog:1, notification:2, store:3]
   }
   entities UserData
 }

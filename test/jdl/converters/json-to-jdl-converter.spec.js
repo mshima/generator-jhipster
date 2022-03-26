@@ -384,6 +384,7 @@ noFluentMethod Region, Country, Location
           'generator-jhipster': {
             microfrontends: [
               {
+                applicationIndex: 1,
                 baseName: 'foo',
               },
               {
@@ -395,7 +396,7 @@ noFluentMethod Region, Country, Location
       });
 
       it('should write a JDL file with the application', () => {
-        jestExpect(jdl).toMatch(/microfrontends \[foo, bar\]/);
+        jestExpect(jdl).toMatch(/microfrontends \[foo:1, bar\]/);
       });
     });
   });

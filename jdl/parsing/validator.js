@@ -49,6 +49,7 @@ const JWT_SECRET_KEY_PATTERN = /^\S+$/;
 const REMEMBER_ME_KEY_PATTERN = /^\S+$/;
 const NUMERIC = /^\d$/;
 const BASIC_NPM_PACKAGE_NAME_PATTERN = /^(@[a-z0-9-][a-z0-9-._]*\/)?[a-z0-9-][a-z0-9-._]*$/;
+const BASENAME_WITH_PORT = /^"?[A-Za-z][A-Za-z0-9_]*:\d*"?$/;
 
 const configPropsValidations = {
   APPLICATION_TYPE: {
@@ -165,7 +166,7 @@ const configPropsValidations = {
   },
   MICROFRONTENDS: {
     type: 'list',
-    pattern: ALPHANUMERIC_UNDERSCORE,
+    pattern: BASENAME_WITH_PORT,
     msg: 'microfrontends property',
   },
   MICROFRONTEND: { type: 'BOOLEAN' },

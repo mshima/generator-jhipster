@@ -1055,7 +1055,7 @@ describe('JDLSyntaxValidatorVisitor', () => {
             parse(`
             application {
               config {
-                microfrontends [mf_1,mf, mf123]
+                microfrontends [mf_1:1,mf:2, mf123:3, mf:123]
               }
             }`)
           ).not.to.throw();
@@ -1069,10 +1069,10 @@ describe('JDLSyntaxValidatorVisitor', () => {
               parse(`
             application {
               config {
-                microfrontends [mf_1, en, mf-1]
+                microfrontends [mf_1:1, en:2, mf-1:3]
               }
             }`)
-            ).to.throw(/^The microfrontends property name must match: (.*), got mf-1.\n(.*)at line: 4, column: 43/);
+            ).to.throw(/^The microfrontends property name must match: (.*), got mf-1:3.\n(.*)at line: (\d*), column: (\d*)/);
           });
         });
         context('such as not a list', () => {

@@ -18,7 +18,7 @@
  */
 const { Lexer, createToken } = require('chevrotain');
 
-const namePattern = /[a-zA-Z_][a-zA-Z_\-\d]*/;
+const namePattern = /[a-zA-Z_][a-zA-Z_\-\d:]*/;
 const nameTokenConfig = { name: 'NAME', pattern: namePattern };
 
 const nameToken = createToken(nameTokenConfig);

@@ -79,9 +79,16 @@ function cleanUpOptions(application) {
     }));
   }
   if (application[GENERATOR_NAME].microfrontends) {
-    application[GENERATOR_NAME].microfrontends = application[GENERATOR_NAME].microfrontends.map(baseName => ({
-      baseName,
-    }));
+    application[GENERATOR_NAME].microfrontends = application[GENERATOR_NAME].microfrontends.map(host => {
+      const [baseName, applicationIndex] = host.split(':');
+      const microfrontend = {
+        baseName,
+      };
+      if (applicationIndex) {
+        microfrontend.applicationIndex = parseInt(applicationIndex, 10);
+      }
+      return microfrontend;
+    });
   }
   if (application[GENERATOR_NAME].otherModules) {
     application[GENERATOR_NAME].otherModules = application[GENERATOR_NAME].otherModules.map(moduleName => ({

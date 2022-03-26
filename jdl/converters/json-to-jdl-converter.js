@@ -100,8 +100,8 @@ function cleanYoRcFileContent(yoRcFileContent) {
     yoRcFileContent[generatorName].blueprints = yoRcFileContent[generatorName].blueprints.map(blueprint => blueprint.name);
   }
   if (yoRcFileContent[generatorName].microfrontends) {
-    yoRcFileContent[generatorName].microfrontends = yoRcFileContent[generatorName].microfrontends.map(
-      microfrontend => microfrontend.baseName
+    yoRcFileContent[generatorName].microfrontends = yoRcFileContent[generatorName].microfrontends.map(microfrontend =>
+      microfrontend.applicationIndex ? `${microfrontend.baseName}:${microfrontend.applicationIndex}` : microfrontend.baseName
     );
   }
   if (yoRcFileContent[generatorName].otherModules) {

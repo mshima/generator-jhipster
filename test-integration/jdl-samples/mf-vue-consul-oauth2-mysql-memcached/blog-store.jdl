@@ -30,7 +30,7 @@ application {
     prodDatabaseType mysql
     serviceDiscoveryType consul
     testFrameworks [cypress]
-    microfrontends [blog, notification, store]
+    microfrontends [blog:1, notification:2, store:3]
   }
   entities UserData
 }

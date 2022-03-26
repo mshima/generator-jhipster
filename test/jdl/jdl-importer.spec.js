@@ -2277,16 +2277,25 @@ relationship OneToOne {
         const importer = createImporterFromContent(
           `application {
   config {
-    microfrontends [foo, bar]
+    microfrontends [foo:2, bar:1]
   }
 }
 `,
           { skipFileGeneration: true }
         );
         const importState = importer.import();
-        jestExpect(JSON.stringify(importState.exportedApplications[0]['generator-jhipster'].microfrontends)).toMatchInlineSnapshot(
-          '"[{\\"baseName\\":\\"foo\\"},{\\"baseName\\":\\"bar\\"}]"'
-        );
+        jestExpect(importState.exportedApplications[0]['generator-jhipster'].microfrontends).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "applicationIndex": 2,
+    "baseName": "foo",
+  },
+  Object {
+    "applicationIndex": 1,
+    "baseName": "bar",
+  },
+]
+`);
       });
     });
   });

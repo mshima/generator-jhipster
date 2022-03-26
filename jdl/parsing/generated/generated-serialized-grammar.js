@@ -1793,7 +1793,7 @@ const serializedGrammar = [
                         name: 'NAME',
                         label: 'NAME',
                         idx: 0,
-                        pattern: '[a-zA-Z_][a-zA-Z_\\-\\d]*',
+                        pattern: '[a-zA-Z_][a-zA-Z_\\-\\d:]*',
                     },
                 ],
             },
