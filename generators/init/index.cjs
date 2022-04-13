@@ -32,7 +32,12 @@ const {
 } = require('../../lib/constants/priorities.cjs');
 
 const { GENERATOR_INIT } = require('../generator-list');
-const { PRETTIER_DEFAULT_INDENT, PRETTIER_DEFAULT_INDENT_DEFAULT_VALUE, SKIP_COMMIT_HOOK } = require('./constants.cjs');
+const {
+  PRETTIER_EXTENSIONS,
+  PRETTIER_DEFAULT_INDENT,
+  PRETTIER_DEFAULT_INDENT_DEFAULT_VALUE,
+  SKIP_COMMIT_HOOK,
+} = require('./constants.cjs');
 const { files, commitHooksFiles } = require('./files.cjs');
 const { dependencyChain } = require('./mixin.cjs');
 
@@ -82,6 +87,9 @@ module.exports = class extends MixedChain {
       },
       loadOptionsConstants() {
         this.loadChainOptionsConstants();
+      },
+      setDefaults() {
+        this.config.set(PRETTIER_DEFAULT_INDENT, PRETTIER_DEFAULT_INDENT_DEFAULT_VALUE);
       },
     };
   }
@@ -188,6 +196,19 @@ module.exports = class extends MixedChain {
 
   get postWriting() {
     return {
+      packageJson() {
+        this.packageJson.merge({
+          scripts: {
+            'prettier-check': `prettier --check "{,**/}*.{${PRETTIER_EXTENSIONS.join(',')}}"`,
+            'prettier-write': `prettier --write "{,**/}*.{${PRETTIER_EXTENSIONS.join(',')}}"`,
+          },
+          devDependencies: {
+            prettier: this.nodeDependencies.prettier,
+            'prettier-plugin-java': this.nodeDependencies['prettier-plugin-java'],
+            'prettier-plugin-packagejson': this.nodeDependencies['prettier-plugin-packagejson'],
+          },
+        });
+      },
       addCommitHookDependencies() {
         if (this.shouldSkipFiles() || this.shouldSkipCommitHook()) return;
         this.packageJson.merge({

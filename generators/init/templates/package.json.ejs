@@ -22,20 +22,9 @@
   "description": "<%= projectName %>",
   "private": true,
   "license": "UNLICENSED",
-  "cacheDirectories": [
-    "node_modules"
-  ],
   "dependencies": {},
-  "devDependencies": {
-    "prettier": "<%= this.nodeDependencies['prettier'] %>",
-    "prettier-plugin-java": "<%= this.nodeDependencies['prettier-plugin-java'] %>",
-    "prettier-plugin-packagejson": "<%= this.nodeDependencies['prettier-plugin-packagejson'] %>"
-  },
+  "devDependencies": {},
   "engines": {
     "node": ">=<%= NODE_VERSION %>"
-  },
-  "scripts": {
-    "prettier:check": "prettier --check \"{,src/**/}*.{md,json,yml,html,js,ts,tsx,css,scss,vue,java}\"",
-    "prettier:format": "prettier --write \"{,src/**/}*.{md,json,yml,html,js,ts,tsx,css,scss,vue,java}\""
   }
 }

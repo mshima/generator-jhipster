@@ -25,10 +25,31 @@ const SKIP_COMMIT_HOOK = 'skipCommitHook';
 const SKIP_COMMIT_HOOK_DESCRIPTION = 'Skip adding husky commit hooks';
 const SKIP_COMMIT_HOOK_DEFAULT_VALUE = false;
 
+const PRETTIER_EXTENSIONS = [
+  'md',
+  'json',
+  'yml',
+  'xml',
+  'java',
+  // WEB
+  'html',
+  'css',
+  'scss',
+  // JS
+  'js',
+  'cjs',
+  'mjs',
+  'ts',
+  'mts',
+  'tsx',
+  'vue',
+];
+
 module.exports = {
   NODE_VERSION,
   PRETTIER_DEFAULT_INDENT,
   PRETTIER_DEFAULT_INDENT_DEFAULT_VALUE,
+  PRETTIER_EXTENSIONS,
   SKIP_COMMIT_HOOK,
   SKIP_COMMIT_HOOK_DESCRIPTION,
   SKIP_COMMIT_HOOK_DEFAULT_VALUE,
