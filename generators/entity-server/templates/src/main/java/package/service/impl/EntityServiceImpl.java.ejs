@@ -133,22 +133,6 @@ public class <%= serviceClassName %><% if (serviceImpl) { %> implements <%= enti
 
 <%_ if (!serviceImpl) { _%>
     /**
-     * Partially update a <%= entityInstance %>.
-     *
-     * @param <%= instanceName %> the entity to update partially.
-     * @return the persisted entity.
-     */
-<%_ } _%>
-<%_ if (serviceImpl) { _%>
-    @Override
-<%_ } _%>
-    public <% if (reactive) { %>Mono<% } else { %>Optional<% } %><<%= instanceType %>> partialUpdate(<%= instanceType %> <%= instanceName %>) {
-        log.debug("Request to partially update <%= entityClass %> : {}", <%= instanceName %>);
-<%- include('../../common/patch_template', {asEntity, asDto, isService: true, viaService: false}); -%>
-    }
-
-<%_ if (!serviceImpl) { _%>
-    /**
      * Get all the <%= entityInstancePlural %>.
      *
   <%_ if (!paginationNo) { _%>

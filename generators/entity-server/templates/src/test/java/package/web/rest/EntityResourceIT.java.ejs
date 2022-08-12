@@ -1715,7 +1715,6 @@ _%>
   <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
   <%_ if (searchEngineElasticsearch) { _%>
-        <%= entityInstance %>Repository.save(<%= persistInstance %>)<%= callBlock %>;
         <%= entityInstance %>SearchRepository.save(<%= persistInstance %>)<%= callBlock %>;
   <%_ } _%>
 

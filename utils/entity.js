@@ -31,6 +31,7 @@ const { GATEWAY, MICROSERVICE } = require('../jdl/jhipster/application-types');
 const { MapperTypes } = require('../jdl/jhipster/entity-options');
 const { OAUTH2 } = require('../jdl/jhipster/authentication-types');
 const { CommonDBTypes } = require('../jdl/jhipster/field-types');
+const { NEO4J } = require('../jdl/jhipster/database-types');
 
 const { BOOLEAN, LONG, STRING, UUID } = CommonDBTypes;
 const { NO: NO_DTO, MAPSTRUCT } = MapperTypes;
@@ -223,7 +224,9 @@ function prepareEntityForTemplates(entityWithConfig, generator) {
     entityWithConfig.applicationType === MICROSERVICE &&
     entityWithConfig.authenticationType === OAUTH2 &&
     hasBuiltInUserField &&
-    entityWithConfig.dto === NO_MAPPER;
+    entityWithConfig.dto === NO_MAPPER &&
+    // Relationships are cascaded, saving each relationship is not required
+    entityWithConfig.databaseType !== NEO4J;
 
   entityWithConfig.generateFakeData = type => {
     const fieldsToGenerate =

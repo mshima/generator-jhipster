@@ -74,14 +74,6 @@ public interface <%= entityClass %>Service {
      <% if (reactive) { %>Mono<<% } %><%= instanceType %><% if (reactive) { %>><% } %> update(<%= instanceType %> <%= instanceName %>);
 
     /**
-     * Partially updates a <%= entityInstance %>.
-     *
-     * @param <%= instanceName %> the entity to update partially.
-     * @return the persisted entity.
-     */
-    <% if (reactive) { %>Mono<% } else { %>Optional<% } %><<%= instanceType %>> partialUpdate(<%= instanceType %> <%= instanceName %>);
-
-    /**
      * Get all the <%= entityInstancePlural %>.
      *<% if (!paginationNo) { %>
      * @param pageable the pagination information.<% } %>

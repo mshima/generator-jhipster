@@ -51,21 +51,33 @@ _%>
   <%_ } _%>
             <column name="first_name" type="varchar(50)"/>
             <column name="last_name" type="varchar(50)"/>
+  <%_ if (!authenticationTypeOauth2) { _%>
             <column name="email" type="varchar(191)">
                 <constraints unique="true" nullable="true" uniqueConstraintName="ux_user_email"/>
             </column>
+  <%_ } else { _%>
+            <column name="email" type="varchar(191)"/>
+  <%_ } _%>
             <column name="image_url" type="varchar(256)"/>
+  <%_ if (!authenticationTypeOauth2) { _%>
             <column name="activated" type="boolean" valueBoolean="false">
                 <constraints nullable="false" />
             </column>
+  <%_ } else { _%>
+            <column name="activated" type="boolean" valueBoolean="false"/>
+  <%_ } _%>
             <column name="lang_key" type="varchar(10)"/>
   <%_ if (!authenticationTypeOauth2) { _%>
             <column name="activation_key" type="varchar(20)"/>
             <column name="reset_key" type="varchar(20)"/>
   <%_ } _%>
+  <%_ if (!authenticationTypeOauth2) { _%>
             <column name="created_by" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
+  <%_ } else { _%>
+            <column name="created_by" type="varchar(50)"/>
+  <%_ } _%>
             <column name="created_date" type="timestamp"/>
   <%_ if (!authenticationTypeOauth2) { _%>
             <column name="reset_date" type="timestamp">

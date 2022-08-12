@@ -16,6 +16,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
+<%_
+  const patchRequestEmpty = fields.filter(field => field.includeField).length === 0;
+_%>
 int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
 
 // Update the <%= entityInstance %> using partial update
@@ -39,18 +42,28 @@ partialUpdated<%= persistClass %>.set<%= primaryKey.nameCapitalized %>(<%= persi
 
 <%_ if (reactive) { _%>
 webTestClient
-.patch()
-.uri(ENTITY_API_URL_ID, partialUpdated<%= persistClass %>.get<%= primaryKey.nameCapitalized %>())
-.contentType(MediaType.valueOf("application/merge-patch+json"))
-.bodyValue(TestUtil.convertObjectToJsonBytes(<%= 'partialUpdated' + persistClass %>))
-.exchange()
-.expectStatus()
-.isOk();
+    .patch()
+    .uri(ENTITY_API_URL_ID, partialUpdated<%= persistClass %>.get<%= primaryKey.nameCapitalized %>())
+    .contentType(MediaType.valueOf("application/merge-patch+json"))
+    .bodyValue(TestUtil.convertObjectToJsonBytes(<%= 'partialUpdated' + persistClass %>))
+    .exchange()
+    .expectStatus()
+  <%_ if (patchRequestEmpty) { _%>
+    // Request doesn't have any change
+    .isBadRequest();
+  <%_ } else { _%>
+    .isOk();
+  <%_ } _%>
 <%_ } else { _%>
 rest<%= entityClass %>MockMvc.perform(patch(ENTITY_API_URL_ID, partialUpdated<%= persistClass %>.get<%= primaryKey.nameCapitalized %>())<% if (testsNeedCsrf) { %>.with(csrf())<% }%>
-.contentType("application/merge-patch+json")
-.content(TestUtil.convertObjectToJsonBytes(<%= 'partialUpdated' + persistClass %>)))
-.andExpect(status().isOk());
+    .contentType("application/merge-patch+json")
+    .content(TestUtil.convertObjectToJsonBytes(<%= 'partialUpdated' + persistClass %>)))
+  <%_ if (patchRequestEmpty) { _%>
+    // Request doesn't have any change
+    .andExpect(status().isBadRequest());
+  <%_ } else { _%>
+    .andExpect(status().isOk());
+  <%_ } _%>
 <%_ } _%>
 
 // Validate the <%= entityClass %> in the database

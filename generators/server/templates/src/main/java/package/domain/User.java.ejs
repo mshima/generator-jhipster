@@ -260,7 +260,9 @@ public class <%= asEntity('User') %><% if (databaseTypeSql || databaseTypeMongod
     private String email;
 
 <%_ if (databaseTypeSql) { _%>
+  <%_ if (!authenticationTypeOauth2) { _%>
     @NotNull
+  <%_ } _%>
   <%_ if (!reactive) { _%>
     @Column(nullable = false)
   <%_ } _%>

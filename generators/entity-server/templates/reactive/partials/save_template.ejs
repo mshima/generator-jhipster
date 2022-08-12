@@ -16,21 +16,19 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-<%_ const instanceType = restClass;
-const instanceName = restInstance;
-const mapper = entityInstance  + 'Mapper';
-const dtoToEntity = mapper + '.' + 'toEntity';
-const entityToDtoReference = mapper + '::' + 'toDto';
-_%>
-<%_ if (viaService) { _%>
-        return <%= entityInstance %>Service.save(<%= instanceName %>)
-<%_ } else { _%>
-        return <%= entityInstance %>Repository.save(<%if (dtoMapstruct) { %><%= dtoToEntity %>(<% } %><%= instanceName %><%if (dtoMapstruct) { %>)<% } -%>)
-    <%_ if (searchEngineElasticsearch) { %>
+<%_ if (returnDirectly) { _%>
+        return Mono.just(<%= restInstance %>)
+<%_ } _%>
+<%_ if (dtoMapstruct) { _%>
+            .map(<%= entityInstance  %>Mapper::toEntity)
+<%_ } _%>
+            .flatMap(<%= entityInstance %>Repository::save)
+<%_ if (searchEngineElasticsearch) { _%>
             .flatMap(<%= entityInstance %>SearchRepository::save)
-    <%_ } -%>
-    <%_ if (dtoMapstruct) { %>
-            .map(<%= entityToDtoReference  %>)
-    <%_ } -%>
-    <%_ if (returnDirectly) { _%>;<%_ } _%>
+<%_ } _%>
+<%_ if (dtoMapstruct) { _%>
+            .map(<%= entityInstance  %>Mapper::toDto)
+<%_ } _%>
+<%_ if (returnDirectly) { -%>
+        ;
 <%_ } _%>

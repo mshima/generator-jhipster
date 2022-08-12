@@ -316,7 +316,11 @@ public interface UserRepository extends R2dbcRepository<<%= asEntity('User') %>,
 
     @Query("DELETE FROM <%= jhiTablePrefix %>_user_authority WHERE user_id = :userId")
     Mono<Void> deleteUserAuthorities(<%= user.primaryKey.type %> userId);
+  <%_ if (authenticationTypeOauth2) { _%>
 
+    @Override
+    Mono<<%= asEntity('User') %>> create(<%= asEntity('User') %> user);
+  <%_ } _%>
 }
 
   <%_ if (!authenticationTypeOauth2) { _%>
