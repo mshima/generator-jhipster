@@ -221,6 +221,45 @@ jobs:
         with:
           name: screenshots-${{ matrix.name }}
           path: ${{ steps.setup.outputs.application-path }}/**/cypress/screenshots
+      - name: 'ANALYSIS: Sonar PR'
+        id: sonar-result
+        if: steps.base-app.outcome == 'success' && matrix.name == 'ngx-default'
+        run: |
+          echo "::group::docker startup"
+          npm run docker:sonar:up
+          npm run docker:sonar:await
+          echo "::endgroup::"
+
+          echo "::group::base analisys"
+          cd ../base/app
+          ./mvnw -ntp --batch-mode clean compile -Dskip.installnodenpm -Dskip.npm
+          ./mvnw -ntp --batch-mode initialize sonar:sonar \
+            -Dsonar.projectVersion=0.0.0-base \
+            -Dsonar.testExecutionReportPaths=""
+          echo "::endgroup::"
+
+          echo "::group::merge analisys"
+          cd ../../app
+          ./mvnw -ntp --batch-mode clean compile -Dskip.installnodenpm -Dskip.npm
+          npm run sonnar -Dsonar.projectVersion=0.0.0-base -Dsonar.testExecutionReportPaths=""
+          echo "::endgroup::"
+
+          echo "::group::report install"
+          npm install -g mshima/sonar-report
+          echo "::endgroup::"
+
+          sonar-report \
+            --exit-code \
+            --ejs-file summary.txt.ejs \
+            --save-report-json target/sonar_report.json \
+            --allbugs \
+            --since-leak-period \
+            --vulnerability-plural-phrase Issues \
+            --vulnerability-phrase Issue
+
+          echo "::group::json result"
+          cat target/sonar_report.json
+          echo "::endgroup::"
       - name: Dump docker logs
         if: always()
         uses: jwalton/gh-docker-logs@v2

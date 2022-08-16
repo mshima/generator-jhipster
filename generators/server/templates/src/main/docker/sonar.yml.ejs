@@ -20,6 +20,8 @@
 version: '<%= DOCKER_COMPOSE_FORMAT_VERSION %>'
 services:
   <%= baseName.toLowerCase() %>-sonar:
+    # There is no arm64/apple silicon support
+    # It's possible to use an third party provider that provides arm64 support like mwizner/sonarqube:9.4.0-community
     image: <%= DOCKER_SONAR %>
     # Authentication is turned off for out of the box experience while trying out SonarQube
     # For real use cases delete sonar.forceAuthentication variable or set sonar.forceAuthentication=true
