@@ -228,6 +228,7 @@ jobs:
           echo "::group::docker startup"
           npm run docker:sonar:up
           npm run docker:sonar:await
+          sleep 20
           echo "::endgroup::"
 
           echo "::group::base analisys"
