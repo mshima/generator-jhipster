@@ -261,6 +261,15 @@ jobs:
           echo "::group::json result"
           cat target/sonar_report.json
           echo "::endgroup::"
+      - name: 'ANALYSIS: Sonar result'
+        if: steps.base-app.outcome == 'success' && matrix.name == 'ngx-default'
+        uses: mshima/sonar-report-action@main
+        with:
+          exit-code: true
+          allbugs: true
+          since-leak-period: true
+          vulnerability-plural-phrase: Issues
+          vulnerability-phrase: Issue
       - name: Dump docker logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
