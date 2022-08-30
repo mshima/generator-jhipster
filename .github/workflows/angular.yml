@@ -242,7 +242,7 @@ jobs:
           echo "::group::merge analisys"
           cd ../../app
           ./mvnw -ntp --batch-mode clean compile -Dskip.installnodenpm -Dskip.npm
-          npm run sonnar -Dsonar.projectVersion=0.0.0-base -Dsonar.testExecutionReportPaths=""
+          npm run sonar -Dsonar.projectVersion=0.0.0-base -Dsonar.testExecutionReportPaths=""
           echo "::endgroup::"
 
           echo "::group::report install"
