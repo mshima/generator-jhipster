@@ -265,6 +265,7 @@ jobs:
         if: steps.base-app.outcome == 'success' && matrix.name == 'ngx-default'
         uses: mshima/sonar-report-action@main
         with:
+          working-directory: ${{ github.workspace }}/app
           exit-code: true
           allbugs: true
           since-leak-period: true
