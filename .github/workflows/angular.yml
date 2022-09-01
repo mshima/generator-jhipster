@@ -263,9 +263,9 @@ jobs:
           echo "::endgroup::"
       - name: 'ANALYSIS: Sonar result'
         if: steps.base-app.outcome == 'success' && matrix.name == 'ngx-default'
-        uses: mshima/sonar-report-action@main
+        uses: mshima/sonar-report-action@v0.1
         with:
-          working-directory: ${{ github.workspace }}/app
+          sonar-properties-file: ${{ github.workspace }}/app/sonar-project.properties
           exit-code: true
           allbugs: true
           since-leak-period: true
