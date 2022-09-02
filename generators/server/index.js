@@ -586,6 +586,22 @@ module.exports = class JHipsterServerGenerator extends BaseBlueprintGenerator {
           'ci:e2e:server:start': `java -jar ${e2ePackage}.$npm_package_config_packaging --spring.profiles.active=e2e,$npm_package_config_default_environment ${javaCommonLog} ${javaTestLog} --logging.level.org.springframework.web=ERROR`,
         });
       },
+      packageJsonSonar() {
+        if (this.buildToolMaven) {
+          this.packageJson.merge({
+            scripts: {
+              sonar: './mvnw -ntp --batch-mode initialize sonar:sonar',
+            },
+          });
+        }
+        this.packageJson.merge({
+          scripts: {
+            'docker:sonar:up': 'docker compose -f src/main/docker/sonar.yml up -d',
+            'docker:sonar:down': 'docker compose -f src/main/docker/sonar.yml down',
+            'docker:sonar:await': `echo "Waiting for sonar to start" && wait-on -t ${WAIT_TIMEOUT} http-get://localhost:9001/api/system/status && echo "sonar started"`,
+          },
+        });
+      },
       packageJsonE2eScripts() {
         const scriptsStorage = this.packageJson.createStorage('scripts');
         const buildCmd = this.jhipsterConfig.buildTool === GRADLE ? 'gradlew' : 'mvnw';
