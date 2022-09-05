@@ -34,22 +34,13 @@
     "email": "",
     "url": "https://github.com/jdubois"
   },
+  "type": "module",
   "exports": {
-    ".": {
-      "import": "./lib/index.mjs",
-      "default": "./lib/index.js"
-    },
-    "./cli/": "./cli/",
-    "./generators/": "./generators/",
-    "./jdl/": "./jdl/",
-    "./lib/": "./lib/",
-    "./utils/": "./utils/",
+    ".": "./lib/index.mjs",
+    "./cli": "./cli/index.mjs",
+    "./generators/*": "./generators/*/esm.mjs",
     "./package.json": "./package.json",
-    "./esm/cli": "./cli/index.mjs",
-    "./esm/generators/*": "./generators/*/esm.mjs",
-    "./esm/generators": "./lib/constants/generators.mjs",
-    "./esm/priorities": "./lib/constants/priorities.mjs",
-    "./esm/support": "./lib/support/index.cjs"
+    "./priorities": "./lib/constants/priorities.mjs"
   },
   "main": "lib/index.js",
   "bin": {
