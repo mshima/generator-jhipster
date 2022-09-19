@@ -1113,6 +1113,16 @@ const baseServerFiles = {
         },
       ],
     },
+    {
+      condition: generator => !generator.reactive,
+      path: SERVER_MAIN_SRC_DIR,
+      templates: [
+        {
+          file: 'package/web/rest/errors/BindException.java',
+          renameTo: generator => `${generator.javaDir}web/rest/errors/BindException.java`,
+        },
+      ],
+    },
   ],
   serverJavaWeb: [
     {

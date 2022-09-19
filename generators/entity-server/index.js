@@ -57,6 +57,10 @@ module.exports = class extends BaseBlueprintGenerator {
           entity.entityInstanceDbSafe = entity.entityInstance;
         }
       },
+      prepareForTemplates() {
+        this.mapOrFlatMap = this.entity.reactive ? 'flatMap' : 'map';
+        this.optionalOrMono = this.entity.reactive ? 'Mono' : 'Optional';
+      },
     };
   }
 

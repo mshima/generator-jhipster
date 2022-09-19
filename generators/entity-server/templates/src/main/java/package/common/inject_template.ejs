@@ -30,6 +30,9 @@
       const mapsIdRepoInstance = `${mapsIdEntityInstance}Repository`;
       beans.push({class: `${mapsIdEntity}Repository`, instance: mapsIdRepoInstance});
     }
+    if (dtoMapstruct) {
+      beans.push({class: `${entityClass}Mapper`, instance: `${entityInstance}Mapper`});
+    }
   } else {
     beans.push({class: `${entityClass}Repository`, instance: `${entityInstance}Repository`});
     if (dtoMapstruct) {
@@ -45,6 +48,12 @@
       beans.push({class: `${mapsIdEntity}Repository`, instance: mapsIdRepoInstance});
     }
   }
+
+  if (constructorName.endsWith('Resource')) {
+    beans.push({class: 'SmartValidator', instance: 'validator'});
+    beans.push({class: 'ObjectMapper', instance: 'mapper'});
+  }
+
   if (saveUserSnapshot && (viaService || constructorName.endsWith('Resource'))) {
     beans.push({class: 'UserRepository', instance: 'userRepository'});
   }

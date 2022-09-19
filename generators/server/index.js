@@ -343,6 +343,9 @@ module.exports = class JHipsterServerGenerator extends BaseApplicationGenerator 
         this.testResourceDir = SERVER_TEST_RES_DIR;
         this.srcMainDir = MAIN_DIR;
         this.srcTestDir = TEST_DIR;
+
+        this.mapOrFlatMap = this.reactive ? 'flatMap' : 'map';
+        this.optionalOrMono = this.reactive ? 'Mono' : 'Optional';
       },
     });
   }
