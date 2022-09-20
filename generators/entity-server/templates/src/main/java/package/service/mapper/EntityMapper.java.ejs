@@ -66,7 +66,7 @@ public interface <%= entityClass %>Mapper extends EntityMapper<<%= dtoClass %>, 
   <%_ for (relationship of dtoRelationships) { _%>
     <%_
       renMapAnotEnt = true;
-      let qualifiedByName = relationship.otherEntity.entityInstance +this._.upperFirst(relationship.otherEntityField);
+      let qualifiedByName = relationship.otherEntity.entityInstance + this._.upperFirst(relationship.otherEntityField);
       qualifiedByName = qualifiedByName + (relationship.collection ? 'Set' : '');
     _%>
     @Mapping(target = "<%= relationship.propertyName %>", source = "<%= relationship.propertyName %>", qualifiedByName="<%= qualifiedByName %>")
@@ -100,7 +100,7 @@ public interface <%= entityClass %>Mapper extends EntityMapper<<%= dtoClass %>, 
     <%= persistClass %> toEntity(<%= dtoClass %> <%= dtoInstance %>);
   <%_ } _%>
   <%_ for (const {otherEntity, relatedField, collection} of otherEntitiesFields) { _%>
-    <%_ const mapperName = otherEntity.entityInstance +this._.upperFirst(relatedField.propertyName); _%>
+    <%_ const mapperName = otherEntity.entityInstance + this._.upperFirst(relatedField.propertyName); _%>
 
     @Named("<%= mapperName %>")
     @BeanMapping(ignoreByDefault = true)
@@ -112,7 +112,7 @@ public interface <%= entityClass %>Mapper extends EntityMapper<<%= dtoClass %>, 
     <%_ } _%>
     <%- otherEntity.dtoClass %> toDto<%= this._.upperFirst(mapperName) %>(<%- otherEntity.persistClass %> <%= otherEntity.persistInstance %>);
     <%_ if (collection) { %>
-      <%_ const collectionMapperName = otherEntity.entityInstance +this._.upperFirst(relatedField.propertyName) + 'Set'; _%>
+      <%_ const collectionMapperName = otherEntity.entityInstance + this._.upperFirst(relatedField.propertyName) + 'Set'; _%>
 
     @Named("<%= collectionMapperName %>")
     default Set<<%- otherEntity.dtoClass %>> toDto<%= this._.upperFirst(mapperName) %>Set(Set<<%- otherEntity.persistClass %>> <%= otherEntity.persistInstance %>) {
