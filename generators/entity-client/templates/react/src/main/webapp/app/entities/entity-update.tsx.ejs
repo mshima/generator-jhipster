@@ -125,7 +125,7 @@ export const <%= entityReactName %>Update = () => {
   const updating = useAppSelector(state => state.<%= entityReactState %>.updating);
   const updateSuccess = useAppSelector(state => state.<%= entityReactState %>.updateSuccess);
   <%_ enumImports.forEach( (importedPath, importedType) => { _%>
-  const <%-this._.lowerFirst(importedType) %>Values = Object.keys(<%- importedType %>);
+  const <%- this._.lowerFirst(importedType) %>Values = Object.keys(<%- importedType %>);
   <%_ }); _%>
 
   const handleClose = () => {
