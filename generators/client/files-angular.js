@@ -25,9 +25,6 @@ const { GATEWAY } = require('../../jdl/jhipster/application-types');
 const { SPRING_WEBSOCKET } = require('../../jdl/jhipster/websocket-types');
 
 const files = {
-  _: {
-    transform: [replaceAngularTranslations],
-  },
   common: [
     {
       templates: [
@@ -510,9 +507,11 @@ module.exports = {
   files,
 };
 
-function writeFiles() {
+function writeFiles(application) {
   return this.writeFiles({
     sections: files,
     rootTemplatesPath: 'angular',
+    transform: !application.enableTranslation ? [replaceAngularTranslations] : undefined,
+    context: application,
   });
 }

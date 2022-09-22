@@ -25,9 +25,6 @@ const { GATEWAY } = require('../../jdl/jhipster/application-types');
 const { CLIENT_MAIN_SRC_DIR, CLIENT_TEST_SRC_DIR, VUE_DIR } = constants;
 
 const vueFiles = {
-  _: {
-    transform: [replaceVueTranslations],
-  },
   common: [
     {
       templates: [
@@ -372,10 +369,12 @@ function cleanup() {
   }
 }
 
-function writeFiles() {
+function writeFiles(application) {
   return this.writeFiles({
     sections: vueFiles,
     rootTemplatesPath: 'vue',
+    transform: !application.enableTranslation ? [replaceVueTranslations] : undefined,
+    context: application,
   });
 }
 

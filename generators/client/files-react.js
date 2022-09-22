@@ -25,9 +25,6 @@ const constants = require('../generator-constants');
 const { CLIENT_MAIN_SRC_DIR, CLIENT_TEST_SRC_DIR, REACT_DIR } = constants;
 
 const files = {
-  _: {
-    transform: [replaceReactTranslations],
-  },
   common: [
     {
       templates: [
@@ -364,9 +361,11 @@ function cleanup() {
   }
 }
 
-function writeFiles() {
+function writeFiles(application) {
   return this.writeFiles({
     sections: files,
     rootTemplatesPath: 'react',
+    transform: !application.enableTranslation ? [replaceReactTranslations] : undefined,
+    context: application,
   });
 }

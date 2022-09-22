@@ -33,6 +33,7 @@ const {
   POST_WRITING_PRIORITY,
   END_PRIORITY,
 } = require('../../lib/constants/priorities.cjs').compat;
+const ApplicationTypes = require('../../jdl/jhipster/application-types');
 
 const prompts = require('./prompts');
 const { cleanup: cleanupAngular, writeFiles: writeAngularFiles } = require('./files-angular');
@@ -57,6 +58,7 @@ const { CommonDBTypes } = require('../../jdl/jhipster/field-types');
 
 const TYPE_STRING = CommonDBTypes.STRING;
 const TYPE_UUID = CommonDBTypes.UUID;
+const { MICROSERVICE } = ApplicationTypes;
 
 /**
  * @class
@@ -92,6 +94,7 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
     this.loadRuntimeOptions();
 
     this.existingProject = !!this.jhipsterConfig.clientFramework;
+    this.application = {};
   }
 
   async _postConstruct() {
@@ -108,14 +111,7 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
 
       setupConstants() {
         // Make constants available in templates
-        this.MAIN_SRC_DIR = this.CLIENT_MAIN_SRC_DIR;
-        this.TEST_SRC_DIR = this.CLIENT_TEST_SRC_DIR;
         this.packagejs = packagejs;
-        this.LOGIN_REGEX = constants.LOGIN_REGEX_JS;
-        this.ANGULAR = ANGULAR;
-        this.REACT = REACT;
-        this.VUE = VUE;
-        this.NODE_VERSION = constants.NODE_VERSION;
       },
 
       displayLogo() {
@@ -210,31 +206,16 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
   _loading() {
     return this.asLoadingTaskGroup({
       loadSharedConfig() {
-        this.loadAppConfig();
-        this.loadDerivedAppConfig();
-        this.loadClientConfig();
-        this.loadDerivedClientConfig();
-        this.loadServerConfig();
-        this.loadPlatformConfig();
-        this.loadTranslationConfig();
-      },
+        const application = this.application;
+        this.loadAppConfig(undefined, application);
+        this.loadDerivedAppConfig(application);
+        this.loadClientConfig(undefined, application);
+        this.loadDerivedClientConfig(application);
+        this.loadServerConfig(undefined, application);
+        this.loadPlatformConfig(undefined, application);
+        this.loadTranslationConfig(undefined, application);
 
-      validateSkipServer() {
-        if (
-          this.jhipsterConfig.skipServer &&
-          !(
-            this.jhipsterConfig.databaseType &&
-            this.jhipsterConfig.devDatabaseType &&
-            this.jhipsterConfig.prodDatabaseType &&
-            this.jhipsterConfig.authenticationType
-          )
-        ) {
-          this.error(
-            `When using skip-server flag, you must pass a database option and authentication type using ${chalk.yellow(
-              '--db'
-            )} and ${chalk.yellow('--auth')} flags`
-          );
-        }
+        application.backendName = this.configOptions.backendName;
       },
 
       loadPackageJson() {
@@ -244,7 +225,7 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
           this.fs.readJSON(this.fetchFromInstalledJHipster('client', 'templates', 'common', 'package.json'))
         );
         // Load client package.json into packageJson
-        const clientFramewok = this.jhipsterConfig.clientFramework === ANGULAR ? 'angular' : this.jhipsterConfig.clientFramework;
+        const clientFramewok = this.application.clientFramework;
         _.merge(
           this.dependabotPackageJson,
           this.fs.readJSON(this.fetchFromInstalledJHipster('client', 'templates', clientFramewok, 'package.json'))
@@ -260,33 +241,34 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
   // Public API method used by the getter and also by Blueprints
   _preparing() {
     return this.asPreparingTaskGroup({
-      prepareForTemplates({ application }) {
-        this.enableI18nRTL = false;
-        if (this.languages !== undefined) {
-          this.enableI18nRTL = this.isI18nRTLSupportNecessary(this.languages);
-        }
+      prepareForTemplates() {
+        const application = this.application;
 
         // Make dist dir available in templates
-        this.BUILD_DIR = this.getBuildDirectoryForBuildTool(this.buildTool);
+        application.BUILD_DIR = this.getBuildDirectoryForBuildTool(application.buildTool);
 
-        this.styleSheetExt = 'scss';
-        this.DIST_DIR = this.getResourceBuildDirectoryForBuildTool(this.buildTool) + constants.CLIENT_DIST_DIR;
+        application.DIST_DIR = this.getResourceBuildDirectoryForBuildTool(application.buildTool) + constants.CLIENT_DIST_DIR;
+        application.MAIN_SRC_DIR = this.CLIENT_MAIN_SRC_DIR;
+        application.TEST_SRC_DIR = this.CLIENT_TEST_SRC_DIR;
+        application.LOGIN_REGEX = constants.LOGIN_REGEX_JS;
+        application.NODE_VERSION = constants.NODE_VERSION;
 
-        if (this.authenticationType === OAUTH2 || this.databaseType === NO_DATABASE) {
-          this.skipUserManagement = true;
+        if (application.authenticationType === OAUTH2 || application.databaseType === NO_DATABASE) {
+          application.skipUserManagement = true;
+        }
+      },
+
+      microservice() {
+        const application = this.application;
+        if (application.applicationTypeMicroservice) {
+          application.withAdminUi = false;
         }
       },
 
       async loadNativeLanguage() {
-        if (!this.jhipsterConfig.baseName) return;
-        const context = {};
-        this.loadAppConfig(undefined, context);
-        this.loadDerivedAppConfig(context);
-        this.loadClientConfig(undefined, context);
-        this.loadDerivedClientConfig(context);
-        this.loadServerConfig(undefined, context);
-        this.loadPlatformConfig(undefined, context);
-        this.loadTranslationConfig(undefined, context);
+        const application = this.application;
+        if (!application.baseName) return;
+        const context = { ...application };
         await this._loadClientTranslations(context);
       },
     });
@@ -302,9 +284,10 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
       loadUserManagementEntities() {
         if (!this.configOptions.sharedEntities || !this.configOptions.sharedEntities.User) return;
         // Make user entity available to templates.
-        this.user = this.configOptions.sharedEntities.User;
-        this.userPrimaryKeyTypeString = this.user.primaryKey.type === TYPE_STRING;
-        this.userPrimaryKeyTypeUUID = this.user.primaryKey.type === TYPE_UUID;
+        const application = this.application;
+        application.user = this.configOptions.sharedEntities.User;
+        application.userPrimaryKeyTypeString = application.user.primaryKey.type === TYPE_STRING;
+        application.userPrimaryKeyTypeUUID = application.user.primaryKey.type === TYPE_UUID;
       },
 
       loadEntities() {
@@ -316,12 +299,13 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
       },
 
       insight() {
+        const application = this.application;
         statistics.sendSubGenEvent('generator', GENERATOR_CLIENT, {
           app: {
-            clientFramework: this.clientFramework,
-            enableTranslation: this.enableTranslation,
-            nativeLanguage: this.nativeLanguage,
-            languages: this.languages,
+            clientFramework: application.clientFramework,
+            enableTranslation: application.enableTranslation,
+            nativeLanguage: application.nativeLanguage,
+            languages: application.languages,
           },
         });
       },
@@ -340,21 +324,23 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
       cleanupAngular,
 
       write() {
-        if (this.skipClient) return;
-        switch (this.clientFramework) {
+        const application = this.application;
+        if (application.skipClient) return;
+        switch (application.clientFramework) {
           case ANGULAR:
-            return writeAngularFiles.call(this);
+            return writeAngularFiles.call(this, application);
           case REACT:
-            return writeReactFiles.call(this);
+            return writeReactFiles.call(this, application);
           case VUE:
-            return writeVueFiles.call(this);
+            return writeVueFiles.call(this, application);
           default:
           // do nothing by default
         }
       },
       writeCommonFiles() {
-        if (this.skipClient) return;
-        return writeCommonFiles.call(this);
+        const application = this.application;
+        if (application.skipClient) return;
+        return writeCommonFiles.call(this, application);
       },
     });
   }
@@ -388,14 +374,15 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
       },
 
       microfrontend() {
-        if (!this.microfrontend) return;
-        if (this.clientFrameworkAngular) {
-          const conditional = this.applicationTypeMicroservice ? "targetOptions.target === 'serve' ? {} : " : '';
+        const application = this.application;
+        if (!application.microfrontend) return;
+        if (application.clientFrameworkAngular) {
+          const conditional = application.applicationTypeMicroservice ? "targetOptions.target === 'serve' ? {} : " : '';
           this.addWebpackConfig(`${conditional}require('./webpack.microfrontend')(config, options, targetOptions)`);
-        } else if (this.clientFrameworkVue || this.clientFrameworkReact) {
+        } else if (application.clientFrameworkVue || application.clientFrameworkReact) {
           this.addWebpackConfig("require('./webpack.microfrontend')({ serve: options.env.WEBPACK_SERVE })");
         } else {
-          throw new Error(`Client framework ${this.clientFramework} doesn't support microfrontends`);
+          throw new Error(`Client framework ${application.clientFramework} doesn't support microfrontends`);
         }
       },
     });
@@ -408,15 +395,15 @@ module.exports = class JHipsterClientGenerator extends BaseApplicationGenerator 
   // Public API method used by the getter and also by Blueprints
   _end() {
     return this.asEndTaskGroup({
-      end() {
+      end({ application }) {
         if (this.skipClient) return;
         this.log(chalk.green.bold('\nClient application generated successfully.\n'));
 
-        const logMsg = `Start your Webpack development server with:\n ${chalk.yellow.bold(`${this.clientPackageManager} start`)}\n`;
+        const logMsg = `Start your Webpack development server with:\n ${chalk.yellow.bold(`${application.clientPackageManager} start`)}\n`;
 
         this.log(chalk.green(logMsg));
         if (!this.options.skipInstall) {
-          this.spawnCommandSync(this.clientPackageManager, ['run', 'clean-www']);
+          this.spawnCommandSync(application.clientPackageManager, ['run', 'clean-www']);
         }
       },
     });
