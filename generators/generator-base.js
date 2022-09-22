@@ -485,26 +485,38 @@ class JHipsterBaseGenerator extends PrivateBase {
    * @param {string} pageTitle - The translation key or the text for the page title in the browser
    */
   addEntityToModule(
-    entityInstance = this.entityInstance,
-    entityClass = this.entityClass,
-    entityName = this.entityAngularName,
-    entityFolderName = this.entityFolderName,
-    entityFileName = this.entityFileName,
-    entityUrl = this.entityUrl,
-    clientFramework = this.clientFramework,
-    microserviceName = this.microserviceName,
-    readOnly = this.readOnly,
-    pageTitle = this.enableTranslation ? `${this.i18nKeyPrefix}.home.title` : this.entityClassPlural
+    { clientFramework, enableTranslation },
+    {
+      entityInstance,
+      entityClass,
+      entityAngularName,
+      tsEntityName = entityAngularName,
+      entityFolderName,
+      entityFileName,
+      entityUrl,
+      microserviceName,
+      readOnly,
+      entityClassPlural,
+      i18nKeyPrefix,
+      pageTitle = enableTranslation ? `${i18nKeyPrefix}.home.title` : entityClassPlural,
+    }
   ) {
     if (clientFramework === ANGULAR) {
-      this.needleApi.clientAngular.addEntityToModule(entityName, entityFolderName, entityFileName, entityUrl, microserviceName, pageTitle);
+      this.needleApi.clientAngular.addEntityToModule(
+        tsEntityName,
+        entityFolderName,
+        entityFileName,
+        entityUrl,
+        microserviceName,
+        pageTitle
+      );
     } else if (clientFramework === REACT) {
-      this.needleApi.clientReact.addEntityToModule(entityInstance, entityClass, entityName, entityFolderName, entityFileName);
+      this.needleApi.clientReact.addEntityToModule(entityInstance, entityClass, tsEntityName, entityFolderName, entityFileName);
     } else if (clientFramework === VUE) {
-      this.needleApi.clientVue.addEntityToRouterImport(entityName, entityFileName, entityFolderName, readOnly);
-      this.needleApi.clientVue.addEntityToRouter(entityInstance, entityName, entityFileName, readOnly);
-      this.needleApi.clientVue.addEntityServiceToEntitiesComponentImport(entityName, entityClass, entityFileName, entityFolderName);
-      this.needleApi.clientVue.addEntityServiceToEntitiesComponent(entityInstance, entityName);
+      this.needleApi.clientVue.addEntityToRouterImport(tsEntityName, entityFileName, entityFolderName, readOnly);
+      this.needleApi.clientVue.addEntityToRouter(entityInstance, tsEntityName, entityFileName, readOnly);
+      this.needleApi.clientVue.addEntityServiceToEntitiesComponentImport(tsEntityName, entityClass, entityFileName, entityFolderName);
+      this.needleApi.clientVue.addEntityServiceToEntitiesComponent(entityInstance, tsEntityName);
     }
   }
 
@@ -550,8 +562,8 @@ class JHipsterBaseGenerator extends PrivateBase {
    * @param {string} value - Default translated value
    * @param {string} language - The language to which this translation should be added
    */
-  addElementTranslationKey(key, value, language) {
-    this.needleApi.clientI18n.addElementTranslationKey(key, value, language);
+  addElementTranslationKey(key, value, language, webappSrcDir = this.CLIENT_MAIN_SRC_DIR) {
+    this.needleApi.clientI18n.addElementTranslationKey(key, value, language, webappSrcDir);
   }
 
   /**
@@ -561,8 +573,8 @@ class JHipsterBaseGenerator extends PrivateBase {
    * @param {string} value - Default translated value
    * @param {string} language - The language to which this translation should be added
    */
-  addAdminElementTranslationKey(key, value, language) {
-    this.needleApi.clientI18n.addAdminElementTranslationKey(key, value, language);
+  addAdminElementTranslationKey(key, value, language, webappSrcDir = this.CLIENT_MAIN_SRC_DIR) {
+    this.needleApi.clientI18n.addAdminElementTranslationKey(key, value, language, webappSrcDir);
   }
 
   /**
@@ -572,8 +584,8 @@ class JHipsterBaseGenerator extends PrivateBase {
    * @param {string} value - Default translated value
    * @param {string} language - The language to which this translation should be added
    */
-  addEntityTranslationKey(key, value, language) {
-    this.needleApi.clientI18n.addEntityTranslationKey(key, value, language);
+  addEntityTranslationKey(key, value, language, webappSrcDir = this.CLIENT_MAIN_SRC_DIR) {
+    this.needleApi.clientI18n.addEntityTranslationKey(key, value, language, webappSrcDir);
   }
 
   /**
@@ -583,8 +595,8 @@ class JHipsterBaseGenerator extends PrivateBase {
    * @param {string} value - Default translated value or object with multiple key and translated value
    * @param {string} language - The language to which this translation should be added
    */
-  addGlobalTranslationKey(key, value, language) {
-    const fullPath = `${this.CLIENT_MAIN_SRC_DIR}i18n/${language}/global.json`;
+  addGlobalTranslationKey(key, value, language, webappSrcDir = this.CLIENT_MAIN_SRC_DIR) {
+    const fullPath = `${webappSrcDir}i18n/${language}/global.json`;
     try {
       jhipsterUtils.rewriteJSONFile(
         fullPath,
@@ -611,10 +623,10 @@ class JHipsterBaseGenerator extends PrivateBase {
    * @param {string} method - The method to be run with provided key and value from above
    * @param {string} enableTranslation - specify if i18n is enabled
    */
-  addTranslationKeyToAllLanguages(key, value, method, enableTranslation) {
+  addTranslationKeyToAllLanguages(key, value, method, enableTranslation, webappSrcDir = this.CLIENT_MAIN_SRC_DIR) {
     if (enableTranslation) {
       this.getAllInstalledLanguages().forEach(language => {
-        this[method](key, value, language);
+        this[method](key, value, language, webappSrcDir);
       });
     }
   }
