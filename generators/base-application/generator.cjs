@@ -81,9 +81,13 @@ class BaseApplicationGenerator extends BaseGenerator {
   /** @type {SharedData<ApplicationType>} */
   #sharedData;
 
+  /**
+   * @param {string | string[]} args
+   * @param {import('../base/api').GeneratorOptions} options
+   * @param {import('../base/api').GeneratorFeatures} features
+   */
   constructor(args, options, features) {
     super(args, options, { priorityArgs: true, taskPrefix: PRIORITY_PREFIX, ...features });
-
     if (this.options.help) {
       return;
     }

@@ -104,6 +104,11 @@ class JHipsterBaseGenerator extends PrivateBase {
   /** @type {Record<string, any>} */
   dependabotPackageJson;
 
+  /**
+   * @param {string | string[]} args
+   * @param {import('./base/api').GeneratorOptions} options
+   * @param {import('./base/api').GeneratorFeatures} features
+   */
   constructor(args, options, features) {
     super(args, options, features);
 

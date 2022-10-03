@@ -26,6 +26,7 @@ import utils from '../../utils/index.js';
 import userUtils from '../../utils/user.js';
 import constants from '../generator-constants.js';
 import type { CommonClientServerApplication } from './types.js';
+import type { JHipsterOptions, GeneratorFeatures } from '../base/api.js';
 
 const { prepareEntityForTemplates } = entityUtils;
 const { prepareFieldForTemplates } = fieldUtils;
@@ -40,7 +41,7 @@ const { NODE_VERSION } = constants;
  * @extends { BaseApplicationGenerator<CommonClientServerApplication> }
  */
 export default class BootStrapApplicationBase extends BaseApplicationGenerator<CommonClientServerApplication> {
-  constructor(args: any, options: any, features: any) {
+  constructor(args: string | string[], options: JHipsterOptions, features: GeneratorFeatures) {
     super(args, options, { unique: 'namespace', ...features });
 
     if (this.options.help) return;
@@ -99,9 +100,12 @@ export default class BootStrapApplicationBase extends BaseApplicationGenerator<C
 
   get configuringEachEntity() {
     return this.asConfiguringEachEntityTaskGroup({
-      configureEntity({ entityStorage, entityConfig }) {
+      configureEntity({ entityStorage, entityConfig, entityName }) {
         entityStorage.defaults({ fields: [], relationships: [] });
 
+        if (entityConfig.name === undefined) {
+          entityConfig.name = entityName;
+        }
         if (entityConfig.changelogDate === undefined) {
           entityConfig.changelogDate = this.dateFormatForLiquibase();
         }

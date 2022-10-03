@@ -65,6 +65,14 @@ const { MONGODB, NEO4J, COUCHBASE, CASSANDRA, SQL, ORACLE, MYSQL, POSTGRESQL, MA
 const { MAVEN } = require('../jdl/jhipster/build-tool-types');
 
 /**
+ * @typedef {import('./base/api.js').JHipsterGeneratorOptions} JHipsterGeneratorOptions
+ */
+
+/**
+ * @typedef {import('./base/api.js').JHipsterGeneratorFeatures} JHipsterGeneratorFeatures
+ */
+
+/**
  * This is the Generator base private class.
  * This provides all the private API methods used internally.
  * These methods should not be directly utilized using commonJS require,
@@ -72,13 +80,33 @@ const { MAVEN } = require('../jdl/jhipster/build-tool-types');
  *
  * The method signatures in private API can be changed without a major version change.
  * @class
- * @extends {Generator}
+ * @extends {Generator<JHipsterGeneratorOptions>}
  */
 module.exports = class PrivateBase extends Generator {
+  /**
+   * @param {string | string[]} args
+   * @param {import('./base/api').GeneratorOptions} options
+   * @param {import('./base/api').GeneratorFeatures} features
+   */
   constructor(args, options, features) {
     super(args, options, features);
     // expose lodash to templates
     this._ = _;
+  }
+
+  /**
+   * Add features to types
+   * @returns {JHipsterGeneratorFeatures}
+   */
+  get features() {
+    return super.features;
+  }
+
+  /**
+   * @param {JHipsterGeneratorFeatures} features
+   */
+  set features(features) {
+    super.features = features;
   }
 
   /* ======================================================================== */
