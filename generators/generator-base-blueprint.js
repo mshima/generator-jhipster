@@ -69,6 +69,11 @@ module.exports = class JHipsterBaseBlueprintGenerator extends JHipsterBaseGenera
 
   static END = JHipsterBaseBlueprintGenerator.asPriority(END);
 
+  /**
+   * @param {string | string[]} args
+   * @param {import('./base/api').GeneratorOptions} options
+   * @param {import('./base/api').GeneratorFeatures} features
+   */
   constructor(args, options, features) {
     super(args, options, { taskPrefix: PRIORITY_PREFIX, ...features });
 

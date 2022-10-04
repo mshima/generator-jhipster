@@ -29,8 +29,7 @@ const https = require('https');
 const { reproducibleConfigForTests: projectNameReproducibleConfigForTests } = require('./project-name/config.cjs');
 const { packageJson: packagejs } = require('../lib/index.js');
 const jhipsterUtils = require('./utils');
-const { JAVA_COMPATIBLE_VERSIONS, SERVER_TEST_SRC_DIR, SUPPORTED_CLIENT_FRAMEWORKS } = require('./generator-constants');
-const { languageToJavaLanguage } = require('./utils');
+const { JAVA_COMPATIBLE_VERSIONS, SUPPORTED_CLIENT_FRAMEWORKS } = require('./generator-constants');
 const JSONToJDLEntityConverter = require('../jdl/converters/json-to-jdl-entity-converter');
 const JSONToJDLOptionConverter = require('../jdl/converters/json-to-jdl-option-converter');
 const { stringify } = require('../utils');
@@ -66,6 +65,14 @@ const { MONGODB, NEO4J, COUCHBASE, CASSANDRA, SQL, ORACLE, MYSQL, POSTGRESQL, MA
 const { MAVEN } = require('../jdl/jhipster/build-tool-types');
 
 /**
+ * @typedef {import('./base/api.js').JHipsterGeneratorOptions} JHipsterGeneratorOptions
+ */
+
+/**
+ * @typedef {import('./base/api.js').JHipsterGeneratorFeatures} JHipsterGeneratorFeatures
+ */
+
+/**
  * This is the Generator base private class.
  * This provides all the private API methods used internally.
  * These methods should not be directly utilized using commonJS require,
@@ -73,13 +80,33 @@ const { MAVEN } = require('../jdl/jhipster/build-tool-types');
  *
  * The method signatures in private API can be changed without a major version change.
  * @class
- * @extends {Generator}
+ * @extends {Generator<JHipsterGeneratorOptions>}
  */
 module.exports = class PrivateBase extends Generator {
+  /**
+   * @param {string | string[]} args
+   * @param {import('./base/api').GeneratorOptions} options
+   * @param {import('./base/api').GeneratorFeatures} features
+   */
   constructor(args, options, features) {
     super(args, options, features);
     // expose lodash to templates
     this._ = _;
+  }
+
+  /**
+   * Add features to types
+   * @returns {JHipsterGeneratorFeatures}
+   */
+  get features() {
+    return super.features;
+  }
+
+  /**
+   * @param {JHipsterGeneratorFeatures} features
+   */
+  set features(features) {
+    super.features = features;
   }
 
   /* ======================================================================== */
@@ -100,291 +127,6 @@ module.exports = class PrivateBase extends Generator {
     paths = path.join(...paths);
     paths = this.applyOutputPathCustomizer(paths);
     return paths ? super.destinationPath(paths) : paths;
-  }
-
-  /**
-   * Install I18N Server Files By Language
-   *
-   * @param {any} _this - reference to generator
-   * @param {string} resourceDir - resource directory
-   * @param {string} lang - language code
-   * @param {string} testResourceDir - test resource directory
-   */
-  installI18nServerFilesByLanguage(_this, resourceDir, lang, testResourceDir) {
-    const generator = _this || this;
-    const prefix = this.fetchFromInstalledJHipster('languages/templates');
-    const langJavaProp = languageToJavaLanguage(lang);
-    generator.template(
-      `${prefix}/${resourceDir}i18n/messages_${langJavaProp}.properties.ejs`,
-      `${resourceDir}i18n/messages_${langJavaProp}.properties`
-    );
-    if (!this.skipUserManagement) {
-      generator.template(
-        `${prefix}/${testResourceDir}i18n/messages_${langJavaProp}.properties.ejs`,
-        `${testResourceDir}i18n/messages_${langJavaProp}.properties`
-      );
-    }
-  }
-
-  /**
-   * Update Languages In Language Constant
-   *
-   * @param languages
-   */
-  updateLanguagesInLanguageConstant(languages) {
-    const fullPath = `${this.CLIENT_MAIN_SRC_DIR}app/components/language/language.constants.js`;
-    try {
-      let content = ".constant('LANGUAGES', [\n";
-      languages.forEach((language, i) => {
-        content += `            '${language}'${i !== languages.length - 1 ? ',' : ''}\n`;
-      });
-      content += '            // jhipster-needle-i18n-language-constant - JHipster will add/remove languages in this array\n        ]';
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /\.constant.*LANGUAGES.*\[([^\]]*jhipster-needle-i18n-language-constant[^\]]*)\]/g,
-          content,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. LANGUAGE constant not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
-  }
-
-  /**
-   * Update Languages In Language Constant NG2
-   *
-   * @param languages
-   */
-  updateLanguagesInLanguageConstantNG2(languages) {
-    if (this.clientFramework !== ANGULAR) {
-      return;
-    }
-    const fullPath = `${this.CLIENT_MAIN_SRC_DIR}app/config/language.constants.ts`;
-    try {
-      let content = 'export const LANGUAGES: string[] = [\n';
-      languages.forEach((language, i) => {
-        content += `    '${language}'${i !== languages.length - 1 ? ',' : ''}\n`;
-      });
-      content += '    // jhipster-needle-i18n-language-constant - JHipster will add/remove languages in this array\n];';
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /export.*LANGUAGES.*\[([^\]]*jhipster-needle-i18n-language-constant[^\]]*)\];/g,
-          content,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. LANGUAGE constant not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
-  }
-
-  /**
-   * Update Languages In MailServiceIT
-   *
-   * @param languages
-   * @param packageFolder
-   */
-  updateLanguagesInLanguageMailServiceIT(languages, packageFolder) {
-    const fullPath = `${SERVER_TEST_SRC_DIR}${packageFolder}/service/MailServiceIT.java`;
-    try {
-      let content = 'private static final String[] languages = {\n';
-      languages.forEach((language, i) => {
-        content += `        "${language}"${i !== languages.length - 1 ? ',' : ''}\n`;
-      });
-      content += '        // jhipster-needle-i18n-language-constant - JHipster will add/remove languages in this array\n    };';
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /private.*static.*String.*languages.*\{([^}]*jhipster-needle-i18n-language-constant[^}]*)\};/g,
-          content,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. LANGUAGE constant not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
-  }
-
-  /**
-   * Update Languages In Language Pipe
-   *
-   * @param languages
-   */
-  updateLanguagesInLanguagePipe(languages) {
-    const fullPath =
-      this.clientFramework === ANGULAR
-        ? `${this.CLIENT_MAIN_SRC_DIR}app/shared/language/find-language-from-key.pipe.ts`
-        : `${this.CLIENT_MAIN_SRC_DIR}/app/config/translation.ts`;
-    try {
-      let content = '{\n';
-      this.generateLanguageOptions(languages, this.clientFramework).forEach((ln, i) => {
-        content += `        ${ln}${i !== languages.length - 1 ? ',' : ''}\n`;
-      });
-      content += '        // jhipster-needle-i18n-language-key-pipe - JHipster will add/remove languages in this object\n    };';
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /{\s*('[a-z-]*':)?([^=]*jhipster-needle-i18n-language-key-pipe[^;]*)\};/g,
-          content,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. Language pipe not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
-  }
-
-  /**
-   * Update Languages In Webpack
-   *
-   * @param languages
-   */
-  updateLanguagesInWebpackAngular(languages) {
-    const fullPath = 'webpack/webpack.custom.js';
-    try {
-      let content = 'groupBy: [\n';
-      // prettier-ignore
-      languages.forEach((language, i) => {
-                content += `                    { pattern: "./${this.CLIENT_MAIN_SRC_DIR}i18n/${language}/*.json", fileName: "./i18n/${language}.json" }${
-                    i !== languages.length - 1 ? ',' : ''
-                }\n`;
-            });
-      content +=
-        '                    // jhipster-needle-i18n-language-webpack - JHipster will add/remove languages in this array\n' +
-        '                ]';
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /groupBy:.*\[([^\]]*jhipster-needle-i18n-language-webpack[^\]]*)\]/g,
-          content,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. Webpack language task not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
-  }
-
-  /**
-   * Update Languages In Webpack React
-   *
-   * @param languages
-   */
-  updateLanguagesInWebpackReact(languages) {
-    const fullPath = 'webpack/webpack.common.js';
-    try {
-      let content = 'groupBy: [\n';
-      // prettier-ignore
-      languages.forEach((language, i) => {
-                content += `                    { pattern: "./${this.CLIENT_MAIN_SRC_DIR}i18n/${language}/*.json", fileName: "./i18n/${language}.json" }${
-                    i !== languages.length - 1 ? ',' : ''
-                }\n`;
-            });
-      content +=
-        '                    // jhipster-needle-i18n-language-webpack - JHipster will add/remove languages in this array\n' +
-        '                ]';
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /groupBy:.*\[([^\]]*jhipster-needle-i18n-language-webpack[^\]]*)\]/g,
-          content,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. Webpack language task not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
-  }
-
-  /**
-   * Update DayJS Locales to keep in dayjs.ts config file
-   *
-   * @param languages
-   */
-  updateLanguagesInDayjsConfiguation(languages) {
-    let fullPath = `${this.CLIENT_MAIN_SRC_DIR}app/config/dayjs.ts`;
-    if (this.clientFramework === VUE) {
-      fullPath = `${this.CLIENT_MAIN_SRC_DIR}app/shared/config/dayjs.ts`;
-    } else if (this.clientFramework === ANGULAR) {
-      fullPath = `${this.CLIENT_MAIN_SRC_DIR}app/config/dayjs.ts`;
-    }
-    try {
-      const content = languages.reduce(
-        (content, language) =>
-          `${content}import 'dayjs/${this.clientFrameworkAngular ? 'esm/' : ''}locale/${this.getDayjsLocaleId(language)}'\n`,
-        '// jhipster-needle-i18n-language-dayjs-imports - JHipster will import languages from dayjs here\n'
-      );
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          // match needle until // DAYJS CONFIGURATION (excluded)
-          pattern: /\/\/ jhipster-needle-i18n-language-dayjs-imports[\s\S]+?(?=\/\/ DAYJS CONFIGURATION)/g,
-          content: `${content}\n`,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. DayJS language task not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
   }
 
   /**
@@ -1394,102 +1136,6 @@ module.exports = class PrivateBase extends Generator {
           'jhipster <command>'
         )} instead of ${chalk.red('yo jhipster:<command>')}`
       );
-    }
-  }
-
-  vueUpdateLanguagesInTranslationStore(languages) {
-    const fullPath = `${this.CLIENT_MAIN_SRC_DIR}app/shared/config/store/translation-store.ts`;
-    try {
-      let content = 'languages: {\n';
-      if (this.enableTranslation) {
-        this.generateLanguageOptions(languages, this.clientFramework).forEach((ln, i) => {
-          content += `      ${ln}${i !== languages.length - 1 ? ',' : ''}\n`;
-        });
-      }
-      content += '      // jhipster-needle-i18n-language-key-pipe - JHipster will add/remove languages in this object\n    }';
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /languages:.*\{([^\]]*jhipster-needle-i18n-language-key-pipe[^}]*)}/g,
-          content,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. Language pipe not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
-  }
-
-  vueUpdateI18nConfig(languages) {
-    const fullPath = `${this.CLIENT_MAIN_SRC_DIR}app/shared/config/config.ts`;
-
-    try {
-      // Add i18n config snippets for all languages
-      let i18nConfig = 'const dateTimeFormats: DateTimeFormats = {\n';
-      if (this.enableTranslation) {
-        languages.forEach((ln, i) => {
-          i18nConfig += this.generateDateTimeFormat(ln, i, languages.length);
-        });
-      }
-      i18nConfig += '  // jhipster-needle-i18n-language-date-time-format - JHipster will add/remove format options in this object\n';
-      i18nConfig += '}';
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /const dateTimeFormats.*\{([^\]]*jhipster-needle-i18n-language-date-time-format[^}]*)}/g,
-          content: i18nConfig,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. Language pipe not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
-    }
-  }
-
-  vueUpdateLanguagesInWebpack(languages) {
-    const fullPath = 'webpack/webpack.common.js';
-    try {
-      let content = 'groupBy: [\n';
-      // prettier-ignore
-      languages.forEach((language, i) => {
-                content += `          { pattern: './${this.CLIENT_MAIN_SRC_DIR}i18n/${language}/*.json', fileName: './i18n/${language}.json' }${
-                    i !== languages.length - 1 ? ',' : ''
-                }\n`;
-            });
-      content += '          // jhipster-needle-i18n-language-webpack - JHipster will add/remove languages in this array\n        ]';
-
-      jhipsterUtils.replaceContent(
-        {
-          file: fullPath,
-          pattern: /groupBy:.*\[([^\]]*jhipster-needle-i18n-language-webpack[^\]]*)\]/g,
-          content,
-        },
-        this
-      );
-    } catch (e) {
-      this.log(
-        chalk.yellow('\nUnable to find ') +
-          fullPath +
-          chalk.yellow(' or missing required jhipster-needle. Webpack language task not updated with languages: ') +
-          languages +
-          chalk.yellow(' since block was not found. Check if you have enabled translation support.\n')
-      );
-      this.debug('Error:', e);
     }
   }
 

@@ -36,7 +36,7 @@ const PrivateBase = require('./generator-base-private');
 const NeedleApi = require('./needle-api');
 const { defaultConfig, defaultConfigMicroservice } = require('./generator-defaults');
 const { commonOptions } = require('./options');
-const { detectLanguage } = require('../utils/language');
+const { detectLanguage } = require('./languages/detect-language.cjs');
 const { formatDateForChangelog } = require('../utils/liquibase');
 const { calculateDbNameWithLimit, hibernateSnakeCase } = require('../utils/db');
 const defaultApplicationOptions = require('../jdl/jhipster/default-application-options');
@@ -104,6 +104,11 @@ class JHipsterBaseGenerator extends PrivateBase {
   /** @type {Record<string, any>} */
   dependabotPackageJson;
 
+  /**
+   * @param {string | string[]} args
+   * @param {import('./base/api').GeneratorOptions} options
+   * @param {import('./base/api').GeneratorFeatures} features
+   */
   constructor(args, options, features) {
     super(args, options, features);
 
