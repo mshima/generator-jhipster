@@ -87,13 +87,9 @@ export default class DatabaseChangelogLiquibase extends BaseApplication {
       },
 
       prepareFakeData() {
-        const entity = this.entity;
-        const entityChanges = this.entityChanges;
+        const { entity, databaseChangelog, entityChanges } = this;
         const seed = `${entity.entityClass}-liquibase`;
         this.resetEntitiesFakeData(seed);
-
-        const databaseChangelog = this.databaseChangelog;
-        entity.liquibaseFakeData = [];
 
         // fakeDataCount must be limited to the size of required unique relationships.
         Object.defineProperty(entity, 'fakeDataCount', {
@@ -104,14 +100,27 @@ export default class DatabaseChangelogLiquibase extends BaseApplication {
           configurable: true,
         });
 
-        for (let rowNumber = 0; rowNumber < this.numberOfRows; rowNumber++) {
-          const rowData = {};
-          const fields =
-            databaseChangelog.type === 'entity-new'
-              ? // generate id fields first to improve reproducibility
-                [...entityChanges.fields.filter(f => f.id), ...entityChanges.fields.filter(f => !f.id)]
-              : [...entityChanges.allFields.filter(f => f.id), ...entityChanges.addedFields.filter(f => !f.id)];
-          fields.forEach((field, idx) => {
+        entity.liquibaseFakeData = Array.from({ length: this.numberOfRows }, () => ({}));
+        if (!entity.liquibaseHeader) {
+          entity.liquibaseHeader = [];
+        }
+
+        this.fieldsWithFakeData =
+          databaseChangelog.type === 'entity-new'
+            ? // generate id fields first to improve reproducibility
+              [...entityChanges.fields.filter(f => f.id), ...entityChanges.fields.filter(f => !f.id)]
+            : [...entityChanges.allFields.filter(f => f.id), ...entityChanges.addedFields.filter(f => !f.id)];
+
+        for (const field of this.fieldsWithFakeData) {
+          entity.liquibaseHeader.push(field.columnName);
+          if (field.shouldCreateContentType) {
+            entity.liquibaseHeader.push(`${field.columnName}_content_type`);
+          }
+        }
+
+        for (let rowNumber = 0; rowNumber < entity.liquibaseFakeData.length; rowNumber++) {
+          const rowData = entity.liquibaseFakeData[rowNumber];
+          for (const field of this.fieldsWithFakeData) {
             if (field.derived) {
               Object.defineProperty(rowData, field.fieldName, {
                 get: () => {
@@ -121,21 +130,14 @@ export default class DatabaseChangelogLiquibase extends BaseApplication {
                   return field.derivedEntity.liquibaseFakeData[rowNumber][field.fieldName];
                 },
               });
-              return;
-            }
-            let data;
-            if (field.id && field.fieldType === TYPE_LONG) {
-              data = rowNumber + 1;
             } else {
-              data = field.generateFakeData();
+              rowData[field.fieldName] = field.id && field.fieldType === TYPE_LONG ? rowNumber + 1 : field.generateFakeData();
+              if (field.shouldCreateContentType) {
+                rowData[`${field.fieldName}ContentType`] = 'image/png';
+              }
             }
-            rowData[field.fieldName] = data;
-          });
-
-          entity.liquibaseFakeData.push(rowData);
+          }
         }
-        this.configOptions.sharedLiquibaseFakeData = this.configOptions.sharedLiquibaseFakeData || {};
-        this.configOptions.sharedLiquibaseFakeData[_.upperFirst(entity.name)] = entity.liquibaseFakeData;
       },
     });
   }
@@ -146,6 +148,16 @@ export default class DatabaseChangelogLiquibase extends BaseApplication {
 
   get default() {
     return {
+      checkFakeData() {
+        const { entity } = this;
+
+        const requiredFieldsWithFakeData = this.fieldsWithFakeData.filter(
+          field => field.id || (field.fieldValidateRules && field.fieldValidateRules.includes('required'))
+        );
+        entity.liquibaseFakeData = entity.liquibaseFakeData.filter(
+          rowData => !requiredFieldsWithFakeData.find(field => rowData[field.fieldName] === undefined)
+        );
+      },
       prepareRelationshipsForTemplates() {
         const entityChanges = this.entityChanges;
         const databaseChangelog = this.databaseChangelog;
@@ -179,6 +191,47 @@ export default class DatabaseChangelogLiquibase extends BaseApplication {
             .map(relationship => this._prepareRelationshipForTemplates(entity, relationship));
         }
       },
+
+      prepareRelationshipsFakeData() {
+        const { entity, databaseChangelog, entityChanges } = this;
+        const seed = `${entity.entityClass}-liquibase-relationships`;
+        this.resetEntitiesFakeData(seed);
+
+        const relationshipsToPrepare =
+          databaseChangelog.type === 'entity-new' ? entityChanges.relationships : entityChanges.addedRelationships;
+        this.relationshipsWithFakeData = relationshipsToPrepare.filter(
+          relationship =>
+            relationship.relationshipRequired &&
+            relationship.relationshipValidate === true &&
+            (relationship.relationshipType === 'many-to-one' ||
+              (relationship.relationshipType === 'one-to-one' && relationship.ownerSide === true && !relationship.id))
+        );
+
+        const fakeDataCount = _.min(
+          this.relationshipsWithFakeData
+            .filter(relationship => relationship.unique)
+            .map(relationship => relationship.otherEntity.fakeDataCount)
+            .concat(entity.liquibaseFakeData.length)
+        );
+
+        entity.liquibaseFakeData = entity.liquibaseFakeData.slice(0, fakeDataCount);
+
+        for (const { joinColumnNames } of this.relationshipsWithFakeData) {
+          entity.liquibaseHeader.push(joinColumnNames[0]);
+        }
+
+        for (let rowNumber = 0; rowNumber < entity.liquibaseFakeData.length; rowNumber++) {
+          const rowData = entity.liquibaseFakeData[rowNumber];
+          for (const relationship of this.relationshipsWithFakeData) {
+            let relationshipRow = rowData;
+            if (relationshipRow >= relationship.otherEntity.fakeDataCount) {
+              relationshipRow = entity.faker.datatype.number({ min: 1, max: relationship.otherEntity.fakeDataCount }) - 1;
+            }
+            rowData[relationship.relationshipName] =
+              relationship.relationship.otherEntity.liquibaseFakeData[relationshipRow][relationship.otherEntity.primaryKey.name];
+          }
+        }
+      },
     };
   }
 
@@ -209,6 +262,8 @@ export default class DatabaseChangelogLiquibase extends BaseApplication {
           reactive: application.reactive,
           incrementalChangelog: application.incrementalChangelog,
           recreateInitialChangelog: this.configOptions.recreateInitialChangelog,
+          fieldsWithFakeData: this.fieldsWithFakeData,
+          relationshipsWithFakeData: this.relationshipsWithFakeData,
         };
 
         if (databaseChangelog.type === 'entity-new') {
