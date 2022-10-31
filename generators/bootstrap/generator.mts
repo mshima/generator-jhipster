@@ -24,6 +24,7 @@ import { isBinaryFile } from 'isbinaryfile';
 
 import type { Transform, Readable } from 'stream';
 import type Environment from 'yeoman-environment';
+import Tinypool from 'tinypool';
 
 import BaseGenerator from '../base/index.mjs';
 import MultiStepTransform from './multi-step-transform/index.mjs';
@@ -215,11 +216,17 @@ export default class BootstrapGenerator extends BaseGenerator {
       ],
     };
 
+    const prettierPool = !skipPrettier
+      ? new Tinypool({
+          filename: new URL('./prettier-worker.mjs', import.meta.url).href,
+        })
+      : undefined;
+
     const createApplyPrettierTransform = () => {
       const prettierOptions = { packageJson: true, java: !this.skipServer && !this.jhipsterConfig.skipServer };
       // Prettier is clever, it uses correct rules and correct parser according to file extension.
       const transformOptions = { ignoreErrors: ignoreErrors || upgradeCommand, extensions: PRETTIER_EXTENSIONS };
-      return prettierTransform(prettierOptions, this, transformOptions);
+      return prettierTransform(prettierOptions, this, transformOptions, prettierPool);
     };
 
     const createForceWriteConfigFiles = () =>
@@ -266,5 +273,6 @@ export default class BootstrapGenerator extends BaseGenerator {
     ];
 
     await env.fs.commit(transformStreams, stream);
+    await prettierPool?.destroy();
   }
 }

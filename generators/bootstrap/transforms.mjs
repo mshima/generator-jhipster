@@ -20,10 +20,9 @@ import memFsEditor from 'mem-fs-editor';
 import path from 'path';
 import pTransform from 'p-transform';
 import prettier from 'prettier';
-import prettierPluginJava from 'prettier-plugin-java';
-import prettierPluginPackagejson from 'prettier-plugin-packagejson';
 // eslint-disable-next-line import/no-unresolved
 import environmentTransform from 'yeoman-environment/transform';
+import prettierTransfrom from './prettier-worker.mjs';
 
 const { State } = memFsEditor;
 const { passthrough } = pTransform;
@@ -31,7 +30,7 @@ const { patternSpy } = environmentTransform;
 
 const { isFileStateDeleted } = State;
 
-export const prettierTransform = function (options, generator, transformOptions = {}) {
+export const prettierTransform = function (options, generator, transformOptions = {}, pool) {
   if (typeof transformOptions === 'boolean') {
     transformOptions = { ignoreErrors: transformOptions };
   }
@@ -47,23 +46,14 @@ export const prettierTransform = function (options, generator, transformOptions 
       /* resolve from the projects config */
       let fileContent;
       try {
-        const resolvedDestinationFileOptions = await prettier.resolveConfig(file.relative);
-        const prettierOptions = {
-          plugins: [],
-          // Config from disk
-          ...resolvedDestinationFileOptions,
-          // for better errors
-          filepath: file.relative,
-        };
-        if (options.packageJson) {
-          prettierOptions.plugins.push(prettierPluginPackagejson);
-        }
-        if (options.java) {
-          prettierOptions.plugins.push(prettierPluginJava);
-        }
         fileContent = file.contents.toString('utf8');
-        const data = prettier.format(fileContent, prettierOptions);
-        file.contents = Buffer.from(data);
+        const filepath = file.relative;
+        const prettierOptions = await prettier.resolveConfig(filepath);
+        if (pool) {
+          file.contents = Buffer.from(await pool.run({ prettierOptions, filepath, fileContent, options }));
+        } else {
+          file.contents = Buffer.from(await prettierTransfrom({ prettierOptions, filepath, fileContent, options }));
+        }
         return file;
       } catch (error) {
         let errorMessage;
