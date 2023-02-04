@@ -19,7 +19,6 @@
 import memFsEditor from 'mem-fs-editor';
 import path from 'path';
 import { passthrough } from 'p-transform';
-import prettier from 'prettier';
 import prettierPluginJava from 'prettier-plugin-java';
 import prettierPluginPackagejson from 'prettier-plugin-packagejson';
 // eslint-disable-next-line import/no-unresolved
@@ -46,6 +45,7 @@ export const prettierTransform = function (options, generator, transformOptions 
       /* resolve from the projects config */
       let fileContent;
       try {
+        const { default: prettier } = await import('prettier');
         const resolvedDestinationFileOptions = await prettier.resolveConfig(file.relative);
         const prettierOptions = {
           plugins: [],
