@@ -1,6 +1,5 @@
 import assert from 'yeoman-assert';
-import helpers from 'yeoman-test';
-import { getGenerator } from '../support/index.mjs';
+import { basicHelpers as helpers } from '../support/index.mjs';
 
 import AngularGenerator from '../../generators/angular/index.mjs';
 import { CLIENT_MAIN_SRC_DIR } from '../../generators/generator-constants.mjs';
@@ -37,12 +36,11 @@ const mockAngularBlueprintSubGen = class extends AngularGenerator {
 };
 
 describe('needle API Angular angular generator : JHipster with blueprint', () => {
-  let runContext;
   let runResult;
 
   before(async () => {
-    runContext = helpers.create(getGenerator('angular'));
-    runResult = await runContext
+    runResult = await helpers
+      .runJHipster('angular')
       .withOptions({
         defaults: true,
         skipInstall: true,
@@ -50,8 +48,7 @@ describe('needle API Angular angular generator : JHipster with blueprint', () =>
         skipChecks: true,
         skipServer: true,
       })
-      .withGenerators([[mockAngularBlueprintSubGen, 'jhipster-myblueprint2:angular']])
-      .run();
+      .withGenerators([[mockAngularBlueprintSubGen, 'jhipster-myblueprint2:angular']]);
   });
 
   it('entity menu contains the entity added by needle api', () => {
@@ -79,7 +76,6 @@ describe('needle API Angular angular generator : JHipster with blueprint', () =>
       .create('jhipster-myblueprint2:angular')
       .withGenerators([[mockAngularBlueprintSubGen, 'jhipster-myblueprint2:angular']])
       .withOptions({ force: false, skipChecks: true, skipInstall: true })
-      // .withOptions({ force: false, bail: true, skipChecks: true, skipInstall: true })
       .run();
   });
   it('admin menu contains the admin element added by needle api', () => {

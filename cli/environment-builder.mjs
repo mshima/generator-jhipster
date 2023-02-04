@@ -330,11 +330,14 @@ export default class EnvironmentBuilder {
       const namespace = packageNameToNamespace(blueprint);
       const packagePath = this.env.getPackagePath(namespace);
       if (!packagePath) {
-        logger.fatal(
-          `The ${chalk.yellow(blueprint)} blueprint provided is not installed. Please install it using command ${chalk.yellow(
-            `npm i -g ${blueprint}`
-          )}`
-        );
+        const message = `The ${chalk.yellow(blueprint)} blueprint provided is not installed. Please install it using command ${chalk.yellow(
+          `npm i -g ${blueprint}`
+        )}`;
+        if (this.env.options.skipChecks) {
+          logger.log(message);
+        } else {
+          logger.fatal(message);
+        }
       }
       return [blueprint, packagePath];
     });
