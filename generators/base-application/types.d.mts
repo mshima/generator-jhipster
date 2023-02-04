@@ -130,3 +130,78 @@ type Monitoring = {
 type MonitoringApplication = OptionalGenericDerivedProperty<Monitoring, Monitoring[typeof MONITORING_TYPE]>;
 
 export type PlatformApplication = ServiceDiscoveryApplication & MonitoringApplication;
+
+export type Field = {
+  fieldName: string;
+  fieldType: string;
+  fieldTypeBlobContent: string;
+} & Record<string, any>;
+
+export type Relationship = {
+  relationshipName: string;
+} & Record<string, any>;
+
+export type BaseEntity = {
+  name: string;
+  changelogDate?: string;
+  dto?: string;
+
+  primaryKey?: Record<string, any>;
+  fields?: Field[];
+  relationships?: Relationship[];
+
+  readOnly?: boolean;
+  embedded?: boolean;
+  skipClient?: boolean;
+};
+
+export type Entity = Required<BaseEntity> & {
+  builtIn?: boolean;
+  microserviceName?: string;
+
+  entityNameCapitalized: string;
+  entityClass: string;
+  entityInstance: string;
+  entityTableName: string;
+  entityNamePlural: string;
+
+  dtoClass?: string;
+  dtoInstance?: string;
+
+  persistClass: string;
+  persistInstance: string;
+  restClass: string;
+  restInstance: string;
+
+  entityNamePluralizedAndSpinalCased: string;
+  entityClassPlural: string;
+  entityInstancePlural: string;
+
+  entityI18nVariant: string;
+  entityClassHumanized: string;
+  entityClassPluralHumanized: string;
+
+  entityFileName: string;
+  entityFolderName: string;
+  entityModelFileName: string;
+  entityParentPathAddition: string;
+  entityPluralFileName: string;
+  entityServiceFileName: string;
+
+  entityAngularName: string;
+  entityAngularNamePlural: string;
+  entityReactName: string;
+
+  entityApiUrl: string;
+  entityStateName: string;
+  entityUrl: string;
+
+  entityTranslationKey: string;
+  entityTranslationKeyMenu: string;
+
+  i18nKeyPrefix: string;
+  i18nAlertHeaderPrefix: string;
+
+  entityApi: string;
+  entityPage: string;
+};

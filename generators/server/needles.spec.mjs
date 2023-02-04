@@ -57,10 +57,12 @@ describe(`generator - ${generator} - needles`, () => {
         const fileRegexp = /config\/ApplicationProperties.java/;
         const property = 'private Foo foo;';
         const propertyGetter = `
+
     private Foo getFoo() {
         return foo;
     };`;
         const propertyClass = `
+
         public static Foo{} {
             private String bar;
 
