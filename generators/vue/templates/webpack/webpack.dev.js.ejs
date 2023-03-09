@@ -20,43 +20,9 @@ const path = require('path');
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 const WebpackNotifierPlugin = require('webpack-notifier');
 
-module.exports = () => {
-  // Build proxy object, workaround vue-cli not working with proxy with array type.
-  const context = { target: 'http://127.0.0.1:<%= serverPort %>', secure: false, headers: { host: 'localhost:9000' } };
-  const proxy = Object.fromEntries(
-    [
-      '/api',
-      '/services',
-      '/management',
-      '/swagger-resources',
-      '/v2/api-docs',
-      '/v3/api-docs',
-      '/h2-console',
-<%_ if (authenticationTypeOauth2) { _%>
-      '/oauth2',
-      '/login',
-<%_ } _%>
-      '/auth'
-    ].map(contextPath => [
-      contextPath,
-      context,
-    ])
-  );
-
-  return {
-    devServer: {
-      port: <%= devServerPort %>,
-      proxy: {
-        ...proxy,
-<%_ if (communicationSpringWebsocket) { _%>
-        '/websocket': {
-          target: 'ws://127.0.0.1:<%= serverPort %>',
-          ws: true
-        }
-<%_ } _%>
-      },
-      historyApiFallback: true,
-    },
+module.exports =
+  (args = {}) =>
+  () => ({
     plugins: [
       new WebpackNotifierPlugin({
         title: '<%= humanizedBaseName %>',
@@ -67,7 +33,7 @@ module.exports = () => {
           host: 'localhost',
           port: 9000,
           proxy: {
-            target: 'http://localhost:<%= devServerPort %>',
+            target: `http://localhost:${args.watch ? '<%= applicationTypeMicroservice ? gatewayServerPort : serverPort %>' : '<%= devServerPort %>'}`,
 <%_ if (communicationSpringWebsocket) { _%>
             ws: true,
 <%_ } _%>
@@ -90,5 +56,4 @@ module.exports = () => {
         }
       ),
     ],
-  };
-};
+  });

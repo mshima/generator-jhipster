@@ -28,19 +28,20 @@ module.exports = (api, options) => {
   api.registerCommand('build', async (args, rawArgs) => {
     // Force extract for development mode, otherwise css assets are not emitted.
     options.css.extract = true;
-    const webpackConfig = await commonWebpack(api.service, {});
-    api.configureWebpack(webpackConfig);
+    api.configureWebpack(await commonWebpack(api.service, {}));
+    if (args.watch) {
+      api.configureWebpack(devWebpack(args));
+    }
     await api.service.run('build:original', args, rawArgs);
   });
   api.registerCommand('serve', async (args, rawArgs) => {
-    const webpackConfig = await commonWebpack(api.service, { serve: true });
-    api.configureWebpack(webpackConfig);
-    api.configureWebpack(devWebpack);
+    api.configureWebpack(await commonWebpack(api.service, { serve: true }));
+    api.configureWebpack(devWebpack());
     await api.service.run('serve:original', args, rawArgs);
   });
 };
 
 module.exports.defaultModes = {
-  'build': 'production',
-  'serve': 'development',
+  build: 'production',
+  serve: 'development',
 };
