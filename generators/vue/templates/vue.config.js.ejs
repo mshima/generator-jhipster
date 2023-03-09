@@ -16,8 +16,18 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-module.exports = {
-  SERVER_API_URL: '"/"',
-  // APP_VERSION is passed as an environment variable from the Gradle / Maven build tasks.
-  VERSION: `'${process.env.hasOwnProperty('APP_VERSION') ? process.env.APP_VERSION : 'UNKNOWN'}'`,
-};
+const { defineConfig } = require('@vue/cli-service');
+
+module.exports = defineConfig({
+  lintOnSave: true,
+  outputDir: './<%= clientDistDir %>',
+  css: {
+    loaderOptions: {
+      css: {
+        url: {
+          filter: url => url[0] !== '/',
+        },
+      },
+    },
+  },
+});
