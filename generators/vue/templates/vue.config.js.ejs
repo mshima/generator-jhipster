@@ -21,6 +21,9 @@ const { defineConfig } = require('@vue/cli-service');
 module.exports = defineConfig({
   lintOnSave: true,
   outputDir: './<%= clientDistDir %>',
+<%_ if (microfrontend) { _%>
+  publicPath: 'auto',
+<%_ } _%>
   css: {
     loaderOptions: {
       css: {
