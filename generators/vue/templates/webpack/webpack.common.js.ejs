@@ -118,7 +118,7 @@ module.exports = async (configuration, options) => {
 <%_ if (enableTranslation) { _%>
           I18N_HASH: JSON.stringify(languagesHash.hash),
 <%_ } _%>
-          ...require('./config'),
+          ...Object.fromEntries(Object.entries(require('./config')).map(([key, value]) => [key, JSON.stringify(value)])),
         }),
         new CopyWebpackPlugin({
           patterns: [

@@ -19,7 +19,7 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const commonWebpack = require('./webpack/webpack.common');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const devWebpack = require('./webpack/webpack.dev');
+const { notifierPlugin, browserSyncPlugin } = require('./webpack/webpack.dev');
 
 module.exports = (api, options) => {
   api.service.commands['build:original'] = api.service.commands.build;
@@ -30,13 +30,15 @@ module.exports = (api, options) => {
     options.css.extract = true;
     api.configureWebpack(await commonWebpack(api.service, {}));
     if (args.watch) {
-      api.configureWebpack(devWebpack(args));
+      api.configureWebpack(notifierPlugin);
+      api.configureWebpack(browserSyncPlugin(args));
     }
     await api.service.run('build:original', args, rawArgs);
   });
   api.registerCommand('serve', async (args, rawArgs) => {
     api.configureWebpack(await commonWebpack(api.service, { serve: true }));
-    api.configureWebpack(devWebpack());
+    api.configureWebpack(notifierPlugin);
+    api.configureWebpack(browserSyncPlugin(args));
     await api.service.run('serve:original', args, rawArgs);
   });
 };
