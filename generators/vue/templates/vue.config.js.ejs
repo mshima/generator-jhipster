@@ -23,6 +23,10 @@ module.exports = defineConfig({
   outputDir: './<%= clientDistDir %>',
 <%_ if (microfrontend) { _%>
   publicPath: 'auto',
+  chainWebpack: config => {
+    /* module federation plugin import */
+    config.optimization.delete('splitChunks');
+  },
 <%_ } _%>
   css: {
     loaderOptions: {
