@@ -253,6 +253,9 @@ public class SecurityConfiguration {
 <%_ if (!skipClient) { _%>
                     .pathMatchers("/").permitAll()
                     .pathMatchers("/*.*").permitAll()
+  <%_ for (const webResource of webappResources) { _%>
+                    .pathMatchers("<%- webResource %>").permitAll()
+  <%_ } _%>
 <%_ } _%>
                     .pathMatchers("/api/authenticate").permitAll()
 <%_ if (generateUserManagement) { _%>
