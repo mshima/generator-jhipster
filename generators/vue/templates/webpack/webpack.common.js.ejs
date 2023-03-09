@@ -47,7 +47,7 @@ module.exports = async (configuration, options) => {
 <%_ } _%>
       entry: {
         global: resolve('<%= clientSrcDir %>content/scss/global.scss'),
-        app: resolve('<%= clientSrcDir %>app/main.ts'),
+        app: resolve('<%= clientSrcDir %>app/<%= microfrontend ? 'index' : 'main' %>.ts'),
       },
       resolve: {
         alias: {
