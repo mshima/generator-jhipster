@@ -275,7 +275,7 @@ public class SecurityConfiguration {
                     .pathMatchers("/services/*/*.js").permitAll()
                     .pathMatchers("/services/*/*.js.map").permitAll()
     <%_ for (const webResource of webappResources) { _%>
-                    .pathMatchers("/services/*/<%- webResource %>").permitAll()
+                    .pathMatchers("/services/*<%- webResource %>").permitAll()
     <%_ } _%>
   <%_ } _%>
                     .pathMatchers("/services/*/management/health/readiness").permitAll()
