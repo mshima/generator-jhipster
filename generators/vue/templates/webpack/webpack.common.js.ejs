@@ -83,7 +83,7 @@ module.exports = async (configuration, options) => {
           ...proxy,
   <%_ if (communicationSpringWebsocket) { _%>
           '/websocket': {
-            target: 'ws://127.0.0.1:<%= serverPort %>',
+            target: 'ws://localhost:<%= applicationTypeMicroservice ? gatewayServerPort : serverPort %>',
             ws: true
           }
   <%_ } _%>
@@ -98,14 +98,14 @@ module.exports = async (configuration, options) => {
           // 2. Add your config as buildDependency to get cache invalidation on config change
           config: [
             __filename,
-            path.resolve(__dirname, './config.js'),
+            path.resolve(__dirname, 'config.js'),
+            path.resolve(__dirname, 'webpack.dev.js'),
             path.resolve(__dirname, '../.postcssrc.js'),
             path.resolve(__dirname, '../tsconfig.json'),
             path.resolve(__dirname, '../vue.commands.js'),
             path.resolve(__dirname, '../vue.config.js'),
             path.resolve(__dirname, '../package.json'),
             path.resolve(__dirname, '../package-lock.json'),
-            ...(configuration.mode == 'development' ? [path.resolve(__dirname, 'webpack.dev.js')] : []),
           ],
         },
       },
