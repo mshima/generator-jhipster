@@ -21,7 +21,7 @@ const packageJson = require('./../package.json');
 
 <%_ } _%>
 module.exports = {
-  SERVER_API_URL: '',
+  SERVER_API_URL: '/',
 <%_ if (buildToolUnknown) { _%>
   version: packageJson.version,
 <%_ } else { _%>
