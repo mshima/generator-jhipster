@@ -22,7 +22,11 @@ module.exports = defineConfig({
   lintOnSave: true,
   outputDir: './<%= clientDistDir %>',
 <%_ if (microfrontend) { _%>
+  <%_ if (applicationTypeMicroservice) { _%>
+  publicPath: 'auto',
+  <%_ } else { _%>
   publicPath: '/',
+  <%_ } _%>
 <%_ } _%>
   chainWebpack: config =>
     config

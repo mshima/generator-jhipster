@@ -147,8 +147,8 @@
     "test": "<%= clientPackageManager %> run jest --",
     "test-ci": "<%= clientPackageManager %> run lint && <%= clientPackageManager %> run jest:update --",
     "test:watch": "<%= clientPackageManager %> run jest -- --watch",
-    "vue-build": "vue-cli-service build",
-    "vue-serve": "vue-cli-service serve",
+    "vue-build": "vue-cli-service build --modern",
+    "vue-serve": "vue-cli-service serve --modern",
     "watch": "concurrently npm:start<% if(!skipServer) { %> npm:backend:start<% } %>",
     "webapp:build": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:dev --",
     "webapp:build:dev": "<%= clientPackageManager %> run vue-build -- --mode development",
@@ -161,10 +161,5 @@
     "service": [
       "vue.commands.js"
     ]
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ]
+  }
 }

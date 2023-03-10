@@ -17,6 +17,7 @@
  limitations under the License.
 -%>
 const path = require('path');
+const { existsSync } = require('fs');
 const { merge } = require('webpack-merge');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 <%_ if (enableTranslation) { _%>
@@ -25,8 +26,8 @@ const MergeJsonWebpackPlugin = require('merge-jsons-webpack-plugin');
 <%_ } _%>
 const { DefinePlugin, EnvironmentPlugin } = require('webpack');
 
-function resolve(dir = '') {
-  return path.join(__dirname, '..', dir);
+function resolve(...args) {
+  return path.join(__dirname, '..', ...args);
 }
 
 module.exports = async (configuration, options) => {
@@ -106,7 +107,7 @@ module.exports = async (configuration, options) => {
             path.resolve(__dirname, '../vue.config.js'),
             path.resolve(__dirname, '../package.json'),
             path.resolve(__dirname, '../package-lock.json'),
-          ],
+          ].filter(file => existsSync(file)),
         },
       },
       plugins: [
