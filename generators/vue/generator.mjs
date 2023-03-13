@@ -73,6 +73,8 @@ export default class VueGenerator extends BaseApplicationGenerator {
           application.nodeDependencies,
           this.fetchFromInstalledJHipster(GENERATOR_VUE, 'templates', 'package.json')
         );
+        application.nodeDependencies['@vue/cli-service'] = '5.0.8';
+        application.webappResources = ['/manifest.json', '/js/*.js', '/css/*.css'];
       },
     });
   }
@@ -121,6 +123,19 @@ export default class VueGenerator extends BaseApplicationGenerator {
 
   get [BaseApplicationGenerator.WRITING_ENTITIES]() {
     return this.delegateTasksToBlueprint(() => this.writingEntities);
+  }
+
+  get postWriting() {
+    return this.asPostWritingTaskGroup({
+      microfrontend({ application }) {
+        if (!application.microfrontend) return;
+        this.addWebpackConfig("require('./webpack.microfrontend')(options)", application.clientFramework);
+      },
+    });
+  }
+
+  get [BaseApplicationGenerator.POST_WRITING]() {
+    return this.asPostWritingTaskGroup(this.delegateTasksToBlueprint(() => this.postWriting));
   }
 
   get postWritingEntities() {
