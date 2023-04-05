@@ -110,9 +110,9 @@ spring:
     stream:
       bindings:
         testStringSupplier-out-0:
-          destination: <%= dasherizedBaseName %>
+          destination: <%= dasherizedBaseName %>-out
         testStringConsumer-in-0:
-          destination: <%= dasherizedBaseName %>
+          destination: <%= dasherizedBaseName %>-in
 <%_ } _%>
 <%_ if (databaseTypeSql) { _%>
   # Replace by 'prod, faker' to add the faker context and have sample data loaded in production

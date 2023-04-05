@@ -63,6 +63,7 @@ export default class PulsarGenerator extends BaseApplicationGenerator {
             properties: [{ property: 'spring-pulsar.version', value: javaDependencies?.['spring-pulsar'] }],
             dependencies: [
               { groupId: 'org.springframework.cloud', artifactId: 'spring-cloud-stream' },
+              { groupId: 'org.springframework.cloud', artifactId: 'spring-cloud-stream-test-binder', scope: 'test' },
               {
                 groupId: 'org.springframework.pulsar',
                 artifactId: 'spring-pulsar-spring-cloud-stream-binder',

@@ -28,24 +28,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BrokerConfiguration {
 
+    BlockingQueue<String> passthrough = new LinkedBlockingQueue<>();
+
     @Bean
-    public BlockingQueue<String> testInputQueue() {
-        return new LinkedBlockingQueue<>();
+    public Supplier<String> testStringSupplier() {
+        return passthrough::poll;
     }
 
     @Bean
-    public BlockingQueue<String> testOutputQueue() {
-        return new LinkedBlockingQueue<>();
+    public Consumer<String> testStringConsumer() {
+        return passthrough::offer;
     }
-
-    @Bean
-    public Supplier<String> testStringSupplier(BlockingQueue<String> testInputQueue) {
-        return testInputQueue::poll;
-    }
-
-    @Bean
-    public Consumer<String> testStringConsumer(BlockingQueue<String> testOutputQueue) {
-        return testOutputQueue::offer;
-    }
-
 }

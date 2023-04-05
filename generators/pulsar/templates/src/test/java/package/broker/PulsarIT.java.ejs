@@ -16,34 +16,41 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%= packageName %>;
+package <%= packageName %>.broker;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import <%= packageName %>.IntegrationTest;
 import <%= packageName %>.config.EmbeddedPulsar;
+
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.binder.test.InputDestination;
+import org.springframework.cloud.stream.binder.test.OutputDestination;
+import org.springframework.integration.support.MessageBuilder;
 
 /**
  * Integration test for the Spring Cloud Stream Pulsar Binder.
  */
 @IntegrationTest
+@EmbeddedPulsar
 public class PulsarIT {
 
-    @Autowired
-    BlockingQueue<String> testInputQueue;
+    static final String INPUT_DESTINATION = "<%= dasherizedBaseName %>-in";
+    static final String OUTPUT_DESTINATION = "<%= dasherizedBaseName %>-out";
 
     @Autowired
-    BlockingQueue<String> testOutputQueue;
+    OutputDestination outputDestination;
+
+    @Autowired
+    InputDestination inputDestination;
 
     @Test
     public void testPulsar() throws Exception {
         String value = UUID.randomUUID().toString();
-        testInputQueue.put(value);
-        assertThat(testOutputQueue.poll(5, TimeUnit.SECONDS)).isEqualTo(value);
+        inputDestination.send(MessageBuilder.withPayload(value).build(), INPUT_DESTINATION);
+        assertThat(outputDestination.receive(1500, OUTPUT_DESTINATION).getPayload()).isEqualTo(value.getBytes());
     }
-
 }

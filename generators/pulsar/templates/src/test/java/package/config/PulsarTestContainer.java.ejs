@@ -43,6 +43,8 @@ public class PulsarTestContainer implements InitializingBean, DisposableBean {
         if (null == pulsarContainer) {
             pulsarContainer = new PulsarContainer(DockerImageName.parse("<%- dockerContainers.pulsar %>"))
                 .withLogConsumer(new Slf4jLogConsumer(log))
+                // Due to missing arm64 image pulsar takes more than 30s to start on arm64
+                // .withStartupTimeout(java.time.Duration.ofSeconds(120))
                 .withReuse(true);
         }
         if (!pulsarContainer.isRunning()) {
