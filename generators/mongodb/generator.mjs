@@ -83,6 +83,8 @@ export default class MongoDBGenerator extends BaseApplicationGenerator {
                 // switch to mongodb-reactive-driver
                 { groupId: 'io.mongock', artifactId: 'mongodb-springdata-v4-driver' },
               ],
+              // Revert mongodb-driver-reactivestreams to 4.2.3
+              dependencyManagement: [{ groupId: 'org.mongodb', artifactId: 'mongodb-driver-reactivestreams', version: '4.2.3' }],
             });
           } else {
             source.addMavenDefinition?.({
