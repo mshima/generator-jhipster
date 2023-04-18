@@ -1,4 +1,4 @@
-import { shallowMount, createLocalVue, Wrapper } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as sinon from 'sinon';
@@ -24,7 +24,6 @@ const axiosStub = {
 };
 
 describe('<%=jhiPrefixCapitalized%>Tracker', () => {
-  let wrapper: Wrapper<<%=jhiPrefixCapitalized%>TrackerComponent>;
   let trackerView: <%=jhiPrefixCapitalized%>TrackerComponent;
 
   let subject: Subject<any>;
@@ -42,7 +41,7 @@ describe('<%=jhiPrefixCapitalized%>Tracker', () => {
       return subscription;
     });
 
-    wrapper = shallowMount<<%=jhiPrefixCapitalized%>TrackerComponent>(<%=jhiPrefixCapitalized%>Tracker, {
+    const wrapper = shallowMount<<%=jhiPrefixCapitalized%>TrackerComponent>(<%=jhiPrefixCapitalized%>Tracker, {
       store,
 <%_ if (enableTranslation) { _%>
       i18n,

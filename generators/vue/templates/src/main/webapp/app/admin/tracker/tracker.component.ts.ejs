@@ -1,48 +1,52 @@
-import { Component, Inject, Vue } from 'vue-property-decorator';
+import { defineComponent, inject, ref, Ref } from 'vue';
 import { Subscription } from 'rxjs';
 
 import TrackerService from './tracker.service';
 
-@Component
-export default class <%=jhiPrefixCapitalized%>TrackerComponent extends Vue {
+export default defineComponent({
+  name: '<%=jhiPrefixCapitalized%>TrackerComponent',
+  setup() {
+    const trackerService = inject('trackerService', () => new TrackerService());
+    const activities: Ref<any[]> = ref([]);
+    const subscription: Ref<Subscription> = ref(null);
 
-  public activities: any[] = [];
-  private subscription?: Subscription;
-
-  @Inject('trackerService') private trackerService: () => TrackerService;
-
-  public mounted(): void {
+    return {
+      trackerService,
+      activities,
+      subscription,
+    };
+  },
+  mounted(): void {
     this.init();
-  }
-
-  public destroyed(): void {
+  },
+  destroyed(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
       this.subscription = undefined;
     }
-  }
-
-  public init(): void {
-    this.subscription = this.trackerService().subscribe(activity => {
-      this.showActivity(activity);
-    });
-  }
-
-  public showActivity(activity: any): void {
-    let existingActivity = false;
-    for (let index = 0; index < this.activities.length; index++) {
-      if (this.activities[index].sessionId === activity.sessionId) {
-        existingActivity = true;
-        if (activity.page === 'logout') {
-          this.activities.splice(index, 1);
-        } else {
-          this.activities.splice(index, 1);
-          this.activities.push(activity);
+  },
+  methods: {    
+    init(): void {
+      this.subscription = this.trackerService().subscribe(activity => {
+        this.showActivity(activity);
+      });
+    }
+    showActivity(activity: any): void {
+      let existingActivity = false;
+      for (let index = 0; index < this.activities.length; index++) {
+        if (this.activities[index].sessionId === activity.sessionId) {
+          existingActivity = true;
+          if (activity.page === 'logout') {
+            this.activities.splice(index, 1);
+          } else {
+            this.activities.splice(index, 1);
+            this.activities.push(activity);
+          }
         }
       }
+      if (!existingActivity && activity.page !== 'logout') {
+        this.activities.push(activity);
+      }
     }
-    if (!existingActivity && activity.page !== 'logout') {
-      this.activities.push(activity);
-    }
-  }
-}
+  },
+});
