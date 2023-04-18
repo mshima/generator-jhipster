@@ -1,11 +1,13 @@
-import { shallowMount, createLocalVue, Wrapper } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import { useStore } from '@/store';
 import * as config from '@/shared/config/config';
 import GatewayComponent from '@/admin/gateway/gateway.vue';
-import GatewayClass from '@/admin/gateway/gateway.component';
+import type GatewayComponent from '@/admin/gateway/gateway.component';
 import GatewayService from '@/admin/gateway/gateway.service';
+
+type GatewayComponentType = Vue & InstanceType<typeof GatewayComponent>;
 
 const localVue = createLocalVue();
 
@@ -17,11 +19,10 @@ const store = useStore();
 localVue.component('font-awesome-icon', FontAwesomeIcon);
 
 describe('Gateway Component', () => {
-  let wrapper: Wrapper<GatewayClass>;
   let comp : GatewayClass;
 
   beforeEach(() => {
-    wrapper = shallowMount<GatewayClass>(GatewayComponent, { store, <% if (enableTranslation) { %>i18n, <% } %>localVue, provide: {gatewayService: () => new GatewayService() } });
+    const wrapper = shallowMount<GatewayComponentType>(GatewayComponent, { store, <% if (enableTranslation) { %>i18n, <% } %>localVue, provide: {gatewayService: () => new GatewayService() } });
     comp = wrapper.vm;
   });
 
