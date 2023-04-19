@@ -18,7 +18,7 @@ export default defineComponent({
   mounted() : void {
     this.refresh();
   },
-  methods{
+  methods: {
     refresh() : void {
       this.updatingRoutes = true;
       this.gatewayService().findAll().then((res) => {
@@ -44,6 +44,6 @@ export default defineComponent({
 <%_ } _%>
         this.updatingRoutes = false;
       });
-    }
+    },
   },
 });
