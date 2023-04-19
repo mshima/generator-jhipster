@@ -30,7 +30,7 @@ export default defineComponent({
       this.subscription = this.trackerService().subscribe(activity => {
         this.showActivity(activity);
       });
-    }
+    },
     showActivity(activity: any): void {
       let existingActivity = false;
       for (let index = 0; index < this.activities.length; index++) {
@@ -47,6 +47,6 @@ export default defineComponent({
       if (!existingActivity && activity.page !== 'logout') {
         this.activities.push(activity);
       }
-    }
+    },
   },
 });
