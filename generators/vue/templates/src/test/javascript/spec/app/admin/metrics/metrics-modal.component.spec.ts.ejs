@@ -20,7 +20,13 @@ describe('Metrics Component', () => {
   let wrapper: Wrapper<MetricsModalComponentType>;
 
   beforeEach(() => {
-    wrapper = shallowMount<MetricsModalComponentType>(MetricsModal, { store, i18n, localVue });
+    wrapper = shallowMount<MetricsModalComponentType>(MetricsModal, {
+      store,
+<%_ if (enableTranslation) { _%>
+      i18n,
+<%_ } _%>
+      localVue,
+    });
     metricsModal = wrapper.vm;
   });
 
