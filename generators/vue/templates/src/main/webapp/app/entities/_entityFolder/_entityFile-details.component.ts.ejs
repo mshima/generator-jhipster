@@ -42,7 +42,9 @@ export default defineComponent({
     return {
       alertService,
       <%= entityInstance %>,
+<% if (anyFieldIsBlobDerived) { %>
       ...dataUtils,
+<% } %>
       previousState,
     };
   },
