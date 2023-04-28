@@ -5,6 +5,7 @@ import languages from '@/shared/config/languages';
 
 export default class TranslationService {
   private i18n: VueI18n;
+  private languages = languages();
 
   constructor(i18n: VueI18n) {
     this.i18n = i18n;
@@ -41,8 +42,7 @@ export default class TranslationService {
 <%_ if (enableI18nRTL) { _%>
 
     private isRTL(lang: string): boolean {
-      const languages = this.store.getters.languages;
-      return languages[lang] && languages[lang].rtl;
+      return this.languages[lang]?.rtl;
     }
 
     private updatePageDirection(currentLanguage: string): void {
@@ -51,7 +51,7 @@ export default class TranslationService {
 <%_ } _%>
 
   public isLanguageSupported(lang: string) {
-    return Boolean(languages()[lang]);
+    return Boolean(this.languages[lang]);
   }
 
   public getLocalStoreLanguage(): string | null {
