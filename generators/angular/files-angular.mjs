@@ -72,7 +72,6 @@ export const files = {
       ...clientApplicationBlock,
       templates: [
         // entities
-        'entities/entity-navbar-items.ts',
         'entities/entity-routing.module.ts',
         // home module
         'home/home.component.ts',
@@ -95,6 +94,11 @@ export const files = {
         // login
         'login/login.service.ts',
       ],
+    },
+    {
+      condition: generator => generator.applicationTypeMicroservice,
+      ...clientApplicationBlock,
+      templates: ['entities/entity-navbar-items.ts'],
     },
     {
       condition: generator => generator.enableTranslation,

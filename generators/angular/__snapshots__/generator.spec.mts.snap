@@ -182,9 +182,6 @@ exports[`generator - angular gateway-jwt-skipUserManagement(true)-withAdminUi(fa
   "src/app/core/util/parse-links.service.ts": {
     "stateCleared": "modified",
   },
-  "src/app/entities/entity-navbar-items.ts": {
-    "stateCleared": "modified",
-  },
   "src/app/entities/entity-routing.module.ts": {
     "stateCleared": "modified",
   },
@@ -994,9 +991,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
   "src/app/core/util/parse-links.service.ts": {
     "stateCleared": "modified",
   },
-  "src/app/entities/entity-navbar-items.ts": {
-    "stateCleared": "modified",
-  },
   "src/app/entities/entity-routing.module.ts": {
     "stateCleared": "modified",
   },
@@ -1663,9 +1657,6 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
     "stateCleared": "modified",
   },
   "src/app/core/util/parse-links.service.ts": {
-    "stateCleared": "modified",
-  },
-  "src/app/entities/entity-navbar-items.ts": {
     "stateCleared": "modified",
   },
   "src/app/entities/entity-routing.module.ts": {
@@ -3319,9 +3310,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
   "src/main/webapp2/app/core/util/parse-links.service.ts": {
     "stateCleared": "modified",
   },
-  "src/main/webapp2/app/entities/entity-navbar-items.ts": {
-    "stateCleared": "modified",
-  },
   "src/main/webapp2/app/entities/entity-routing.module.ts": {
     "stateCleared": "modified",
   },
@@ -4005,9 +3993,6 @@ exports[`generator - angular monolith-oauth2-withAdminUi(false)-skipJhipsterDepe
   "src/main/webapp/app/core/util/parse-links.service.ts": {
     "stateCleared": "modified",
   },
-  "src/main/webapp/app/entities/entity-navbar-items.ts": {
-    "stateCleared": "modified",
-  },
   "src/main/webapp/app/entities/entity-routing.module.ts": {
     "stateCleared": "modified",
   },
@@ -4662,9 +4647,6 @@ exports[`generator - angular monolith-session-skipUserManagement(true)-withAdmin
     "stateCleared": "modified",
   },
   "src/main/webapp/app/core/util/parse-links.service.ts": {
-    "stateCleared": "modified",
-  },
-  "src/main/webapp/app/entities/entity-navbar-items.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/entities/entity-routing.module.ts": {
