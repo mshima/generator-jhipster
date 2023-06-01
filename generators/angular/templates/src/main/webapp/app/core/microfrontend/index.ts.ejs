@@ -22,11 +22,11 @@ import { loadRemoteModule } from '@angular-architects/module-federation-runtime'
 import NavbarItem from 'app/layouts/navbar/navbar-item.model';
 
 export const loadNavbarItems = async (service: string): Promise<NavbarItem[]> =>
-  loadRemoteModule<{ EntityNavbarItems: NavbarItem[] }>({
+  loadRemoteModule<{ default: NavbarItem[] }>({
     type: 'module',
     remoteEntry: `./services/${service}/remoteEntry.js`,
     exposedModule: './entity-navbar-items',
-  }).then(({ EntityNavbarItems }) => EntityNavbarItems);
+  }).then(({ default }) => default);
 
 export const loadTranslationModule = async (service: string): Promise<Type<any>> =>
   loadRemoteModule<{ LazyTranslationModule: Type<any> }>({

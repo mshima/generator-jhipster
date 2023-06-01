@@ -18,7 +18,7 @@
 -%>
 import NavbarItem from 'app/layouts/navbar/navbar-item.model';
 
-export const EntityNavbarItems: NavbarItem[] = [
+const EntityNavbarItems: NavbarItem[] = [
 <%_ for (const entity of this.localEntities) { _%>
   {
     name: '<%= entity.entityAngularName %>',
@@ -29,3 +29,5 @@ export const EntityNavbarItems: NavbarItem[] = [
   },
 <%_ } _%>
 ];
+
+export default EntityNavbarItems;
