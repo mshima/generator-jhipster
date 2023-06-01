@@ -352,6 +352,11 @@ export const files = {
         'shared/language/translate.directive.ts',
       ],
     },
+    {
+      condition: generator => generator.enableTranslation && generator.applicationTypeMicroservice,
+      ...clientApplicationBlock,
+      templates: ['shared/language/lazy-translation.module.ts'],
+    },
   ],
   angularAuthService: [
     {

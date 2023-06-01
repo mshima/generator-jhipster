@@ -35,7 +35,7 @@ module.exports = (config, options, targetOptions) => {
         filename: 'remoteEntry.js',
         exposes: {
   <%_ if (enableTranslation) { _%>
-          './translation-module': 'app/shared/language/translation.module.ts',
+          './translation-module': 'app/shared/language/lazy-translation.module.ts',
   <%_ } _%>
           './entity-navbar-items': 'app/entities/entity-navbar-items.ts',
           './entity-routing': 'app/entities/entity-routing.module.ts',
