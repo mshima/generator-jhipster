@@ -2669,6 +2669,9 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
   "src/main/webapp2/app/shared/language/index.ts": {
     "stateCleared": "modified",
   },
+  "src/main/webapp2/app/shared/language/lazy-translation.module.ts": {
+    "stateCleared": "modified",
+  },
   "src/main/webapp2/app/shared/language/translate.directive.spec.ts": {
     "stateCleared": "modified",
   },
