@@ -1,4 +1,4 @@
-import { createRouter as createVueRouter, createWebHistory<% if (applicationTypeGateway && microfrontend) { %>, RouteRecordRaw<% } %> } from 'vue-router';
+import { createRouter as createVueRouter, createWebHistory<% if (applicationTypeGateway && microfrontend) { %>, type RouteRecordRaw<% } %> } from 'vue-router';
 
 const Home = () => import('@/core/home/home.vue');
 const Error = () => import('@/core/error/error.vue');
