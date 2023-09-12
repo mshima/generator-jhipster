@@ -134,7 +134,7 @@ task webapp(type: NpmTask) {
     inputs.dir("<%= clientSrcDir %>")
         .withPropertyName("webapp-source-dir")
         .withPathSensitivity(PathSensitivity.RELATIVE)
-  <%_ if (!clientFrameworkAngular) { _%>
+  <%_ if (clientFrameworkReact) { _%>
     inputs.files("tsconfig.json")
         .withPropertyName("tsconfig")
         .withPathSensitivity(PathSensitivity.RELATIVE)
@@ -146,6 +146,14 @@ task webapp(type: NpmTask) {
         .withPathSensitivity(PathSensitivity.RELATIVE)
   <%_ } _%>
   <%_ if (clientFrameworkVue) { _%>
+    inputs.files("tsconfig.json", "tsconfig.app.json")
+        .withPropertyName("tsconfig")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+
+    inputs.files("vite.config.ts")
+        .withPropertyName("vite")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+
     inputs.files(".postcssrc")
         .withPropertyName("postcssrc")
         .withPathSensitivity(PathSensitivity.RELATIVE)

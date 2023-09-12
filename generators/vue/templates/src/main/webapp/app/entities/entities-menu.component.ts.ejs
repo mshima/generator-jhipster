@@ -25,9 +25,12 @@ export default defineComponent({
     const translationService = inject<TranslationService>('translationService');
     const currentLanguage = inject<ComputedRef<string>>('currentLanguage');
 
-    const loadLanguage = () => {
+    const loadLanguage = async () => {
       if (microfrontendI18n) {
-        translationService.loadTranslations(currentLanguage.value, '<%= frontendAppName %>', '<%= endpointPrefix %>/', I18N_HASH);
+        const languageToLoad = currentLanguage.value;
+        const translations = (await import(`../../i18n/${languageToLoad}/${languageToLoad}.js`)).default;
+
+        translationService.loadTranslations({ currentLanguage: languageToLoad, translations });
       }
     };
 

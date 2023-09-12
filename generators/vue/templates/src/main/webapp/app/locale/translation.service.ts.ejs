@@ -12,14 +12,10 @@ export default class TranslationService {
   }
 <%_ if (microfrontend) { _%>
 
-  public loadTranslations(currentLanguage: string, appKey: string, urlPrefix: string, hash: string) {
+  public loadTranslations({ currentLanguage, translations }: { currentLanguage: string; translations: any }) {
     if (!this.i18n) return;
 
-    axios.get(`${urlPrefix}i18n/${currentLanguage}.json?_=${hash}`).then((res: any) => {
-      if (res.data) {
-        this.i18n.mergeLocaleMessage(currentLanguage, res.data);
-      }
-    });
+    this.i18n.mergeLocaleMessage(currentLanguage, translations);
   }
 <%_ } _%>
 

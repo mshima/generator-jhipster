@@ -25,7 +25,8 @@ import vue from '@vitejs/plugin-vue';
 import copy from 'rollup-plugin-copy';
 <%_ if (microfrontend) { _%>
 import federation from "@originjs/vite-plugin-federation";
-import { version as appVersion } from './package.json';
+
+const sharedAppVersion = '0.0.0';
 <%_ } _%>
 
 const getFileFromRepo = (file: string) =>
@@ -87,9 +88,13 @@ let config = defineConfig({
       [
         '/api',
         '/management',
+        '/v3/api-docs',
+<%_ if (databaseTypeSql && devDatabaseTypeH2Any) { _%>
+        '/h2-console',
+<%_ } _%>
 <%_ if (authenticationTypeOauth2) { _%>
         '/oauth2',
-        '/login/oauth2',
+        '/login',
 <%_ } _%>
 <%_ if (authenticationTypeSession) { _%>
         '/login',
@@ -100,7 +105,7 @@ let config = defineConfig({
       ].map(res => [
         res,
         {
-          target: 'http://localhost:8080',
+          target: 'http://localhost:<%= applicationTypeMicroservice ? gatewayServerPort : serverPort %>',
         },
       ])
     ),
@@ -110,6 +115,8 @@ let config = defineConfig({
 <%_ if (microfrontend) { _%>
 config = mergeConfig(config, {
   build: {
+    modulePreload: false,
+    minify: false,
     target: ["chrome89", "edge89", "firefox89", "safari15"],
   },
   plugins: [
@@ -118,7 +125,7 @@ config = mergeConfig(config, {
 <%_ if (applicationTypeGateway) { _%>
       remotes: {
   <%_ for (const remote of microfrontends) { _%>
-        '@<%= remote.lowercaseBaseName %>': `<%= remote.lowercaseBaseName %>@/<%= remote.endpointPrefix %>/remoteEntry.js`,
+        '@<%= remote.lowercaseBaseName %>': `/<%= remote.endpointPrefix %>/assets/remoteEntry.js`,
   <%_ } _%>
       },
 <%_ } _%>
@@ -126,28 +133,39 @@ config = mergeConfig(config, {
       exposes: {
         './entities-router': './<%= clientSrcDir %>app/router/entities',
         './entities-menu': './<%= clientSrcDir %>app/entities/entities-menu.vue',
+        './translations': './src/main/webapp/app/locale/all',
       },
 <%_ } _%>
       shared: {
         '@vuelidate/core': {},
         '@vuelidate/validators': {},
         axios: {},
-        'bootstrap-vue': {},
-        vue: {},
+        // 'bootstrap-vue': {},
+        vue: {
+          packagePath: '@vue/compat/dist/vue.esm-bundler.js',
+        },
         'vue-i18n': {},
         'vue-router': {},
         pinia: {},
         '@/shared/security/authority': {
           packagePath: './<%= clientSrcDir %>app/shared/security/authority',
-          requiredVersion: appVersion,
+<%_ if (applicationTypeGateway) { _%>
+          version: sharedAppVersion,
+<%_ } _%>
         },
+        /*
         '@/shared/alert/alert.service': {
           packagePath: './<%= clientSrcDir %>app/shared/alert/alert.service',
-          requiredVersion: appVersion,
+<%_ if (applicationTypeGateway) { _%>
+          version: sharedAppVersion,
+<%_ } _%>
         },
+        */
         '@/locale/translation.service': {
           packagePath: './<%= clientSrcDir %>app/locale/translation.service',
-          requiredVersion: appVersion,
+<%_ if (applicationTypeGateway) { _%>
+          version: sharedAppVersion,
+<%_ } _%>
         },
       },
     }),
