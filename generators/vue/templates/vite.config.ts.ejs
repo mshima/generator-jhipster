@@ -91,6 +91,12 @@ let config = defineConfig({
         '/oauth2',
         '/login/oauth2',
 <%_ } _%>
+<%_ if (authenticationTypeSession) { _%>
+        '/login',
+<%_ } _%>
+<%_ if (applicationTypeGateway || applicationTypeMicroservice) { _%>
+        '/services',
+<%_ } _%>
       ].map(res => [
         res,
         {
@@ -119,7 +125,7 @@ config = mergeConfig(config, {
 <%_ if (applicationTypeMicroservice) { _%>
       exposes: {
         './entities-router': './<%= clientSrcDir %>app/router/entities',
-        './entities-menu': './<%= clientSrcDir %>app/entities/entities-menu',
+        './entities-menu': './<%= clientSrcDir %>app/entities/entities-menu.vue',
       },
 <%_ } _%>
       shared: {
