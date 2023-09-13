@@ -25,23 +25,17 @@ export const vueFiles = {
       templates: [
         'package.json',
         'tsconfig.json',
-        'tsconfig.test.json',
+        'tsconfig.app.json',
+        'tsconfig.node.json',
+        'tsconfig.vitest.json',
         '.postcssrc.js',
-        '.eslintrc.js',
+        '.eslintrc.cjs',
+        'vite.config.ts',
         'vitest.config.ts',
-        'webpack/config.js',
-        'webpack/webpack.common.js',
-        'webpack/webpack.dev.js',
-        'webpack/webpack.prod.js',
-        'webpack/vue.utils.js',
       ],
     },
   ],
   microfrontend: [
-    {
-      condition: generator => generator.microfrontend,
-      templates: ['webpack/webpack.microfrontend.js.jhi.vue'],
-    },
     {
       condition: generator => generator.microfrontend,
       ...clientApplicationTemplatesBlock(),

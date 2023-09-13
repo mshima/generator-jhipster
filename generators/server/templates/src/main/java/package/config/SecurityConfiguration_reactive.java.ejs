@@ -212,7 +212,11 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
             .securityMatcher(new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(
+  <%_ if (clientFrameworkVue) { _%>
+                pathMatchers("/assets/**", "/swagger-ui/**")
+  <%_ } else { _%>
                 pathMatchers("/app/**", "/i18n/**", "/content/**", "/swagger-ui/**")
+  <%_ } _%>
             )))
 <%_ if (!applicationTypeMicroservice) { _%>
             .cors(withDefaults())

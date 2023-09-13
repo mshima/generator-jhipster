@@ -24,7 +24,7 @@ export const files = {
       templates: ['.eslintignore', 'README.md.jhi.client'],
     },
     {
-      condition: generator => generator.microfrontend && (generator.clientFrameworkVue || generator.clientFrameworkReact),
+      condition: generator => generator.microfrontend && generator.clientFrameworkReact,
       templates: ['webpack/webpack.microfrontend.js.jhi'],
     },
     {
