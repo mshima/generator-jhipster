@@ -25,6 +25,14 @@ module.exports = (config, options, targetOptions) => {
     experiments: {
       outputModule: true,
     },
+<%_ if (applicationTypeGateway) { _%>
+    resolve: {
+      fallback: {
+        // Workaround https://github.com/module-federation/universe/issues/1575
+        path: false,
+      },
+    },
+<%_ } _%>
     plugins: [
       new ModuleFederationPlugin({
         library: {
