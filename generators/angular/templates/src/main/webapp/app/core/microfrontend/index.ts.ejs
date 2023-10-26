@@ -16,28 +16,33 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Type } from '@angular/core';
-import { loadRemoteModule } from '@angular-architects/module-federation-runtime';
+import type { Type } from '@angular/core';
+import { importRemote } from '@module-federation/utilities';
 
-import NavbarItem from 'app/layouts/navbar/navbar-item.model';
+import type NavbarItem from 'app/layouts/navbar/navbar-item.model';
 
 export const loadNavbarItems = async (service: string): Promise<NavbarItem[]> =>
-  loadRemoteModule<{ EntityNavbarItems: NavbarItem[] }>({
-    type: 'module',
-    remoteEntry: `./services/${service}/remoteEntry.js`,
-    exposedModule: './entity-navbar-items',
+  importRemote<{ EntityNavbarItems: NavbarItem[] }>({
+    esm: true,
+    url: `./services/${service}`,
+    scope: service,
+    module: 'entity-navbar-items',
   }).then(({ EntityNavbarItems }) => EntityNavbarItems);
+<%_ if (enableTranslation) { _%>
 
 export const loadTranslationModule = async (service: string): Promise<Type<any>> =>
-  loadRemoteModule<{ LazyTranslationModule: Type<any> }>({
-    type: 'module',
-    remoteEntry: `./services/${service}/remoteEntry.js`,
-    exposedModule: './translation-module',
+  importRemote<{ LazyTranslationModule: Type<any> }>({
+    esm: true,
+    url: `./services/${service}`,
+    scope: service,
+    module: 'translation-module',
   }).then(({ LazyTranslationModule }) => LazyTranslationModule);
+<%_ } _%>
 
 export const loadEntityModule = async (service: string): Promise<Type<any>> =>
-  loadRemoteModule<{ EntityRoutingModule: Type<any> }>({
-    type: 'module',
-    remoteEntry: `./services/${service}/remoteEntry.js`,
-    exposedModule: './entity-routing',
+  importRemote<{ EntityRoutingModule: Type<any> }>({
+    esm: true,
+    url: `./services/${service}`,
+    scope: service,
+    module: 'entity-routing',
   }).then(({ EntityRoutingModule }) => EntityRoutingModule);

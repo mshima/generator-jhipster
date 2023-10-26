@@ -461,7 +461,6 @@ exports[`generator - app with default config should match snapshot 1`] = `
     "rtl": false,
   },
   "nodeDependencies": {
-    "@angular-architects/module-federation-runtime": "ANGULAR_ARCHITECTS_MODULE_FEDERATION_RUNTIME_VERSION",
     "@angular-builders/custom-webpack": "ANGULAR_BUILDERS_CUSTOM_WEBPACK_VERSION",
     "@angular-builders/jest": "ANGULAR_BUILDERS_JEST_VERSION",
     "@angular-eslint/eslint-plugin": "ANGULAR_ESLINT_ESLINT_PLUGIN_VERSION",
@@ -471,6 +470,7 @@ exports[`generator - app with default config should match snapshot 1`] = `
     "@fortawesome/angular-fontawesome": "FORTAWESOME_ANGULAR_FONTAWESOME_VERSION",
     "@fortawesome/fontawesome-svg-core": "FORTAWESOME_FONTAWESOME_SVG_CORE_VERSION",
     "@fortawesome/free-solid-svg-icons": "FORTAWESOME_FREE_SOLID_SVG_ICONS_VERSION",
+    "@module-federation/utilities": "MODULE_FEDERATION_UTILITIES_VERSION",
     "@ng-bootstrap/ng-bootstrap": "NG_BOOTSTRAP_NG_BOOTSTRAP_VERSION",
     "@ngx-translate/core": "NGX_TRANSLATE_CORE_VERSION",
     "@ngx-translate/http-loader": "NGX_TRANSLATE_HTTP_LOADER_VERSION",
@@ -1029,7 +1029,6 @@ exports[`generator - app with gateway should match snapshot 1`] = `
     "rtl": false,
   },
   "nodeDependencies": {
-    "@angular-architects/module-federation-runtime": "ANGULAR_ARCHITECTS_MODULE_FEDERATION_RUNTIME_VERSION",
     "@angular-builders/custom-webpack": "ANGULAR_BUILDERS_CUSTOM_WEBPACK_VERSION",
     "@angular-builders/jest": "ANGULAR_BUILDERS_JEST_VERSION",
     "@angular-eslint/eslint-plugin": "ANGULAR_ESLINT_ESLINT_PLUGIN_VERSION",
@@ -1039,6 +1038,7 @@ exports[`generator - app with gateway should match snapshot 1`] = `
     "@fortawesome/angular-fontawesome": "FORTAWESOME_ANGULAR_FONTAWESOME_VERSION",
     "@fortawesome/fontawesome-svg-core": "FORTAWESOME_FONTAWESOME_SVG_CORE_VERSION",
     "@fortawesome/free-solid-svg-icons": "FORTAWESOME_FREE_SOLID_SVG_ICONS_VERSION",
+    "@module-federation/utilities": "MODULE_FEDERATION_UTILITIES_VERSION",
     "@ng-bootstrap/ng-bootstrap": "NG_BOOTSTRAP_NG_BOOTSTRAP_VERSION",
     "@ngx-translate/core": "NGX_TRANSLATE_CORE_VERSION",
     "@ngx-translate/http-loader": "NGX_TRANSLATE_HTTP_LOADER_VERSION",

@@ -36,6 +36,9 @@
     "useDefineForClassFields": false,
     "target": "es2022",
     "module": "es2020",
+<%_ if (microfrontend && applicationTypeGateway) { _%>
+    "skipLibCheck": true,
+<%_ } _%>
     "types": [],
     "lib": ["es2018", "es2020", "dom"]
   },
