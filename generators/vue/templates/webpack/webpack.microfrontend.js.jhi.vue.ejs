@@ -21,6 +21,18 @@
 const { DefinePlugin } = require('webpack');
 <%_ } _%>
 <&_ } -&>
+
+<&_ if (fragment.configSection) { -&>
+<%_ if (applicationTypeGateway && clientFrameworkVue) { _%>
+    resolve: {
+      fallback: {
+        // Workaround https://github.com/module-federation/universe/issues/1575
+        path: false,
+      },
+    },
+<%_ } _%>
+<&_ } -&>
+
 <&_ if (fragment.moduleFederationSection) { -&>
 <%_ if (applicationTypeMicroservice) { _%>
         exposes: {
@@ -37,6 +49,7 @@ const { DefinePlugin } = require('webpack');
           ),
         },
 <&_ } -&>
+
 <&_ if (fragment.pluginsSection) { -&>
 <%_ if (applicationTypeMicroservice) { _%>
       new DefinePlugin({
