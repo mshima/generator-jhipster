@@ -19,7 +19,7 @@
 package <%= entityAbsolutePackage %>.domain;
 
 import static <%= entityAbsolutePackage %>.domain.<%= persistClass %>TestSamples.*;
-<%_ for (const otherEntity of otherEntities.filter(otherEntity => !otherEntity.builtIn)) { _%>
+<%_ for (const otherEntity of otherEntities) { _%>
 import static <%= otherEntity.entityAbsolutePackage %>.domain.<%= otherEntity.persistClass %>TestSamples.*;
 <%_ } _%>
 <%_ for (const otherEntity of otherEntities.filter(otherEntity => entityPackage !== otherEntity.entityPackage)) { _%>
@@ -50,7 +50,7 @@ class <%= persistClass %>Test {
         assertThat(<%= persistInstance %>1).isNotEqualTo(<%= persistInstance %>2);
 <%_} _%>
     }
-<%_ for (const relationship of relationships.filter(relationship => !relationship.otherEntity.builtIn)) { _%>
+<%_ for (const relationship of relationships) { _%>
 
     @Test
     void <%- relationship.relationshipName %>Test() throws Exception {
@@ -78,7 +78,7 @@ class <%= persistClass %>Test {
         assertThat(<%= persistInstance %>.get<%- relationship.propertyNameCapitalized %>()).doesNotContain(<%= relationship.otherEntity.persistInstance %>Back);
   <%_ } else { _%>
 
-    <%_ if (fluentMethods) { _%>
+    <%_ if (fluentMethods && !builtIn) { _%>
         <%= persistInstance %>.<%- relationship.propertyName %>(null);
     <%_ } else { _%>
         <%= persistInstance %>.set<%- relationship.propertyNameCapitalized %>(null);
@@ -94,7 +94,7 @@ class <%= persistClass %>Test {
   <%_ } _%>
   <%_ if (relationship.collection) { _%>
 
-    <%_ if (fluentMethods) { _%>
+    <%_ if (fluentMethods && !builtIn) { _%>
         <%= persistInstance %>.<%- relationship.propertyName %>(new HashSet<>(Set.of(<%= relationship.otherEntity.persistInstance %>Back)));
     <%_ } else { _%>
         <%= persistInstance %>.set<%- relationship.propertyNameCapitalized %>(new HashSet<>(Set.of(<%= relationship.otherEntity.persistInstance %>Back)));
