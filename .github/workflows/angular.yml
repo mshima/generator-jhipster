@@ -85,7 +85,7 @@ jobs:
       #----------------------------------------------------------------------
       # Install all tools and check configuration
       #----------------------------------------------------------------------
-      - uses: mshima/jhipster-actions/setup-git#da207c33a182539afccf031280669f3aa7a4af7c
+      - uses: mshima/jhipster-actions/setup-git@da207c33a182539afccf031280669f3aa7a4af7c
       - name: 'SETUP: Checkout generator-jhipster'
         uses: actions/checkout@v4
         with:
