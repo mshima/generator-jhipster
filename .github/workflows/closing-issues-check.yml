@@ -1,0 +1,159 @@
+#
+# Copyright the original author or authors from the JHipster project.
+#
+# This file is part of the JHipster project, see https://www.jhipster.tech/
+# for more information.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Closing Issue Check
+on:
+  pull_request:
+    types: [closed, opened, synchronize, reopened]
+    branches:
+      - '*'
+permissions:
+  contents: read
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has-issues: ${{ steps.has-issues.outputs.has-issues }}
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: get_closing_issues
+        with:
+          query: |
+            query closingIssues($owner: String!, $repo: String!, $pr_number: Int!) {
+              repository(owner:$owner,name:$repo) {
+                pullRequest(number: $pr_number) {
+                  id
+                  closingIssuesReferences (first: 50) {
+                    edges {
+                      node {
+                        number
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          owner: ${{ github.event.pull_request.base.repo.owner.login }}
+          repo: ${{ github.event.pull_request.base.repo.name }}
+          pr_number: ${{ github.event.pull_request.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: echo '${{ steps.get_closing_issues.outputs.data }}'
+      - name: prepare matrix
+        id: matrix
+        run: |
+          echo 'matrix<<EOF' >> $GITHUB_OUTPUT
+          echo '{ include:' >> $GITHUB_OUTPUT
+          echo '${{ steps.get_closing_issues.outputs.data }}' | jq -r '.repository.pullRequest.closingIssuesReferences.edges | [.[] | .node ]' >> $GITHUB_OUTPUT
+          echo '}' >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - run: echo "has-issues=$(echo '${{ steps.matrix.outputs.matrix }}' | jq -r 'if .include == [] then false else true end')" >> $GITHUB_OUTPUT
+        id: has-issues
+  applications:
+    name: Check issue ${{ matrix.number }}
+    needs: matrix
+    runs-on: 'ubuntu-22.04'
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/app
+    timeout-minutes: 50
+    if: needs.matrix.outputs.has-issues == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.matrix.outputs.matrix)}}
+    steps:
+      #----------------------------------------------------------------------
+      # Install all tools and check configuration
+      #----------------------------------------------------------------------
+      - name: 'SETUP: Checkout generator-jhipster'
+        uses: actions/checkout@v4
+        with:
+          path: generator-jhipster
+          fetch-depth: 1
+      - uses: ./generator-jhipster/.github/actions/setup-default-node-java
+      - uses: jhipster/actions/restore-cache@v0
+        with:
+          npm: true
+          maven: true
+          gradle: true
+      - uses: jhipster/action/setup-keycloak-hostname@v0
+      - uses: jhipster/action/setup-git@v0
+      #----------------------------------------------------------------------
+      # Install JHipster and generate project+entities
+      #----------------------------------------------------------------------
+      - name: 'GENERATION: install JHipster'
+        run: $JHI_SCRIPTS/10-install-jhipster.sh
+      - name: 'GENERATION: project'
+        id: project
+        run: jhipster from-issue ${{ matrix.number }} --no-code-workspace
+      - name: 'GENERATION: jhipster info'
+        run: $JHI_SCRIPTS/14-jhipster-info.sh
+      #----------------------------------------------------------------------
+      # Launch tests
+      #----------------------------------------------------------------------
+      - name: 'PREPARE: npm install'
+        run: npm install
+        timeout-minutes: 7
+      - name: 'TESTS: backend'
+        id: backend
+        run: npm run ci:backend:test --if-present
+        timeout-minutes: 15
+      - name: 'TESTS: frontend'
+        id: frontend
+        run: npm run ci:frontend:test --if-present
+        timeout-minutes: 15
+      - name: 'TESTS: packaging'
+        run: npm run ci:e2e:package --if-present
+        timeout-minutes: 12
+      - name: 'TESTS: Start docker compose containers for e2e tests'
+        run: npm run ci:e2e:prepare --if-present
+        timeout-minutes: 5
+      - name: 'E2E: Run'
+        id: e2e
+        run: npm run ci:e2e:run --if-present
+        timeout-minutes: 15
+      - name: 'BACKEND: Store failure logs'
+        uses: actions/upload-artifact@v3
+        if: always() && steps.backend.outcome == 'failure'
+        with:
+          name: log-${{ matrix.number }}
+          path: app/**/test-results/**/*.xml
+      - name: 'E2E: Store failure screenshots'
+        uses: actions/upload-artifact@v3
+        if: always() && steps.e2e.outcome == 'failure'
+        with:
+          name: screenshots-${{ matrix.number }}
+          path: app/**/cypress/screenshots
+      - name: Dump docker logs
+        if: always()
+        uses: jwalton/gh-docker-logs@v2
+  check-closing-issues:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: [applications]
+    if: always()
+    steps:
+      - run: |
+          echo '${{ toJSON(needs) }}'
+          if [ 'skipped' == '${{ needs.applications.result }}' ] || [ 'success' == '${{ needs.applications.result }}' ] || [ 'closed' == '${{ github.event.action }}' ]; then
+            exit 0
+          fi
+          exit 1
