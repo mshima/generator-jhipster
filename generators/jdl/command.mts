@@ -19,6 +19,12 @@ const command: JHipsterCommandDefinition = {
       type: Boolean,
       scope: 'generator',
     },
+    addEntitiesToYoRc: {
+      description: 'Add entities to .yo-rc.json file',
+      type: Boolean,
+      scope: 'generator',
+      hide: true,
+    },
     ignoreApplication: {
       description: 'Ignores application generation',
       type: Boolean,
