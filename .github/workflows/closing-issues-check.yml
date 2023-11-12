@@ -60,7 +60,7 @@ jobs:
         id: matrix
         run: |
           echo 'matrix<<EOF' >> $GITHUB_OUTPUT
-          echo '{ include:' >> $GITHUB_OUTPUT
+          echo -n '{ include:' >> $GITHUB_OUTPUT
           echo '${{ steps.get_closing_issues.outputs.data }}' | jq -r '.repository.pullRequest.closingIssuesReferences.edges | [.[] | .node ]' >> $GITHUB_OUTPUT
           echo '}' >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
