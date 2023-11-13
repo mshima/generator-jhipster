@@ -90,6 +90,10 @@ jobs:
         with:
           path: generator-jhipster
           fetch-depth: 2
+      - uses: ./generator-jhipster/.github/actions/setup-generator-jhipster-jit
+        with:
+          generator-path: generator-jhipster
+          executable: jhipster
       - name: 'SETUP: environment'
         id: setup
         uses: ./generator-jhipster/.github/actions/setup
@@ -100,6 +104,7 @@ jobs:
           jdl-sample: ${{ matrix.setup-jdl-sample }}
           application-environment: ${{ matrix.setup-application-environment }}
           application-packaging: ${{ matrix.setup-application-packaging }}
+          jhipster-bom-branch: ignore
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -112,10 +117,8 @@ jobs:
           npm: true
           maven: true
           gradle: ${{ matrix.workspaces == 'true' || matrix.gradle == 1 || contains(matrix.name, 'gradle') }}
-      - name: 'TOOLS: configure tools installed by the system'
-        run: $JHI_SCRIPTS/03-system.sh
-      - name: 'TOOLS: configure git'
-        run: $JHI_SCRIPTS/04-git-config.sh
+      - uses: jhipster/actions/setup-keycloak-hostname@v0
+      - uses: jhipster/actions/setup-git@v0
       # Update global NPM for workspaces support
       - name: 'Install required NPM version'
         if: matrix.workspaces == 'true'
@@ -123,8 +126,7 @@ jobs:
       #----------------------------------------------------------------------
       # Install JHipster and generate project+entities
       #----------------------------------------------------------------------
-      - name: 'GENERATION: install JHipster'
-        run: $JHI_SCRIPTS/10-install-jhipster.sh
+      - uses: ./generator-jhipster/.github/actions/setup-bom
       - name: 'GENERATION: config'
         run: $JHI_SCRIPTS/11-generate-config.sh
       - name: 'GENERATION: project'
@@ -185,21 +187,12 @@ jobs:
         if: steps.compare.outputs.equals != 'true'
         run: npm run ci:e2e:run --if-present
         timeout-minutes: 15
-      - name: 'BACKEND: Store failure logs'
-        uses: actions/upload-artifact@v3
-        if: always() && steps.backend.outcome == 'failure'
+      - uses: ./generator-jhipster/.github/actions/handle-logs
         with:
-          name: log-${{ matrix.name }}
-          path: ${{ steps.setup.outputs.application-path }}/**/test-results/**/*.xml
-      - name: 'E2E: Store failure screenshots'
-        uses: actions/upload-artifact@v3
-        if: always() && steps.e2e.outcome == 'failure'
-        with:
-          name: screenshots-${{ matrix.name }}
-          path: ${{ steps.setup.outputs.application-path }}/**/cypress/screenshots
-      - name: Dump docker logs
-        if: always()
-        uses: jwalton/gh-docker-logs@v2
+          name: ${{ matrix.name }}
+          application-path: ${{ steps.setup.outputs.application-path }}
+          upload-java-test-results: ${{ steps.backend.outcome == 'failure' }}
+          upload-cypress-snapshots: ${{ steps.e2e.outcome == 'failure' }}
   check-vue:
     permissions:
       contents: none
