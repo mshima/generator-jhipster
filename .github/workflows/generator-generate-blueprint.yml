@@ -42,10 +42,6 @@ jobs:
         with:
           path: generator-jhipster
           fetch-depth: 2
-      - uses: ./generator-jhipster/.github/actions/setup-generator-jhipster-jit
-        with:
-          generator-path: generator-jhipster
-          executable: jhipster
       - name: 'SETUP: environment'
         id: setup
         uses: ./generator-jhipster/.github/actions/setup
@@ -69,6 +65,8 @@ jobs:
       #----------------------------------------------------------------------
       # Install JHipster and generate project+entities
       #----------------------------------------------------------------------
+      - run: npm install && npm link
+        working-directory: ${{ github.workspace }}/generator-jhipster
       - uses: ./generator-jhipster/.github/actions/setup-bom
         env:
           JHI_INSTALL_GLOBALLY: 'true'
