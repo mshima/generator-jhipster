@@ -39,7 +39,7 @@ runs:
   steps:
     - name: 'BACKEND: Store failure logs'
       uses: actions/upload-artifact@v3
-      if: always() && upload-java-test-results != 'false'
+      if: always() && inputs.upload-java-test-results != 'false'
       with:
         name: log-${{ inputs.name-suffix }}
         path: ${{ inputs.application-path }}/**/test-results/**/*.xml
