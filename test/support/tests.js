@@ -2,7 +2,7 @@ import path, { dirname } from 'path';
 import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import sinon from 'sinon';
-import { before, it, describe, after, expect } from 'esmocha';
+import { beforeAll as before, it, describe, afterAll as after, expect } from 'vitest';
 import { buildJHipster } from '../../cli/index.mjs';
 import { GENERATOR_JHIPSTER } from '../../generators/generator-constants.js';
 import { skipPrettierHelpers as helpers } from '../../testing/index.js';
@@ -299,9 +299,6 @@ export const testBlueprintSupport = (generatorName, options = {}) => {
           spy = addSpies(generator);
         });
     });
-    after(() => {
-      result.cleanup();
-    });
     it(`should compose with jhipster-foo:${generatorName} blueprint once`, () => {
       expect(result.mockedGenerators[`jhipster-foo:${generatorName}`].callCount).toBe(1);
     });
@@ -365,9 +362,6 @@ export const testBlueprintSupport = (generatorName, options = {}) => {
 
       result = await context;
     });
-    after(() => {
-      result.cleanup();
-    });
     it(`should compose with jhipster-foo:${generatorName} blueprint once`, () => {
       expect(result.mockedGenerators[`jhipster-foo-sbs:${generatorName}`].callCount).toBe(1);
     });
@@ -377,9 +371,9 @@ export const testBlueprintSupport = (generatorName, options = {}) => {
     [...PRIORITY_NAMES_LIST, ...workspacesPriorityList]
       .filter(priority => !Object.values(ENTITY_PRIORITY_NAMES).includes(priority))
       .forEach(priority => {
-        it(`should call ${priority} tasks if implemented`, function () {
+        it(`should call ${priority} tasks if implemented`, context => {
           if (!spy.prioritiesTasks[priority]) {
-            this.skip();
+            context.skip();
             return;
           }
           expect(spy.prioritiesTasks[priority].callCount).toBe(1);

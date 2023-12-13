@@ -41,8 +41,8 @@ export const defineDefaults = async ({ mockFactory }: { mockFactory?: any } = {}
     defaultMockFactory = mockFactory;
   } else if (!defaultMockFactory) {
     try {
-      const { esmocha } = await import('esmocha');
-      defaultMockFactory = esmocha.fn;
+      const { vitest } = await import('vitest');
+      defaultMockFactory = vitest.fn;
     } catch {
       throw new Error('loadMockFactory should be called before using mock');
     }
