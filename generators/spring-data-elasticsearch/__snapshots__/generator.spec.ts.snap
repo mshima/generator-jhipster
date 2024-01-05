@@ -416,6 +416,12 @@ exports[`generator - elasticsearch gateway-jwt-gradle-enableTranslation(true)-co
   "src/test/java/com/package/domain/SimpleTestSamples.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/com/package/domain/UserTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/package/domain/UserTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/com/package/management/SecurityMetersServiceTests.java": {
     "stateCleared": "modified",
   },
@@ -2075,6 +2081,12 @@ exports[`generator - elasticsearch monolith-jwt-reactive(false)-maven-enableTran
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/domain/SimpleEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/management/SecurityMetersServiceTests.java": {
@@ -3889,6 +3901,12 @@ exports[`generator - elasticsearch monolith-session-reactive(false)-maven-enable
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/domain/SimpleEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/security/DomainUserDetailsServiceIT.java": {

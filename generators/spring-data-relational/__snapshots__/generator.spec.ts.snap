@@ -350,6 +350,12 @@ exports[`generator - sql gateway-jwt-mysql-gradle-enableTranslation(true)-com.pa
   "src/test/java/com/package/config/SqlTestContainersSpringContextCustomizerFactory.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/com/package/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/package/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/com/package/management/SecurityMetersServiceTests.java": {
     "stateCleared": "modified",
   },
@@ -799,6 +805,12 @@ exports[`generator - sql gateway-jwt-oracle-gradle-enableTranslation(true)-com.p
   "src/test/java/com/package/config/SqlTestContainersSpringContextCustomizerFactory.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/com/package/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/package/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/com/package/management/SecurityMetersServiceTests.java": {
     "stateCleared": "modified",
   },
@@ -1233,6 +1245,12 @@ exports[`generator - sql gateway-jwt-postgresql-gradle-enableTranslation(true)-c
   "src/test/java/com/package/config/SqlTestContainersSpringContextCustomizerFactory.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/com/package/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/package/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/com/package/management/SecurityMetersServiceTests.java": {
     "stateCleared": "modified",
   },
@@ -1631,6 +1649,12 @@ exports[`generator - sql gateway-oauth2-mariadb-gradle-enableTranslation(true)-c
   "src/test/java/com/package/config/TestSecurityConfiguration.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/com/package/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/package/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/com/package/security/SecurityUtilsUnitTest.java": {
     "stateCleared": "modified",
   },
@@ -2009,6 +2033,12 @@ exports[`generator - sql gateway-oauth2-mssql-gradle-enableTranslation(true)-com
     "stateCleared": "modified",
   },
   "src/test/java/com/package/config/TestSecurityConfiguration.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/package/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/package/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/com/package/security/SecurityUtilsUnitTest.java": {
@@ -6327,6 +6357,12 @@ exports[`generator - sql monolith-jwt-mariadb-reactive(false)-maven-enableTransl
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/tech/jhipster/management/SecurityMetersServiceTests.java": {
     "stateCleared": "modified",
   },
@@ -7054,6 +7090,12 @@ exports[`generator - sql monolith-jwt-mssql-reactive(false)-maven-enableTranslat
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/tech/jhipster/management/SecurityMetersServiceTests.java": {
     "stateCleared": "modified",
   },
@@ -7778,6 +7820,12 @@ exports[`generator - sql monolith-jwt-mysql-reactive(false)-maven-enableTranslat
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/tech/jhipster/management/SecurityMetersServiceTests.java": {
     "stateCleared": "modified",
   },
@@ -8482,6 +8530,12 @@ exports[`generator - sql monolith-jwt-oracle-reactive(false)-maven-enableTransla
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/management/SecurityMetersServiceTests.java": {
@@ -9206,6 +9260,12 @@ exports[`generator - sql monolith-jwt-postgresql-reactive(false)-maven-enableTra
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/management/SecurityMetersServiceTests.java": {
@@ -12907,6 +12967,12 @@ exports[`generator - sql monolith-session-mariadb-reactive(false)-maven-enableTr
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/tech/jhipster/repository/timezone/DateTimeWrapper.java": {
     "stateCleared": "modified",
   },
@@ -13563,6 +13629,12 @@ exports[`generator - sql monolith-session-mssql-reactive(false)-maven-enableTran
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/repository/timezone/DateTimeWrapper.java": {
@@ -14223,6 +14295,12 @@ exports[`generator - sql monolith-session-mysql-reactive(false)-maven-enableTran
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/tech/jhipster/repository/timezone/DateTimeWrapper.java": {
     "stateCleared": "modified",
   },
@@ -14878,6 +14956,12 @@ exports[`generator - sql monolith-session-oracle-reactive(false)-maven-enableTra
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/tech/jhipster/repository/timezone/DateTimeWrapper.java": {
     "stateCleared": "modified",
   },
@@ -15531,6 +15615,12 @@ exports[`generator - sql monolith-session-postgresql-reactive(false)-maven-enabl
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/config/timezone/HibernateTimeZoneIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/repository/timezone/DateTimeWrapper.java": {

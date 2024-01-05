@@ -22,7 +22,13 @@ import BaseApplicationGenerator from '../base-application/index.js';
 import { GENERATOR_JAVA, GENERATOR_BOOTSTRAP_APPLICATION } from '../generator-list.js';
 import writeTask from './files.js';
 import cleanupTask from './cleanup.js';
-import { packageInfoTransform, generatedAnnotationTransform, checkJava } from './support/index.js';
+import {
+  packageInfoTransform,
+  generatedAnnotationTransform,
+  checkJava,
+  javaMainPackageTemplatesBlock,
+  javaTestPackageTemplatesBlock,
+} from './support/index.js';
 import { JavaApplication } from './types.js';
 import { BaseApplicationGeneratorDefinition, GenericApplicationDefinition } from '../base-application/tasks.js';
 import { GenericSourceTypeDefinition } from '../base/tasks.js';
@@ -41,6 +47,8 @@ export default class JavaGenerator extends BaseApplicationGenerator<GeneratorDef
   useJakartaValidation!: boolean;
   useJacksonIdentityInfo!: boolean;
   generateEnums!: boolean;
+  generateBuiltInUser!: boolean;
+  generateBuiltInUserTests!: boolean;
 
   async beforeQueue() {
     if (!this.fromBlueprint) {
@@ -133,11 +141,33 @@ export default class JavaGenerator extends BaseApplicationGenerator<GeneratorDef
         if (!this.generateEntities) return;
 
         const { useJakartaValidation, useJacksonIdentityInfo } = this;
-        for (const entity of entities.filter(entity => !entity.skipServer && !entity.builtIn)) {
-          await this.writeFiles({
-            sections: entityServerFiles,
-            context: { ...application, ...entity, useJakartaValidation, useJacksonIdentityInfo },
-          });
+        for (const entity of entities.filter(entity => !entity.skipServer)) {
+          if (entity.builtIn) {
+            if ((entity as any).builtInUser) {
+              await this.writeFiles({
+                blocks: [
+                  javaMainPackageTemplatesBlock({
+                    condition: () => this.generateBuiltInUser,
+                    templates: ['_entityPackage_/domain/_persistClass_.java.jhi'],
+                  }),
+                  javaMainPackageTemplatesBlock({
+                    condition: ctx => ctx.useJakartaValidation && this.generateBuiltInUser,
+                    templates: ['_entityPackage_/domain/_persistClass_.java.jhi.jakarta_validation'],
+                  }),
+                  javaTestPackageTemplatesBlock({
+                    condition: () => this.generateBuiltInUser || this.generateBuiltInUserTests,
+                    templates: ['_entityPackage_/domain/_persistClass_Test.java', '_entityPackage_/domain/_persistClass_TestSamples.java'],
+                  }),
+                ],
+                context: { ...application, ...entity, useJakartaValidation, useJacksonIdentityInfo },
+              });
+            }
+          } else {
+            await this.writeFiles({
+              sections: entityServerFiles,
+              context: { ...application, ...entity, useJakartaValidation, useJacksonIdentityInfo },
+            });
+          }
         }
       },
 

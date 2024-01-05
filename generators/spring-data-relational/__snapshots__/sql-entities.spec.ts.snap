@@ -176,6 +176,12 @@ exports[`generator - sql - entities gateway-jwt-gradle-enableTranslation(true)-c
   "src/test/java/com/package/domain/SimpleTestSamples.java": {
     "stateCleared": "modified",
   },
+  "src/test/java/com/package/domain/UserTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/package/domain/UserTestSamples.java": {
+    "stateCleared": "modified",
+  },
   "src/test/java/com/package/service/UserServiceIT.java": {
     "stateCleared": "modified",
   },
@@ -896,6 +902,12 @@ exports[`generator - sql - entities monolith-jwt-reactive(false)-maven-enableTra
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/domain/SimpleEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/service/UserServiceIT.java": {
@@ -1621,6 +1633,12 @@ exports[`generator - sql - entities monolith-session-reactive(false)-maven-enabl
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/domain/SimpleEntityTestSamples.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTest.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/domain/UserEntityTestSamples.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/service/UserServiceIT.java": {

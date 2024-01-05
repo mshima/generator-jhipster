@@ -48,7 +48,7 @@ public class <%= persistClass %>TestSamples {
 <%_ } _%>
 
     public static <%= persistClass %> get<%= persistClass %>Sample1() {
-<%_ if (fluentMethods) { _%>
+<%_ if (fluentMethods && !builtIn) { _%>
         return new <%= persistClass %>()<% sampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueSample1 %>)<% }) %>;
 <%_ } else { _%>
         <%= persistClass %> <%= persistInstance %> = new <%= persistClass %>();
@@ -60,7 +60,7 @@ public class <%= persistClass %>TestSamples {
     }
 
     public static <%= persistClass %> get<%= persistClass %>Sample2() {
-<%_ if (fluentMethods) { _%>
+<%_ if (fluentMethods && !builtIn) { _%>
         return new <%= persistClass %>()<% sampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueSample2 %>)<% }) %>;
 <%_ } else { _%>
         <%= persistClass %> <%= persistInstance %> = new <%= persistClass %>();
@@ -72,7 +72,7 @@ public class <%= persistClass %>TestSamples {
     }
 
     public static <%= persistClass %> get<%= persistClass %>RandomSampleGenerator() {
-<%_ if (fluentMethods) { _%>
+<%_ if (fluentMethods && !builtIn) { _%>
         return new <%= persistClass %>()<% sampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueGenerator %>)<% }) %>;
 <%_ } else { _%>
         <%= persistClass %> <%= persistInstance %> = new <%= persistClass %>();

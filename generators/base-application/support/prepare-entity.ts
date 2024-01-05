@@ -69,6 +69,7 @@ const { BYTES, BYTE_BUFFER } = fieldTypes.RelationalOnlyDBTypes;
 const { IMAGE, TEXT } = fieldTypes.BlobTypes;
 
 const BASE_TEMPLATE_DATA = {
+  builtIn: false,
   primaryKey: undefined,
   entityPackage: undefined,
   skipUiGrouping: false,
