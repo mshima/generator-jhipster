@@ -19,13 +19,42 @@
 import * as _ from 'lodash-es';
 import { Validations, authenticationTypes, databaseTypes, fieldTypes } from '../../jdl/jhipster/index.js';
 import { loadRequiredConfigIntoEntity } from '../base-application/support/index.js';
+import { hibernateSnakeCase } from '../server/support/string.js';
+import { PaginationTypes } from '../../jdl/jhipster/entity-options.js';
 import { LOGIN_REGEX, LOGIN_REGEX_JS } from '../generator-constants.js';
 
 const { CASSANDRA } = databaseTypes;
 const { OAUTH2 } = authenticationTypes;
 const { CommonDBTypes } = fieldTypes;
 
-const { STRING: TYPE_STRING } = CommonDBTypes;
+const { STRING: TYPE_STRING, BOOLEAN: TYPE_BOOLEAN } = CommonDBTypes;
+
+const auditableEntityFields = () => [
+  {
+    fieldName: 'createdBy',
+    fieldType: TYPE_STRING,
+    skipServer: true,
+    builtIn: true,
+  },
+  {
+    fieldName: 'createdDate',
+    fieldType: TYPE_STRING,
+    skipServer: true,
+    builtIn: true,
+  },
+  {
+    fieldName: 'lastModifiedBy',
+    fieldType: TYPE_STRING,
+    skipServer: true,
+    builtIn: true,
+  },
+  {
+    fieldName: 'lastModifiedDate',
+    fieldType: TYPE_STRING,
+    skipServer: true,
+    builtIn: true,
+  },
+];
 
 const authorityEntityName = 'Authority';
 
@@ -41,6 +70,7 @@ export function createUserEntity(customUserData = {}, application) {
     }
   }
 
+  const cassandraOrNoDatabase = application.databaseTypeNo || application.databaseTypeCassandra;
   // Create entity definition for built-in entity to make easier to deal with relationships.
   const user = {
     name: 'User',
@@ -57,7 +87,9 @@ export function createUserEntity(customUserData = {}, application) {
     entityPersistenceLayer: false,
     entityRestLayer: false,
     entitySearchLayer: false,
-    hasImageField: !application.databaseTypeNo && !application.databaseTypeCassandra,
+    hasImageField: !cassandraOrNoDatabase,
+    pagination: cassandraOrNoDatabase ? PaginationTypes.NO : PaginationTypes.PAGINATION,
+    auditableEntity: !cassandraOrNoDatabase,
     ...customUserData,
   };
 
@@ -83,22 +115,60 @@ export function createUserEntity(customUserData = {}, application) {
     {
       fieldName: 'login',
       fieldType: TYPE_STRING,
-      fieldValidateRules: [Validations.REQUIRED, Validations.MAX, Validations.PATTERN],
-      fieldValidateRulesMax: 50,
+      fieldValidateRules: [Validations.REQUIRED, Validations.MAXLENGTH, Validations.PATTERN],
+      fieldValidateRulesMaxlength: 50,
       fieldValidateRulesPattern: LOGIN_REGEX_JS,
       fieldValidateRulesPatternJava: LOGIN_REGEX,
       builtIn: true,
     },
     {
+      fieldName: 'activated',
+      fieldType: TYPE_BOOLEAN,
+      builtIn: true,
+    },
+    {
       fieldName: 'firstName',
       fieldType: TYPE_STRING,
+      fieldValidateRules: [Validations.MAXLENGTH],
+      fieldValidateRulesMaxlength: 50,
       builtIn: true,
     },
     {
       fieldName: 'lastName',
       fieldType: TYPE_STRING,
+      fieldValidateRules: [Validations.MAXLENGTH],
+      fieldValidateRulesMaxlength: 50,
       builtIn: true,
     },
+    {
+      fieldName: 'email',
+      fieldType: TYPE_STRING,
+      fieldValidateRules: [Validations.REQUIRED, Validations.MAXLENGTH, Validations.MINLENGTH],
+      fieldValidateRulesMinlength: 5,
+      fieldValidateRulesMaxlength: 100,
+      builtIn: true,
+    },
+    ...(user.hasImageField
+      ? [
+          {
+            fieldName: 'imageUrl',
+            fieldType: TYPE_STRING,
+            fieldValidateRules: [Validations.MAXLENGTH],
+            fieldValidateRulesMaxlength: 256,
+            builtIn: true,
+          },
+        ]
+      : []),
+    ...(application.enableTranslation
+      ? [
+          {
+            fieldName: 'langKey',
+            fieldType: TYPE_STRING,
+            builtIn: true,
+          },
+        ]
+      : []),
+    ...(user.auditableEntity ? auditableEntityFields() : []),
   ]);
 
   return user;
