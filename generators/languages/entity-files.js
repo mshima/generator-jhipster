@@ -81,7 +81,7 @@ export function writeEntityFiles() {
 
     async writeClientFiles({ application, entities }) {
       if (application.skipClient) return;
-      const entitiesToWriteTranslationFor = entities.filter(entity => !entity.skipClient && !entity.builtIn);
+      const entitiesToWriteTranslationFor = entities.filter(entity => !entity.skipClient && (!entity.builtIn || entity.builtInAuthority));
 
       // Copy each
       const { clientSrcDir, frontendAppName } = application;
