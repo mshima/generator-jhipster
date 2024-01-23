@@ -74,6 +74,8 @@ const BASE_TEMPLATE_DATA = {
   existingEnum: false,
   searchEngine: NO_SEARCH_ENGINE,
   microserviceName: undefined,
+  entityAuthority: undefined,
+  entityReadAuthority: undefined,
 
   requiresPersistableImplementation: false,
   updatableEntity: undefined,
@@ -171,6 +173,7 @@ export default function prepareEntity(entityWithConfig, generator, application) 
     entityInstance: lowerFirst(entityName),
     entityTableName: hibernateSnakeCase(entityName),
     entityNamePlural: pluralize(entityName),
+    entityAuthority: entityWithConfig.adminEntity ? 'ROLE_ADMIN' : undefined,
   });
 
   const dto = entityWithConfig.dto && entityWithConfig.dto !== NO_DTO;

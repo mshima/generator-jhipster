@@ -40,6 +40,8 @@ type Entity = Required<BaseEntity> & {
   builtInUser?: boolean;
   builtInAuthority?: boolean;
   microserviceName?: string;
+  adminEntity?: boolean;
+  generateJavaEntity?: boolean;
 
   entityNameCapitalized: string;
   entityClass: string;

@@ -114,13 +114,14 @@ export function createAuthorityEntity(customAuthorityData = {}, application) {
     name: authorityEntityName,
     entitySuffix: '',
     builtIn: true,
-    fluentMethods: false,
+    adminEntity: true,
     entityTableName: `${application.jhiTablePrefix}_authority`,
     relationships: [],
     fields: entityDefinition ? entityDefinition.fields || [] : [],
     builtInAuthority: true,
     skipClient: application.clientFrameworkReact || application.clientFrameworkVue,
     searchEngine: 'no',
+    generateJavaEntity: application.backendTypeSpringBoot,
     ...customAuthorityData,
   };
 

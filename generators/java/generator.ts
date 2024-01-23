@@ -38,8 +38,6 @@ export type GeneratorDefinition = BaseApplicationGeneratorDefinition<Application
 export default class JavaGenerator extends BaseApplicationGenerator<GeneratorDefinition> {
   packageInfoFile!: boolean;
   generateEntities!: boolean;
-  generateBuiltInUser!: boolean;
-  generateBuiltInAuthority!: boolean;
   useJakartaValidation!: boolean;
   useJacksonIdentityInfo!: boolean;
   generateEnums!: boolean;
@@ -152,11 +150,7 @@ export default class JavaGenerator extends BaseApplicationGenerator<GeneratorDef
 
         const { useJakartaValidation, useJacksonIdentityInfo } = this;
         for (const entity of entities.filter(entity => !entity.skipServer)) {
-          if (
-            !entity.builtIn ||
-            (this.generateBuiltInAuthority && entity.builtInAuthority) ||
-            (this.generateBuiltInUser && entity.builtInUser)
-          ) {
+          if (!entity.builtIn || entity.generateJavaEntity) {
             await this.writeFiles({
               sections: entityServerFiles,
               context: { ...application, ...entity, useJakartaValidation, useJacksonIdentityInfo },

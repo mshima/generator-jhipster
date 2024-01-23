@@ -18,27 +18,46 @@
  */
 import { javaMainPackageTemplatesBlock } from '../java/support/index.js';
 
+const domainFiles = [
+  {
+    condition: generator => !generator.reactive,
+    ...javaMainPackageTemplatesBlock('_entityPackage_'),
+    templates: ['domain/_persistClass_.java.jhi.jakarta_persistence'],
+  },
+  {
+    condition: generator => !generator.reactive && generator.requiresPersistableImplementation,
+    ...javaMainPackageTemplatesBlock('_entityPackage_'),
+    templates: ['domain/_persistClass_.java.jhi.jakarta_lifecycle_events'],
+  },
+  {
+    condition: generator => !generator.reactive && generator.enableHibernateCache,
+    ...javaMainPackageTemplatesBlock('_entityPackage_'),
+    templates: ['domain/_persistClass_.java.jhi.hibernate_cache'],
+  },
+  {
+    condition: generator => generator.reactive,
+    ...javaMainPackageTemplatesBlock('_entityPackage_'),
+    templates: ['domain/_persistClass_.java.jhi.spring_data_reactive'],
+  },
+  {
+    condition: generator => generator.requiresPersistableImplementation,
+    ...javaMainPackageTemplatesBlock('_entityPackage_'),
+    templates: ['domain/_persistClass_.java.jhi.spring_data_persistable'],
+  },
+  {
+    condition: generator => generator.reactive && generator.requiresPersistableImplementation,
+    ...javaMainPackageTemplatesBlock('_entityPackage_'),
+    templates: ['domain/_persistClass_Callback.java'],
+  },
+];
+
 const sqlFiles = {
-  sqlFiles: [
-    {
-      condition: generator => !generator.reactive,
-      ...javaMainPackageTemplatesBlock('_entityPackage_'),
-      templates: ['domain/_persistClass_.java.jhi.jakarta_persistence'],
-    },
+  domainFiles,
+  repositoryFiles: [
     {
       condition: generator => !generator.reactive && !generator.embedded,
       ...javaMainPackageTemplatesBlock('_entityPackage_/'),
       templates: ['repository/_entityClass_Repository.java'],
-    },
-    {
-      condition: generator => !generator.reactive && generator.requiresPersistableImplementation,
-      ...javaMainPackageTemplatesBlock('_entityPackage_'),
-      templates: ['domain/_persistClass_.java.jhi.jakarta_lifecycle_events'],
-    },
-    {
-      condition: generator => !generator.reactive && generator.enableHibernateCache,
-      ...javaMainPackageTemplatesBlock('_entityPackage_'),
-      templates: ['domain/_persistClass_.java.jhi.hibernate_cache'],
     },
     {
       condition: generator => !generator.reactive && !generator.embedded && generator.containsBagRelationships,
@@ -47,21 +66,6 @@ const sqlFiles = {
         'repository/_entityClass_RepositoryWithBagRelationships.java',
         'repository/_entityClass_RepositoryWithBagRelationshipsImpl.java',
       ],
-    },
-    {
-      condition: generator => generator.reactive,
-      ...javaMainPackageTemplatesBlock('_entityPackage_'),
-      templates: ['domain/_persistClass_.java.jhi.spring_data_reactive'],
-    },
-    {
-      condition: generator => generator.requiresPersistableImplementation,
-      ...javaMainPackageTemplatesBlock('_entityPackage_'),
-      templates: ['domain/_persistClass_.java.jhi.spring_data_persistable'],
-    },
-    {
-      condition: generator => generator.reactive && generator.requiresPersistableImplementation,
-      ...javaMainPackageTemplatesBlock('_entityPackage_'),
-      templates: ['domain/_persistClass_Callback.java'],
     },
     {
       condition: generator => generator.reactive && !generator.embedded,
@@ -94,6 +98,11 @@ export default async function writeEntitiesTask({ application, entities }) {
     } else if (!entity.builtIn) {
       await this.writeFiles({
         sections: sqlFiles,
+        context: { ...application, ...entity },
+      });
+    } else if (entity.generateJavaEntity) {
+      await this.writeFiles({
+        blocks: domainFiles,
         context: { ...application, ...entity },
       });
     }

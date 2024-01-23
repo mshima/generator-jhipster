@@ -63,6 +63,9 @@ import tech.jhipster.web.util.<% if (reactive) { %>reactive.<% } %>ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+<%_ if (entityAuthority) { _%>
+import org.springframework.security.access.prepost.PreAuthorize;
+<%_ } _%>
 <%_ if (!paginationNo) { _%>
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -164,6 +167,9 @@ public class <%= entityClass %>Resource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
+  <%_ if (entityAuthority) { _%>
+    @PreAuthorize("hasAuthority('<%- entityAuthority %>')")
+  <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> create<%= entityClass %>(<% if (anyPropertyHasValidation) { %>@Valid <% } %>@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
         log.debug("REST request to save <%= entityClass %> : {}", <%= instanceName %>);
   <%_ if (primaryKey.autoGenerate) { _%>
@@ -240,6 +246,9 @@ public class <%= entityClass %>Resource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{<%= primaryKey.name %>}")
+  <%_ if (entityAuthority) { _%>
+    @PreAuthorize("hasAuthority('<%- entityAuthority %>')")
+  <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> update<%= entityClass %>(
         @PathVariable(value = "<%= primaryKey.name %>", required = false) final <%= primaryKey.type %> <%= primaryKey.name %>,
         <% if (anyPropertyHasValidation) { %>@Valid <% } %>@RequestBody <%= restClass %> <%= restInstance %>
@@ -315,9 +324,13 @@ public class <%= entityClass %>Resource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{<%= primaryKey.name %>}", consumes = {"application/json", "application/merge-patch+json"})
+  <%_ if (entityAuthority) { _%>
+    @PreAuthorize("hasAuthority('<%- entityAuthority %>')")
+  <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> partialUpdate<%= entityClass %>(
-    @PathVariable(value = "<%= primaryKey.name %>", required = false) final <%= primaryKey.type %> <%= primaryKey.name %>,
-    <% if (anyPropertyHasValidation) { %>@NotNull <% } %>@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
+        @PathVariable(value = "<%= primaryKey.name %>", required = false) final <%= primaryKey.type %> <%= primaryKey.name %>,
+        <% if (anyPropertyHasValidation) { %>@NotNull <% } %>@RequestBody <%= instanceType %> <%= instanceName %>
+    ) throws URISyntaxException {
         log.debug("REST request to partial update <%= entityClass %> partially : {}, {}", <%= primaryKey.name %>, <%= instanceName %>);
         if (<%= instanceName %>.get<%= primaryKey.nameCapitalized %>() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
@@ -398,6 +411,9 @@ public class <%= entityClass %>Resource {
 <%_ if (databaseTypeSql && isUsingMapsId && !viaService) { _%>
     @Transactional(readOnly = true)
 <%_ } _%>
+<%_ if (entityAuthority) { _%>
+    @PreAuthorize("hasAuthority('<%- entityReadAuthority ?? entityAuthority %>')")
+<%_ } _%>
 <%- include('../../_partials_entity_/get_all_template', {viaService}); -%>
 
 <%_ if (!jpaMetamodelFiltering && reactive && paginationNo) { _%>
@@ -409,6 +425,9 @@ public class <%= entityClass %>Resource {
   <%_ if (databaseTypeSql && isUsingMapsId && !viaService) { _%>
     @Transactional(readOnly = true)
   <%_ } _%>
+<%_ if (entityAuthority) { _%>
+    @PreAuthorize("hasAuthority('<%- entityReadAuthority ?? entityAuthority %>')")
+<%_ } _%>
     public Flux<<%= instanceType %>> getAll<%= entityClassPlural %>AsStream() {
         log.debug("REST request to get all <%= entityClassPlural %> as a stream");
   <%_ if (viaService) { _%>
@@ -429,6 +448,9 @@ public class <%= entityClass %>Resource {
 <%_ if (databaseTypeSql && isUsingMapsId && !viaService) { _%>
     @Transactional(readOnly = true)
 <%_ } _%>
+<%_ if (entityAuthority) { _%>
+    @PreAuthorize("hasAuthority('<%- entityReadAuthority ?? entityAuthority %>')")
+<%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> get<%= entityClass %>(@PathVariable("id") <%= primaryKey.type %> id) {
         log.debug("REST request to get <%= entityClass %> : {}", id);<%- include('../../_partials_entity_/get_template', {viaService, returnDirectly:false, implementsEagerLoadApis}); -%>
         return ResponseUtil.wrapOrNotFound(<%= instanceName %>);
@@ -442,6 +464,9 @@ public class <%= entityClass %>Resource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
+  <%_ if (entityAuthority) { _%>
+    @PreAuthorize("hasAuthority('<%- entityAuthority %>')")
+  <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<Void><% if (reactive) { %>><% } %> delete<%= entityClass %>(@PathVariable("id") <%= primaryKey.type %> id) {
         log.debug("REST request to delete <%= entityClass %> : {}", id);
 <%- include('../../_partials_entity_/delete_template', {viaService: viaService, fromResource: true}); -%>
@@ -475,6 +500,10 @@ public class <%= entityClass %>Resource {
   <%_ } _%>
      * @return the result of the search.
      */
-    @GetMapping("/_search")<%- include('../../_partials_entity_/search_template', {viaService}); -%>
+    @GetMapping("/_search")
+  <%_ if (entityAuthority) { _%>
+    @PreAuthorize("hasAuthority('<%- entityReadAuthority ?? entityAuthority %>')")
+  <%_ } _%>
+<%- include('../../_partials_entity_/search_template', {viaService}); -%>
 <%_ } _%>
 }
