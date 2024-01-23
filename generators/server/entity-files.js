@@ -182,21 +182,24 @@ export function writeFiles() {
     },
 
     async writeServerFiles({ application, entities }) {
+      const rootTemplatesPath = application.reactive ? ['reactive', '', '../../java/templates/'] : ['', '../../java/templates/'];
       for (const entity of entities.filter(entity => !entity.skipServer)) {
         if (entity.builtInUser) {
           await this.writeFiles({
             sections: userFiles,
+            rootTemplatesPath,
             context: { ...application, ...entity },
           });
         } else if (entity.builtInAuthority) {
           await this.writeFiles({
             sections: restFiles,
+            rootTemplatesPath,
             context: { ...application, ...entity },
           });
         } else if (!entity.builtIn) {
           await this.writeFiles({
             sections: serverFiles,
-            rootTemplatesPath: application.reactive ? ['reactive', '', '../../java/templates/'] : ['', '../../java/templates/'],
+            rootTemplatesPath,
             context: { ...application, ...entity },
           });
         }

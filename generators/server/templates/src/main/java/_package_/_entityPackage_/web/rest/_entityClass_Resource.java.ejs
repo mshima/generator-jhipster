@@ -176,7 +176,7 @@ public class <%= entityClass %>Resource {
         if (<%= instanceName %>.get<%= primaryKey.nameCapitalized %>() != null) {
             throw new BadRequestAlertException("A new <%= entityInstance %> cannot already have an ID", ENTITY_NAME, "idexists");
         }
-  <%_ } else { _%>
+  <%_ } else if (!reactive) { _%>
         if (<%= entityInstance %>Repository.existsById(<%- instanceName %>.get<%= primaryKey.nameCapitalized %>())) {
             throw new BadRequestAlertException("<%- entityInstance %> already exists", ENTITY_NAME, "idexists");
         }
@@ -206,6 +206,14 @@ public class <%= entityClass %>Resource {
         <%= instanceName %>.set<%= field.fieldNameCapitalized %>(UUID.randomUUID());
     <%_ } _%>
   <%_ } _%>
+  <%_ if (!primaryKey.autoGenerate && reactive) { _%>
+        return <%= entityInstance %>Repository
+            .existsById(<%- instanceName %>.get<%= primaryKey.nameCapitalized %>())
+            .flatMap(exists -> {
+                if (exists) {
+                    return Mono.error(new BadRequestAlertException("<%- entityInstance %> already exists", ENTITY_NAME, "idexists"));
+                }
+  <%_ } _%>
   <%_ if (serviceNo) { _%>
 <%- include('/_global_partials_entity_/save_template', {saveNewEntityOperation: true, returnDirectly: false}); -%>
   <%_ } _%>
@@ -223,6 +231,9 @@ public class <%= entityClass %>Resource {
                     throw new RuntimeException(e);
                 }
             });
+    <%_ if (!primaryKey.autoGenerate) { _%>
+        });
+    <%_ } _%>
   <%_ } else { _%>
     <%_ if (!serviceNo) { _%>
         <%- restInstance %> = <%= entityInstance %>Service.save(<%= instanceName %>);
@@ -262,10 +273,12 @@ public class <%= entityClass %>Resource {
         }
 
   <%_ if (reactive) { _%>
-        return <%= entityInstance %>Repository.existsById(<%= primaryKey.name %>).flatMap(exists -> {
-            if (!exists) {
-                return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
-            }
+        return <%= entityInstance %>Repository
+            .existsById(<%= primaryKey.name %>)
+            .flatMap(exists -> {
+                if (!exists) {
+                    return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
+                }
   <%_ } else { _%>
         if (!<%= entityInstance %>Repository.existsById(<%= primaryKey.name %>)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");

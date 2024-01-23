@@ -19,6 +19,21 @@
 import { SERVER_MAIN_RES_DIR } from '../generator-constants.js';
 import { javaMainPackageTemplatesBlock } from '../server/support/index.js';
 
+const domainFiles = [
+  {
+    ...javaMainPackageTemplatesBlock('_entityPackage_'),
+    templates: ['domain/_persistClass_.java.jhi.spring_data_couchbase'],
+  },
+];
+
+const repositoryFiles = [
+  {
+    condition: generator => !generator.embedded,
+    ...javaMainPackageTemplatesBlock('_entityPackage_'),
+    templates: ['repository/_entityClass_Repository.java'],
+  },
+];
+
 export const entityFiles = {
   dbChangelog: [
     {
@@ -43,17 +58,8 @@ export const entityFiles = {
       ],
     },
   ],
-  server: [
-    {
-      ...javaMainPackageTemplatesBlock('_entityPackage_'),
-      templates: ['domain/_persistClass_.java.jhi.spring_data_couchbase'],
-    },
-    {
-      condition: generator => !generator.embedded,
-      ...javaMainPackageTemplatesBlock('_entityPackage_'),
-      templates: ['repository/_entityClass_Repository.java'],
-    },
-  ],
+  domainFiles,
+  repositoryFiles,
 };
 
 export function cleanupCouchbaseEntityFilesTask({ application, entities }) {
@@ -67,10 +73,12 @@ export function cleanupCouchbaseEntityFilesTask({ application, entities }) {
 }
 
 export default async function writeEntityCouchbaseFiles({ application, entities }) {
-  for (const entity of entities.filter(entity => !entity.builtIn && !entity.skipServer)) {
-    await this.writeFiles({
-      sections: entityFiles,
-      context: { ...application, ...entity },
-    });
+  for (const entity of entities.filter(entity => !entity.skipServer)) {
+    if (!entity.builtIn || entity.generateJavaEntity) {
+      await this.writeFiles({
+        sections: entity.builtIn ? { domainFiles } : entityFiles,
+        context: { ...application, ...entity },
+      });
+    }
   }
 }

@@ -73,6 +73,7 @@ Secure the entity with the authority.
 
 ```
 @EntityAuthority(ROLE_ADMIN)
+@EntityReadAuthority(ROLE_USER)
 entity Department {}
 ```
 
@@ -106,7 +107,7 @@ entity Company {
 ##### Label
 
 ```jdl
-relationship ManyToOnly {
+relationship ManyToOne {
   @RelationshipNameHumanized('Company user') Company{user} to User
 }
 ```

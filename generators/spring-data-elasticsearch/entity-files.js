@@ -35,10 +35,12 @@ export const entityFiles = {
 export function cleanupElasticsearchEntityFilesTask() {}
 
 export default async function writeEntityElasticsearchFiles({ application, entities }) {
-  for (const entity of entities.filter(entity => !entity.builtIn && !entity.skipServer && entity.searchEngineElasticsearch)) {
-    await this.writeFiles({
-      sections: entityFiles,
-      context: { ...application, ...entity },
-    });
+  for (const entity of entities.filter(entity => !entity.skipServer && entity.searchEngineElasticsearch)) {
+    if (!entity.builtIn) {
+      await this.writeFiles({
+        sections: entityFiles,
+        context: { ...application, ...entity },
+      });
+    }
   }
 }

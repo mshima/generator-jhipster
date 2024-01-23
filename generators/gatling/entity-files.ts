@@ -36,10 +36,12 @@ export const gatlingFiles = {
 export function cleanupEntitiesTask() {}
 
 export default async function writeEntitiesTask(this: Generator, { application, entities }) {
-  for (const entity of entities.filter(entity => !entity.builtIn && !entity.skipServer)) {
-    await this.writeFiles({
-      sections: gatlingFiles,
-      context: { ...application, ...entity },
-    });
+  for (const entity of entities.filter(entity => !entity.skipServer)) {
+    if (!entity.builtIn) {
+      await this.writeFiles({
+        sections: gatlingFiles,
+        context: { ...application, ...entity },
+      });
+    }
   }
 }

@@ -516,7 +516,7 @@ filterTestableRelationships.forEach((relationship) => { _%>
     <%_ if (reactive && databaseTypeSql && primaryKey.typeUUID && !isUsingMapsId) { _%>
             .<%= primaryKey.name %>(UUID.randomUUID())
     <%_ } _%>
-    <%_ if (primaryKey.typeString && !isUsingMapsId) { _%>
+    <%_ if (primaryKey.typeString && !isUsingMapsId && !primaryKey.autoGenerate) { _%>
             .<%= primaryKey.name %>(UUID.randomUUID().toString())
     <%_ } _%>
     <% for (field of fieldsToTest) { %>
@@ -527,7 +527,7 @@ filterTestableRelationships.forEach((relationship) => { _%>
     <%_ if (reactive && databaseTypeSql && primaryKey.typeUUID && !isUsingMapsId) { _%>
         <%= persistInstance %>.set<%= primaryKey.fields[0].fieldInJavaBeanMethod %>(UUID.randomUUID());
     <%_ } _%>
-    <%_ if (primaryKey.typeString && !isUsingMapsId) { _%>
+    <%_ if (primaryKey.typeString && !isUsingMapsId && !primaryKey.autoGenerate) { _%>
         <%= persistInstance %>.set<%= primaryKey.fields[0].fieldInJavaBeanMethod %>(UUID.randomUUID().toString());
     <%_ } _%>
     <%_ for (field of fieldsToTest) { _%>
@@ -711,7 +711,7 @@ _%>
     @Test<%= transactionalAnnotation %>
     void create<%= entityClass %>WithExistingId() throws Exception {
         // Create the <%= entityClass %> with an existing ID
-  <%_ if ((primaryKey.typeUUID || primaryKey.typeString) && databaseTypeSql) { _%>
+  <%_ if ((primaryKey.typeUUID && databaseTypeSql) || !primaryKey.autoGenerate) { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
   <%_ } else { _%>
         <%= persistInstance %>.set<%= primaryKey.nameCapitalized %>(<% if (primaryKey.typeUUID) { %>UUID.randomUUID()<% } else if (primaryKey.typeLong) { %>1L<% } else if (primaryKey.typeInteger) { %>1<% } else { %>"existing_id"<% } %>);
