@@ -254,6 +254,9 @@ exports[`generator - neo4j gateway-jwt-gradle-enableTranslation(true)-com.mycomp
   "src/main/java/com/mycompany/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -429,6 +432,9 @@ exports[`generator - neo4j gateway-jwt-gradle-enableTranslation(true)-com.mycomp
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/mycompany/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/PublicUserResourceIT.java": {
@@ -1678,6 +1684,9 @@ exports[`generator - neo4j monolith-jwt-reactive(false)-maven-enableTranslation(
   "src/main/java/tech/jhipster/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -1865,6 +1874,9 @@ exports[`generator - neo4j monolith-jwt-reactive(false)-maven-enableTranslation(
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -3213,6 +3225,9 @@ exports[`generator - neo4j monolith-session-reactive(false)-maven-enableTranslat
   "src/main/java/tech/jhipster/web/rest/AnotherSimpleResource.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -3373,6 +3388,9 @@ exports[`generator - neo4j monolith-session-reactive(false)-maven-enableTranslat
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AnotherSimpleResourceIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {

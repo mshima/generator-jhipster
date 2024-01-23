@@ -188,6 +188,11 @@ export function writeFiles() {
             sections: userFiles,
             context: { ...application, ...entity },
           });
+        } else if (entity.builtInAuthority) {
+          await this.writeFiles({
+            sections: restFiles,
+            context: { ...application, ...entity },
+          });
         } else if (!entity.builtIn) {
           await this.writeFiles({
             sections: serverFiles,

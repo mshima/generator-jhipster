@@ -227,6 +227,9 @@ exports[`generator - sql gateway-jwt-mysql-gradle-enableTranslation(true)-com.my
   "src/main/java/com/mycompany/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/web/rest/GatewayResource.java": {
     "stateCleared": "modified",
   },
@@ -393,6 +396,9 @@ exports[`generator - sql gateway-jwt-mysql-gradle-enableTranslation(true)-com.my
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/mycompany/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/PublicUserResourceIT.java": {
@@ -679,6 +685,9 @@ exports[`generator - sql gateway-jwt-oracle-gradle-enableTranslation(true)-com.m
   "src/main/java/com/mycompany/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/web/rest/GatewayResource.java": {
     "stateCleared": "modified",
   },
@@ -842,6 +851,9 @@ exports[`generator - sql gateway-jwt-oracle-gradle-enableTranslation(true)-com.m
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/mycompany/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/PublicUserResourceIT.java": {
@@ -1122,6 +1134,9 @@ exports[`generator - sql gateway-jwt-postgresql-gradle-enableTranslation(true)-c
   "src/main/java/com/mycompany/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -1273,6 +1288,9 @@ exports[`generator - sql gateway-jwt-postgresql-gradle-enableTranslation(true)-c
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/mycompany/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/PublicUserResourceIT.java": {
@@ -1532,6 +1550,9 @@ exports[`generator - sql gateway-oauth2-mariadb-gradle-enableTranslation(true)-c
   "src/main/java/com/mycompany/web/rest/AuthInfoResource.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/web/rest/GatewayResource.java": {
     "stateCleared": "modified",
   },
@@ -1656,6 +1677,9 @@ exports[`generator - sql gateway-oauth2-mariadb-gradle-enableTranslation(true)-c
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/AccountResourceIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/mycompany/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/LogoutResourceIT.java": {
@@ -1912,6 +1936,9 @@ exports[`generator - sql gateway-oauth2-mssql-gradle-enableTranslation(true)-com
   "src/main/java/com/mycompany/web/rest/AuthInfoResource.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/web/rest/GatewayResource.java": {
     "stateCleared": "modified",
   },
@@ -2036,6 +2063,9 @@ exports[`generator - sql gateway-oauth2-mssql-gradle-enableTranslation(true)-com
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/AccountResourceIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/mycompany/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/com/mycompany/web/rest/LogoutResourceIT.java": {
@@ -6204,6 +6234,9 @@ exports[`generator - sql monolith-jwt-mariadb-reactive(false)-maven-enableTransl
   "src/main/java/tech/jhipster/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -6370,6 +6403,9 @@ exports[`generator - sql monolith-jwt-mariadb-reactive(false)-maven-enableTransl
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -6925,6 +6961,9 @@ exports[`generator - sql monolith-jwt-mssql-reactive(false)-maven-enableTranslat
   "src/main/java/tech/jhipster/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -7097,6 +7136,9 @@ exports[`generator - sql monolith-jwt-mssql-reactive(false)-maven-enableTranslat
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -7649,6 +7691,9 @@ exports[`generator - sql monolith-jwt-mysql-reactive(false)-maven-enableTranslat
   "src/main/java/tech/jhipster/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -7821,6 +7866,9 @@ exports[`generator - sql monolith-jwt-mysql-reactive(false)-maven-enableTranslat
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -8364,6 +8412,9 @@ exports[`generator - sql monolith-jwt-oracle-reactive(false)-maven-enableTransla
   "src/main/java/tech/jhipster/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -8527,6 +8578,9 @@ exports[`generator - sql monolith-jwt-oracle-reactive(false)-maven-enableTransla
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -9079,6 +9133,9 @@ exports[`generator - sql monolith-jwt-postgresql-reactive(false)-maven-enableTra
   "src/main/java/tech/jhipster/web/rest/AuthenticateController.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -9251,6 +9308,9 @@ exports[`generator - sql monolith-jwt-postgresql-reactive(false)-maven-enableTra
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AuthenticateControllerIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -12787,6 +12847,9 @@ exports[`generator - sql monolith-session-mariadb-reactive(false)-maven-enableTr
   "src/main/java/tech/jhipster/web/rest/AccountResource.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -12932,6 +12995,9 @@ exports[`generator - sql monolith-session-mariadb-reactive(false)-maven-enableTr
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AccountResourceIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -13445,6 +13511,9 @@ exports[`generator - sql monolith-session-mssql-reactive(false)-maven-enableTran
   "src/main/java/tech/jhipster/web/rest/AccountResource.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -13590,6 +13659,9 @@ exports[`generator - sql monolith-session-mssql-reactive(false)-maven-enableTran
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AccountResourceIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -14103,6 +14175,9 @@ exports[`generator - sql monolith-session-mysql-reactive(false)-maven-enableTran
   "src/main/java/tech/jhipster/web/rest/AccountResource.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -14248,6 +14323,9 @@ exports[`generator - sql monolith-session-mysql-reactive(false)-maven-enableTran
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AccountResourceIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -14761,6 +14839,9 @@ exports[`generator - sql monolith-session-oracle-reactive(false)-maven-enableTra
   "src/main/java/tech/jhipster/web/rest/AccountResource.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -14903,6 +14984,9 @@ exports[`generator - sql monolith-session-oracle-reactive(false)-maven-enableTra
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AccountResourceIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {
@@ -15413,6 +15497,9 @@ exports[`generator - sql monolith-session-postgresql-reactive(false)-maven-enabl
   "src/main/java/tech/jhipster/web/rest/AccountResource.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/web/rest/AuthorityResource.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/web/rest/PublicUserResource.java": {
     "stateCleared": "modified",
   },
@@ -15558,6 +15645,9 @@ exports[`generator - sql monolith-session-postgresql-reactive(false)-maven-enabl
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/AccountResourceIT.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/tech/jhipster/web/rest/AuthorityResourceIT.java": {
     "stateCleared": "modified",
   },
   "src/test/java/tech/jhipster/web/rest/PublicUserResourceIT.java": {

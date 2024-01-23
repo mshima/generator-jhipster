@@ -166,9 +166,15 @@ public class <%= entityClass %>Resource {
     @PostMapping("")
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> create<%= entityClass %>(<% if (anyPropertyHasValidation) { %>@Valid <% } %>@RequestBody <%= instanceType %> <%= instanceName %>) throws URISyntaxException {
         log.debug("REST request to save <%= entityClass %> : {}", <%= instanceName %>);
+  <%_ if (primaryKey.autoGenerate) { _%>
         if (<%= instanceName %>.get<%= primaryKey.nameCapitalized %>() != null) {
             throw new BadRequestAlertException("A new <%= entityInstance %> cannot already have an ID", ENTITY_NAME, "idexists");
         }
+  <%_ } else { _%>
+        if (<%= entityInstance %>Repository.existsById(<%- instanceName %>.get<%= primaryKey.nameCapitalized %>())) {
+            throw new BadRequestAlertException("<%- entityInstance %> already exists", ENTITY_NAME, "idexists");
+        }
+  <%_ } _%>
   <%_ if (isUsingMapsId) { _%>
         if (Objects.isNull(<%= instanceName %>.get<%= mapsIdAssoc.relationshipNameCapitalized %>())) {
             throw new BadRequestAlertException("Invalid association value provided", ENTITY_NAME, "null");
