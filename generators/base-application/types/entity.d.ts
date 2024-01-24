@@ -35,86 +35,94 @@ export type BaseEntity = {
   skipServer?: boolean;
 };
 
-type Entity = Required<BaseEntity> & {
-  builtIn?: boolean;
-  builtInUser?: boolean;
-  builtInAuthority?: boolean;
-  microserviceName?: string;
-  adminEntity?: boolean;
-  generateJavaEntity?: boolean;
-
-  entityNameCapitalized: string;
-  entityClass: string;
-  entityInstance: string;
-  entityTableName: string;
-  entityNamePlural: string;
-
-  dtoClass?: string;
-  dtoInstance?: string;
-
-  persistClass: string;
-  persistInstance: string;
-  restClass: string;
-  restInstance: string;
-
-  entityNamePluralizedAndSpinalCased: string;
-  entityClassPlural: string;
-  entityInstancePlural: string;
-
-  entityI18nVariant: string;
-  entityClassHumanized: string;
-  entityClassPluralHumanized: string;
-
-  entityFileName: string;
-  entityFolderName: string;
-  entityModelFileName: string;
-  entityParentPathAddition: string;
-  entityPluralFileName: string;
-  entityServiceFileName: string;
-
-  entityAngularName: string;
-  entityAngularNamePlural: string;
-  entityReactName: string;
-
-  entityApiUrl: string;
-  entityStateName: string;
-  entityUrl: string;
-
-  entityTranslationKey: string;
-  entityTranslationKeyMenu: string;
-
-  i18nKeyPrefix: string;
-  i18nAlertHeaderPrefix: string;
-
-  entityApi: string;
-  entityPage: string;
-
-  anyFieldIsBigDecimal: boolean;
-  /**
-   * Any file is of type Bytes or ByteBuffer
-   */
-  anyFieldIsBlobDerived: boolean;
-  /**
-   * Any field is of type ZonedDateTime, Instant or LocalDate
-   */
-  anyFieldIsDateDerived: boolean;
-  anyFieldIsDuration: boolean;
-  anyFieldIsInstant: boolean;
-  anyFieldIsLocalDate: boolean;
-  /**
-   * Any field is of type ZonedDateTime or Instant
-   */
-  anyFieldIsTimeDerived: boolean;
-  anyFieldIsUUID: boolean;
-  anyFieldIsZonedDateTime: boolean;
-
-  anyFieldHasDocumentation: boolean;
-  anyFieldHasImageContentType: boolean;
-  anyFieldHasTextContentType: boolean;
-  /**
-   * Any field has image or any contentType
-   */
-  anyFieldHasFileBasedContentType: boolean;
+type SpringEntity = {
+  entitySpringPreAuthorize?: string;
+  entitySpringReadPreAuthorize?: string;
 };
+
+type Entity = Required<BaseEntity> &
+  SpringEntity & {
+    builtIn?: boolean;
+    builtInUser?: boolean;
+    builtInAuthority?: boolean;
+    microserviceName?: string;
+    adminEntity?: boolean;
+    generateJavaEntity?: boolean;
+    entityAuthority?: string;
+    entityReadAuthority?: string;
+
+    entityNameCapitalized: string;
+    entityClass: string;
+    entityInstance: string;
+    entityTableName: string;
+    entityNamePlural: string;
+
+    dtoClass?: string;
+    dtoInstance?: string;
+
+    persistClass: string;
+    persistInstance: string;
+    restClass: string;
+    restInstance: string;
+
+    entityNamePluralizedAndSpinalCased: string;
+    entityClassPlural: string;
+    entityInstancePlural: string;
+
+    entityI18nVariant: string;
+    entityClassHumanized: string;
+    entityClassPluralHumanized: string;
+
+    entityFileName: string;
+    entityFolderName: string;
+    entityModelFileName: string;
+    entityParentPathAddition: string;
+    entityPluralFileName: string;
+    entityServiceFileName: string;
+
+    entityAngularName: string;
+    entityAngularNamePlural: string;
+    entityReactName: string;
+
+    entityApiUrl: string;
+    entityStateName: string;
+    entityUrl: string;
+
+    entityTranslationKey: string;
+    entityTranslationKeyMenu: string;
+
+    i18nKeyPrefix: string;
+    i18nAlertHeaderPrefix: string;
+
+    entityApi: string;
+    entityPage: string;
+
+    anyFieldIsBigDecimal: boolean;
+    /**
+     * Any file is of type Bytes or ByteBuffer
+     */
+    anyFieldIsBlobDerived: boolean;
+    /**
+     * Any field is of type ZonedDateTime, Instant or LocalDate
+     */
+    anyFieldIsDateDerived: boolean;
+    anyFieldIsDuration: boolean;
+    anyFieldIsInstant: boolean;
+    anyFieldIsLocalDate: boolean;
+    /**
+     * Any field is of type ZonedDateTime or Instant
+     */
+    anyFieldIsTimeDerived: boolean;
+    anyFieldIsUUID: boolean;
+    anyFieldIsZonedDateTime: boolean;
+
+    anyFieldHasDocumentation: boolean;
+    anyFieldHasImageContentType: boolean;
+    anyFieldHasTextContentType: boolean;
+    /**
+     * Any field has image or any contentType
+     */
+    anyFieldHasFileBasedContentType: boolean;
+  };
 
 export default Entity;
