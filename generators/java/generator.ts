@@ -106,7 +106,7 @@ export default class JavaGenerator extends BaseApplicationGenerator<GeneratorDef
     return this.asPreparingEachEntityFieldTaskGroup({
       prepareEntity({ entity, field }) {
         field.propertyJavaBeanName = javaBeanCase(field.propertyName);
-        if (entity.dtoMapstruct) {
+        if (entity.dtoMapstruct || entity.builtIn) {
           field.propertyDtoJavaType = field.blobContentTypeText ? 'String' : field.fieldType;
         }
       },
