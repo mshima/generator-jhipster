@@ -37,9 +37,6 @@ import cleanupTask from './cleanup.js';
 import { ADD_SPRING_MILESTONE_REPOSITORY } from '../generator-constants.js';
 import {
   addSpringFactory,
-  buildJavaGet,
-  buildJavaGetter,
-  buildJavaSetter,
   getJavaValueGeneratorForType,
   getPrimaryKeyValue,
   getSpecificationBuildForType,
@@ -345,17 +342,5 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
    */
   getPrimaryKeyValue(primaryKey, databaseType = this.jhipsterConfig.databaseType, defaultValue = 1) {
     return getPrimaryKeyValue(primaryKey, databaseType, defaultValue);
-  }
-
-  buildJavaGet(reference) {
-    return buildJavaGet(reference);
-  }
-
-  buildJavaGetter(reference, type = reference.type) {
-    return buildJavaGetter(reference, type);
-  }
-
-  buildJavaSetter(reference, valueDefinition = `${reference.type} ${reference.name}`) {
-    return buildJavaSetter(reference, valueDefinition);
   }
 }

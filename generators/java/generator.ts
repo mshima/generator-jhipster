@@ -105,7 +105,7 @@ export default class JavaGenerator extends BaseApplicationGenerator<GeneratorDef
   get preparingEachEntityField() {
     return this.asPreparingEachEntityFieldTaskGroup({
       prepareEntity({ field }) {
-        field.propertyJavaBeanName = javaBeanCase(field.fieldName);
+        field.propertyJavaBeanName = javaBeanCase(field.propertyName);
       },
     });
   }
@@ -117,7 +117,7 @@ export default class JavaGenerator extends BaseApplicationGenerator<GeneratorDef
   get preparingEachEntityRelationship() {
     return this.asPreparingEachEntityRelationshipTaskGroup({
       prepareEntity({ relationship }) {
-        relationship.propertyJavaBeanName = javaBeanCase(relationship.relationshipName);
+        relationship.propertyJavaBeanName = javaBeanCase(relationship.propertyName);
       },
     });
   }
