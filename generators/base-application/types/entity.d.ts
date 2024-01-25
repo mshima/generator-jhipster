@@ -125,6 +125,8 @@ type Entity = Required<BaseEntity> &
      * Any field has image or any contentType
      */
     anyFieldHasFileBasedContentType: boolean;
+
+    dtoMapstruct: boolean;
   };
 
 export default Entity;

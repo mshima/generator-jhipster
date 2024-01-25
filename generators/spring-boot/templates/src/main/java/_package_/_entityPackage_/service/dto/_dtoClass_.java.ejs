@@ -80,59 +80,37 @@ _%>
   const relationship = property.relationshipName ? property : undefined;
   const required = field && field.fieldValidate && field.fieldValidationRequired;
   if (field) {
-    if (field.fieldValidate ) { _%>
+    if (property.fieldValidate ) { _%>
     <%- include('/_global_partials_entity_/field_validators', {field, reactive}); -%>
     <%_ }
   } _%>
   <%_ if (property.propertyApiDescription) { _%>
     @Schema(description = "<%- property.propertyApiDescription %>"<% if (required) { %>, required = true<% } %>)
   <%_ } _%>
-  <%_ if (field && field.fieldTypeBytes && databaseTypeSql) { _%>
+  <%_ if (property.fieldTypeBytes && databaseTypeSql) { _%>
     @Lob
   <%_ } _%>
-  <%_ if (field && field.blobContentTypeText) { _%>
-    private String <%= property.propertyName %>;
-  <%_ } else if (property.collection && relationship) { _%>
+  <%_ if (property.collection && relationship) { _%>
     private Set<<%= relationship.otherEntity.dtoClass %>> <%= property.propertyName %> = new HashSet<>();
-  <%_ } else if (relationship) { _%>
-    private <%= relationship.otherEntity.dtoClass %> <%= property.propertyName %>;
   <%_ } else { _%>
-    private <%= property.fieldType %> <%= property.propertyName %>;
+  private <%= property.propertyDtoJavaType %> <%= property.propertyName %>;
   <%_ } _%>
 
-  <%_ if (field && field.fieldWithContentType) { _%>
+  <%_ if (property.fieldWithContentType) { _%>
     private String <%= property.propertyName %>ContentType;
   <%_ }
 }
 _%>
 
 <%_ for (property of restProperties) { _%>
-  <%_ const field = property.fieldName ? property : undefined; _%>
-  <%_ const relationship = property.relationshipName ? property : undefined; _%>
-  <%_ if (field && field.blobContentTypeText) { _%>
-    public String get<%- property.propertyJavaBeanName %>() {
-  <%_ } else if (relationship && relationship.collection) { _%>
-    public Set<<%- relationship.otherEntity.dtoClass %>> get<%- property.propertyJavaBeanName %>() {
-  <%_ } else if (relationship) { _%>
-    public <%- relationship.otherEntity.dtoClass %> get<%- property.propertyJavaBeanName %>() {
-  <%_ } else { _%>
-    public <%- property.fieldType %> get<%- property.propertyJavaBeanName %>() {
-  <%_ } _%>
+    public <%- property.propertyDtoJavaType %> get<%- property.propertyJavaBeanName %>() {
         return <%= property.propertyName %>;
     }
 
-  <%_ if (field && field.blobContentTypeText) { _%>
-    public void set<%- property.propertyJavaBeanName %>(String <%- property.propertyName %>) %> {
-  <%_ } else if (relationship && relationship.collection) { _%>
-    public void set<%- property.propertyJavaBeanName %>(Set<<%- relationship.otherEntity.dtoClass %>> <%- property.propertyName %>) %> {
-  <%_ } else if (relationship) { _%>
-    public void set<%- property.propertyJavaBeanName %>(<%- relationship.otherEntity.dtoClass %> <%- property.propertyName %>) %> {
-  <%_ } else { _%>
-    public void set<%- property.propertyJavaBeanName %>(<%- property.fieldType %> <%- property.propertyName %>) %> {
-  <%_ } _%>
+    public void set<%- property.propertyJavaBeanName %>(<%- property.propertyDtoJavaType %> <%- property.propertyName %>) %> {
         this.<%= property.propertyName %> = <%= property.propertyName %>;
     }
-  <%_ if (field && field.fieldWithContentType) { _%>
+  <%_ if (property.fieldWithContentType) { _%>
 
     public String get<%= property.propertyJavaBeanName %>ContentType() {
         return <%= property.propertyName %>ContentType;
@@ -144,7 +122,7 @@ _%>
   <%_ } _%>
 <%_ } _%>
 
-<%_ const idNames = primaryKey ? [...primaryKey.fields.map(f => f.fieldName)] : [] _%>
+<%_ const idNames = primaryKey ? [...primaryKey.fields.map(f => f.propertyName)] : [] _%>
     @Override
     public boolean equals(Object o) {
         if (this == o) {
