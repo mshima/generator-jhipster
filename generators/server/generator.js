@@ -51,7 +51,6 @@ import {
 } from '../generator-list.js';
 import BaseApplicationGenerator from '../base-application/index.js';
 import { writeFiles } from './files.js';
-import { writeFiles as writeEntityFiles } from './entity-files.js';
 import { packageJson } from '../../lib/index.js';
 import {
   SERVER_MAIN_SRC_DIR,
@@ -545,17 +544,6 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
           throw new Error(validation);
         }
       },
-      checkForCircularRelationships({ entity }) {
-        const detectCyclicRequiredRelationship = (entity, relatedEntities) => {
-          if (relatedEntities.has(entity)) return true;
-          relatedEntities.add(entity);
-          return entity.relationships
-            ?.filter(rel => rel.relationshipRequired || rel.id)
-            .some(rel => detectCyclicRequiredRelationship(rel.otherEntity, new Set([...relatedEntities])));
-        };
-        entity.hasCyclicRequiredRelationship = detectCyclicRequiredRelationship(entity, new Set());
-        entity.skipJunitTests = entity.hasCyclicRequiredRelationship ? 'Cyclic required relationships detected' : undefined;
-      },
     });
   }
 
@@ -628,16 +616,6 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
 
   get [BaseApplicationGenerator.WRITING]() {
     return this.asWritingTaskGroup(this.delegateTasksToBlueprint(() => this.writing));
-  }
-
-  get writingEntities() {
-    return this.asWritingEntitiesTaskGroup({
-      ...writeEntityFiles(),
-    });
-  }
-
-  get [BaseApplicationGenerator.WRITING_ENTITIES]() {
-    return this.asWritingEntitiesTaskGroup(this.delegateTasksToBlueprint(() => this.writingEntities));
   }
 
   get postWriting() {

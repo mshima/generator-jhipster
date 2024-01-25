@@ -20,7 +20,7 @@ import fs from 'fs';
 import * as _ from 'lodash-es';
 import chalk from 'chalk';
 import { cleanupOldFiles } from './entity-cleanup.js';
-import { moveToJavaPackageSrcDir, javaMainPackageTemplatesBlock, javaTestPackageTemplatesBlock } from './support/index.js';
+import { moveToJavaPackageSrcDir, javaMainPackageTemplatesBlock, javaTestPackageTemplatesBlock } from '../java/support/index.js';
 import { SERVER_TEST_SRC_DIR } from '../generator-constants.js';
 import { databaseTypes, entityOptions } from '../../jdl/jhipster/index.js';
 
@@ -128,23 +128,28 @@ export const dtoFiles = {
 const userFiles = {
   userFiles: [
     {
-      ...javaMainPackageTemplatesBlock(),
+      ...javaMainPackageTemplatesBlock('_entityPackage_/'),
       renameTo: (data, file) => moveToJavaPackageSrcDir(data, file).replace('/User.java', `/${data.user.persistClass}.java`),
       templates: ['domain/User.java'],
     },
     {
-      ...javaMainPackageTemplatesBlock(),
+      ...javaMainPackageTemplatesBlock('_entityPackage_/'),
       renameTo: (data, file) => moveToJavaPackageSrcDir(data, file).replace('/UserDTO.java', `/${data.user.dtoClass}.java`),
       templates: ['service/dto/UserDTO.java'],
     },
     {
-      ...javaMainPackageTemplatesBlock(),
+      ...javaMainPackageTemplatesBlock('_entityPackage_/'),
       renameTo: (data, file) => moveToJavaPackageSrcDir(data, file).replace('/AdminUserDTO.java', `/${data.user.adminUserDto}.java`),
       templates: ['service/dto/AdminUserDTO.java'],
     },
     {
+      condition: data => data.generateUserManagement,
+      ...javaMainPackageTemplatesBlock('_entityPackage_/'),
+      templates: ['web/rest/UserResource.java'],
+    },
+    {
       condition: data => data.generateBuiltInUserEntity,
-      ...javaMainPackageTemplatesBlock(),
+      ...javaMainPackageTemplatesBlock('_entityPackage_/'),
       templates: [
         'service/UserService.java',
         'service/mapper/UserMapper.java',
@@ -154,7 +159,7 @@ const userFiles = {
     },
     {
       condition: data => data.generateBuiltInUserEntity,
-      ...javaTestPackageTemplatesBlock(),
+      ...javaTestPackageTemplatesBlock('_entityPackage_/'),
       templates: [
         'service/UserServiceIT.java',
         'service/mapper/UserMapperTest.java',

@@ -51,6 +51,7 @@ type Entity = Required<BaseEntity> &
     adminEntity?: boolean;
     entityAuthority?: string;
     entityReadAuthority?: string;
+    hasCyclicRequiredRelationship?: boolean;
 
     entityNameCapitalized: string;
     entityClass: string;
