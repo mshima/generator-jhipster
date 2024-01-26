@@ -352,9 +352,6 @@ export function prepareEntityPrimaryKeyForTemplates(
             get fieldName() {
               return idCount === 1 ? field.fieldName : `${relationship.relationshipName}${field.fieldNameCapitalized}`;
             },
-            get fieldType() {
-              return field.fieldType;
-            },
             get fieldNameCapitalized() {
               return idCount === 1
                 ? field.fieldNameCapitalized
