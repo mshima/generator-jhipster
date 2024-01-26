@@ -1,0 +1,161 @@
+<%#
+ Copyright 2013-2024 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+package <%- entityAbsolutePackage %>.service.dto;
+
+import java.util.Objects;
+<%_ if (entityApiDescription || importApiModelProperty) { _%>
+import io.swagger.v3.oas.annotations.media.Schema;
+<%_ } _%>
+<%_ if (anyFieldIsInstant) { _%>
+import java.time.Instant;
+<%_ } _%>
+<%_ if (anyFieldIsLocalDate) { _%>
+import java.time.LocalDate;
+<%_ } _%>
+<%_ if (anyFieldIsZonedDateTime) { _%>
+import java.time.ZonedDateTime;
+<%_ } _%>
+<%_ if (anyFieldIsDuration) { _%>
+import java.time.Duration;
+<%_ } _%>
+<%_ if (anyPropertyHasValidation) { _%>
+import jakarta.validation.constraints.*;
+<%_ } _%>
+import java.io.Serializable;
+<%_ if (anyFieldIsBigDecimal) { _%>
+import java.math.BigDecimal;
+<%_ } _%>
+<%_ if (anyFieldIsBlobDerived && databaseTypeCassandra) { _%>
+import java.nio.ByteBuffer;
+<%_ } _%>
+<%_ if (restProperties.some(property => property.collection)) { _%>
+import java.util.HashSet;
+import java.util.Set;
+<%_ } _%>
+<%_ if (anyFieldIsUUID) { _%>
+import java.util.UUID;
+<%_ } _%>
+<%_ if (anyFieldIsBlobDerived && databaseTypeSql) { _%>
+import jakarta.persistence.Lob;
+<%_ } _%>
+<%_ Object.keys(uniqueEnums).forEach(function(element) { _%>
+import <%- entityAbsolutePackage %>.domain.enumeration.<%- element %>;
+<%_ }); _%>
+
+<%_ for (const otherEntity of otherEntities.filter(otherEntity => otherEntity.entityPackage !== entityPackage)) { _%>
+import <%- `${otherEntity.entityAbsolutePackage}.service.dto.${otherEntity.dtoClass}` %>;
+<%_ } _%>
+
+/**
+ * A DTO for the {@link <%- entityAbsolutePackage %>.domain.<%- persistClass %>} entity.
+ */
+<%_ if (entityApiDescription) { _%>
+@Schema(description = "<%- entityApiDescription %>")
+<%_ } _%>
+@SuppressWarnings("common-java:DuplicatedBlocks")
+public class <%- dtoClass %> implements Serializable {
+
+<%_ for (property of restProperties) {
+  if (typeof property.propertyJavadoc) {
+_%>
+<%- property.propertyJavadoc %>
+  <%_ }
+  const field = property.fieldName ? property : undefined;
+  const relationship = property.relationshipName ? property : undefined;
+  const required = field && field.fieldValidate && field.fieldValidationRequired;
+  if (field) {
+    if (property.fieldValidate ) { _%>
+    <%- include('/_global_partials_entity_/field_validators', {field, reactive}); -%>
+    <%_ }
+  } _%>
+  <%_ if (property.propertyApiDescription) { _%>
+    @Schema(description = "<%- property.propertyApiDescription %>"<% if (required) { %>, required = true<% } %>)
+  <%_ } _%>
+  <%_ if (property.fieldTypeBytes && databaseTypeSql) { _%>
+    @Lob
+  <%_ } _%>
+    private <%- property.propertyDtoJavaType %> <%- property.propertyName %><% if (property.collection && relationship) { %> = new HashSet<>()<% } %>;
+
+  <%_ if (property.fieldWithContentType) { _%>
+    private String <%- property.propertyName %>ContentType;
+  <%_ }
+}
+_%>
+
+<%_ for (property of restProperties) { _%>
+    public <%- property.propertyDtoJavaType %> get<%- property.propertyJavaBeanName %>() {
+        return <%- property.propertyName %>;
+    }
+
+    public void set<%- property.propertyJavaBeanName %>(<%- property.propertyDtoJavaType %> <%- property.propertyName %>) %> {
+        this.<%- property.propertyName %> = <%- property.propertyName %>;
+    }
+  <%_ if (property.fieldWithContentType) { _%>
+
+    public String get<%- property.propertyJavaBeanName %>ContentType() {
+        return <%- property.propertyName %>ContentType;
+    }
+
+    public void set<%- property.propertyJavaBeanName %>ContentType(String <%- property.propertyName %>ContentType) {
+        this.<%- property.propertyName %>ContentType = <%- property.propertyName %>ContentType;
+    }
+  <%_ } _%>
+<%_ } _%>
+
+<%_ const idNames = primaryKey ? [...primaryKey.fields.map(f => f.propertyName)] : [] _%>
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof <%- dtoClass %>)) {
+            return false;
+        }
+
+<%_ if (!embedded) { _%>
+        <%- dtoClass %> <%- dtoInstance %> = (<%- dtoClass %>) o;
+        if (<%- idNames.map(n => `this.${n} == null`).join(' && ') %>){
+            return false;
+        }
+        return <%- idNames.map(n => `Objects.equals(this.${n}, ${dtoInstance}.${n})`).join(' &&\n            ') %>;
+<%_ } else { _%>
+        return false;
+<%_ } _%>
+    }
+
+    @Override
+    public int hashCode() {
+<%_ if (!embedded) { _%>
+        return Objects.hash(<%- idNames.map(n => `this.${n}`).join(', ') %>);
+<%_ } else { _%>
+        return getClass().hashCode();
+<%_ } _%>
+    }
+
+    // prettier-ignore
+    @Override
+    public String toString() {
+        return "<%- dtoClass %>{" +
+<%_ for ([idx, property] of restProperties.entries()) {
+  const isQuoted = property.fieldName && !property.fieldTypeNumeric _%>
+            "<%- idx === 0 ? '' : ', ' %><%- property.propertyName %>=<% if (isQuoted) { %>'<% } %>" + get<%- property.propertyJavaBeanName %>() <% if (isQuoted) { %>+ "'" <% } %>+
+<%_ } _%>
+            "}";
+    }
+}
