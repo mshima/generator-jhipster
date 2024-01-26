@@ -73,6 +73,39 @@ export const angularFiles = {
   ],
 };
 
+export const userManagementFiles: WriteFileSection = {
+  userManagement: [
+    {
+      condition: generator => generator.generateUserManagement,
+      ...clientApplicationTemplatesBlock(),
+      templates: [
+        'admin/user-management/user-management.route.ts',
+        'admin/user-management/user-management.model.ts',
+        'admin/user-management/list/user-management.component.html',
+        'admin/user-management/list/user-management.component.spec.ts',
+        'admin/user-management/list/user-management.component.ts',
+        {
+          sourceFile: 'entities/_entityFolder_/detail/_entityFile_-detail.component.html',
+          renameTo: 'admin/user-management/detail/user-management-detail.component.html',
+        },
+        'admin/user-management/detail/user-management-detail.component.spec.ts',
+        {
+          sourceFile: 'entities/_entityFolder_/detail/_entityFile_-detail.component.ts',
+          renameTo: 'admin/user-management/detail/user-management-detail.component.ts',
+        },
+        'admin/user-management/update/user-management-update.component.html',
+        'admin/user-management/update/user-management-update.component.spec.ts',
+        'admin/user-management/update/user-management-update.component.ts',
+        'admin/user-management/delete/user-management-delete-dialog.component.html',
+        'admin/user-management/delete/user-management-delete-dialog.component.spec.ts',
+        'admin/user-management/delete/user-management-delete-dialog.component.ts',
+        'admin/user-management/service/user-management.service.spec.ts',
+        'admin/user-management/service/user-management.service.ts',
+      ],
+    },
+  ],
+};
+
 export async function writeEntitiesFiles(this: CoreGenerator, { application, entities }: GeneratorDefinition['writingEntitiesTaskParam']) {
   for (const entity of entities.filter(entity => !entity.skipClient)) {
     if (entity.builtInUser) {
@@ -83,6 +116,17 @@ export async function writeEntitiesFiles(this: CoreGenerator, { application, ent
           ...entity,
           fields: entity.fields.filter(field => ['id', 'login'].includes(field.fieldName)),
           readOnly: true,
+        },
+      });
+
+      await this.writeFiles({
+        sections: userManagementFiles,
+        context: {
+          ...application,
+          ...entity,
+          i18nKeyPrefix: 'userManagement',
+          entityFileName: 'user-management',
+          entityFolderPrefix: 'admin',
         },
       });
     } else {
