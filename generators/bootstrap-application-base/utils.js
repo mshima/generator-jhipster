@@ -90,6 +90,7 @@ export function createUserEntity(customUserData = {}, application) {
     hasImageField: !cassandraOrNoDatabase,
     pagination: cassandraOrNoDatabase ? PaginationTypes.NO : PaginationTypes.PAGINATION,
     auditableEntity: !cassandraOrNoDatabase,
+    entityDeleteLabelField: 'login',
     ...customUserData,
   };
 

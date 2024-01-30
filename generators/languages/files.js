@@ -33,7 +33,6 @@ export const clientI18nFiles = {
         'register.json',
         'sessions.json',
         'settings.json',
-        'user-management.json',
       ],
     },
     {

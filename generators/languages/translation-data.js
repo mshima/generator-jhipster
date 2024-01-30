@@ -94,7 +94,15 @@ export default class TranslationData {
     if (!data) {
       return translatedValue;
     }
-    const compiledTemplate = _.template(translatedValue, { interpolate: /{{([\s\S]+?)}}/g });
-    return compiledTemplate(data);
+    try {
+      if (translatedValue.includes('{{ login }}') && !data.login) {
+        data.login = data.id;
+      }
+      const compiledTemplate = _.template(translatedValue, { interpolate: /{{([\s\S]+?)}}/g });
+      return compiledTemplate(data);
+    } catch (error) {
+      console.log(this.translations, translatedValue, data);
+      throw error;
+    }
   }
 }

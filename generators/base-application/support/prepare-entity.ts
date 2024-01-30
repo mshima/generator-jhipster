@@ -77,6 +77,7 @@ const BASE_TEMPLATE_DATA = {
   entityAuthority: undefined,
   entityReadAuthority: undefined,
   adminEntity: undefined,
+  entityDeleteLabelField: undefined,
 
   requiresPersistableImplementation: false,
   updatableEntity: undefined,
