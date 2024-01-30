@@ -16,28 +16,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { JHipsterCommandDefinition } from '../../generators/base/api.js';
 
-const defaultCommands = {
-  'code-workspace': {
-    desc: 'Prepare a code-workspace for jhipster development',
-    blueprint: '@jhipster/jhipster-dev',
+const command: JHipsterCommandDefinition = {
+  arguments: {
+    generatorNamespace: {
+      type: String,
+      required: true,
+    },
   },
-  'from-issue': {
-    desc: 'Generate a sample from issue',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-  'generate-generator': {
-    desc: 'Generate a generator',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-  'generate-sample': {
-    desc: 'Generate a test sample',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-  'update-vscode': {
-    desc: 'Update generator-jhipster vscode files',
-    blueprint: '@jhipster/jhipster-dev',
-  },
+  options: {},
+  import: [],
 };
 
-export default defaultCommands;
+export default command;
