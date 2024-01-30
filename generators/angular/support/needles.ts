@@ -59,14 +59,14 @@ export function addEntitiesRoute({ application, entities }: { application: Commo
   const { enableTranslation } = application;
   return joinCallbacks(
     ...entities.map(entity => {
-      const { i18nKeyPrefix, entityClassPlural, entityFolderName, entityFileName, entityUrl } = entity;
+      const { i18nKeyPrefix, entityClassPlural, entityFolderName, entityFileName, entityPage } = entity;
 
       const pageTitle = enableTranslation ? `${i18nKeyPrefix}.home.title` : entityClassPlural;
       const modulePath = `./${entityFolderName}/${entityFileName}.routes`;
 
       return addRoute({
         needle: 'jhipster-needle-add-entity-route',
-        route: entityUrl,
+        route: entityPage,
         modulePath,
         pageTitle,
       });

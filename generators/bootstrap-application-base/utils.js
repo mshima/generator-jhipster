@@ -19,7 +19,6 @@
 import * as _ from 'lodash-es';
 import { Validations, authenticationTypes, databaseTypes, fieldTypes } from '../../jdl/jhipster/index.js';
 import { loadRequiredConfigIntoEntity } from '../base-application/support/index.js';
-import { hibernateSnakeCase } from '../server/support/string.js';
 import { PaginationTypes } from '../../jdl/jhipster/entity-options.js';
 import { LOGIN_REGEX, LOGIN_REGEX_JS } from '../generator-constants.js';
 
@@ -91,6 +90,7 @@ export function createUserEntity(customUserData = {}, application) {
     pagination: cassandraOrNoDatabase ? PaginationTypes.NO : PaginationTypes.PAGINATION,
     auditableEntity: !cassandraOrNoDatabase,
     naturalId: 'login',
+    i18nKeyPrefix: 'userManagement',
     ...customUserData,
   };
 
@@ -173,6 +173,28 @@ export function createUserEntity(customUserData = {}, application) {
   ]);
 
   return user;
+}
+
+export function createUserManagementEntity(customUserManagementData = {}, application) {
+  const user = createUserEntity.call(this, customUserManagementData, application);
+  user.fields = user.fields.filter(field => field.fieldName !== 'id');
+  for (const field of user.fields) {
+    if (field.fieldName === 'login') {
+      field.id = true;
+    }
+  }
+  return {
+    ...user,
+    adminEntity: true,
+    entityAngularSuffix: 'Management',
+    builtInUser: false,
+    builtInUserManagement: true,
+    skipServer: true,
+    entityRootFolder: 'admin/',
+    entityPage: 'admin/user-management/',
+    entityFolderName: 'user-management',
+    entityFileName: 'user-management',
+  };
 }
 
 export function createAuthorityEntity(customAuthorityData = {}, application) {

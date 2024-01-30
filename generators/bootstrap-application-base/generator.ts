@@ -33,7 +33,7 @@ import {
   prepareField as prepareFieldForTemplates,
   prepareRelationship,
 } from '../base-application/support/index.js';
-import { createAuthorityEntity, createUserEntity } from './utils.js';
+import { createAuthorityEntity, createUserEntity, createUserManagementEntity } from './utils.js';
 import { JAVA_DOCKER_DIR } from '../generator-constants.js';
 import { GENERATOR_BOOTSTRAP, GENERATOR_BOOTSTRAP_APPLICATION_BASE, GENERATOR_COMMON, GENERATOR_PROJECT_NAME } from '../generator-list.js';
 import { packageJson } from '../../lib/index.js';
@@ -231,6 +231,10 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
           const user = createUserEntity.call(this, { ...customUserData, ...customUserData.annotations }, application);
           this.sharedData.setEntity('User', user);
           application.user = user;
+
+          const userManagement = createUserManagementEntity.call(this, { ...customUserData, ...customUserData.annotations }, application);
+          this.sharedData.setEntity('UserManagement', userManagement);
+          (application as any).userManagement = userManagement;
         }
       },
       loadAuthority({ application, entitiesToLoad }) {

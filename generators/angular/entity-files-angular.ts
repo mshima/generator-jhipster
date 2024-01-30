@@ -114,20 +114,6 @@ export const writeEntitiesFiles = asWritingEntitiesTask(async function (this: Co
           readOnly: true,
         },
       });
-
-      if (application.generateUserManagement) {
-        await this.writeFiles({
-          sections: angularFiles,
-          context: {
-            ...application,
-            ...entity,
-            i18nKeyPrefix: 'userManagement',
-            entityFolderName: 'user-management',
-            entityFileName: 'user-management',
-            entityRootFolder: 'admin/',
-          },
-        });
-      }
     } else {
       await this.writeFiles({
         sections: angularFiles,

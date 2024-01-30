@@ -249,9 +249,9 @@ export default function prepareEntity(entityWithConfig, generator, application) 
   const { microserviceName, entityFileName, microfrontend } = entityWithConfig;
   entityWithConfig.entityApi = microserviceName ? `services/${microserviceName.toLowerCase()}/` : '';
   entityWithConfig.entityPage =
-    microfrontend && microserviceName && entityWithConfig.applicationType === MICROSERVICE
+  entityWithConfig.entityPage ?? (microfrontend && microserviceName && entityWithConfig.applicationType === MICROSERVICE
       ? `${microserviceName.toLowerCase()}/${entityFileName}`
-      : `${entityFileName}`;
+      : `${entityFileName}`);
 
   const hasBuiltInUserField = entityWithConfig.relationships.some(relationship => relationship.otherEntity.builtInUser);
   entityWithConfig.saveUserSnapshot =
