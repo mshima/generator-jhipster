@@ -4,6 +4,7 @@ import { CLIENT_MAIN_SRC_DIR, CLIENT_TEST_SRC_DIR } from '../../generator-consta
 
 export const replaceEntityFilePath = (data: any, filepath: string) =>
   filepath
+    .replace(/_entities_/, data.entityRootFolder ?? 'entities')
     .replace(/_entityFolder_/, data.entityFolderName)
     .replace(/_entityFile_/, data.entityFileName)
     .replace(/_entityModel_/, data.entityModelFileName);
