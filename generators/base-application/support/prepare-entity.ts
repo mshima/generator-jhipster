@@ -212,6 +212,8 @@ export default function prepareEntity(entityWithConfig, generator, application) 
   mutateData(entityWithConfig, {
     entityFileName: data =>
       data.entityFileName ?? kebabCase(entityWithConfig.entityNameCapitalized + upperFirst(entityWithConfig.entityAngularJSSuffix)),
+    entityAngularName: data => data.entityAngularName ?? data.entityClass + upperFirstCamelCase(entityWithConfig.entityAngularJSSuffix),
+    entityAngularNamePlural: data => data.entityAngularNamePlural ?? pluralize(data.entityAngularName),
   });
   entityWithConfig.entityFolderName = entityWithConfig.clientRootFolder
     ? `${entityWithConfig.clientRootFolder}/${entityWithConfig.entityFileName}`
@@ -221,8 +223,6 @@ export default function prepareEntity(entityWithConfig, generator, application) 
   entityWithConfig.entityPluralFileName = entityWithConfig.entityNamePluralizedAndSpinalCased + entityWithConfig.entityAngularJSSuffix;
   entityWithConfig.entityServiceFileName = entityWithConfig.entityFileName;
 
-  entityWithConfig.entityAngularName = entityWithConfig.entityClass + upperFirstCamelCase(entityWithConfig.entityAngularJSSuffix);
-  entityWithConfig.entityAngularNamePlural = pluralize(entityWithConfig.entityAngularName);
   entityWithConfig.entityReactName = entityWithConfig.entityClass + upperFirstCamelCase(entityWithConfig.entityAngularJSSuffix);
 
   entityWithConfig.entityApiUrl = entityWithConfig.entityNamePluralizedAndSpinalCased;
@@ -249,7 +249,8 @@ export default function prepareEntity(entityWithConfig, generator, application) 
   const { microserviceName, entityFileName, microfrontend } = entityWithConfig;
   entityWithConfig.entityApi = microserviceName ? `services/${microserviceName.toLowerCase()}/` : '';
   entityWithConfig.entityPage =
-  entityWithConfig.entityPage ?? (microfrontend && microserviceName && entityWithConfig.applicationType === MICROSERVICE
+    entityWithConfig.entityPage ??
+    (microfrontend && microserviceName && entityWithConfig.applicationType === MICROSERVICE
       ? `${microserviceName.toLowerCase()}/${entityFileName}`
       : `${entityFileName}`);
 

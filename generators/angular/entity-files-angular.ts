@@ -28,7 +28,10 @@ const entityModelFiles = clientApplicationTemplatesBlock({
 
 const entityServiceFiles = clientApplicationTemplatesBlock({
   condition: generator => !generator.embedded,
-  templates: ['_entities_/_entityFolder_/service/_entityFile_.service.ts', '_entities_/_entityFolder_/service/_entityFile_.service.spec.ts'],
+  templates: [
+    '_entities_/_entityFolder_/service/_entityFile_.service.ts',
+    '_entities_/_entityFolder_/service/_entityFile_.service.spec.ts',
+  ],
 });
 
 export const builtInFiles: WriteFileSection = {
@@ -102,7 +105,10 @@ export const userManagementFiles: WriteFileSection = {
   ],
 };
 
-export const writeEntitiesFiles = asWritingEntitiesTask(async function (this: CoreGenerator, { application, entities }: GeneratorDefinition['writingEntitiesTaskParam']) {
+export const writeEntitiesFiles = asWritingEntitiesTask(async function (
+  this: CoreGenerator,
+  { application, entities }: GeneratorDefinition['writingEntitiesTaskParam'],
+) {
   for (const entity of entities.filter(entity => !entity.skipClient)) {
     if (entity.builtInUser) {
       await this.writeFiles({

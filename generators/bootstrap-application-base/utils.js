@@ -186,7 +186,7 @@ export function createUserManagementEntity(customUserManagementData = {}, applic
   return {
     ...user,
     adminEntity: true,
-    entityAngularSuffix: 'Management',
+    entityAngularName: 'UserManagement',
     builtInUser: false,
     builtInUserManagement: true,
     skipServer: true,
