@@ -20,13 +20,6 @@ import { Routes } from '@angular/router';
 /* jhipster-needle-add-admin-module-import - JHipster will add admin modules imports here */
 
 const routes: Routes = [
-<%_ if (generateUserManagement) { _%>
-  {
-    path: 'user-management',
-    loadChildren: () => import('./user-management/user-management.route'),
-    title: 'userManagement.home.title',
-  },
-<%_ } _%>
   {
     path: 'docs',
     loadComponent: () => import('./docs/docs.component'),
@@ -68,7 +61,7 @@ const routes: Routes = [
     title: 'tracker.title',
   },
 <%_ } _%>
-  /* jhipster-needle-add-admin-route - JHipster will add admin routes here */
+  /* jhipster-needle-add-route - JHipster will add admin routes here */
 ];
 
 export default routes;

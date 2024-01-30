@@ -191,7 +191,7 @@ export function createUserManagementEntity(customUserManagementData = {}, applic
     builtInUserManagement: true,
     skipServer: true,
     entityRootFolder: 'admin/',
-    entityPage: 'admin/user-management/',
+    entityPage: 'admin/user-management',
     entityFolderName: 'user-management',
     entityFileName: 'user-management',
   };

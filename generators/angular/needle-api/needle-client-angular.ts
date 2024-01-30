@@ -176,6 +176,6 @@ export default class extends needleClientBase {
 
   addAdminRoute(route, modulePath, moduleName, pageTitle) {
     const adminModulePath = `${this.clientSrcDir}app/admin/admin.routes.ts`;
-    this._addRoute(route, modulePath, moduleName, 'jhipster-needle-add-admin-route', adminModulePath, pageTitle);
+    this._addRoute(route, modulePath, moduleName, 'jhipster-needle-add-route', adminModulePath, pageTitle);
   }
 }

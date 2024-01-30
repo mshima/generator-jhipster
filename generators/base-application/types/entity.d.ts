@@ -39,6 +39,8 @@ export type BaseEntity = {
 type AngularEntity = {
   entityAngularAuthorities?: string;
   entityAngularReadAuthorities?: string;
+  /** Folder where the ui should be generated. Defaults to 'entities/' */
+  entityRootFolder?: string;
 };
 
 type Entity = Required<BaseEntity> &

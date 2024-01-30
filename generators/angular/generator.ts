@@ -96,7 +96,7 @@ export default class AngularGenerator extends BaseApplicationGenerator {
           this.editFile(
             `${application.srcMainWebapp}app/admin/admin.routes.ts`,
             addRoute({
-              needle: 'add-admin-route',
+              needle: 'add-route',
               ...args,
             }),
           );
@@ -320,8 +320,18 @@ export default class AngularGenerator extends BaseApplicationGenerator {
   addEntitiesToModule({ application, entities }: { application: CommonClientServerApplication; entities: Entity[] }) {
     const filePath = `${application.clientSrcDir}app/entities/entity.routes.ts`;
     const ignoreNonExisting = chalk.yellow(`Route(s) not added to ${filePath}.`);
-    const addRouteCallback = addEntitiesRoute({ application, entities });
+    const entitiesRoutes = entities.filter(entity => !entity.entityRootFolder);
+    const addRouteCallback = addEntitiesRoute({ application, entities: entitiesRoutes });
     this.editFile(filePath, { ignoreNonExisting }, addRouteCallback);
+
+    const adminRoutesFilePath = `${application.clientSrcDir}app/admin/admin.routes.ts`;
+    const adminRoutes = entities.filter(entity => entity.entityRootFolder === 'admin/');
+    const addAdminRouteCallback = addEntitiesRoute({ application, entities: adminRoutes });
+    this.editFile(
+      adminRoutesFilePath,
+      { ignoreNonExisting: chalk.yellow(`Route(s) not added to ${adminRoutesFilePath}.`) },
+      addAdminRouteCallback,
+    );
   }
 
   /**
