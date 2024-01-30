@@ -90,7 +90,7 @@ export function createUserEntity(customUserData = {}, application) {
     hasImageField: !cassandraOrNoDatabase,
     pagination: cassandraOrNoDatabase ? PaginationTypes.NO : PaginationTypes.PAGINATION,
     auditableEntity: !cassandraOrNoDatabase,
-    entityDeleteLabelField: 'login',
+    naturalId: 'login',
     ...customUserData,
   };
 
@@ -120,11 +120,6 @@ export function createUserEntity(customUserData = {}, application) {
       fieldValidateRulesMaxlength: 50,
       fieldValidateRulesPattern: LOGIN_REGEX_JS,
       fieldValidateRulesPatternJava: LOGIN_REGEX,
-      builtIn: true,
-    },
-    {
-      fieldName: 'activated',
-      fieldType: TYPE_BOOLEAN,
       builtIn: true,
     },
     {
@@ -160,6 +155,11 @@ export function createUserEntity(customUserData = {}, application) {
           },
         ]
       : []),
+    {
+      fieldName: 'activated',
+      fieldType: TYPE_BOOLEAN,
+      builtIn: true,
+    },
     ...(application.enableTranslation
       ? [
           {
