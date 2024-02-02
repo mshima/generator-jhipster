@@ -27,6 +27,7 @@ import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize<% if (relationships.some(rel => rel.persistableRelationship)) { %>, map<% } %> } from 'rxjs/operators';
+import { NgbDatepickerModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -61,7 +62,7 @@ import { <%- importedType %> } from '<%- importedPath %>';
     standalone: true,
     selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update',
     templateUrl: './<%= entityFileName %>-update.component.html',
-    imports: [SharedModule, FormsModule, ReactiveFormsModule],
+    imports: [SharedModule, NgbDatepickerModule, NgbTooltipModule, FormsModule, ReactiveFormsModule],
 })
 export class <%= entityAngularName %>UpdateComponent implements OnInit {
     isSaving = false;

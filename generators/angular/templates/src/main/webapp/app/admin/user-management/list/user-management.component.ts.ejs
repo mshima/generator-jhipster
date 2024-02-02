@@ -22,7 +22,7 @@ import { HttpResponse<%_ if (!databaseTypeCassandra) { %>, HttpHeaders <% } %>} 
 <%_ if (!databaseTypeCassandra) { _%>
 import { combineLatest } from 'rxjs';
 <%_ } _%>
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalModule,  NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
 <%_ if (!databaseTypeCassandra) { _%>
@@ -43,6 +43,8 @@ import UserManagementDeleteDialogComponent from '../delete/user-management-delet
   templateUrl: './user-management.component.html',
   imports: [
     RouterModule,
+    NgbModalModule,
+    NgbPaginationModule,
     SharedModule,
     UserManagementDeleteDialogComponent,
 <%_ if (!databaseTypeCassandra) { _%>

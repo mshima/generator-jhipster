@@ -35,9 +35,15 @@ import { HttpHeaders } from '@angular/common/http';
 <%_ } _%>
 import { ActivatedRoute, Data, ParamMap, Router, RouterModule } from '@angular/router';
 import { combineLatest<%_ if (!readOnly) { _%>, filter<%_ } _%>, Observable, Subscription, tap } from 'rxjs';
+import {
 <%_ if (!readOnly) { _%>
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+  NgbModal,
+  NgbModalModule,
 <%_ } _%>
+<%_ if (paginationPagination) { _%>
+  NgbPaginationModule,
+<%_ } _%>
+} from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
 import { sortStateSignal, SortDirective, SortByDirective, type SortState, SortService } from 'app/shared/sort';
@@ -90,8 +96,14 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
     templateUrl: './<%= entityFileName %>.component.html',
     imports: [
       RouterModule,
+<%_ if (!readOnly) { _%>
+      NgbModalModule,
+<%_ } _%>
 <%_ if (searchEngine) { _%>
       FormsModule,
+<%_ } _%>
+<%_ if (paginationPagination) { _%>
+      NgbPaginationModule,
 <%_ } _%>
       SharedModule,
       SortDirective,
