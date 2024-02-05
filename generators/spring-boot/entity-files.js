@@ -31,6 +31,16 @@ const { MAPSTRUCT } = MapperTypes;
 const { ServiceTypes } = entityOptions;
 const { SERVICE_CLASS, SERVICE_IMPL } = ServiceTypes;
 
+export const sampleFiles = {
+  sampleFiles: [
+    javaTestPackageTemplatesBlock({
+      relativePath: '_entityPackage_/domain/',
+      condition: data => !data.embedded && data.databaseTypeSql && !data.reactive,
+      templates: ['_persistClass_IntegrationTestSamplesBuilder.java'],
+    }),
+  ],
+};
+
 export const restFiles = {
   restFiles: [
     {
@@ -181,6 +191,7 @@ const userFiles = {
 };
 
 export const serverFiles = {
+  ...sampleFiles,
   ...restFiles,
   ...filteringFiles,
   ...filteringReactiveFiles,

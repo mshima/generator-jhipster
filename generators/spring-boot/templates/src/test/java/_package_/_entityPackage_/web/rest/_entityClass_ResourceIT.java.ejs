@@ -62,7 +62,11 @@ _%>
 import <%= packageName %>.web.rest.TestUtil;
 <% } %>
 import <%= packageName %>.IntegrationTest;
+import <%= packageName %>.domain.IntegrationTestSample;
 import <%= entityAbsolutePackage %>.domain.<%= persistClass %>;
+<%_ if (newIntegrationTestSample) { _%>
+import <%= entityAbsolutePackage %>.domain.<%= persistClass %>IntegrationTestSamplesBuilder;
+<%_ } _%>
 <%_
 var imported = [];
 for (relationship of relationships) { // import entities in required relationships
@@ -111,9 +115,8 @@ import org.assertj.core.util.IterableUtil;
 import org.apache.commons.collections4.IterableUtils;
 import java.util.concurrent.TimeUnit;
 <%_ } _%>
-<%_ if ((databaseTypeSql && reactive) || searchEngineElasticsearch) { _%>
+import org.springframework.context.ApplicationContext;
 import org.junit.jupiter.api.AfterEach;
-<%_ } _%>
 import org.junit.jupiter.api.BeforeEach;
 <%_ if (skipJunitTests) { _%>
 import org.junit.jupiter.api.Disabled;
@@ -452,6 +455,9 @@ if (field.fieldTypeString || field.blobContentTypeText) {
 <%_ } _%>
 
     @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
     private <%= entityClass %>Repository <%= entityInstance %>Repository;
 <%_ if (isUsingMapsId && (!dtoMapstruct && serviceNo)) { _%>
     @Autowired
@@ -494,8 +500,13 @@ if (field.fieldTypeString || field.blobContentTypeText) {
 <%_ } else { _%>
     private MockMvc rest<%= entityClass %>MockMvc;
 <%_ } _%>
+<%_ if (newIntegrationTestSample) { _%>
+
+    private IntegrationTestSample<<%= persistClass %>> <%= persistInstance %>IntegrationTestSample;
+<%_ } else { _%>
 
     private <%= persistClass %> <%= persistInstance %>;
+<%_ } _%>
 
 <%_ if(jpaMetamodelFiltering && reactive) {
 filterTestableRelationships.forEach((relationship) => { _%>
@@ -503,6 +514,7 @@ filterTestableRelationships.forEach((relationship) => { _%>
     private <%= relationship.otherEntity.persistClass %>Repository <%= relationship.otherEntity.persistInstance %>Repository;
 <%_ });
 }_%>
+
 <%_ ['DEFAULT_', 'UPDATED_'].forEach((fieldStatus) => { _%>
     /**
      * Create an <% if (fieldStatus === 'UPDATED_') { %>updated <% } %>entity for this test.
@@ -636,19 +648,38 @@ _%>
 
 <%_ } _%>
     @BeforeEach
-    public void initTest() {
-<%_ if (databaseTypeMongodb || databaseTypeCouchbase || databaseTypeCassandra || databaseTypeNeo4j) { _%>
-        <%= entityInstance %>Repository.deleteAll()<%= callBlock %>;
-<%_ } else if (databaseTypeSql && reactive) {  _%>
-        deleteEntities(em);
+<%_ if (newIntegrationTestSample) { _%>
+    @Transactional
 <%_ } _%>
+    public void initTest() {
+<%_ if (newIntegrationTestSample) { _%>
+    <%- persistInstance %>IntegrationTestSample = <%- persistClass %>IntegrationTestSamplesBuilder.build<%- persistClass %>IntegrationTestSample(applicationContext);
+<%_ } else { _%>
+
+  <%_ if (databaseTypeMongodb || databaseTypeCouchbase || databaseTypeCassandra || databaseTypeNeo4j) { _%>
+        <%= entityInstance %>Repository.deleteAll()<%= callBlock %>;
+  <%_ } else if (databaseTypeSql && reactive) {  _%>
+        deleteEntities(em);
+  <%_ } _%>
         <%= persistInstance %> = createEntity(<% if (databaseTypeSql) { %>em<% } %>);
+<%_ } _%>
     }
+<%_ if (newIntegrationTestSample) { _%>
+
+    @AfterEach
+    @Transactional
+    public void tearDown() {
+        <%- persistInstance %>IntegrationTestSample.tearDown();
+    }
+<%_ } _%>
 <%_ if (!readOnly) { _%>
 
     @Test<%= transactionalAnnotation %>
     void create<%= entityClass %>() throws Exception {
         int databaseSizeBeforeCreate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
+  <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+  <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
         int searchDatabaseSizeBefore = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
   <%_ } _%>
@@ -711,10 +742,14 @@ _%>
     @Test<%= transactionalAnnotation %>
     void create<%= entityClass %>WithExistingId() throws Exception {
         // Create the <%= entityClass %> with an existing ID
+  <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+  <%_ } else { _%>
   <%_ if ((primaryKey.typeUUID && databaseTypeSql) || !primaryKey.autoGenerate) { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
   <%_ } else { _%>
         <%= persistInstance %>.set<%= primaryKey.nameCapitalized %>(<% if (primaryKey.typeUUID) { %>UUID.randomUUID()<% } else if (primaryKey.typeLong) { %>1L<% } else if (primaryKey.typeInteger) { %>1<% } else { %>"existing_id"<% } %>);
+  <%_ } _%>
   <%_ } _%>
   <%_ if (dtoMapstruct) { _%>
         <%= dtoClass %> <%= dtoInstance %> = <%= entityInstance %>Mapper.toDto(<%= persistInstance %>);
@@ -755,7 +790,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void update<%= entityClass %>MapsIdAssociationWithNewId() throws Exception {
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
     <%_ const alreadyGeneratedEntities = []; _%>
         int databaseSizeBeforeCreate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
     <%_ if (searchEngineElasticsearch) { _%>
@@ -836,6 +875,9 @@ _%>
     @Test<%= transactionalAnnotation %>
     void check<%= field.fieldInJavaBeanMethod %>IsRequired() throws Exception {
         int databaseSizeBeforeTest = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+        <%_ } _%>
         <%_ if (searchEngineElasticsearch) { _%>
         int searchDatabaseSizeBefore = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
         <%_ } _%>
@@ -879,12 +921,16 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>AsStream() {
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+        <%_ } else { _%>
   <%_ if (!primaryKey.derived) { _%>
     <%_ for (field of primaryKey.fields.filter(f => !f.autoGenerateByRepository)) { _%>
         <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.fieldJavaValueGenerator %>);
     <%_ } _%>
   <%_ } _%>
         <%= entityInstance %>Repository.save(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         List<<%= persistClass %>> <%= entityInstance %>List = webTestClient.get().uri(ENTITY_API_URL)
             .accept(MediaType.APPLICATION_NDJSON)
@@ -921,12 +967,16 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
 <%_ if (!primaryKey.derived) { _%>
   <%_ for (field of primaryKey.fields.filter(f => !f.autoGenerateByRepository)) { _%>
         <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.fieldJavaValueGenerator %>);
   <%_ } _%>
 <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List
 <%_ if (reactive) { _%>
@@ -1008,12 +1058,16 @@ _%>
     @Test<%= transactionalAnnotation %>
     void get<%= entityClass %>() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
 <%_ if (!primaryKey.derived) { _%>
   <%_ for (field of primaryKey.fields.filter(f => !f.autoGenerateByRepository)) { _%>
         <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.fieldJavaValueGenerator %>);
   <%_ } _%>
 <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get the <%= entityInstance %>
 <%_ if (reactive) { _%>
@@ -1052,7 +1106,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void get<%= entityClassPlural %>ByIdFiltering() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         <%= primaryKey.type %> id = <%= persistInstance %>.get<%= primaryKey.nameCapitalized %>();
 
@@ -1074,7 +1132,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>IsEqualToSomething() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> equals to <%= 'DEFAULT_' + searchBy.fieldNameUnderscored.toUpperCase() %>
         default<%= entityClass %>ShouldBeFound("<%= searchBy.fieldName %>.equals=" + <%= 'DEFAULT_' + searchBy.fieldNameUnderscored.toUpperCase() %>);
@@ -1086,7 +1148,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>IsInShouldWork() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> in <%= 'DEFAULT_' + searchBy.fieldNameUnderscored.toUpperCase() %> or <%= 'UPDATED_' + searchBy.fieldNameUnderscored.toUpperCase() %>
         default<%= entityClass %>ShouldBeFound("<%= searchBy.fieldName %>.in=" + <%= 'DEFAULT_' + searchBy.fieldNameUnderscored.toUpperCase() %> + "," + <%= 'UPDATED_' + searchBy.fieldNameUnderscored.toUpperCase() %>);
@@ -1098,7 +1164,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>IsNullOrNotNull() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> is not null
         default<%= entityClass %>ShouldBeFound("<%= searchBy.fieldName %>.specified=true");
@@ -1111,7 +1181,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>ContainsSomething() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> contains <%= 'DEFAULT_' + searchBy.fieldNameUnderscored.toUpperCase() %>
         default<%= entityClass %>ShouldBeFound("<%= searchBy.fieldName %>.contains=" + <%= 'DEFAULT_' + searchBy.fieldNameUnderscored.toUpperCase() %>);
@@ -1123,7 +1197,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>NotContainsSomething() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> does not contain <%= 'DEFAULT_' + searchBy.fieldNameUnderscored.toUpperCase() %>
         default<%= entityClass %>ShouldNotBeFound("<%= searchBy.fieldName %>.doesNotContain=" + <%= 'DEFAULT_' + searchBy.fieldNameUnderscored.toUpperCase() %>);
@@ -1153,7 +1231,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>IsGreaterThanOrEqualToSomething() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> is greater than or equal to <%= defaultValue %>
         default<%= entityClass %>ShouldBeFound("<%= searchBy.fieldName %>.greaterThanOrEqual=" + <%= defaultValue %>);
@@ -1165,7 +1247,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>IsLessThanOrEqualToSomething() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> is less than or equal to <%= defaultValue %>
         default<%= entityClass %>ShouldBeFound("<%= searchBy.fieldName %>.lessThanOrEqual=" + <%= defaultValue %>);
@@ -1177,7 +1263,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>IsLessThanSomething() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> is less than <%= defaultValue %>
         default<%= entityClass %>ShouldNotBeFound("<%= searchBy.fieldName %>.lessThan=" + <%= defaultValue %>);
@@ -1189,7 +1279,11 @@ _%>
     @Test<%= transactionalAnnotation %>
     void getAll<%= entityClassPlural %>By<%= searchBy.fieldInJavaBeanMethod %>IsGreaterThanSomething() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         // Get all the <%= entityInstance %>List where <%= searchBy.fieldName %> is greater than <%= defaultValue %>
         default<%= entityClass %>ShouldNotBeFound("<%= searchBy.fieldName %>.greaterThan=" + <%= defaultValue %>);
@@ -1235,7 +1329,11 @@ _%>
       <%_ } else { _%>
         <%= relationship.otherEntity.primaryKey.type %> <%= relationship.relationshipFieldName %>Id = <%= relationship.relationshipFieldName %>.get<%= relationship.otherEntity.primaryKey.nameCapitalized %>();
         <%= persistInstance %>.set<%= relationship.relationshipNameCapitalized %>Id(<%= relationship.relationshipFieldName %>Id);
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
       <%_ } _%>
     <%_ } _%>
     <%_ if(!reactive) { _%>
@@ -1399,12 +1497,16 @@ _%>
     @Test<%= transactionalAnnotation %>
     void putExisting<%= entityClass %>() throws Exception {
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
   <%_ if (!primaryKey.derived) { _%>
     <%_ for (field of primaryKey.fields.filter(f => !f.autoGenerateByRepository)) { _%>
         <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.fieldJavaValueGenerator %>);
     <%_ } _%>
   <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
         int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
   <%_ if (searchEngineElasticsearch) { _%>
@@ -1491,6 +1593,9 @@ _%>
     @Test<%= transactionalAnnotation %>
     void putNonExisting<%= entityClass %>() throws Exception {
         int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
+  <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+  <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
         int searchDatabaseSizeBefore = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
   <%_ } _%>
@@ -1531,6 +1636,9 @@ _%>
     @Test<%= transactionalAnnotation %>
     void putWithIdMismatch<%= entityClass %>() throws Exception {
         int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
+  <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+  <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
         int searchDatabaseSizeBefore = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
   <%_ } _%>
@@ -1570,6 +1678,9 @@ _%>
     @Test<%= transactionalAnnotation %>
     void putWithMissingIdPathParam<%= entityClass %>() throws Exception {
         int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
+  <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+  <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
         int searchDatabaseSizeBefore = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
   <%_ } _%>
@@ -1618,12 +1729,16 @@ _%>
     @Test<%= transactionalAnnotation %>
     void partialUpdate<%= entityClass %>WithPatch() throws Exception {
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
   <%_ if (!primaryKey.derived) { _%>
     <%_ for (field of primaryKey.fields.filter(f => !f.autoGenerateByRepository)) { _%>
         <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.fieldJavaValueGenerator %>);
     <%_ } _%>
   <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
   <%_ const fieldsToIncludeInPartialPatchTest = fieldsToTest.map(field => prepareFieldForPatchTest(field, () => faker.datatype.boolean())); _%>
 <%- include('/_global_partials_entity_/it_patch_update.partial.java.ejs', {fields: fieldsToIncludeInPartialPatchTest, saveMethod, callBlock, callListBlock}); -%>
@@ -1632,12 +1747,16 @@ _%>
     @Test<%= transactionalAnnotation %>
     void fullUpdate<%= entityClass %>WithPatch() throws Exception {
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
   <%_ if (!primaryKey.derived) { _%>
     <%_ for (field of primaryKey.fields.filter(f => !f.autoGenerateByRepository)) { _%>
         <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.fieldJavaValueGenerator %>);
     <%_ } _%>
   <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
 
   <% const fieldsToIncludeInFullPatchTest = fieldsToTest.map(field => prepareFieldForPatchTest(field, () => true)); %>
 <%- include('/_global_partials_entity_/it_patch_update.partial.java.ejs', {fields: fieldsToIncludeInFullPatchTest, saveMethod, callBlock, callListBlock}); -%>
@@ -1646,6 +1765,9 @@ _%>
     @Test<%= transactionalAnnotation %>
     void patchNonExisting<%= entityClass %>() throws Exception {
         int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
+  <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+  <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
         int searchDatabaseSizeBefore = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
   <%_ } _%>
@@ -1685,6 +1807,9 @@ _%>
     @Test<%= transactionalAnnotation %>
     void patchWithIdMismatch<%= entityClass %>() throws Exception {
         int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
+  <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+  <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
         int searchDatabaseSizeBefore = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
   <%_ } _%>
@@ -1724,6 +1849,9 @@ _%>
     @Test<%= transactionalAnnotation %>
     void patchWithMissingIdPathParam<%= entityClass %>() throws Exception {
         int databaseSizeBeforeUpdate = <%= entityInstance %>Repository.findAll()<%= callListBlock %>.size();
+  <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.getInsertableSample();
+  <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
       int searchDatabaseSizeBefore = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
   <%_ } _%>
@@ -1766,12 +1894,16 @@ _%>
     @Test<%= transactionalAnnotation %>
     void delete<%= entityClass %>() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
   <%_ if (!primaryKey.derived) { _%>
     <%_ for (field of primaryKey.fields.filter(f => !f.autoGenerateByRepository)) { _%>
         <%= persistInstance %>.set<%= primaryKey.nameCapitalized %>(<%- field.fieldJavaValueGenerator %>);
     <%_ } _%>
   <%_ } _%>
         <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
         <%= entityInstance %>Repository.save(<%= persistInstance %>)<%= callBlock %>;
         <%= entityInstance %>SearchRepository.save(<%= persistInstance %>)<%= callBlock %>;
@@ -1816,12 +1948,16 @@ _%>
     @Test<%= transactionalAnnotation %>
     void search<%= entityClass %>() <% if (!reactive) { %>throws Exception <% } %>{
         // Initialize the database
+        <%_ if (newIntegrationTestSample) { _%>
+        var <%- persistInstance %> = this.<%- persistInstance %>IntegrationTestSample.insert();
+        <%_ } else { _%>
   <%_ if (!primaryKey.derived) { _%>
     <%_ for (field of primaryKey.fields.filter(f => !f.autoGenerateByRepository)) { _%>
         <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.fieldJavaValueGenerator %>);
     <%_ } _%>
   <%_ } _%>
         <%= persistInstance %> = <%= entityInstance %>Repository.<%= saveMethod %>(<%= persistInstance %>)<%= callBlock %>;
+        <%_ } _%>
   <%_ if (searchEngineElasticsearch) { _%>
         <%= entityInstance %>SearchRepository.save(<%= persistInstance %>)<%= callBlock %>;
   <%_ } else if (searchEngineCouchbase) { _%>

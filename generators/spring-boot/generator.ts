@@ -246,8 +246,17 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
 
   get postPreparingEachEntity() {
     return this.asPostPreparingEachEntityTaskGroup({
-      prepareEntity({ entity }) {
+      prepareEntity({ application, entity }) {
         const { primaryKey } = entity;
+        (entity as any).newIntegrationTestSample =
+          application.databaseTypeSql &&
+          !application.reactive &&
+          (entity as any).searchEngineNo &&
+          !(entity as any).jpaMetaModelFiltering &&
+          !entity.primaryKey.derived &&
+          entity.primaryKey.autoGenerate &&
+          entity.primaryKey.type !== 'UUID';
+
         if (primaryKey) {
           primaryKey.javaBuildSpecification = getSpecificationBuildForType(primaryKey.type);
           primaryKey.javaValueGenerator = getJavaValueGeneratorForType(primaryKey.type);

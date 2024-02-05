@@ -1,0 +1,75 @@
+package <%= packageName %>.domain;
+
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+public class IntegrationTestSample<SampleType> {
+
+    private final SampleType insertableSample;
+
+    private final Supplier<SampleType> insertCallback;
+
+    private final Function<SampleType, SampleType> updatableCallback;
+
+    private final Consumer<SampleType> tearDownCallback;
+
+    private boolean isInserted = false;
+
+    private SampleType persistedSample;
+
+    private IntegrationTestSample(
+        SampleType insertableSample,
+        Supplier<SampleType> insert,
+        Function<SampleType, SampleType> updateSupplier,
+        Consumer<SampleType> tearDown
+    ) {
+        this.insertableSample = insertableSample;
+        this.updatableCallback = updateSupplier;
+        this.insertCallback = insert;
+        this.tearDownCallback = tearDown;
+    }
+
+    public boolean isInserted() {
+        return this.isInserted;
+    }
+
+    public SampleType getInsertableSample() {
+        return this.insertableSample;
+    }
+
+    public SampleType getUpdatableSample() {
+        if (this.isInserted) {
+            return this.updatableCallback.apply(this.persistedSample);
+        }
+        return null;
+    }
+
+    public SampleType getPersistedSample() {
+        return this.persistedSample;
+    }
+
+    public SampleType insert() {
+        if (this.isInserted) {
+            return this.persistedSample;
+        }
+        this.persistedSample = this.insertCallback.get();
+        return this.persistedSample;
+    }
+
+    public void tearDown() {
+        if (!this.isInserted) {
+            return;
+        }
+        this.tearDownCallback.accept(this.persistedSample);
+    }
+
+    static <SampleType> IntegrationTestSample<SampleType> of(
+        SampleType insertableSample,
+        Supplier<SampleType> insertCallback,
+        Function<SampleType, SampleType> updateCallback,
+        Consumer<SampleType> tearDownCallback
+    ) {
+        return new IntegrationTestSample<SampleType>(insertableSample, insertCallback, updateCallback, tearDownCallback);
+    }
+}
