@@ -18,9 +18,9 @@
  */
 import { passthrough } from 'p-transform';
 import { isFileStateModified } from 'mem-fs-editor/state';
-import ESLint from 'eslint';
 import { Minimatch } from 'minimatch';
 
+import Tinypool from 'tinypool';
 import BaseGenerator from '../../base-core/index.js';
 import { getPackageRoot } from '../../../lib/index.js';
 import { JS_PRETTIER_EXTENSIONS } from '../../generator-constants.js';
@@ -32,46 +32,38 @@ export const createESLintTransform = function (
 ) {
   const { extensions = JS_PRETTIER_EXTENSIONS, ignoreErrors } = transformOptions;
   const minimatch = new Minimatch(`**/*.{${extensions}}`, { dot: true });
-  const eslint = new ESLint.ESLint({
-    fix: true,
-    // Disable destination configs. We should apply plugins and rules which jhipster depends on.
-    useEslintrc: false,
-    resolvePluginsRelativeTo: getPackageRoot(),
-    overrideConfig: {
-      plugins: ['unused-imports', 'import'],
-      extends: ['plugin:@typescript-eslint/base'],
-      parserOptions: {
-        sourceType: 'module',
-        ecmaVersion: 'latest',
-      },
-      rules: {
-        'import/order': 'error',
-        'import/no-duplicates': 'error',
-        'unused-imports/no-unused-imports': 'error',
-        'unused-imports/no-unused-vars': ['warn', { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' }],
-      },
+
+  const pool = new Tinypool({
+    runtime: 'child_process',
+    maxThreads: 1,
+    filename: new URL('./eslint-worker.js', import.meta.url).href,
+  });
+
+  return passthrough(
+    async file => {
+      if (!minimatch.match(file.path) || !isFileStateModified(file)) {
+        return;
+      }
+      const fileContents = file.contents.toString();
+      const { result, error } = await pool.run({
+        resolvePluginsRelativeTo: getPackageRoot(),
+        filePath: file.path,
+        fileContents,
+      });
+      if (result) {
+        file.contents = Buffer.from(result);
+      }
+      if (error) {
+        const errorMessage = `Error parsing file ${file.relative}: ${error} at ${fileContents}`;
+        if (!ignoreErrors) {
+          throw new Error(errorMessage);
+        }
+
+        this?.log?.warn?.(errorMessage);
+      }
     },
-  });
-
-  return passthrough(async file => {
-    if (!minimatch.match(file.path) || !isFileStateModified(file)) {
-      return;
-    }
-    try {
-      if (await eslint.isPathIgnored(file.path)) {
-        return;
-      }
-      const [result] = await eslint.lintText(file.contents.toString(), { filePath: file.path });
-      if (result.output) {
-        file.contents = Buffer.from(result.output);
-      }
-    } catch (error) {
-      if (ignoreErrors) {
-        this?.log?.warn?.(error);
-        return;
-      }
-
-      throw error;
-    }
-  });
+    () => {
+      pool.destroy();
+    },
+  );
 };
