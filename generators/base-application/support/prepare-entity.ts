@@ -597,6 +597,9 @@ function preparePostEntityCommonDerivedPropertiesNotTyped(entity: any) {
   entity.persistableOtherEntities = Object.values(relationshipsByOtherEntity).filter(relationships =>
     relationships.some(({ persistableRelationship, otherEntity }) => persistableRelationship && otherEntity !== entity),
   );
+  entity.requiredOtherEntities = Object.values(relationshipsByOtherEntity)
+    .filter(relationships => relationships.some(({ relationshipRequired, id }) => relationshipRequired || id))
+    .map(relationships => relationships[0].otherEntity);
 
   entity.anyPropertyHasValidation = entity.anyPropertyHasValidation || fields.some(({ fieldValidate }) => fieldValidate);
 

@@ -35,6 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 <%_ } _%>
 
 <%_ const sampleFields = fields.filter(field => !field.mapstructExpression && (field.fieldTypeInteger || field.fieldTypeLong || field.fieldTypeString || field.fieldTypeUUID)); _%>
+<%_ const autoGenerateSampleFields = sampleFields.filter(field => field.autoGenerate); _%>
+<%_ const manualGenerateSampleFields = sampleFields.filter(field => !field.autoGenerate); _%>
 public class <%= persistClass %>TestSamples {
 
 <%_ if (fields.some(field => field.fieldTypeLong || field.fieldTypeInteger)) { _%>
@@ -47,39 +49,80 @@ public class <%= persistClass %>TestSamples {
     private static final AtomicInteger intCount = new AtomicInteger(random.nextInt() + ( 2 * Short.MAX_VALUE ));
 <%_ } _%>
 
-    public static <%= persistClass %> get<%= persistClass %>Sample1() {
+    private <%= persistClass %>TestSamples() {}
+
+    public static <%= persistClass %> build<%= persistClass %>InsertableSample1() {
 <%_ if (fluentMethods) { _%>
-        return new <%= persistClass %>()<% sampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueSample1 %>)<% }) %>;
+        return new <%= persistClass %>()<% manualGenerateSampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueSample1 %>)<% }) %>;
 <%_ } else { _%>
         <%= persistClass %> <%= persistInstance %> = new <%= persistClass %>();
-  <%_ for (const field of sampleFields) { _%>
-        <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.javaValueSample1 %>);
+  <%_ for (const field of manualGenerateSampleFields) { _%>
+        <%= persistInstance %>.set<%= field.propertyJavaBeanName %>(<%- field.javaValueSample1 %>);
   <%_ } _%>
         return <%= persistInstance %>;
 <%_ } _%>
     }
 
-    public static <%= persistClass %> get<%= persistClass %>Sample2() {
+    public static <%= persistClass %> build<%= persistClass %>Sample1() {
 <%_ if (fluentMethods) { _%>
-        return new <%= persistClass %>()<% sampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueSample2 %>)<% }) %>;
+        return build<%= persistClass %>InsertableSample1()<% autoGenerateSampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueSample1 %>)<% }) %>;
 <%_ } else { _%>
-        <%= persistClass %> <%= persistInstance %> = new <%= persistClass %>();
-  <%_ for (const field of sampleFields) { _%>
-        <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.javaValueSample2 %>);
+        <%= persistClass %> <%= persistInstance %> = build<%= persistClass %>InsertableSample1();
+  <%_ for (const field of autoGenerateSampleFields) { _%>
+        <%= persistInstance %>.set<%= field.propertyJavaBeanName %>(<%- field.javaValueSample1 %>);
   <%_ } _%>
         return <%= persistInstance %>;
 <%_ } _%>
     }
 
-    public static <%= persistClass %> get<%= persistClass %>RandomSampleGenerator() {
+    public static <%= persistClass %> build<%= persistClass %>InsertableSample2() {
+<%_ if (fluentMethods) { _%>
+        return new <%= persistClass %>()<% manualGenerateSampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueSample2 %>)<% }) %>;
+<%_ } else { _%>
+        <%= persistClass %> <%= persistInstance %> = new <%= persistClass %>();
+  <%_ for (const field of manualGenerateSampleFields) { _%>
+        <%= persistInstance %>.set<%= field.propertyJavaBeanName %>(<%- field.javaValueSample2 %>);
+  <%_ } _%>
+        return <%= persistInstance %>;
+<%_ } _%>
+    }
+
+    public static <%= persistClass %> build<%= persistClass %>Sample2() {
+        return apply<%= persistClass %>UpdateSampleToInsertableSample1(build<%= persistClass %>InsertableSample2());
+    }
+
+    public static <%= persistClass %> apply<%= persistClass %>UpdateSampleToInsertableSample1(<%= persistClass %> <%= persistInstance %>) {
+<%_ if (fluentMethods) { _%>
+        return <%= persistInstance %><% autoGenerateSampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueSample2 %>)<% }) %>;
+<%_ } else { _%>
+  <%_ for (const field of autoGenerateSampleFields) { _%>
+        <%= persistInstance %>.set<%= field.propertyJavaBeanName %>(<%- field.javaValueSample2 %>);
+  <%_ } _%>
+        return <%= persistInstance %>;
+<%_ } _%>
+    }
+
+    public static <%= persistClass %> build<%= persistClass %>RandomSampleGenerator() {
 <%_ if (fluentMethods) { _%>
         return new <%= persistClass %>()<% sampleFields.forEach(field => { %>.<%- field.fieldName %>(<%- field.javaValueGenerator %>)<% }) %>;
 <%_ } else { _%>
         <%= persistClass %> <%= persistInstance %> = new <%= persistClass %>();
   <%_ for (const field of sampleFields) { _%>
-        <%= persistInstance %>.set<%= field.fieldNameCapitalized %>(<%- field.javaValueGenerator %>);
+        <%= persistInstance %>.set<%= field.propertyJavaBeanName %>(<%- field.javaValueGenerator %>);
   <%_ } _%>
         return <%= persistInstance %>;
+<%_ } _%>
+    }
+
+    public static <%= persistClass %> clone(<%= persistClass %> <%= persistInstance %>) {
+<%_ if (fluentMethods) { _%>
+        return new <%= persistClass %>()<% sampleFields.forEach(field => { %>.<%- field.fieldName %>(<%= persistInstance %>.get<%= field.propertyJavaBeanName %>())<% }) %>;
+<%_ } else { _%>
+        <%= persistClass %> new<%= persistClass %> = new <%= persistClass %>();
+  <%_ for (const field of sampleFields) { _%>
+        new<%= persistClass %>.set<%= field.propertyJavaBeanName %>(<%= persistInstance %>.get<%= field.propertyJavaBeanName %>());
+  <%_ } _%>
+        return new<%= persistClass %>;
 <%_ } _%>
     }
 }

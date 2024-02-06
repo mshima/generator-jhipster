@@ -1,0 +1,58 @@
+package <%= entityAbsolutePackage %>.domain;
+
+import <%= entityAbsolutePackage %>.repository.<%= entityClass %>Repository;
+<%_ for (const otherEntity of requiredOtherEntities) { _%>
+import <%= otherEntity.entityAbsolutePackage %>.domain.<%= otherEntity.persistClass %>IntegrationTestSamplesBuilder;
+<%_ } _%>
+<%_ if (entityAbsolutePackage !== packageName) { _%>
+import <%= packageName %>.domain.IntegrationTestSample;
+<%_ } _%>
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import org.springframework.context.ApplicationContext;
+
+public class <%= persistClass %>IntegrationTestSamplesBuilder {
+
+    private <%= persistClass %>IntegrationTestSamplesBuilder() {}
+
+    public static IntegrationTestSample<<%= persistClass %>> build<%= persistClass %>IntegrationTestSample(ApplicationContext applicationContext) {
+        <%= persistClass %> insertable = <%= persistClass %>TestSamples.build<%= persistClass %>InsertableSample1();
+
+        var tearDownCallbacks = new ArrayList<IntegrationTestSample<?>>();
+<%_ for (const relationship of relationships.filter(relationship => relationship.relationshipRequired)) { _%>
+
+        IntegrationTestSample<<%- relationship.otherEntity.persistClass %>> <%- relationship.relationshipName %>IntegrationTestSample = <%- relationship.otherEntity.persistClass %>IntegrationTestSamplesBuilder.build<%= relationship.otherEntity.persistClass %>IntegrationTestSample(applicationContext);
+        tearDownCallbacks.add(<%- relationship.relationshipName %>IntegrationTestSample);
+  <%_ if (relationship.collection) { _%>
+        insertable.set<%- relationship.propertyJavaBeanName %>(Collections.singleton(<%- relationship.relationshipName %>IntegrationTestSample.insert()));
+  <%_ } else { _%>
+        insertable.set<%- relationship.propertyJavaBeanName %>(<%- relationship.relationshipName %>IntegrationTestSample.insert());
+  <%_ } _%>
+<%_ } _%>
+
+        Supplier<<%= persistClass %>> insertCallback = () -> {
+            <%= entityClass %>Repository <%= entityInstance %>Repository = applicationContext.getBean(<%= entityClass %>Repository.class);
+            <%= persistClass %> persisted = <%= entityInstance %>Repository.save(<%= persistClass %>TestSamples.build<%= persistClass %>InsertableSample1());
+
+            return <%= persistClass %>TestSamples.clone(persisted);
+        };
+
+        Consumer<<%= persistClass %>> tearDownCallback = (<%= persistClass %> inserted) -> {
+            <%= entityClass %>Repository <%= entityInstance %>Repository = applicationContext.getBean(<%= entityClass %>Repository.class);
+            <%= entityInstance %>Repository.delete(inserted);
+
+            tearDownCallbacks.forEach((IntegrationTestSample<?> integrationTestSample) -> {
+                integrationTestSample.tearDown();
+            });
+        };
+
+        Function<<%= persistClass %>, <%= persistClass %>> updatableCallback = (<%= persistClass %> <%= persistInstance %>) -> {
+            return <%= persistClass %>TestSamples.apply<%= persistClass %>UpdateSampleToInsertableSample1(<%= persistInstance %>);
+        };
+
+        return IntegrationTestSample.of(insertable, insertCallback, updatableCallback, tearDownCallback);
+    }
+}

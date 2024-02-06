@@ -39,14 +39,14 @@ class <%= persistClass %>Test {
     void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(<%= persistClass %>.class);
 <%_if (!embedded) { _%>
-        <%= persistClass %> <%= persistInstance %>1 = get<%= persistClass %>Sample1();
+        <%= persistClass %> <%= persistInstance %>1 = build<%= persistClass %>Sample1();
         <%= persistClass %> <%= persistInstance %>2 = new <%= persistClass %>();
         assertThat(<%= persistInstance %>1).isNotEqualTo(<%= persistInstance %>2);
 
         <%= persistInstance %>2.set<%= primaryKey.nameCapitalized %>(<%= persistInstance %>1.get<%= primaryKey.nameCapitalized %>());
         assertThat(<%= persistInstance %>1).isEqualTo(<%= persistInstance %>2);
 
-        <%= persistInstance %>2 = get<%= persistClass %>Sample2();
+        <%= persistInstance %>2 = build<%= persistClass %>Sample2();
         assertThat(<%= persistInstance %>1).isNotEqualTo(<%= persistInstance %>2);
 <%_ } _%>
     }
@@ -57,7 +57,7 @@ class <%= persistClass %>Test {
         <%= persistClass %> <%= persistInstance %> = new <%= persistClass %>();
         assertThat(<%= persistInstance %>.hashCode()).isZero();
 
-        <%= persistClass %> <%= persistInstance %>1 = get<%= persistClass %>Sample1();
+        <%= persistClass %> <%= persistInstance %>1 = build<%= persistClass %>Sample1();
         <%= persistInstance %>.set<%= primaryKey.nameCapitalized %>(<%= persistInstance %>1.get<%= primaryKey.nameCapitalized %>());
         assertThat(<%= persistInstance %>).hasSameHashCodeAs(<%= persistInstance %>1);
     }
@@ -66,8 +66,8 @@ class <%= persistClass %>Test {
 
     @Test
     void <%- relationship.relationshipName %>Test() throws Exception {
-        <%= persistClass %> <%= persistInstance %> = get<%= persistClass %>RandomSampleGenerator();
-        <%= relationship.otherEntity.persistClass %> <%= relationship.otherEntity.persistInstance %>Back = get<%= relationship.otherEntity.persistClass %>RandomSampleGenerator();
+        <%= persistClass %> <%= persistInstance %> = build<%= persistClass %>RandomSampleGenerator();
+        <%= relationship.otherEntity.persistClass %> <%= relationship.otherEntity.persistInstance %>Back = build<%= relationship.otherEntity.persistClass %>RandomSampleGenerator();
   <%_ if (relationship.collection) { _%>
 
         <%= persistInstance %>.add<%- relationship.relationshipNameCapitalized %>(<%= relationship.otherEntity.persistInstance %>Back);

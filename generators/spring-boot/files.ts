@@ -24,7 +24,22 @@ import {
   GRADLE_BUILD_SRC_MAIN_DIR,
 } from '../generator-constants.js';
 import { addSectionsCondition, mergeSections } from '../base/support/index.js';
-import { moveToJavaPackageSrcDir, moveToJavaPackageTestDir, moveToSrcMainResourcesDir } from '../java/support/index.js';
+import {
+  javaTestPackageTemplatesBlock,
+  moveToJavaPackageSrcDir,
+  moveToJavaPackageTestDir,
+  moveToSrcMainResourcesDir,
+} from '../java/support/index.js';
+
+export const sampleFiles = {
+  sampleFiles: [
+    javaTestPackageTemplatesBlock({
+      condition: data => !data.reactive && data.databaseTypeSql,
+      relativePath: 'domain/',
+      templates: ['IntegrationTestSample.java'],
+    }),
+  ],
+};
 
 const imperativeConfigFiles = {
   imperativeFiles: [
@@ -283,6 +298,7 @@ const swaggerFiles = {
  * For any other config an object { file:.., method:.., template:.. } can be used
  */
 export const baseServerFiles = {
+  ...sampleFiles,
   jib: [
     {
       path: 'src/main/docker/jib/',
