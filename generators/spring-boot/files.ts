@@ -34,7 +34,7 @@ import {
 export const sampleFiles = {
   sampleFiles: [
     javaTestPackageTemplatesBlock({
-      condition: data => !data.reactive,
+      condition: data => !data.reactive && data.databaseTypeSql,
       relativePath: 'domain/',
       templates: ['IntegrationTestSample.java'],
     }),
