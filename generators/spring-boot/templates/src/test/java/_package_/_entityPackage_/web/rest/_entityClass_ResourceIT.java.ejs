@@ -18,6 +18,7 @@
 -%>
 package <%= entityAbsolutePackage %>.web.rest;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 <%_
 var filterTestableRelationships = (reactive ? reactiveEagerRelations : relationships).filter(rel => rel.persistableRelationship && !rel.otherEntity.hasCyclicRequiredRelationship);
 const fieldsToTest = fields.filter(field => !field.id && !field.autoGenerate && !field.transient);
@@ -707,23 +708,14 @@ _%>
             assertThat(searchDatabaseSizeAfter).isEqualTo(searchDatabaseSizeBefore + 1);
         });
   <%_ } _%>
-        <%= persistClass %> test<%= entityClass %> = <%= entityInstance %>Repository.findById(returned<%- restClass %>.get<%- primaryKey.nameCapitalized %>())<%= reactive ? callBlock : '.orElseThrow()' %>;
-  <%_ for (const field of fieldsToTest) {
-    if (field.fieldTypeZonedDateTime) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ } else if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>ContentType()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE);
-    <%_ } else if (field.fieldTypeBigDecimal) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualByComparingTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ } else { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ }
-  } _%>
+  <%_ if (dtoMapstruct) { _%>
+        var returned<%- persistClass %> = <%= entityInstance %>Mapper.toEntity(returned<%- dtoClass %>);
+  <%_ } _%>
+        assertPersisted<%- persistClass %>ToMatchInsertProperties(returned<%- persistClass %>);
   <%_ if (isUsingMapsId) { _%>
 
         // Validate the id for MapsId, the ids must be same
-        assertThat(test<%= entityClass %>.get<%= primaryKey.nameCapitalized %>()).isEqualTo(<%_ if (dtoMapstruct) { _%><%= dtoInstance %><%_ } else { _%>test<%= entityClass %><%_ } _%>.get<%= mapsIdEntity %>().get<%= primaryKey.nameCapitalized %>());
+        assertThat(returned<%- persistClass %>.get<%= primaryKey.nameCapitalized %>()).isEqualTo(<%= persistInstance %>.get<%= mapsIdEntity %>().get<%= primaryKey.nameCapitalized %>());
   <%_ } _%>
     }
 
@@ -752,9 +744,15 @@ _%>
             .exchange()
             .expectStatus().isBadRequest();
   <%_ } else { _%>
-        rest<%= entityClass %>MockMvc.perform(post(ENTITY_API_URL)<% if (authenticationUsesCsrf) { %>.with(csrf())<% }%>
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(om.writeValueAsBytes(<%= restInstance %>)))
+        rest<%= entityClass %>MockMvc
+            .perform(
+                post(ENTITY_API_URL)
+    <%_ if (authenticationUsesCsrf) { _%>
+                .with(csrf())
+    <%_ } _%>
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsBytes(<%= restInstance %>))
+            )
             .andExpect(status().isBadRequest());
   <%_ } _%>
 
@@ -923,18 +921,8 @@ _%>
         assertThat(<%= entityInstance %>List).isNotNull();
         assertThat(<%= entityInstance %>List).hasSize(1);
         <%= persistClass %> test<%= entityClass %> = <%= entityInstance %>List.get(0);
-  <%_ for (const field of fieldsToTest) {
-    if (field.fieldTypeZonedDateTime) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ } else if ((field.fieldTypeBinary) && !field.blobContentTypeText) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>ContentType()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE);
-    <%_ } else if (field.fieldTypeBigDecimal) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualByComparingTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ } else { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'DEFAULT_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ }
-  } _%>
+
+        assertRelevantProperties<%- persistClass %>Equals(<%= persistInstance %>, test<%= entityClass %>);
     }
 <%_ } _%>
 
@@ -1474,36 +1462,17 @@ _%>
         List<<%= persistClass %>> <%= entityInstance %>List = <%= entityInstance %>Repository.findAll()<%= callListBlock %>;
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
         <%= persistClass %> test<%= entityClass %> = <%= entityInstance %>List.get(<%= entityInstance %>List.size() - 1);
-  <%_ for (const field of fieldsToTest) { _%>
-    <%_ if (field.fieldTypeZonedDateTime) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ } else if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>);
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>ContentType()).isEqualTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE);
-    <%_ } else if (field.fieldTypeBigDecimal) { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualByComparingTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ } else { _%>
-        assertThat(test<%= entityClass %>.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>);
-    <%_ } _%>
-  <%_ } _%>
+
+        assertAllProperties<%- persistClass %>Equals(test<%= entityClass %>, updated<%= persistClass %>);
+
   <%_ if (searchEngineElasticsearch) { _%>
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
             int searchDatabaseSizeAfter = IterableUtil.sizeOf(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
             assertThat(searchDatabaseSizeAfter).isEqualTo(searchDatabaseSizeBefore);
             List<<%= persistClass %>> <%= entityInstance %>SearchList = IterableUtils.toList(<%= entityInstance %>SearchRepository.findAll()<%= callListBlock %>);
-        <%= persistClass %> test<%= entityClass %>Search = <%= entityInstance %>SearchList.get(searchDatabaseSizeAfter - 1);
-    <%_ for (const field of fieldsToTest) { _%>
-      <%_ if (field.fieldTypeZonedDateTime) { _%>
-            assertThat(test<%= entityClass %>Search.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>);
-      <%_ } else if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
-            assertThat(test<%= entityClass %>Search.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>);
-            assertThat(test<%= entityClass %>Search.get<%= field.fieldInJavaBeanMethod %>ContentType()).isEqualTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>_CONTENT_TYPE);
-      <%_ } else if (field.fieldTypeBigDecimal) { _%>
-            assertThat(test<%= entityClass %>Search.get<%= field.fieldInJavaBeanMethod %>()).isEqualByComparingTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>);
-      <%_ } else { _%>
-            assertThat(test<%= entityClass %>Search.get<%= field.fieldInJavaBeanMethod %>()).isEqualTo(<%= 'UPDATED_' + field.fieldNameUnderscored.toUpperCase() %>);
-      <%_ } _%>
-    <%_ } _%>
+            <%= persistClass %> test<%= entityClass %>Search = <%= entityInstance %>SearchList.get(searchDatabaseSizeAfter - 1);
+
+            assertAllProperties<%- persistClass %>Equals(test<%= entityClass %>Search, updated<%= persistClass %>);
       });
   <%_ } _%>
     }
@@ -1889,5 +1858,56 @@ _%>
 
     protected void assertSameRepositoryCount(long countBefore) {
       assertThat(countBefore).isEqualTo(getRepositoryCount());
+    }
+
+    protected void assertPersisted<%- persistClass %>ToMatchInsertProperties(<%- persistClass %> expected<%- persistClass %>) {
+        var persisted<%- persistClass %> = <%- entityInstance %>Repository.findById(expected<%- persistClass %>.get<%- primaryKey.nameCapitalized %>())<%- reactive ? '.block()' : '.orElseThrow()' %>;
+        assertRelevantProperties<%- persistClass %>Equals(expected<%- persistClass %>, persisted<%- persistClass %>);
+    }
+
+    protected void assertPersisted<%- persistClass %>ToMatchAllProperties(<%- persistClass %> expected<%- persistClass %>) {
+        var persisted<%- persistClass %> = <%- entityInstance %>Repository.findById(expected<%- persistClass %>.get<%- primaryKey.nameCapitalized %>())<%- reactive ? '.block()' : '.orElseThrow()' %>;
+        assertAllProperties<%- persistClass %>Equals(expected<%- persistClass %>, persisted<%- persistClass %>);
+    }
+
+    public static void assertAllProperties<%- persistClass %>Equals(<%- persistClass %> expected, <%- persistClass %> actual) {
+        // prettier-ignore
+        assertAll("Verify properties",
+<%_ for (const field of fields.filter(field => !field.transient && field.autoGenerate)) { _%>
+            () -> assertThat(expected.get<%- field.fieldInJavaBeanMethod %>()).as("check <%- field.propertyName %>").isEqualTo(actual.get<%- field.fieldInJavaBeanMethod %>()),
+<%_ } _%>
+<%_ for (const relationship of relationships.filter(relationship => relationship.autoGenerate && !relationship.otherEntity.builtInUser)) { _%>
+            () -> assertThat(expected.get<%- relationship.propertyJavaBeanName %>()).as("check <%- relationship.propertyName %>").isEqualTo(actual.get<%- relationship.propertyJavaBeanName %>()),
+<%_ } _%>
+            () -> {}
+        );
+        assertRelevantProperties<%- persistClass %>Equals(expected, actual);
+    }
+
+    public static void assertRelevantProperties<%- persistClass %>Equals(<%- persistClass %> expected, <%- persistClass %> actual) {
+        // prettier-ignore
+        assertAll("Verify properties",
+<%_ for (const field of fields.filter(field => !field.transient && !field.autoGenerate)) { _%>
+  <%_ if (field.fieldTypeZonedDateTime) { _%>
+            () -> assertThat(expected.get<%- field.fieldInJavaBeanMethod %>()).as("check <%- field.propertyName %>").usingComparator((e, a) -> e.withZoneSameInstant(ZoneOffset.UTC).compareTo(a.withZoneSameInstant(ZoneOffset.UTC))).isEqualTo(actual.get<%- field.fieldInJavaBeanMethod %>()),
+  <%_ } else if (field.fieldTypeBigDecimal) { _%>
+            () -> assertThat(expected.get<%- field.fieldInJavaBeanMethod %>()).as("check <%- field.propertyName %>").usingComparator(BigDecimal::compareTo).isEqualTo(actual.get<%- field.fieldInJavaBeanMethod %>()),
+  <%_ } else { _%>
+            () -> assertThat(expected.get<%- field.fieldInJavaBeanMethod %>()).as("check <%- field.propertyName %>").isEqualTo(actual.get<%- field.fieldInJavaBeanMethod %>()),
+    <%_ if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
+            () -> assertThat(expected.get<%- field.fieldInJavaBeanMethod %>ContentType()).as("check <%- field.propertyName %> contenty type").isEqualTo(actual.get<%- field.fieldInJavaBeanMethod %>ContentType()),
+    <%_ } _%>
+  <%_ } _%>
+<%_ } _%>
+<%_ for (const relationship of relationships.filter(relationship => !relationship.autoGenerate && !relationship.otherEntity.builtInUser)) { _%>
+  <%_ if (reactive && databaseTypeSql) { _%>
+            // Test fails because reactive api returns an empty object instead of null
+            <% if (relationship.collection) { %>// <% } %>() -> assertThat(expected.get<%- relationship.propertyJavaBeanName %>()).as("check <%- relationship.propertyName %>").isEqualTo((actual.get<%- relationship.propertyJavaBeanName %>() == null || actual.get<%- relationship.propertyJavaBeanName %>().get<%- primaryKey.nameCapitalized %>() == null) ? null : actual.get<%- relationship.propertyJavaBeanName %>()),
+  <%_ } else { _%>
+            () -> assertThat(expected.get<%- relationship.propertyJavaBeanName %>()).as("check <%- relationship.propertyName %>").isEqualTo(actual.get<%- relationship.propertyJavaBeanName %>()),
+  <%_ } _%>
+<%_ } _%>
+            () -> {}
+        );
     }
 }
