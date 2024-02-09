@@ -20,6 +20,9 @@ package <%= entityAbsolutePackage %>.repository;
 
 import <%= entityAbsolutePackage %>.domain.<%= persistClass %>;
 
+<%_ if (serviceNo && anyPropertyHasValidation) { _%> 
+import jakarta.validation.Valid;
+<%_ } _%>
 <%_ if (implementsEagerLoadApis) { _%>
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +52,12 @@ import java.util.UUID;
 <%_ } _%>
 @Repository
 public interface <%= entityClass %>Repository extends <% if (containsBagRelationships) { %><%= entityClass %>RepositoryWithBagRelationships, <% } %>JpaRepository<<%= persistClass %>, <%= primaryKey.type %>><% if (jpaMetamodelFiltering) { %>, JpaSpecificationExecutor<<%= persistClass %>><% } %> {
+<%_ if (serviceNo && anyPropertyHasValidation) { _%> 
+    default <%= persistClass %> saveValidated(@Valid <%= persistClass %> entity) {
+        return this.save(entity);
+    }
+<%_ } _%>
+
 <%_ for (const relationship of relationships) { _%>
   <%_ if (relationship.relationshipManyToOne && relationship.otherEntityUser) { _%>
 
