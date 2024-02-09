@@ -922,7 +922,11 @@ _%>
         assertThat(<%= entityInstance %>List).hasSize(1);
         <%= persistClass %> test<%= entityClass %> = <%= entityInstance %>List.get(0);
 
+  <%_ if (relationships.length > 0) { _%>
         assert<%- persistClass %>RelevantPropertiesAndRelationshipsEquals(<%= persistInstance %>, test<%= entityClass %>);
+  <%_ } else { _%>
+        assert<%- persistClass %>RelevantPropertiesEquals(<%= persistInstance %>, test<%= entityClass %>);
+  <%_ } _%>
     }
 <%_ } _%>
 
@@ -1906,18 +1910,24 @@ _%>
 <%_ } _%>
             () -> {}
         );
+<%_ if (relationships.length > 0) { _%>
         assert<%- persistClass %>RelevantPropertiesAndRelationshipsEquals(expected, actual);
+<%_ } else { _%>
+        assert<%- persistClass %>RelevantPropertiesEquals(expected, actual);
+<%_ } _%>
     }
+<%_ if (relationships.length > 0) { _%>
 
     public static void assert<%- persistClass %>RelevantPropertiesAndRelationshipsEquals(<%- persistClass %> expected, <%- persistClass %> actual) {
         assert<%- persistClass %>RelevantPropertiesEquals(expected, actual);
-<%_ if (reactive && databaseTypeSql) { _%>
+  <%_ if (reactive && databaseTypeSql) { _%>
         // Test fails because reactive api returns an empty object instead of null
         // assert<%- persistClass %>RelationshipsEquals(expected, actual);
-<%_ } else { _%>
+  <%_ } else { _%>
         assert<%- persistClass %>RelationshipsEquals(expected, actual);
-<%_ } _%>
+  <%_ } _%>
     }
+<%_ } _%>
 
     public static void assert<%- persistClass %>RelevantPropertiesEquals(<%- persistClass %> expected, <%- persistClass %> actual) {
         // prettier-ignore
@@ -1937,14 +1947,16 @@ _%>
             () -> {}
         );
     }
+<%_ if (relationships.length > 0) { _%>
 
     public static void assert<%- persistClass %>RelationshipsEquals(<%- persistClass %> expected, <%- persistClass %> actual) {
         // prettier-ignore
         assertAll("Verify relationships",
-<%_ for (const relationship of relationships.filter(relationship => !relationship.autoGenerate && !relationship.otherEntity.builtInUser)) { _%>
+  <%_ for (const relationship of relationships.filter(relationship => !relationship.autoGenerate && !relationship.otherEntity.builtInUser)) { _%>
             () -> assertThat(expected.get<%- relationship.propertyJavaBeanName %>()).as("check <%- relationship.propertyName %>").isEqualTo(actual.get<%- relationship.propertyJavaBeanName %>()),
-<%_ } _%>
+  <%_ } _%>
             () -> {}
         );
     }
+<%_ } _%>
 }
