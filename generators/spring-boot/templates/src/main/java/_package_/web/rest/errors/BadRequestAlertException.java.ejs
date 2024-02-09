@@ -65,4 +65,20 @@ public class BadRequestAlertException extends ErrorResponseException {
     public ProblemDetailWithCause getProblemDetailWithCause() {
         return (ProblemDetailWithCause) this.getBody();
     }
+
+    public static BadRequestAlertException idinvalid(String entityName) {
+        return new BadRequestAlertException("Invalid id", entityName, "idinvalid");
+    }
+
+    public static BadRequestAlertException idnull(String entityName) {
+        return new BadRequestAlertException("Invalid id", entityName, "idnull");
+    }
+
+    public static BadRequestAlertException idnotfound(String entityName) {
+        return new BadRequestAlertException("Entity not found", entityName, "idnotfound");
+    }
+
+    public static BadRequestAlertException internalServerError(String entityName) {
+        return new BadRequestAlertException("Unknown server error", entityName, "internalServerError");
+    }
 }
