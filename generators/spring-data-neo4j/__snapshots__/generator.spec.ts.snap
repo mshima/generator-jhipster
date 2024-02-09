@@ -140,6 +140,9 @@ exports[`generator - neo4j gateway-jwt-gradle-enableTranslation(true)-com.mycomp
   "src/main/java/com/mycompany/repository/UserRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -586,6 +589,9 @@ exports[`generator - neo4j microservice-jwt-reactive(false)-maven-enableTranslat
   "src/main/java/tech/jhipster/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -918,6 +924,9 @@ exports[`generator - neo4j microservice-jwt-reactive(true)-gradle-enableTranslat
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -1242,6 +1251,9 @@ exports[`generator - neo4j microservice-oauth2-reactive(true)-gradle-enableTrans
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/package-info.java": {
@@ -1571,6 +1583,9 @@ exports[`generator - neo4j monolith-jwt-reactive(false)-maven-enableTranslation(
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/UserRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -2049,6 +2064,9 @@ exports[`generator - neo4j monolith-jwt-reactive(true)-gradle-enableTranslation(
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -2373,6 +2391,9 @@ exports[`generator - neo4j monolith-oauth2-reactive(false)-maven-enableTranslati
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -2726,6 +2747,9 @@ exports[`generator - neo4j monolith-oauth2-reactive(true)-gradle-enableTranslati
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/package-info.java": {
@@ -3082,6 +3106,9 @@ exports[`generator - neo4j monolith-session-reactive(false)-maven-enableTranslat
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/UserRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -3519,6 +3546,9 @@ exports[`generator - neo4j monolith-session-reactive(true)-gradle-enableTranslat
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/package-info.java": {

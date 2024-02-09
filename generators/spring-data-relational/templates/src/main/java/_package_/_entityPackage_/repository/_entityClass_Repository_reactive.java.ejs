@@ -29,6 +29,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+<%_ if (serviceNo && anyPropertyHasValidation) { _%> 
+import <%= packageName %>.repository.ValidatedCrudRepository;
+<%_ } _%>
 <%_ if (primaryKey.typeUUID) { _%>
 
 import java.util.UUID;
@@ -39,7 +42,7 @@ import java.util.UUID;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface <%= entityClass %>Repository extends ReactiveCrudRepository<<%= persistClass %>, <%= primaryKey.type %>>, <%= entityClass %>RepositoryInternal {
+public interface <%= entityClass %>Repository extends <% if (serviceNo && anyPropertyHasValidation) { %>Validated<% } else { %>Reactive<% } %>CrudRepository<<%= persistClass %>, <%= primaryKey.type %>>, <%= entityClass %>RepositoryInternal {
 
 <%_ if (!paginationNo) { _%>
     Flux<<%= persistClass %>> findAllBy(Pageable pageable);

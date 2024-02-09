@@ -140,6 +140,9 @@ exports[`generator - mongodb gateway-jwt-gradle-enableTranslation(true)-com.myco
   "src/main/java/com/mycompany/repository/UserRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -580,6 +583,9 @@ exports[`generator - mongodb microservice-jwt-reactive(false)-maven-enableTransl
   "src/main/java/tech/jhipster/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -915,6 +921,9 @@ exports[`generator - mongodb microservice-jwt-reactive(true)-gradle-enableTransl
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -1239,6 +1248,9 @@ exports[`generator - mongodb microservice-oauth2-reactive(true)-gradle-enableTra
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/package-info.java": {
@@ -1568,6 +1580,9 @@ exports[`generator - mongodb monolith-jwt-reactive(false)-maven-enableTranslatio
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/UserRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -2043,6 +2058,9 @@ exports[`generator - mongodb monolith-jwt-reactive(true)-gradle-enableTranslatio
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -2367,6 +2385,9 @@ exports[`generator - mongodb monolith-oauth2-reactive(false)-maven-enableTransla
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -2725,6 +2746,9 @@ exports[`generator - mongodb monolith-oauth2-reactive(true)-gradle-enableTransla
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -3079,6 +3103,9 @@ exports[`generator - mongodb monolith-session-reactive(false)-maven-enableTransl
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/UserRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -3513,6 +3540,9 @@ exports[`generator - mongodb monolith-session-reactive(true)-gradle-enableTransl
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/package-info.java": {

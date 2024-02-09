@@ -84,6 +84,9 @@ import java.util.stream.Collectors;
 <%_ if (fieldsContainNoOwnerOneToOne || (paginationNo && searchEngineElasticsearch)) { _%>
 import java.util.stream.StreamSupport;
 <%_ } _%>
+<%_ if (!serviceImpl && anyPropertyHasValidation) { _%> 
+import jakarta.validation.Valid;
+<%_ } _%>
 
 /**
  * Service Implementation for managing {@link <%= entityAbsoluteClass %>}.
@@ -93,7 +96,19 @@ import java.util.stream.StreamSupport;
 public class <%= serviceClassName %><% if (serviceImpl) { %> implements <%= entityClass %>Service<% } %> {
 
     private static final Logger LOG = LoggerFactory.getLogger(<%= serviceClassName %>.class);
-<%- include('../../_partials_entity_/inject_template', {viaService: false, constructorName: serviceClassName, queryService: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false}); -%>
+<%- include('../../_partials_entity_/inject_template', {viaService: false, constructorName: serviceClassName, queryService: false, isUsingMapsId: isUsingMapsId, mapsIdAssoc: mapsIdAssoc, isController: false, injectVariables: []}); -%>
+<%_ if (!serviceImpl && anyPropertyHasValidation) { _%> 
+
+    /**
+     * Update a validated <%= entityInstance %>.
+     *
+     * @param <%- instanceName %> the entity to save.
+     * @return the persisted entity.
+     */
+    public <%- wrapMono(restClass) %> updateValidated(@Valid <%= restClass %> <%- instanceName %>) {
+        return this.update(<%- instanceName %>);
+    }
+<%_ } _%>
 
 <%_ if (!serviceImpl) { _%>
     /**
@@ -128,21 +143,6 @@ public class <%= serviceClassName %><% if (serviceImpl) { %> implements <%= enti
 <%- include('/_global_partials_entity_/save_template', {saveNewEntityOperation: false, returnDirectly: true}); -%>
     }
 
-  <%_ if (!serviceImpl) { _%>
-    /**
-     * Partially update a <%= entityInstance %>.
-     *
-     * @param <%= instanceName %> the entity to update partially.
-     * @return the persisted entity.
-     */
-  <%_ } _%>
-  <%_ if (serviceImpl) { _%>
-    @Override
-  <%_ } _%>
-    public <% if (reactive) { %>Mono<% } else { %>Optional<% } %><<%= instanceType %>> partialUpdate(<%= instanceType %> <%= instanceName %>) {
-        LOG.debug("Request to partially update <%= entityClass %> : {}", <%= instanceName %>);
-<%- include('../../_partials_entity_/patch_template', {isService: true, viaService: false}); -%>
-    }
 <%_ } _%>
 <%_ if (!jpaMetamodelFiltering) { _%>
 

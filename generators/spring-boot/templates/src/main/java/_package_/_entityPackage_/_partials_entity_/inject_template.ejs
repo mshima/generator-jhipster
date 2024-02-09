@@ -50,6 +50,11 @@
   if (saveUserSnapshot && (viaService || constructorName.endsWith('Resource'))) {
     beans.push({class: 'UserRepository', instance: 'userRepository'});
   }
+  if (injectVariables) {
+    for (const variable of injectVariables) {
+      beans.push({ class: variable.classPath.split('.').pop(), instance: variable.fieldName });
+    }
+  }
 _%>
 
 <%_ for (const bean of beans) { _%>
