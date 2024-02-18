@@ -67,11 +67,11 @@ public interface <%= entityClass %>Service {
     /**
      * Save a validated <%= entityInstance %>.
      *
-     * @param <%= instanceName %> the entity to save.
+     * @param <%- instanceName %> the entity to save.
      * @return the persisted entity.
      */
-    default <%= restClass %> saveValidated(@Valid <%= restClass %> entity) {
-        return this.save(entity);
+    default <%= restClass %> saveValidated(@Valid <%= restClass %> <%- instanceName %>) {
+        return this.save(<%- instanceName %>);
     }
 <%_ } _%>
 
