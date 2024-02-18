@@ -361,7 +361,7 @@ public class <%= entityClass %>Resource {
         if (!idNode.<%- primaryKey.typeLong ? 'isIntegralNumber' : 'isTextual' %>()) {
             throw BadRequestAlertException.idnull(ENTITY_NAME);
         }
-        var idNodeValue = idNode.<%- primaryKey.typeLong ? 'longValue' : 'textValue' %>();
+        var idNodeValue = idNode.<%- primaryKey.typeLong ? 'longValue' : primaryKey.typeInteger ? 'intValue' : 'textValue' %>();
         if (!Objects.equals(<%= primaryKey.name %><%- primaryKey.typeUUID ? '.toString()' : '' %>, idNodeValue)) {
             throw BadRequestAlertException.idinvalid(ENTITY_NAME);
         }
