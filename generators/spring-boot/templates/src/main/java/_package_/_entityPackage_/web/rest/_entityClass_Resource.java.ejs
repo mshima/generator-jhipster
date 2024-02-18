@@ -355,9 +355,9 @@ public class <%= entityClass %>Resource {
   <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> partialUpdate<%= entityClass %>(
             @PathVariable(value = "<%= primaryKey.name %>", required = false) final <%= primaryKey.type %> <%= primaryKey.name %>,
-            @RequestBody JsonNode <%= instanceName %>Node
+            @RequestBody JsonNode <%= instanceName %>
     ) throws URISyntaxException {
-        var idNode = <%= instanceName %>Node.get("<%- primaryKey.name %>");
+        var idNode = <%= instanceName %>.get("<%- primaryKey.name %>");
         if (!idNode.<%- primaryKey.typeLong ? 'isIntegralNumber' : 'isTextual' %>()) {
             throw BadRequestAlertException.idnull(ENTITY_NAME);
         }
@@ -400,7 +400,7 @@ public class <%= entityClass %>Resource {
   <%_ } _%>
             .<%= mapOrFlatMap %>(existing<%= entityClass %> -> {
                 try {
-                    existing<%= entityClass %> = this.om.readerForUpdating(existing<%= entityClass %>).readValue(<%= instanceName %>Node);
+                    existing<%= entityClass %> = this.om.readerForUpdating(existing<%= entityClass %>).readValue(<%= instanceName %>);
                     return existing<%= entityClass %>;
                 } catch (IOException e) {
                     log.error("Error updating the entity", e);
