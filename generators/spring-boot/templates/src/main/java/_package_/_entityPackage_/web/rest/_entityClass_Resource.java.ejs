@@ -64,7 +64,7 @@ import <%= entityAbsolutePackage %>.domain.criteria.<%= entityClass %>Criteria;
 <%_ if (!readOnly && updatableEntity) { _%>
 
 import java.io.IOException;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectNode;
 <%_ } _%>
 
 import tech.jhipster.web.util.HeaderUtil;
@@ -355,9 +355,9 @@ public class <%= entityClass %>Resource {
   <%_ } _%>
     public <% if (reactive) { %>Mono<<% } %>ResponseEntity<<%= instanceType %>><% if (reactive) { %>><% } %> partialUpdate<%= entityClass %>(
             @PathVariable(value = "<%= primaryKey.name %>", required = false) final <%= primaryKey.type %> <%= primaryKey.name %>,
-            @RequestBody JsonNode <%= instanceName %>
+            @RequestBody ObjectNode <%= instanceName %>
     ) throws URISyntaxException {
-        var idNode = <%= instanceName %>.get("<%- primaryKey.name %>");
+        var idNode = <%= instanceName %>.remove("<%- primaryKey.name %>");
         if (!idNode.<%- primaryKey.typeLong || primaryKey.typeInteger ? 'isIntegralNumber' : 'isTextual' %>()) {
             throw BadRequestAlertException.idnull(ENTITY_NAME);
         }
