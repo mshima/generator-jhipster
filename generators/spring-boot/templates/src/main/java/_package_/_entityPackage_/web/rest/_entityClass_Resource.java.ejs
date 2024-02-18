@@ -362,7 +362,7 @@ public class <%= entityClass %>Resource {
             throw BadRequestAlertException.idnull(ENTITY_NAME);
         }
         var idNodeValue = idNode.<%- primaryKey.typeLong ? 'longValue' : 'textValue' %>();
-        if (!Objects.equals(<%= primaryKey.name %>, idNodeValue)) {
+        if (!Objects.equals(<%= primaryKey.name %><%- primaryKey.typeUUID ? '.toString()' : '' %>, idNodeValue)) {
             throw BadRequestAlertException.idinvalid(ENTITY_NAME);
         }
 
