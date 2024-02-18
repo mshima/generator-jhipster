@@ -358,7 +358,7 @@ public class <%= entityClass %>Resource {
             @RequestBody JsonNode <%= instanceName %>
     ) throws URISyntaxException {
         var idNode = <%= instanceName %>.get("<%- primaryKey.name %>");
-        if (!idNode.<%- primaryKey.typeLong ? 'isIntegralNumber' : 'isTextual' %>()) {
+        if (!idNode.<%- primaryKey.typeLong || primaryKey.typeInteger ? 'isIntegralNumber' : 'isTextual' %>()) {
             throw BadRequestAlertException.idnull(ENTITY_NAME);
         }
         var idNodeValue = idNode.<%- primaryKey.typeLong ? 'longValue' : primaryKey.typeInteger ? 'intValue' : 'textValue' %>();
