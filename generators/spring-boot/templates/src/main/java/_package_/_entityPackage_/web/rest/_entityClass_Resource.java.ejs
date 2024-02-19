@@ -23,7 +23,7 @@ const viaService = !serviceNo;
 const injectVariables = [];
 if (!readOnly && updatableEntity) {
   injectVariables.push({ classPath: 'com.fasterxml.jackson.databind.ObjectMapper', fieldName: 'om' });
-  if (serviceNo && databaseTypeSql && !reactive) {
+  if (databaseTypeSql && !reactive) {
     injectVariables.push({ classPath: 'jakarta.persistence.EntityManager', fieldName: 'em' });
   }
 }
@@ -403,7 +403,7 @@ public class <%= entityClass %>Resource {
   <%_ } _%>
             .<%= mapOrFlatMap %>(existing<%= entityClass %> -> {
                 try {
-  <%_ if (serviceNo && databaseTypeSql && !reactive) { _%>
+  <%_ if (databaseTypeSql && !reactive) { _%>
                     em.clear();
   <%_ } _%>
                     existing<%= entityClass %> = this.om.readerForUpdating(existing<%= entityClass %>).readValue(<%= instanceName %>);
