@@ -16,10 +16,33 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, Input } from '@angular/core';
+import { computed, Component, Input, Signal, WritableSignal, signal } from '@angular/core';
+import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
 <%_ if (enableTranslation) { _%>
 import TranslateDirective from '../language/translate.directive';
 <%_ } _%>
+import { type PaginationState } from './pagination-state';
+
+const validPaginationState = (state: PaginationState): boolean => Boolean(state.page > 0 && state.itemsPerPage > 0);
+
+const calculateLastItems = (state: PaginationState): { lastItemOfPreviousPage: number; lastItemOfCurrentPage: number } => {
+  const lastItemOfCurrentPage = state.page * state.itemsPerPage;
+  return { lastItemOfPreviousPage: lastItemOfCurrentPage - state.itemsPerPage, lastItemOfCurrentPage };
+};
+
+const calculateFirst = (state: PaginationState): number | undefined =>
+  validPaginationState(state) ? calculateLastItems(state).lastItemOfPreviousPage + 1 : undefined;
+
+const calculateUntil = (state: PaginationState): number | undefined => {
+  if (!validPaginationState(state)) {
+    return undefined;
+  }
+  const { lastItemOfCurrentPage } = calculateLastItems(state);
+  if (state.totalItems !== -1 && lastItemOfCurrentPage > state.totalItems) {
+    return state.totalItems;
+  }
+  return lastItemOfCurrentPage;
+};
 
 /**
  * A component that will take care of item count statistics of a pagination.
@@ -29,34 +52,18 @@ import TranslateDirective from '../language/translate.directive';
   selector: '<%= jhiPrefixDashed %>-item-count',
   template: `
 <%_ if (enableTranslation) { _%>
-    <div <%= jhiPrefix %>Translate="global.item-count" [translateValues]="{ first: first, second: second, total: total }"></div>
+    <div <%= jhiPrefix %>Translate="global.item-count" [translateValues]="{ first: first(), second: until(), total: paginationState().totalItems }"></div>
 <%_ } else { _%>
-    <div>__jhiTransformTranslate__('global.item-count')</div>
+    <div>__jhiTransformTranslate__('global.item-count', { "first": "{{ first() }}", "second": "{{ until() }}", "total": "{{ paginationState().totalItems }}" })</div>
 <%_ } _%>
   `,
 <%_ if (enableTranslation) { _%>
   imports: [TranslateDirective],
 <%_ } _%>
 })
-export default class ItemCountComponent {
-  /**
-   * @param params  Contains parameters for component:
-   *                    page          Current page number
-   *                    totalItems    Total number of items
-   *                    itemsPerPage  Number of items per page
-   */
-  @Input() set params(params: { page?: number; totalItems?: number; itemsPerPage?: number }) {
-    if (params.page && params.totalItems !== undefined && params.itemsPerPage) {
-      this.first = (params.page - 1) * params.itemsPerPage + 1;
-      this.second = params.page * params.itemsPerPage < params.totalItems ? params.page * params.itemsPerPage : params.totalItems;
-    } else {
-      this.first = undefined;
-      this.second = undefined;
-    }
-    this.total = params.totalItems;
-  }
+export class ItemCountComponent {
+  @Input() paginationState!: Signal<PaginationState>;
 
-  first?: number;
-  second?: number;
-  total?: number;
+  first: Signal<number | undefined> = computed(() => calculateFirst(this.paginationState()));
+  until: Signal<number | undefined> = computed(() => calculateUntil(this.paginationState()));
 }

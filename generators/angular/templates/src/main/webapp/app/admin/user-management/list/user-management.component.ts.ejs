@@ -29,7 +29,7 @@ import SharedModule from 'app/shared/shared.module';
 import { SortDirective, SortByDirective, sortStateSignal, SortService, SortState } from 'app/shared/sort';
 import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
 import { SORT } from 'app/config/navigation.constants';
-import { ItemCountComponent } from 'app/shared/pagination';
+import { ItemCountComponent, paginationStateSignal } from 'app/shared/pagination';
 <%_ } _%>
 import { AccountService } from 'app/core/auth/account.service';
 import { Account } from 'app/core/auth/account.model';
@@ -57,9 +57,7 @@ export default class UserManagementComponent implements OnInit {
   users = signal<User[] | null>(null);
   isLoading = signal(false);
 <%_ if (!databaseTypeCassandra) { _%>
-  totalItems = signal(0);
-  itemsPerPage = ITEMS_PER_PAGE;
-  page!: number;
+  paginationState = paginationStateSignal();
   sortState = sortStateSignal({});
 <%_ } _%>
 
@@ -75,7 +73,12 @@ export default class UserManagementComponent implements OnInit {
 <%_ if (databaseTypeCassandra) { _%>
     this.loadAll();
 <%_ } else { _%>
-    this.handleNavigation();
+    combineLatest([this.activatedRoute.data, this.activatedRoute.queryParamMap]).subscribe(([data, params]) => {
+      const page = +(params.get('page') ?? 1);
+      this.paginationState.set({ ...this.paginationState(), page });
+      this.sortState.set(this.sortService.parseSortParam(params.get(SORT) ?? data['defaultSort']));
+      this.loadAll();
+    });
 <%_ } _%>
   }
 
@@ -102,8 +105,8 @@ export default class UserManagementComponent implements OnInit {
     this.isLoading.set(true);
     this.userService
       .query(<% if (!databaseTypeCassandra) { %>{
-        page: this.page - 1,
-        size: this.itemsPerPage,
+        page: this.paginationState().page - 1,
+        size: this.paginationState().itemsPerPage,
         sort: this.sortService.buildSortParam(this.sortState(), 'id'),
       }<% } %>)
       .subscribe({
@@ -116,29 +119,28 @@ export default class UserManagementComponent implements OnInit {
   }
 
 <%_ if (!databaseTypeCassandra) { _%>
-  transition(sortState?: SortState): void {
+  navigateToPage(page: number): void {
+    this.handleNavigation(this.sortState(), page);
+  }
+
+  changeSort(sortState: SortState): void {
+    this.handleNavigation(sortState, 1);
+  }
+
+  private handleNavigation(sortState: SortState, page?: number): void {
     this.router.navigate(['./'], {
       relativeTo: this.activatedRoute.parent,
       queryParams: {
-        page: this.page,
-        sort: this.sortService.buildSortParam(sortState ?? this.sortState()),
+        page,
+        sort: this.sortService.buildSortParam(sortState),
       },
-    });
-  }
-
-  private handleNavigation(): void {
-    combineLatest([this.activatedRoute.data, this.activatedRoute.queryParamMap]).subscribe(([data, params]) => {
-      const page = params.get('page');
-      this.page = +(page ?? 1);
-      this.sortState.set(this.sortService.parseSortParam(params.get(SORT) ?? data['defaultSort']));
-      this.loadAll();
     });
   }
 <%_ } _%>
 
   private onSuccess(users: User[] | null<% if (!databaseTypeCassandra) { %>, headers: HttpHeaders<% } %>): void {
 <%_ if (!databaseTypeCassandra) { _%>
-    this.totalItems.set(Number(headers.get('X-Total-Count')));    
+    this.paginationState.set({ ...this.paginationState(), totalItems: Number(headers.get('X-Total-Count'))});
 <%_ } _%>
     this.users.set(users);
   }

@@ -43,7 +43,7 @@ import SharedModule from 'app/shared/shared.module';
 import { sortStateSignal, SortDirective, SortByDirective, type SortState, SortService } from 'app/shared/sort';
 import { DurationPipe, FormatMediumDatetimePipe, FormatMediumDatePipe } from 'app/shared/date';
 <%_ if (paginationPagination) { _%>
-import { ItemCountComponent } from 'app/shared/pagination';
+import { ItemCountComponent, paginationStateSignal } from 'app/shared/pagination';
 <%_ } _%>
 <%_ if (searchEngine) { _%>
 import { FormsModule } from '@angular/forms';
@@ -129,7 +129,7 @@ export class <%= componentName %> implements OnInit {
 <%_ } _%>
 
 <%_ if (paginationPagination) { _%>
-<%- include('pagination-template'); -%>
+    paginationState = paginationStateSignal();
 <%_ } else if (paginationInfiniteScroll) { _%>
     itemsPerPage = ITEMS_PER_PAGE;
     links: WritableSignal<{ [key: string]: undefined | { [key: string]: string | undefined } }> = signal({});
@@ -177,8 +177,8 @@ export class <%= componentName %> implements OnInit {
       this.filters.filterChanges.subscribe(filterOptions => this.handleNavigation(1, this.sortState(), filterOptions));
 <%_ } _%>
     }
-
 <%_ if (paginationInfiniteScroll) { _%>
+
     reset(): void {
       this.<%= entityInstancePlural %> = [];
     }
@@ -186,8 +186,8 @@ export class <%= componentName %> implements OnInit {
     loadNextPage(): void {
       this.load();
     }
-
 <%_ } _%>
+
 <%_ if (searchEngineAny) { _%>
     search(query: string): void {
   <%_ if (notSortableFieldsAfterSearch) { _%>
@@ -196,11 +196,8 @@ export class <%= componentName %> implements OnInit {
         this.loadDefaultSortState();
       }
   <%_ } _%>
-  <%_ if (paginationPagination) { _%>
-      this.page = 1;
-  <%_ } _%>
       this.currentSearch = query;
-      this.navigateToWithComponentValues(this.sortState());
+      this.handleNavigation(<% if (paginationPagination) { %>1, <% } %>this.sortState()<% if (jpaMetamodelFiltering && paginationPagination) { %>, this.filters.filterOptions<% } %>, query);
     }
 
     loadDefaultSortState(): void {
@@ -244,7 +241,7 @@ export class <%= componentName %> implements OnInit {
     }
 
     navigateToWithComponentValues(event: SortState): void {
-      this.handleNavigation(<% if (paginationPagination) { %>this.page, <% } %>event<% if (jpaMetamodelFiltering && paginationPagination) { %>, this.filters.filterOptions<% } %><% if (searchEngineAny) { %>, this.currentSearch<% } %>);
+      this.handleNavigation(<% if (paginationPagination) { %>1, <% } %>event<% if (jpaMetamodelFiltering && paginationPagination) { %>, this.filters.filterOptions<% } %><% if (searchEngineAny) { %>, this.currentSearch<% } %>);
     }
 
 <%_ if (paginationPagination) { _%>
@@ -253,10 +250,11 @@ export class <%= componentName %> implements OnInit {
     }
 
 <%_ } _%>
+
     protected fillComponentAttributeFromRoute(params: ParamMap, data: Data): void {
 <%_ if (paginationPagination) { _%>
-      const page = params.get(PAGE_HEADER);
-      this.page = +(page ?? 1);
+      const page = +(params.get(PAGE_HEADER) ?? 1);
+      this.paginationState.set({ ...this.paginationState(), page });
 <%_ } _%>
       this.sortState.set(this.sortService.parseSortParam(params.get(SORT) ?? data[DEFAULT_SORT_DATA]));
 <%_ if (jpaMetamodelFiltering && paginationPagination) { _%>
@@ -319,7 +317,8 @@ export class <%= componentName %> implements OnInit {
 <%_ if (!paginationNo) { _%>
     protected fillComponentAttributesFromResponseHeader(headers: HttpHeaders): void {
   <%_ if (paginationPagination) { _%>
-      this.totalItems = Number(headers.get(TOTAL_COUNT_RESPONSE_HEADER));
+      const totalItems = Number(headers.get(TOTAL_COUNT_RESPONSE_HEADER) ?? -1);
+      this.paginationState.set({ ...this.paginationState(), totalItems });
   <%_ } else if (paginationInfiniteScroll) { _%>
       const linkHeader = headers.get('link');
       if (linkHeader) {
@@ -332,11 +331,8 @@ export class <%= componentName %> implements OnInit {
 
 <%_ } _%>
     protected queryBackend(): Observable<EntityArrayResponseType> {
-<%_ if (paginationPagination || searchEngineAny) { _%>
+<%_ if ((paginationPagination && jpaMetamodelFiltering) || searchEngineAny) { _%>
       const {
-  <%_ if (paginationPagination) { _%>
-        page,
-  <%_ } _%>
   <%_ if (jpaMetamodelFiltering && paginationPagination) { _%>
         filters,
   <%_ } _%>
@@ -348,14 +344,12 @@ export class <%= componentName %> implements OnInit {
 
       this.isLoading = true;
 <%_ if (paginationPagination) { _%>
-      const pageToLoad: number = page;
+      const { page, itemsPerPage } = this.paginationState();
 <%_ } _%>
       const queryObject<% if ((jpaMetamodelFiltering && paginationPagination) || searchEngine) { %>: any <% } %> = {
 <%_ if (paginationPagination) { _%>
-        page: pageToLoad - 1,
-<%_ } _%>
-<%_ if (!paginationNo) { _%>
-        size: this.itemsPerPage,
+        page: page - 1,
+        size: itemsPerPage,
 <%_ } _%>
 <%_ if(implementsEagerLoadApis || containsBagRelationships) { _%>
         eagerload: true,
@@ -376,7 +370,10 @@ export class <%= componentName %> implements OnInit {
       if (this.hasMorePage()) {
         Object.assign(queryObject, this.links().next);
       } else if (this.isFirstFetch()) {
-        Object.assign(queryObject, { sort: this.sortService.buildSortParam(this.sortState()) });
+        Object.assign(queryObject, {
+          size: this.itemsPerPage,
+          sort: this.sortService.buildSortParam(this.sortState()),
+        });
       }
 
 <%_ } _%>
@@ -408,7 +405,7 @@ export class <%= componentName %> implements OnInit {
 <%_ } _%>
 <%_ if (paginationPagination) { _%>
         page,
-        size: this.itemsPerPage,
+        size: this.paginationState().itemsPerPage,
 <%_ } _%>
         sort: this.sortService.buildSortParam(sortState),
       };

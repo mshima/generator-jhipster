@@ -39,7 +39,7 @@
   <div class="table-responsive">
     <table class="table table-striped" aria-describedby="user-management-page-heading">
       <thead>
-        <tr<% if (!databaseTypeCassandra) { %> <%= jhiPrefix %>Sort [sortState]="sortState" (sortChange)="transition($event)"<% } %>>
+        <tr<% if (!databaseTypeCassandra) { %> <%= jhiPrefix %>Sort [sortState]="sortState" (sortChange)="changeSort($event)"<% } %>>
           <th scope="col"<% if (!databaseTypeCassandra) { %> <%= jhiPrefix %>SortBy="id"<% } %>>
             <span>__jhiTranslateTag__('global.field.id')</span><% if (databaseType !== 'cassandra') { %> <fa-icon icon="sort"></fa-icon><% } %>
           </th>
@@ -137,18 +137,18 @@
 
   <div>
     <div class="d-flex justify-content-center">
-      <<%= jhiPrefixDashed %>-item-count [params]="{ page: page, totalItems: totalItems(), itemsPerPage: itemsPerPage }"></<%= jhiPrefixDashed %>-item-count>
+      <<%= jhiPrefixDashed %>-item-count [paginationState]="paginationState"></<%= jhiPrefixDashed %>-item-count>
     </div>
 
     <div class="d-flex justify-content-center">
       <ngb-pagination
-        [collectionSize]="totalItems()"
-        [(page)]="page"
-        [pageSize]="itemsPerPage"
+        [collectionSize]="paginationState().totalItems"
+        [page]="paginationState().page"
+        [pageSize]="paginationState().itemsPerPage"
         [maxSize]="5"
         [rotate]="true"
         [boundaryLinks]="true"
-        (pageChange)="transition()"
+        (pageChange)="navigateToPage($event)"
       ></ngb-pagination>
     </div>
   </div>

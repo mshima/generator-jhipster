@@ -312,6 +312,7 @@ export const files = {
         'shared/sort/sort.service.ts',
         'shared/pagination/index.ts',
         'shared/pagination/item-count.component.ts',
+        'shared/pagination/pagination-state.ts',
         // alert service code
         'shared/alert/alert.component.ts',
         'shared/alert/alert.component.html',
