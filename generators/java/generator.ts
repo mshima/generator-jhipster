@@ -145,12 +145,20 @@ export default class JavaGenerator extends BaseApplicationGenerator {
         source.addJavaDefinition = (definition, options) => {
           const { dependencies, versions } = definition;
           if (dependencies) {
-            source.addJavaDependencies!(dependencies, options);
+            source.addJavaDependencies!(
+              dependencies.filter(dep => {
+                if (dep.versionRef) {
+                  return versions?.find(({ name }) => name === dep.versionRef)?.version;
+                }
+                return true;
+              }),
+              options,
+            );
           }
           if (versions) {
             if (application.buildToolMaven) {
               source.addMavenDefinition!({
-                properties: versions.map(({ name, version }) => ({ property: `${name}.version`, value: version })),
+                properties: versions.filter(v => v.version).map(({ name, version }) => ({ property: `${name}.version`, value: version })),
               });
             }
             if (application.buildToolGradle) {
