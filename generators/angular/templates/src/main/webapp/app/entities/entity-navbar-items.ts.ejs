@@ -22,6 +22,7 @@ export const EntityNavbarItems: NavbarItem[] = [
 <%_ for (const entity of this.localEntities) { _%>
   {
     name: '<%= entity.entityAngularName %>',
+    title: '__jhiTranslateValue__('global.menu.entities.<%= entity.entityTranslationKey %>')',
     route: '/<%= entity.entityPage %>',
   <%_ if (enableTranslation) { _%>
     translationKey: 'global.menu.entities.<%= entity.entityTranslationKey %>',
