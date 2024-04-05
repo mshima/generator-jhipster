@@ -1,0 +1,4 @@
+org.springframework.test.context.ContextCustomizerFactory = com.mycompany.myapp.\
+    config.SqlTestContainersSpringContextCustomizerFactory
+org.springframework.cloud.gateway.server.mvc.filter.FilterSupplier=\
+  com.mycompany.myapp.config.SampleFilterSupplier
