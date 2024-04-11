@@ -107,6 +107,7 @@ export default class BoostrapApplicationServer extends BaseApplicationGenerator 
             ...applicationDockerContainers,
             ...currentDockerContainers,
           }),
+          gatewayRoutes: undefined,
         });
       },
     });

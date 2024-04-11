@@ -217,6 +217,14 @@ spring:
               - Path=/services/<%= lowercaseBaseName %>/**
             filters:
               - RewritePath=/services/<%= lowercaseBaseName %>/?(?<segment>.*), /$\{segment}
+      <%_ for (const ms of gatewayRoutes ?? []) { _%>
+          - id: <%= ms.route %>_route
+            uri: lb://<%= ms.host %>
+            predicates:
+              - Path=/services/<%= ms.route %>/**
+            filters:
+              - RewritePath=/services/<%= ms.route %>/?(?<segment>.*), /$\{segment}
+      <%_ } _%>
     <%_ } _%>
   <%_ } _%>
   <%_ if (messageBrokerKafka) { _%>
