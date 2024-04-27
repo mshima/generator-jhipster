@@ -147,6 +147,19 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
           dockerServicesDir: JAVA_DOCKER_DIR,
           // TODO drop clientPackageManager
           clientPackageManager: ({ nodePackageManager }) => nodePackageManager,
+          hipsterName: 'Java Hipster',
+          hipsterProductName: 'JHipster',
+          hipsterHomePageProductName: 'JHipster',
+          hipsterStackOverflowProductName: 'JHipster',
+          hipsterBugTrackerProductName: 'JHipster',
+          hipsterChatProductName: 'JHipster',
+          hipsterTwitterUsername: '@jhipster',
+          hipsterDocumentationLink: 'https://www.jhipster.tech/',
+          hipsterTwitterLink: 'https://twitter.com/jhipster',
+          hipsterProjectLink: 'https://github.com/jhipster/generator-jhipster',
+          hipsterStackoverflowLink: 'https://stackoverflow.com/tags/jhipster/info',
+          hipsterBugTrackerLink: 'https://github.com/jhipster/generator-jhipster/issues?state=open',
+          hipsterChatLink: 'https://gitter.im/jhipster/generator-jhipster',
         });
       },
     });

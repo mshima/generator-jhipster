@@ -63,6 +63,7 @@ import {
 } from '../../jdl/index.js';
 import { writeFiles as writeEntityFiles } from './entity-files.js';
 import { getPomVersionProperties, parseMavenPom } from '../maven/support/index.js';
+import { askForOptionalItems, askForServerSideOpts, askForServerTestOpts } from './prompts.js';
 
 const { CAFFEINE, EHCACHE, HAZELCAST, INFINISPAN, MEMCACHED, REDIS, NO: NO_CACHE } = cacheTypes;
 const { NO: NO_WEBSOCKET, SPRING_WEBSOCKET } = websocketTypes;
@@ -106,6 +107,9 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
         if (control.existingProject && this.options.askAnswered !== true) return;
         await this.promptCurrentJHipsterCommand();
       },
+      askForServerTestOpts,
+      askForServerSideOpts,
+      askForOptionalItems,
     });
   }
 
@@ -223,6 +227,9 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
 
   get preparing() {
     return this.asPreparingTaskGroup({
+      async loadCommand({ application }) {
+        await this.loadCurrentJHipsterCommandConfig(application);
+      },
       checksWebsocket({ application }) {
         const { websocket } = application as any;
         if (websocket && websocket !== NO_WEBSOCKET) {
@@ -364,6 +371,20 @@ public void set${javaBeanCase(propertyName)}(${propertyType} ${propertyName}) {
 
   get preparingEachEntityRelationship() {
     return this.asPreparingEachEntityRelationshipTaskGroup({
+      checkUserRelationships({ entity, entityName, relationship }) {
+        if (!entity.dtoMapstruct && relationship.otherEntity.builtInUser) {
+          this.log.warn(
+            `Entity ${entityName} doesn't use DTO. You should check for User data leakage through ${relationship.relationshipName} relationship.`,
+          );
+        }
+      },
+      checkDtoRelationships({ entity, entityName, relationship }) {
+        if (entity.dto !== relationship.otherEntity.dto) {
+          this.log.warn(
+            `Relationship between entities with different DTO configurations can cause unexpected results. Check ${relationship.relationshipName} in the ${entityName} entity.`,
+          );
+        }
+      },
       prepareEntity({ relationship }) {
         if (relationship.otherEntity.embedded) return;
 

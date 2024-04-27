@@ -32,9 +32,8 @@ import {
   getPrimaryKeyValue as getPKValue,
   hibernateSnakeCase,
 } from './support/index.js';
-import { askForOptionalItems, askForServerSideOpts, askForServerTestOpts } from './prompts.js';
 
-import { GENERATOR_COMMON, GENERATOR_SERVER, GENERATOR_SPRING_BOOT } from '../generator-list.js';
+import { GENERATOR_COMMON, GENERATOR_SPRING_BOOT } from '../generator-list.js';
 import BaseApplicationGenerator from '../base-application/index.js';
 import { packageJson } from '../../lib/index.js';
 import {
@@ -50,7 +49,6 @@ import {
   JAVA_COMPATIBLE_VERSIONS,
   JHIPSTER_DEPENDENCIES_VERSION,
 } from '../generator-constants.js';
-import statistics from '../statistics.js';
 
 import {
   applicationTypes,
@@ -68,6 +66,7 @@ import { stringifyApplicationData } from '../base-application/support/index.js';
 import { createBase64Secret, createSecret, createNeedleCallback, mutateData } from '../base/support/index.js';
 import { isReservedPaginationWords } from '../../jdl/jhipster/reserved-keywords.js';
 import { loadStoredAppOptions } from '../app/support/index.js';
+import { isReservedH2Keyword } from '../spring-data-relational/support/h2-reserved-keywords.js';
 
 const dbTypes = fieldTypes;
 const {
@@ -140,9 +139,6 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
         if (control.existingProject && this.options.askAnswered !== true) return;
         await this.promptCurrentJHipsterCommand();
       },
-      askForServerTestOpts,
-      askForServerSideOpts,
-      askForOptionalItems,
     });
   }
 
@@ -152,6 +148,11 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
 
   get configuring() {
     return this.asConfiguringTaskGroup({
+      configuring() {
+        if (process.env.JHI_WAR === '1') {
+          this.jhipsterConfig.defaultPackaging = 'war';
+        }
+      },
       configServerPort() {
         if (!this.jhipsterConfig.serverPort && this.jhipsterConfig.applicationIndex) {
           this.jhipsterConfig.serverPort = 8080 + this.jhipsterConfig.applicationIndex;
@@ -205,6 +206,9 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
 
   get loading() {
     return this.asLoadingTaskGroup({
+      async loadCommand({ application }) {
+        await this.loadCurrentJHipsterCommandConfig(application);
+      },
       loadEnvironmentVariables({ application }) {
         application.packageInfoJavadocs?.push(
           { packageName: `${application.packageName}.aop.logging`, documentation: 'Logging aspect.' },
@@ -217,18 +221,11 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
           { packageName: `${application.packageName}.web.rest.errors`, documentation: 'Rest layer error handling.' },
           { packageName: `${application.packageName}.web.rest.vm`, documentation: 'Rest layer visual models.' },
         );
-        application.defaultPackaging = process.env.JHI_WAR === '1' ? 'war' : 'jar';
+
         if (application.defaultPackaging === 'war') {
           this.log.info(`Using ${application.defaultPackaging} as default packaging`);
         }
-
-        const JHI_PROFILE = process.env.JHI_PROFILE;
-        application.defaultEnvironment = (JHI_PROFILE || '').includes('dev') ? 'dev' : 'prod';
-        if (JHI_PROFILE) {
-          this.log.info(`Using ${application.defaultEnvironment} as default profile`);
-        }
       },
-
       setupServerconsts({ application }) {
         // Make constants available in templates
         application.MAIN_DIR = MAIN_DIR;
@@ -384,10 +381,16 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
       configureEntityTable({ application, entityName, entityConfig }) {
         if ((application.applicationTypeGateway && entityConfig.microserviceName) || entityConfig.skipServer) return;
 
+        const { jhiTablePrefix, devDatabaseTypeH2Any } = application;
+
         const databaseType =
           entityConfig.prodDatabaseType ?? application.prodDatabaseType ?? entityConfig.databaseType ?? application.databaseType;
         const entityTableName = entityConfig.entityTableName ?? hibernateSnakeCase(entityName);
-        const fixedEntityTableName = this._fixEntityTableName(entityTableName, databaseType, application.jhiTablePrefix);
+        const fixedEntityTableName =
+          (isReservedTableName(entityTableName, databaseType) || (devDatabaseTypeH2Any && isReservedH2Keyword(entityTableName))) &&
+          jhiTablePrefix
+            ? `${jhiTablePrefix}_${entityTableName}`
+            : entityTableName;
         if (fixedEntityTableName !== entityTableName) {
           entityConfig.entityTableName = fixedEntityTableName;
         }
@@ -520,26 +523,6 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
           );
         }
       },
-
-      insight({ application }) {
-        statistics.sendSubGenEvent('generator', GENERATOR_SERVER, {
-          app: {
-            authenticationType: application.authenticationType,
-            cacheProvider: application.cacheProvider,
-            enableHibernateCache: application.enableHibernateCache,
-            websocket: application.websocket,
-            databaseType: application.databaseType,
-            devDatabaseType: application.devDatabaseType,
-            prodDatabaseType: application.prodDatabaseType,
-            searchEngine: application.searchEngine,
-            messageBroker: application.messageBroker,
-            serviceDiscoveryType: application.serviceDiscoveryType,
-            buildTool: application.buildTool,
-            enableSwaggerCodegen: application.enableSwaggerCodegen,
-            enableGradleEnterprise: application.enableGradleEnterprise,
-          },
-        });
-      },
     });
   }
 
@@ -553,7 +536,6 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
         const packageJsonConfigStorage = this.packageJson.createStorage('config').createProxy();
         packageJsonConfigStorage.backend_port = application.gatewayServerPort || application.serverPort;
         packageJsonConfigStorage.packaging = application.defaultPackaging;
-        packageJsonConfigStorage.default_environment = application.defaultEnvironment;
       },
       packageJsonBackendScripts({ application }) {
         const scriptsStorage = this.packageJson.createStorage('scripts');
@@ -801,13 +783,6 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
         `relationshipSide is missing in .jhipster/${entityName}.json for relationship ${stringifyApplicationData(relationship)}`,
       );
     }
-  }
-
-  _fixEntityTableName(entityTableName, prodDatabaseType, jhiTablePrefix) {
-    if (isReservedTableName(entityTableName, prodDatabaseType) && jhiTablePrefix) {
-      entityTableName = `${jhiTablePrefix}_${entityTableName}`;
-    }
-    return entityTableName;
   }
 
   /**
