@@ -18,7 +18,7 @@
  */
 import { JHipsterCommandDefinition } from '../base/api.js';
 import { GENERATOR_JAVA, GENERATOR_LIQUIBASE, GENERATOR_SPRING_DATA_RELATIONAL } from '../generator-list.js';
-import { APPLICATION_TYPE_MICROSERVICE } from '../../jdl/index.js';
+import { APPLICATION_TYPE_MICROSERVICE, serviceDiscoveryTypes } from '../../jdl/index.js';
 
 const command: JHipsterCommandDefinition = {
   options: {
@@ -57,6 +57,13 @@ const command: JHipsterCommandDefinition = {
         when: ({ authenticationType }) => (authenticationType ?? gen.jhipsterConfigWithDefaults.authenticationType) === 'oauth2',
       }),
       default: false,
+    },
+    serviceDiscoveryType: {
+      cli: {
+        description: 'Service discovery type',
+        type: String,
+      },
+      choices: Object.values(serviceDiscoveryTypes),
     },
     defaultPackaging: {
       description: 'Default packaging for the application',
