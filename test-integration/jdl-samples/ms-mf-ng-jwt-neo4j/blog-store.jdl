@@ -3,8 +3,8 @@
  *
  * Test focus:
  * - clientFramework: angular with microservice/microfrontend
- * - serviceDiscovery: consul
- * - authenticationType: oauth2
+ * - serviceDiscovery: no
+ * - authenticationType: jwt
  * - databaseType: neo4j
  * - testFrameworks: cypress
  *
@@ -21,7 +21,7 @@
 application {
   config {
     applicationType gateway
-    authenticationType oauth2
+    authenticationType jwt
     baseName gateway
     buildTool maven
     clientFramework angular
@@ -30,9 +30,11 @@ application {
     databaseType neo4j
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
     packageName com.okta.developer.gateway
-    serviceDiscoveryType consul
+    reactive false
+    serviceDiscoveryType no
     testFrameworks [cypress]
     microfrontends [blog, notification]
+    routes ["blog:blog:8081", "store:store:8082", "notification:notification:8083"]
   }
   entities UserData, Product
 }
@@ -41,7 +43,7 @@ application {
 application {
   config {
     applicationType microservice
-    authenticationType oauth2
+    authenticationType jwt
     baseName blog
     buildTool maven
     cacheProvider no
@@ -51,7 +53,7 @@ application {
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
     packageName com.okta.developer.blog
     serverPort 8081
-    serviceDiscoveryType consul
+    serviceDiscoveryType no
     testFrameworks [cypress]
     feignClient true
   }
@@ -62,7 +64,7 @@ application {
 application {
   config {
     applicationType microservice
-    authenticationType oauth2
+    authenticationType jwt
     baseName store,
     buildTool gradle
     cacheProvider no
@@ -74,7 +76,7 @@ application {
     jwtSecretKey "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ="
     packageName com.okta.developer.store
     serverPort 8082
-    serviceDiscoveryType consul
+    serviceDiscoveryType no
     feignClient true
   }
   entities Product
@@ -84,7 +86,7 @@ application {
 application {
   config {
     applicationType microservice
-    authenticationType oauth2
+    authenticationType jwt
     baseName notification,
     buildTool gradle
     clientFramework angular
@@ -96,7 +98,7 @@ application {
     packageName com.okta.developer.notification
     reactive true
     serverPort 8083
-    serviceDiscoveryType consul
+    serviceDiscoveryType no
     testFrameworks [cypress]
   }
   entities Notification
@@ -163,7 +165,7 @@ deployment {
   appsFolders [gateway, store, blog, notification]
   dockerRepositoryName "hipsterslabs"
   monitoring no
-  serviceDiscoveryType consul
+  serviceDiscoveryType no
 }
 
 deployment {
@@ -171,5 +173,5 @@ deployment {
   appsFolders [gateway, store, blog, notification]
   dockerRepositoryName "hipsterslabs"
   monitoring no
-  serviceDiscoveryType consul
+  serviceDiscoveryType no
 }
