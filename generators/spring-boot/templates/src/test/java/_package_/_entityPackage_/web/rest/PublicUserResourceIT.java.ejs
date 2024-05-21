@@ -34,6 +34,9 @@ import <%= packageName %>.security.AuthoritiesConstants;
 <%_ if (databaseTypeSql && reactive) { _%>
 import <%= packageName %>.repository.EntityManager;
 <%_ } _%>
+<%_ if (requiresDeleteAllUser) { _%>
+import org.junit.jupiter.api.AfterEach;
+<%_ } _%>
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,8 +165,18 @@ class PublicUserResourceIT {
 <%_ } _%>
     @BeforeEach
     public void initTest() {
-        user = UserResourceIT.initTestUser(userRepository<% if (databaseTypeSql) { %>, em<% } %>);
+        user = UserResourceIT.initTestUser(<% if (databaseTypeSql) { %>em<% } %>);
     }
+<%_ if (requiresDeleteAllUser) { _%>
+
+    @AfterEach
+    public void cleanup() {
+  <%_ if (databaseTypeSql && reactive) { _%>
+        userRepository.deleteAllUserAuthorities().block();
+  <%_ } _%>
+        userRepository.deleteAll()<%- reactorBlock %>;
+    }
+<%_ } _%>
 
     @Test
 <%_ if (databaseTypeSql && !reactive) { _%>

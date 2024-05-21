@@ -113,4 +113,7 @@ export type SpringBootApplication = JavaApplication &
     databaseMigrationLiquibase: boolean;
 
     communicationSpringWebsocket: boolean;
+    requiresDeleteAllUser: boolean;
+    reactorBlock: string;
+    reactorBlockOptional: string;
   };
