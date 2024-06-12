@@ -33,6 +33,7 @@ export const files = {
         '.blueprint/cli/commands.mjs',
         '.blueprint/generate-sample/command.mjs',
         '.blueprint/generate-sample/generator.mjs',
+        '.blueprint/generate-sample/get-samples.mjs',
         '.blueprint/generate-sample/index.mjs',
       ],
     },
@@ -40,6 +41,7 @@ export const files = {
       condition: ctx => !ctx[LOCAL_BLUEPRINT_OPTION] && ctx.githubWorkflows,
       templates: [
         '.blueprint/github-build-matrix/build-matrix.mjs',
+        '.blueprint/github-build-matrix/command.mjs',
         '.blueprint/github-build-matrix/generator.mjs',
         '.blueprint/github-build-matrix/index.mjs',
         '.github/workflows/build-cache.yml',
