@@ -35,6 +35,8 @@ export const files = {
         '.blueprint/generate-sample/generator.mjs',
         '.blueprint/generate-sample/get-samples.mjs',
         '.blueprint/generate-sample/index.mjs',
+        // Always write cli for devBlueprint usage
+        'cli/cli.cjs',
       ],
     },
     {
@@ -51,10 +53,6 @@ export const files = {
     {
       condition: ctx => !ctx[LOCAL_BLUEPRINT_OPTION] && !ctx.sampleWritten,
       templates: ['.blueprint/generate-sample/templates/samples/sample.jdl'],
-    },
-    {
-      condition: ctx => ctx.cli,
-      templates: ['cli/cli.cjs'],
     },
     {
       condition: ctx => ctx.commands.length > 0,
