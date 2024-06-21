@@ -16,32 +16,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { applyChanges } from './support/apply-changes.js';
+import BaseGenerator from 'generator-jhipster/generators/base';
 
-const defaultCommands = {
-  apply: {
-    desc: 'Apply changes',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-  'code-workspace': {
-    desc: 'Prepare a code-workspace for jhipster development',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-  'from-issue': {
-    desc: 'Generate a sample from issue',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-  'generate-generator': {
-    desc: 'Generate a generator',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-  'generate-sample': {
-    desc: 'Generate a test sample',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-  'update-vscode': {
-    desc: 'Update generator-jhipster vscode files',
-    blueprint: '@jhipster/jhipster-dev',
-  },
-};
+export default class ApplyGenerator extends BaseGenerator {
+  constructor(args, options, features) {
+    super(args, options, { queueCommandTasks: true, ...features });
+  }
 
-export default defaultCommands;
+  get [BaseGenerator.WRITING]() {
+    return this.asWritingTaskGroup({
+      async writing() {
+        await applyChanges(this, { clientFramework: 'angular', skipServer: true });
+        await applyChanges(this, { clientFramework: 'vue', skipServer: true });
+        await applyChanges(this, { clientFramework: 'react', skipServer: true });
+        await applyChanges(this, { skipClient: true });
+      },
+    });
+  }
+}

@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import os from 'node:os';
 import { passthrough } from 'p-transform';
 import { isFileStateModified } from 'mem-fs-editor/state';
 import { Minimatch } from 'minimatch';
@@ -24,6 +25,19 @@ import { Piscina } from 'piscina';
 import BaseGenerator from '../../base-core/index.js';
 import { addLineNumbers } from '../internal/transform-utils.js';
 
+export class ESLintPool extends Piscina {
+  constructor() {
+    super({
+      maxThreads: Math.ceil(os.availableParallelism() / 3),
+      filename: new URL('./eslint-worker.js', import.meta.url).href,
+    });
+  }
+
+  apply(data: { cwd?: string; filePath: string; fileContents: string; extensions: string }): Promise<{ result: string; error: string }> {
+    return this.run(data);
+  }
+}
+
 export const createESLintTransform = function (
   this: BaseGenerator | void,
   transformOptions: { ignoreErrors?: boolean; extensions?: string; cwd?: string } = {},
@@ -31,10 +45,7 @@ export const createESLintTransform = function (
   const { extensions = 'js,cjs,mjs,ts,cts,mts,jsx,tsx', ignoreErrors, cwd } = transformOptions;
   const minimatch = new Minimatch(`**/*.{${extensions}}`, { dot: true });
 
-  const pool = new Piscina({
-    maxThreads: 1,
-    filename: new URL('./eslint-worker.js', import.meta.url).href,
-  });
+  const pool = new ESLintPool();
 
   return passthrough(
     async file => {
@@ -42,7 +53,7 @@ export const createESLintTransform = function (
         return;
       }
       const fileContents = file.contents.toString();
-      const { result, error } = await pool.run({
+      const { result, error } = await pool.apply({
         cwd,
         filePath: file.path,
         fileContents,
