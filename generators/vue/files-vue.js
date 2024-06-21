@@ -30,6 +30,7 @@ export const vueFiles = {
         'tsconfig.vitest.json',
         '.postcssrc.js',
         '.eslintrc.cjs',
+        '.eslintignore',
         'vite.config.mts',
         'vitest.config.mts',
       ],

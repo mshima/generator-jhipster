@@ -29,6 +29,7 @@ export const files = {
     clientRootTemplatesBlock({
       templates: [
         '.eslintrc.json',
+        '.eslintignore',
         'angular.json',
         'ngsw-config.json',
         'package.json',
