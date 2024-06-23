@@ -16,8 +16,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-node_modules
-package-lock.json
-.git
+printWidth: 140
+singleQuote: true
+tabWidth: <%= prettierTabWidth %>
+useTabs: false
+
+arrowParens: avoid
+bracketSameLine: false
 
 <&- fragments.render({ join: '\n\n' }) &>

@@ -32,7 +32,7 @@ import { GENERATOR_COMMON, GENERATOR_GIT } from '../generator-list.js';
 import { createPrettierTransform } from '../bootstrap/support/prettier-support.js';
 import { loadStoredAppOptions } from '../app/support/index.js';
 import command from './command.js';
-import { writeFiles, prettierConfigFiles } from './files.js';
+import { writeFiles } from './files.js';
 
 const { REACT, ANGULAR } = clientFrameworkTypes;
 
@@ -100,37 +100,16 @@ export default class CommonGenerator extends BaseApplicationGenerator {
     return this.delegateTasksToBlueprint(() => this.configuring);
   }
 
-  get configuringEachEntity() {
-    return this.asConfiguringEachEntityTaskGroup({
-      migrateEntity({ entityConfig, entityStorage }) {
-        for (const field of entityConfig.fields) {
-          if (field.javadoc) {
-            field.documentation = field.javadoc;
-            delete field.javadoc;
-          }
-          if (field.fieldTypeJavadoc) {
-            field.fieldTypeDocumentation = field.fieldTypeJavadoc;
-            delete field.fieldTypeJavadoc;
-          }
-        }
-        for (const relationship of entityConfig.relationships) {
-          if (relationship.javadoc) {
-            relationship.documentation = relationship.javadoc;
-            delete relationship.javadoc;
-          }
-        }
-        if (entityConfig.javadoc) {
-          entityConfig.documentation = entityConfig.javadoc;
-          delete entityConfig.javadoc;
-        } else {
-          entityStorage.save();
-        }
+  get composing() {
+    return this.asComposingTaskGroup({
+      async composePrettier() {
+        await this.composeWithJHipster('jhipster:javascript:prettier');
       },
     });
   }
 
-  get [BaseApplicationGenerator.CONFIGURING_EACH_ENTITY]() {
-    return this.delegateTasksToBlueprint(() => this.configuringEachEntity);
+  get [BaseApplicationGenerator.COMPOSING]() {
+    return this.delegateTasksToBlueprint(() => this.composing);
   }
 
   // Public API method used by the getter and also by Blueprints
@@ -144,12 +123,6 @@ export default class CommonGenerator extends BaseApplicationGenerator {
           application.nodeDependencies,
           this.fetchFromInstalledJHipster(GENERATOR_COMMON, 'resources', 'package.json'),
         );
-      },
-
-      loadConfig({ applicationDefaults }) {
-        applicationDefaults({
-          prettierTabWidth: this.jhipsterConfig.prettierTabWidth ?? 2,
-        });
       },
     });
   }
@@ -185,6 +158,39 @@ export default class CommonGenerator extends BaseApplicationGenerator {
     return this.delegateTasksToBlueprint(() => this.preparing);
   }
 
+  get configuringEachEntity() {
+    return this.asConfiguringEachEntityTaskGroup({
+      migrateEntity({ entityConfig, entityStorage }) {
+        for (const field of entityConfig.fields) {
+          if (field.javadoc) {
+            field.documentation = field.javadoc;
+            delete field.javadoc;
+          }
+          if (field.fieldTypeJavadoc) {
+            field.fieldTypeDocumentation = field.fieldTypeJavadoc;
+            delete field.fieldTypeJavadoc;
+          }
+        }
+        for (const relationship of entityConfig.relationships) {
+          if (relationship.javadoc) {
+            relationship.documentation = relationship.javadoc;
+            delete relationship.javadoc;
+          }
+        }
+        if (entityConfig.javadoc) {
+          entityConfig.documentation = entityConfig.javadoc;
+          delete entityConfig.javadoc;
+        } else {
+          entityStorage.save();
+        }
+      },
+    });
+  }
+
+  get [BaseApplicationGenerator.CONFIGURING_EACH_ENTITY]() {
+    return this.delegateTasksToBlueprint(() => this.configuringEachEntity);
+  }
+
   get default() {
     return this.asDefaultTaskGroup({
       async formatSonarProperties() {
@@ -207,7 +213,7 @@ export default class CommonGenerator extends BaseApplicationGenerator {
 
   // Public API method used by the getter and also by Blueprints
   get writing() {
-    return {
+    return this.asWritingTaskGroup({
       cleanup({ application }) {
         if (this.isJhipsterVersionLessThan('7.1.1')) {
           if (!application.skipCommitHook) {
@@ -226,14 +232,8 @@ export default class CommonGenerator extends BaseApplicationGenerator {
           }
         }
       },
-      writePrettierConfig({ application }) {
-        return this.writeFiles({
-          sections: prettierConfigFiles,
-          context: application,
-        });
-      },
       ...writeFiles(),
-    };
+    });
   }
 
   get [BaseApplicationGenerator.WRITING]() {
@@ -271,13 +271,6 @@ export default class CommonGenerator extends BaseApplicationGenerator {
             'prettier-plugin-packagejson': application.nodeDependencies['prettier-plugin-packagejson'],
           },
         });
-        if (application.backendTypeJavaAny) {
-          this.packageJson.merge({
-            devDependencies: {
-              'prettier-plugin-java': application.nodeDependencies['prettier-plugin-java'],
-            },
-          });
-        }
       },
     });
   }

@@ -84,6 +84,7 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
 
     if (!this.delegateToBlueprint) {
       await this.dependsOnJHipster(GENERATOR_SERVER);
+      await this.dependsOnJHipster('java');
       await this.dependsOnJHipster('jhipster:java:domain');
       await this.dependsOnJHipster('jhipster:java:build-tool');
     }

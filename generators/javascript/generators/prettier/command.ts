@@ -16,25 +16,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { JHipsterCommandDefinition } from '../base/api.js';
+import type { JHipsterCommandDefinition } from '../../../base/api.js';
+import gitCommand from '../../../git/command.js';
+
+const { monorepository } = gitCommand.configs!;
 
 const command: JHipsterCommandDefinition = {
-  options: {
-    skipGit: {
-      description: 'Skip git repository initialization',
-      type: Boolean,
-      scope: 'generator',
-    },
-  },
   configs: {
-    monorepository: {
-      description: 'Use monorepository',
+    fromInit: {
+      description: 'Generate prettier config using init defaults',
       cli: {
         type: Boolean,
+        hide: true,
+      },
+      scope: 'generator',
+    },
+    prettierConfigFile: {
+      description: 'Prettier configuration file',
+      cli: {
+        type: Boolean,
+        hide: true,
+      },
+      configure: (gen: any) => {
+        gen.prettierConfigFile = gen.fromInit || gen.monorepositoryRoot ? '.prettierrc.yml' : '.prettierrc';
+      },
+      scope: 'generator',
+    },
+    prettierTabWidth: {
+      description: 'Default tab width for prettier',
+      cli: {
+        type: Number,
       },
       scope: 'storage',
     },
+    monorepository,
+    monorepositoryRoot: {
+      cli: {
+        type: Boolean,
+        hide: true,
+      },
+      scope: 'generator',
+    },
   },
+  import: [],
 };
 
 export default command;
