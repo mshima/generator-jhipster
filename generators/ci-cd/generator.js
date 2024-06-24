@@ -46,10 +46,6 @@ export default class CiCdGenerator extends BaseApplicationGenerator {
       sayHello() {
         this.log.log(chalk.white('🚀 Welcome to the JHipster CI/CD Sub-Generator 🚀'));
       },
-
-      getConfig() {
-        this.parseJHipsterCommand(command);
-      },
     });
   }
 

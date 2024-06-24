@@ -34,8 +34,6 @@ const { ANGULAR, VUE, REACT, NO: CLIENT_FRAMEWORK_NO } = clientFrameworkTypes;
 const { CYPRESS } = testFrameworkTypes;
 
 export default class JHipsterClientGenerator extends BaseApplicationGenerator {
-  command = command;
-
   async beforeQueue() {
     loadStoredAppOptions.call(this);
 
@@ -48,18 +46,6 @@ export default class JHipsterClientGenerator extends BaseApplicationGenerator {
       await this.dependsOnBootstrapApplication();
       await this.dependsOnJHipster(GENERATOR_COMMON);
     }
-  }
-
-  get initializing() {
-    return this.asInitializingTaskGroup({
-      loadOptions() {
-        this.parseJHipsterCommand(this.command);
-      },
-    });
-  }
-
-  get [BaseApplicationGenerator.INITIALIZING]() {
-    return this.delegateTasksToBlueprint(() => this.initializing);
   }
 
   get prompting() {

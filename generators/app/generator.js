@@ -28,13 +28,10 @@ import { packageJson } from '../../lib/index.js';
 import { applicationTypes } from '../../jdl/jhipster/index.js';
 import cleanupOldFilesTask from './cleanup.js';
 import { checkNode, loadStoredAppOptions } from './support/index.js';
-import command from './command.js';
 
 const { MICROSERVICE } = applicationTypes;
 
 export default class JHipsterAppGenerator extends BaseApplicationGenerator {
-  command = command;
-
   async beforeQueue() {
     loadStoredAppOptions.call(this);
 
@@ -60,9 +57,6 @@ export default class JHipsterAppGenerator extends BaseApplicationGenerator {
         if (!this.skipChecks) {
           await this.checkForNewVersion();
         }
-      },
-      loadOptions() {
-        this.parseJHipsterCommand(this.command);
       },
 
       validate() {
