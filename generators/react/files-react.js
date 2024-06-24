@@ -22,8 +22,8 @@ export const files = {
   common: [
     clientRootTemplatesBlock({
       templates: [
+        'eslint.config.mjs',
         'package.json',
-        '.eslintrc.json',
         'tsconfig.json',
         'tsconfig.test.json',
         'jest.conf.js',

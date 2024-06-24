@@ -40,10 +40,7 @@ import { createNeedleCallback, upperFirstCamelCase } from '../base/support/index
 const { CommonDBTypes } = fieldTypes;
 const TYPE_BOOLEAN = CommonDBTypes.BOOLEAN;
 const { REACT } = clientFrameworkTypes;
-/**
- * @class
- * @extends {BaseApplicationGenerator<import('../client/types.js').ClientApplication>}
- */
+
 export default class ReactGenerator extends BaseApplicationGenerator {
   async beforeQueue() {
     if (!this.fromBlueprint) {
@@ -142,10 +139,15 @@ export default class ReactGenerator extends BaseApplicationGenerator {
   }
 
   get writing() {
-    return {
+    return this.asWritingTaskGroup({
+      cleanup({ control }) {
+        control.cleanupFiles({
+          '8.5.1': ['.eslintrc.json', '.eslintignore'],
+        });
+      },
       cleanupOldFilesTask,
       writeFiles,
-    };
+    });
   }
 
   get [BaseApplicationGenerator.WRITING]() {
