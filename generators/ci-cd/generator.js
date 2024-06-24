@@ -58,19 +58,6 @@ export default class CiCdGenerator extends BaseApplicationGenerator {
   }
 
   // Public API method used by the getter and also by Blueprints
-  get prompting() {
-    return this.asPromptingTaskGroup({
-      async prompting() {
-        await this.prompt(this.prepareQuestions(command.configs));
-      },
-    });
-  }
-
-  get [BaseApplicationGenerator.PROMPTING]() {
-    return this.delegateTasksToBlueprint(() => this.prompting);
-  }
-
-  // Public API method used by the getter and also by Blueprints
   get loading() {
     return {
       loadSharedConfig({ application }) {

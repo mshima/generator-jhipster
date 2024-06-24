@@ -64,10 +64,6 @@ export default class JHipsterClientGenerator extends BaseApplicationGenerator {
 
   get prompting() {
     return this.asPromptingTaskGroup({
-      async prompting({ control }) {
-        if (control.existingProject && this.options.askAnswered !== true) return;
-        await this.prompt(this.prepareQuestions(this.command.configs));
-      },
       askForClientTheme,
       askForClientThemeVariant,
     });

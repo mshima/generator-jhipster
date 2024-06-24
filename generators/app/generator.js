@@ -77,19 +77,6 @@ export default class JHipsterAppGenerator extends BaseApplicationGenerator {
     return this.delegateTasksToBlueprint(() => this.initializing);
   }
 
-  get prompting() {
-    return this.asPromptingTaskGroup({
-      async prompting({ control }) {
-        if (control.existingProject && this.options.askAnswered !== true) return;
-        await this.prompt(this.prepareQuestions(this.command.configs));
-      },
-    });
-  }
-
-  get [BaseApplicationGenerator.PROMPTING]() {
-    return this.delegateTasksToBlueprint(() => this.prompting);
-  }
-
   get configuring() {
     return this.asConfiguringTaskGroup({
       setup() {

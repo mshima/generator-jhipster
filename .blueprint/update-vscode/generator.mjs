@@ -5,11 +5,7 @@ import { getWorkflowSamples } from '../generate-sample/support/get-workflow-samp
 
 export default class extends BaseGenerator {
   get [BaseGenerator.INITIALIZING]() {
-    return this.asInitializingTaskGroup({
-      async parseCommand() {
-        await this.parseCurrentJHipsterCommand();
-      },
-    });
+    return this.asInitializingTaskGroup({});
   }
 
   get [BaseGenerator.WRITING]() {
