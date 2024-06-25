@@ -19,7 +19,6 @@
 import chalk from 'chalk';
 import { camelCase, upperFirst, snakeCase } from 'lodash-es';
 import { passthrough } from '@yeoman/transform';
-import { clearFileState } from 'mem-fs-editor/state';
 
 import BaseGenerator from '../base-application/index.js';
 import { PRIORITY_NAMES_LIST as BASE_PRIORITY_NAMES_LIST } from '../base/priorities.js';
@@ -213,7 +212,9 @@ export default class extends BaseGenerator {
               filter: file => file.path.includes('.github/workflows'),
               pendingFiles: true,
             },
-            passthrough(file => clearFileState(file)),
+            passthrough(file => {
+              file.confliter = 'skip';
+            }),
           );
         }
       },
