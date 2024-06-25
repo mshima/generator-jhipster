@@ -141,8 +141,9 @@ entity Notification {
   title String required
 }
 
+
 relationship ManyToOne {
-  Post{blog(name)} to Blog
+  Post{blog(name) required} to Blog{posts}
 }
 
 relationship ManyToMany {
