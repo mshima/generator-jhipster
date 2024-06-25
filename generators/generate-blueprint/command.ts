@@ -54,6 +54,13 @@ const command: JHipsterCommandDefinition = {
       },
       scope: 'storage',
     },
+    skipWorkflows: {
+      description: 'Skip github workflows',
+      cli: {
+        type: Boolean,
+      },
+      scope: 'generator',
+    },
   },
   options: {
     [GENERATE_SNAPSHOTS]: {
