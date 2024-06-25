@@ -18,6 +18,8 @@
  */
 import chalk from 'chalk';
 import { camelCase, upperFirst, snakeCase } from 'lodash-es';
+import { passthrough } from '@yeoman/transform';
+import { clearFileState } from 'mem-fs-editor/state';
 
 import BaseGenerator from '../base/index.js';
 import { PRIORITY_NAMES_LIST as BASE_PRIORITY_NAMES_LIST } from '../base/priorities.js';
@@ -53,6 +55,8 @@ const { GENERATOR_PROJECT_NAME, GENERATOR_INIT } = GENERATOR_LIST;
 const defaultPublishedFiles = ['generators', '!**/__*', '!**/*.snap', '!**/*.spec.?(c|m)js'];
 
 export default class extends BaseGenerator {
+  skipWorkflows;
+
   async _beforeQueue() {
     if (!this.fromBlueprint) {
       await this.composeWithBlueprints();
@@ -206,6 +210,17 @@ export default class extends BaseGenerator {
     return this.asWritingTaskGroup({
       async cleanup({ control }) {
         await control.cleanupFiles({ '8.5.1': ['.eslintrc.json'] });
+      },
+      skipWorkflows() {
+        if (this.skipWorkflows) {
+          this.queueTransformStream(
+            {
+              filter: file => file.path.includes('.github/workflows'),
+              pendingFiles: true,
+            },
+            passthrough(file => clearFileState(file)),
+          );
+        }
       },
       async writing() {
         this.application.sampleWritten = this.jhipsterConfig.sampleWritten;
