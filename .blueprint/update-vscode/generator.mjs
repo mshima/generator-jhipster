@@ -4,10 +4,6 @@ import { getPackageRoot } from '../../lib/index.js';
 import { getWorkflowSamples } from '../generate-sample/support/get-workflow-samples.js';
 
 export default class extends BaseGenerator {
-  get [BaseGenerator.INITIALIZING]() {
-    return this.asInitializingTaskGroup({});
-  }
-
   get [BaseGenerator.WRITING]() {
     return this.asEndTaskGroup({
       async generateVscodeLaunch() {
