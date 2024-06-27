@@ -36,6 +36,9 @@ export type JHipsterGeneratorOptions = BaseOptions & {
   entities?: string[];
   disableBlueprints?: boolean;
 
+  /* Init based application */
+  fromInit?: boolean;
+
   /* blueprint options */
   blueprints?: string;
   blueprint?: any;
