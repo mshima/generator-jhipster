@@ -28,7 +28,6 @@ import { loadStoredAppOptions } from '../app/support/index.js';
 import { addEnumerationFiles } from './entity-files.js';
 import { writeFiles as writeCommonFiles } from './files-common.js';
 import { askForClientTheme, askForClientThemeVariant } from './prompts.js';
-import command from './command.js';
 
 const { ANGULAR, VUE, REACT, NO: CLIENT_FRAMEWORK_NO } = clientFrameworkTypes;
 const { CYPRESS } = testFrameworkTypes;
