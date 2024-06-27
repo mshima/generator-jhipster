@@ -219,14 +219,6 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
     return this.delegateTasksToBlueprint(() => this.composingComponent);
   }
 
-  get loading() {
-    return this.asLoadingTaskGroup({});
-  }
-
-  get [BaseApplicationGenerator.LOADING]() {
-    return this.delegateTasksToBlueprint(() => this.loading);
-  }
-
   get preparing() {
     return this.asPreparingTaskGroup({
       checksWebsocket({ application }) {
