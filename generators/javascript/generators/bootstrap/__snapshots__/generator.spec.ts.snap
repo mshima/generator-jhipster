@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generator - javascript:bootstrap packageJsonNodeEngine(false) should call source snapshot 1`] = `{}`;
+
+exports[`generator - javascript:bootstrap packageJsonNodeEngine(false) should match files snapshot 1`] = `
+{
+  ".yo-rc.json": ObjectContaining {
+    "contents": Any<String>,
+  },
+  "package.json": {
+    "contents": "{
+  "name": "dasherizedBaseName",
+  "version": "0.0.0",
+  "description": "projectDescription",
+  "private": true,
+  "license": "UNLICENSED",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {},
+  "scripts": {}
+}
+",
+    "stateCleared": "modified",
+  },
+}
+`;
+
+exports[`generator - javascript:bootstrap packageJsonNodeEngine(true) should call source snapshot 1`] = `{}`;
+
+exports[`generator - javascript:bootstrap packageJsonNodeEngine(true) should match files snapshot 1`] = `
+{
+  ".yo-rc.json": ObjectContaining {
+    "contents": Any<String>,
+  },
+  "package.json": {
+    "contents": "{
+  "name": "dasherizedBaseName",
+  "version": "0.0.0",
+  "description": "projectDescription",
+  "private": true,
+  "license": "UNLICENSED",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": "^18.19.0 || >= 20.6.1"
+  },
+  "scripts": {}
+}
+",
+    "stateCleared": "modified",
+  },
+}
+`;

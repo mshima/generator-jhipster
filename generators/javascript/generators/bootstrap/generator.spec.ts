@@ -33,15 +33,14 @@ describe(`generator - ${generator}`, () => {
   shouldSupportFeatures(Generator);
   describe('blueprint support', () => testBlueprintSupport(generator));
 
-  for (const [name, config] of Object.entries(fromMatrix({ skipCommitHook: [true, false] }))) {
+  for (const [name, config] of Object.entries(fromMatrix({ packageJsonNodeEngine: [true, false] }))) {
     describe(name, () => {
       before(async () => {
         await helpers
           .runJHipster(generator)
           .withMockedJHipsterGenerators()
           .withMockedSource()
-          .withMocketNodeDependencies()
-          .withSharedApplication({})
+          .withSharedApplication({ dasherizedBaseName: 'dasherizedBaseName', projectDescription: 'projectDescription' })
           .withJHipsterConfig(config);
       });
 
@@ -54,7 +53,7 @@ describe(`generator - ${generator}`, () => {
       });
 
       it('should compose with generators', () => {
-        expect(result.composedMockedGenerators).toMatchObject(expect.arrayContaining(['jhipster:javascript:bootstrap']));
+        expect(result.composedMockedGenerators).toHaveLength(0);
       });
     });
   }
