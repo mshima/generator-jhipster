@@ -33,7 +33,7 @@ describe(`generator - ${generator}`, () => {
   shouldSupportFeatures(Generator);
   describe('blueprint support', () => testBlueprintSupport(generator));
 
-  for (const [name, config] of Object.entries(fromMatrix({ packageJsonNodeEngine: [true, false] }))) {
+  for (const [name, config] of Object.entries(fromMatrix({ packageJsonNodeEngine: [true, false, 'customVersion'] }))) {
     describe(name, () => {
       before(async () => {
         await helpers
