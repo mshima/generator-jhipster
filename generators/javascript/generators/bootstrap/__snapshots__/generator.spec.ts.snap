@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generator - javascript:bootstrap customVersion should call source snapshot 1`] = `{}`;
+exports[`generator - javascript:bootstrap customVersion-commonjs should call source snapshot 1`] = `{}`;
 
-exports[`generator - javascript:bootstrap customVersion should match files snapshot 1`] = `
+exports[`generator - javascript:bootstrap customVersion-commonjs should match files snapshot 1`] = `
 {
   ".yo-rc.json": ObjectContaining {
     "contents": Any<String>,
@@ -19,7 +19,8 @@ exports[`generator - javascript:bootstrap customVersion should match files snaps
   "engines": {
     "node": "customVersion"
   },
-  "scripts": {}
+  "scripts": {},
+  "type": "commonjs"
 }
 ",
     "stateCleared": "modified",
@@ -27,9 +28,9 @@ exports[`generator - javascript:bootstrap customVersion should match files snaps
 }
 `;
 
-exports[`generator - javascript:bootstrap packageJsonNodeEngine(false) should call source snapshot 1`] = `{}`;
+exports[`generator - javascript:bootstrap packageJsonNodeEngine(false)-module should call source snapshot 1`] = `{}`;
 
-exports[`generator - javascript:bootstrap packageJsonNodeEngine(false) should match files snapshot 1`] = `
+exports[`generator - javascript:bootstrap packageJsonNodeEngine(false)-module should match files snapshot 1`] = `
 {
   ".yo-rc.json": ObjectContaining {
     "contents": Any<String>,
@@ -44,7 +45,8 @@ exports[`generator - javascript:bootstrap packageJsonNodeEngine(false) should ma
   "dependencies": {},
   "devDependencies": {},
   "engines": {},
-  "scripts": {}
+  "scripts": {},
+  "type": "module"
 }
 ",
     "stateCleared": "modified",

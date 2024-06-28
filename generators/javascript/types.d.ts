@@ -5,4 +5,5 @@ export type JavaScriptSourceType = {
 
 export type JavaScriptApplication = {
   packageJsonNodeEngine?: boolean | string;
+  packageJsonType?: string;
 };
