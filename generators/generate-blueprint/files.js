@@ -25,7 +25,7 @@ export const files = {
       templates: [
         '.github/workflows/generator.yml',
         '.prettierignore.jhi.blueprint',
-        'eslint.config.js',
+        'eslint.config.js.jhi.blueprint',
         'README.md',
         'tsconfig.json',
         'vitest.config.ts',
