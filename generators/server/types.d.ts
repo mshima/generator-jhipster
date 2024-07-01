@@ -26,6 +26,7 @@ export type SpringBootSourceType = JavaSourceType &
   MavenSourceType &
   SpringCacheSourceType &
   LiquibaseSourceType & {
+    addSpringFactory?({ key, value }: { key: string; value: string }): void;
     addTestSpringFactory?({ key, value }: { key: string; value: string }): void;
     addLogbackLogEntry?({ file, name, level }: { file: string; name: string; level: string }): void;
     addLogbackMainLog?({ name, level }: { name: string; level: string }): void;
