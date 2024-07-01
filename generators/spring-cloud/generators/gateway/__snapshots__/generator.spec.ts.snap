@@ -34,12 +34,21 @@ exports[`generator - spring-cloud:gateway with imperative option should call sou
       },
     ],
   ],
+  "addSpringFactory": [
+    {
+      "key": "org.springframework.cloud.gateway.server.mvc.filter.FilterSupplier",
+      "value": "com.mycompany.myapp.config.GatewayFilterSupplier.FilterSupplier",
+    },
+  ],
 }
 `;
 
 exports[`generator - spring-cloud:gateway with imperative option should match files snapshot 1`] = `
 {
   ".yo-rc.json": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/myapp/config/GatewayFilterSupplier.java": {
     "stateCleared": "modified",
   },
 }
