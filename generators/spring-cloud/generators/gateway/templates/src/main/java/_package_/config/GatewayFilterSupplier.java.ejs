@@ -1,0 +1,81 @@
+<%#
+ Copyright 2013-2024 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+package <%= packageName %>.config;
+
+import static org.springframework.web.servlet.function.HandlerFilterFunction.ofRequestProcessor;
+
+import java.net.URI;
+import org.springframework.cloud.gateway.server.mvc.common.Shortcut;
+import org.springframework.cloud.gateway.server.mvc.filter.SimpleFilterSupplier;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.function.HandlerFilterFunction;
+import org.springframework.web.servlet.function.ServerRequest;
+import org.springframework.web.servlet.function.ServerResponse;
+import org.springframework.web.util.UriComponentsBuilder;
+
+/**
+ * Custom StripPrefix filter that passes the X-Forwarded-Prefix header to the downstream service.
+ * See https://github.com/spring-cloud/spring-cloud-gateway/issues/3354.
+ */
+public interface GatewayFilterSupplier {
+    public static HandlerFilterFunction<ServerResponse, ServerResponse> jhipsterStripPrefix() {
+        return jhipsterStripPrefix(2);
+    }
+
+    @Shortcut
+    public static HandlerFilterFunction<ServerResponse, ServerResponse> jhipsterStripPrefix(int parts) {
+        return jhipsterStripPrefix(parts, "X-Forwarded-Prefix");
+    }
+
+    @Shortcut
+    public static HandlerFilterFunction<ServerResponse, ServerResponse> jhipsterStripPrefix(int parts, String header) {
+        return ofRequestProcessor(request -> {
+            String path = request.uri().getRawPath();
+            String[] originalParts = StringUtils.tokenizeToStringArray(path, "/");
+
+            // all new paths start with /
+            StringBuilder newPath = new StringBuilder("/");
+            StringBuilder prefix = new StringBuilder("");
+            for (int i = 0; i < originalParts.length; i++) {
+                if (i >= parts) {
+                    // only append slash if this is the second part or greater
+                    if (newPath.length() > 1) {
+                        newPath.append('/');
+                    }
+                    newPath.append(originalParts[i]);
+                } else {
+                    prefix.append("/").append(originalParts[i]);
+                }
+            }
+            if (newPath.length() > 1 && path.endsWith("/")) {
+                newPath.append('/');
+            }
+
+            URI prefixedUri = UriComponentsBuilder.fromUri(request.uri()).replacePath(newPath.toString()).build().toUri();
+            return ServerRequest.from(request).uri(prefixedUri).header(header, prefix.toString()).build();
+        });
+    }
+
+    class FilterSupplier extends SimpleFilterSupplier {
+
+        public FilterSupplier() {
+            super(GatewayFilterSupplier.class);
+        }
+    }
+}

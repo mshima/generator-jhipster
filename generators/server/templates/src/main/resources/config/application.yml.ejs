@@ -217,10 +217,7 @@ spring:
               args:
                 pattern: "'/services/'+serviceId.toLowerCase()+'/**'"
           filters:
-            - name: RewritePath
-              args:
-                regexp: "'/services/' + serviceId.toLowerCase() + '/(?<remaining>.*)'"
-                replacement: "'/${remaining}'"
+            - StripPrefix=2
       httpclient:
         pool:
           max-connections: 1000
@@ -232,14 +229,18 @@ spring:
             predicates:
               - Path=/services/<%= lowercaseBaseName %>/**
             filters:
-              - StripPrefix=2
+              # X-Forwarded-Prefix not working when using MVC https://github.com/spring-cloud/spring-cloud-gateway/issues/3354
+              # - StripPrefix=2
+              - jhipsterStripPrefix
       <%_ for (const ms of gatewayRoutes ?? []) { _%>
           - id: <%= ms.route %>_route
             uri: lb://<%= ms.route %>
             predicates:
               - Path=/services/<%= ms.route %>/**
             filters:
-              - StripPrefix=2
+              # X-Forwarded-Prefix not working when using MVC https://github.com/spring-cloud/spring-cloud-gateway/issues/3354
+              # - StripPrefix=2
+              - jhipsterStripPrefix
         <%_ if (authenticationTypeOauth2) { _%>
               - TokenRelay
         <%_ } _%>

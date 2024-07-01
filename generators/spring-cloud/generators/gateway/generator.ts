@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 import BaseApplicationGenerator from '../../../base-application/index.js';
-import { javaMainPackageTemplatesBlock, javaTestPackageTemplatesBlock } from '../../../java/support/files.js';
+import { javaMainPackageTemplatesBlock } from '../../../java/support/files.js';
 
 const WAIT_TIMEOUT = 3 * 60000;
 
@@ -106,6 +106,17 @@ export default class GatewayGenerator extends BaseApplicationGenerator {
 
   get writing() {
     return this.asWritingTaskGroup({
+      cleanup({ control, application }) {
+        control.cleanupFiles({
+          '8.6.1': [
+            [
+              application.reactive && (application as any).serviceDiscoveryAny,
+              `${application.javaPackageSrcDir}/web/filter/ModifyServersOpenApiFilter.java`,
+              `${application.javaPackageTestDir}/web/filter/ModifyServersOpenApiFilterTest.java`,
+            ],
+          ],
+        });
+      },
       async writing({ application }) {
         await this.writeFiles({
           blocks: [
@@ -114,12 +125,12 @@ export default class GatewayGenerator extends BaseApplicationGenerator {
               templates: ['security/jwt/JWTRelayGatewayFilterFactory.java'],
             }),
             javaMainPackageTemplatesBlock({
-              condition: ctx => ctx.reactive && ctx.serviceDiscoveryAny,
-              templates: ['web/rest/vm/RouteVM.java', 'web/rest/GatewayResource.java', 'web/filter/ModifyServersOpenApiFilter.java'],
+              condition: ctx => !ctx.reactive,
+              templates: ['config/GatewayFilterSupplier.java'],
             }),
-            javaTestPackageTemplatesBlock({
+            javaMainPackageTemplatesBlock({
               condition: ctx => ctx.reactive && ctx.serviceDiscoveryAny,
-              templates: ['web/filter/ModifyServersOpenApiFilterTest.java'],
+              templates: ['web/rest/vm/RouteVM.java', 'web/rest/GatewayResource.java'],
             }),
           ],
           context: application,
@@ -139,6 +150,14 @@ export default class GatewayGenerator extends BaseApplicationGenerator {
         source.addJavaDependencies!([
           { groupId: 'org.springframework.cloud', artifactId: `spring-cloud-starter-gateway${reactive ? '' : '-mvc'}` },
         ]);
+      },
+      addSpringFactories({ application, source }) {
+        if (!application.reactive) {
+          source.addSpringFactory!({
+            key: 'org.springframework.cloud.gateway.server.mvc.filter.FilterSupplier',
+            value: `${application.packageName}.config.GatewayFilterSupplier.FilterSupplier`,
+          });
+        }
       },
     });
   }

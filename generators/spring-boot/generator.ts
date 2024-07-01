@@ -302,6 +302,10 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
           const springFactoriesFile = `${application.srcTestResources}META-INF/spring.factories`;
           this.editFile(springFactoriesFile, { create: true }, addSpringFactory({ key, value }));
         };
+        source.addSpringFactory = ({ key, value }) => {
+          const springFactoriesFile = `${application.srcMainResources}META-INF/spring.factories`;
+          this.editFile(springFactoriesFile, { create: true }, addSpringFactory({ key, value }));
+        };
       },
       addSpringIntegrationTest({ application, source }) {
         source.addIntegrationTestAnnotation = annotation =>
