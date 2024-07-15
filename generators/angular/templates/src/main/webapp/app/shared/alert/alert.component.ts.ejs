@@ -18,7 +18,7 @@
 -%>
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AlertService, Alert } from 'app/core/util/alert.service';
 
@@ -26,7 +26,7 @@ import { AlertService, Alert } from 'app/core/util/alert.service';
   standalone: true,
   selector: '<%= jhiPrefixDashed %>-alert',
   templateUrl: './alert.component.html',
-  imports: [CommonModule, NgbModule],
+  imports: [CommonModule, NgbAlertModule],
 })
 export class AlertComponent implements OnInit, OnDestroy {
   alerts = signal<Alert[]>([]);
