@@ -11,22 +11,6 @@ export default class extends BaseGenerator {
     super(args, opts, { ...features, queueCommandTasks: true, jhipsterBootstrap: false });
   }
 
-  get [BaseGenerator.PROMPTING]() {
-    return this.asPromptingTaskGroup({
-      async askForSample() {
-        await this.promptCurrentJHipsterCommand();
-      },
-    });
-  }
-
-  get [BaseGenerator.LOADING]() {
-    return this.asLoadingTaskGroup({
-      async loadCommand() {
-        await this.loadCurrentJHipsterCommandConfig(this);
-      },
-    });
-  }
-
   get [BaseGenerator.WRITING]() {
     return this.asWritingTaskGroup({
       async copySample() {
