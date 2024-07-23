@@ -193,7 +193,12 @@ class JHipsterRunContext extends RunContext<GeneratorTestType> {
   }
 
   withJHipsterLookup(): this {
-    return this.withLookups([{ packagePaths: [getPackageRoot()], lookups: [`${isDistFolder() ? 'dist/' : ''}generators`] }] as any);
+    return this.withLookups([
+      {
+        packagePaths: [getPackageRoot()],
+        lookups: [`${isDistFolder() ? 'dist/' : ''}generators`, `${isDistFolder() ? 'dist/' : ''}generators/*/generators`],
+      },
+    ] as any);
   }
 
   /**
@@ -201,7 +206,7 @@ class JHipsterRunContext extends RunContext<GeneratorTestType> {
    * @param lookups generators relative folder
    * @returns
    */
-  withParentBlueprintLookup(lookups = ['generators']): this {
+  withParentBlueprintLookup(lookups = ['generators', 'generators/*/generators']): this {
     const packageRootParent = join(getPackageRoot(), '..');
     if (basename(packageRootParent) === 'node_modules') {
       this.withLookups([{ packagePaths: [join(packageRootParent, '..')], lookups }] as any);
