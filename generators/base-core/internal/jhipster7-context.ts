@@ -19,7 +19,7 @@
 
 /* eslint-disable no-console */
 import chalk from 'chalk';
-import { camelCase } from 'lodash-es';
+import { camelCase, escapeRegExp } from 'lodash-es';
 
 import { fieldTypes } from '../../../lib/jhipster/index.ts';
 import { isReservedTableName } from '../../../lib/jhipster/reserved-keywords.ts';
@@ -478,3 +478,41 @@ const createHandler = ({ log }: Handler = { log: msg => console.log(msg) }): Pro
 export function createJHipster7Context(generator: CoreGenerator, data: ApplicationAll, options: { log: (msg: string) => void }) {
   return new Proxy({ generator, data }, createHandler(options));
 }
+
+const replaceTemplate = (str, key, replacement) => str.replace(new RegExp(`(<%[-=_]?((?!%>).)*)${key}`, 'sg'), `$1${replacement}`);
+
+const customReplacements = {
+  "asEntity('User')": { replacement: 'user.persistClass' },
+  "asDto('User')": { replacement: 'user.restClass' },
+  "asDto('AdminUser')": { replacement: 'user.adminUserDto' },
+  ' getPrimaryKeyValue(': { replacement: ' this.getPrimaryKeyValue(' },
+  'getJavaValueGeneratorForType(field.fieldType)': { replacement: 'field.javaValueGenerator' },
+  'isFilterableType(searchBy.fieldType)': { replacement: 'searchBy.filterableField' },
+  'isFilterableType(field.fieldType)': { replacement: 'field.filterableField' },
+  'getDBCExtraOption(prodDatabaseType)': { replacement: 'prodDatabaseExtraOptions' },
+  'getDBCExtraOption(devDatabaseType)': { replacement: 'devDatabaseExtraOptions' },
+};
+
+export const convertJHipster7Templates = content => {
+  for (const [key, def] of Object.entries({ ...customReplacements, ...jhipster7deprecatedProperties })) {
+    if (
+      def.behaviorOnlyReason ||
+      def.replacement.includes(' property') ||
+      [
+        'getDBCExtraOption',
+        'getPrimaryKeyValue',
+        'prodDatabaseTypePostgres',
+        'asEntity',
+        'asDto',
+        'getJavaValueGeneratorForType',
+        'isFilterableType',
+        'getColumnName',
+      ].includes(key)
+    ) {
+      console.log(`Auto replacement for ${key} is not implemented`);
+    } else {
+      content = replaceTemplate(content, escapeRegExp(key), def.replacement);
+    }
+  }
+  return content;
+};
