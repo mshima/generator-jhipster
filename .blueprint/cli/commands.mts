@@ -18,6 +18,10 @@
  */
 
 const defaultCommands = {
+  apply: {
+    desc: 'Apply changes',
+    blueprint: '@jhipster/jhipster-dev',
+  },
   'code-workspace': {
     desc: 'Prepare a code-workspace for jhipster development',
     blueprint: '@jhipster/jhipster-dev',
