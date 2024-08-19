@@ -18,28 +18,28 @@
 -%>
 <div class="d-flex justify-content-center">
   <div class="col-8">
-  @if (user(); as userRef) {
-    <div>
-      <h2>
-        <span>__jhiTranslateTag__('userManagement.detail.title')</span> [<strong>{{ userRef.login }}</strong>]
-      </h2>
+    @if (user(); as userRef) {
+      <div>
+        <h2>
+          <span>__jhiTranslateTag__('userManagement.detail.title')</span> [<strong>{{ userRef.login }}</strong>]
+        </h2>
 
-      <dl class="row-md jh-entity-details">
-        <dt><span>__jhiTranslateTag__('userManagement.login')</span></dt>
-        <dd>
-          <span>{{ userRef.login }}</span>
-        @if (userRef.activated) {
-          <span class="badge bg-success">__jhiTranslateTag__('userManagement.activated')</span>
-        } @else {
-          <span class="badge bg-danger">__jhiTranslateTag__('userManagement.deactivated')</span>
-        }
-        </dd>
+        <dl class="row-md jh-entity-details">
+          <dt><span>__jhiTranslateTag__('userManagement.login')</span></dt>
+          <dd>
+            <span>{{ userRef.login }}</span>
+            @if (userRef.activated) {
+              <span class="badge bg-success">__jhiTranslateTag__('userManagement.activated')</span>
+            } @else {
+              <span class="badge bg-danger">__jhiTranslateTag__('userManagement.deactivated')</span>
+            }
+          </dd>
 
-        <dt><span>__jhiTranslateTag__('userManagement.firstName')</span></dt>
-        <dd>{{ userRef.firstName }}</dd>
+          <dt><span>__jhiTranslateTag__('userManagement.firstName')</span></dt>
+          <dd>{{ userRef.firstName }}</dd>
 
-        <dt><span>__jhiTranslateTag__('userManagement.lastName')</span></dt>
-        <dd>{{ userRef.lastName }}</dd>
+          <dt><span>__jhiTranslateTag__('userManagement.lastName')</span></dt>
+          <dd>{{ userRef.lastName }}</dd>
 
         <dt><span>__jhiTranslateTag__('userManagement.email')</span></dt>
         <dd>{{ userRef.email }}</dd>

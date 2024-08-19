@@ -82,43 +82,39 @@
             >__jhiTranslateTag__('register.messages.validate.login.pattern')</small>
           }
           </div>
-        }
-        </div>
 
-        <div class="mb-3">
-          <label class="form-label" for="email">__jhiTranslateTag__('global.form.email.label')</label>
-          <input
-            type="email"
-            class="form-control"
-            id="email"
-            name="email"
-            placeholder="__jhiTranslatePipe__('global.form.email.placeholder')"
-            formControlName="email"
-            data-cy="email"
-          />
+          <div class="mb-3">
+            <label class="form-label" for="email">__jhiTranslateTag__('global.form.email.label')</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="__jhiTranslatePipe__('global.form.email.placeholder')"
+              formControlName="email"
+              data-cy="email"
+            />
 
-        @let emailRef = registerForm.get('email')!;
-        @if (emailRef.invalid && (emailRef.dirty || emailRef.touched)) {
-          <div>
-          @if (emailRef?.errors?.required) {
-            <small class="form-text text-danger"
-            >__jhiTranslateTag__('global.messages.validate.email.required')</small>
-          }
+            @let emailRef = registerForm.get('email')!;
+            @if (emailRef.invalid && (emailRef.dirty || emailRef.touched)) {
+              <div>
+                @if (emailRef?.errors?.required) {
+                  <small class="form-text text-danger">__jhiTranslateTag__('global.messages.validate.email.required')</small>
+                }
 
-          @if (emailRef?.errors?.invalid) {
-            <small class="form-text text-danger"
-            >__jhiTranslateTag__('global.messages.validate.email.invalid')</small>
-          }
+                @if (emailRef?.errors?.invalid) {
+                  <small class="form-text text-danger">__jhiTranslateTag__('global.messages.validate.email.invalid')</small>
+                }
 
-          @if (emailRef?.errors?.minlength) {
-            <small class="form-text text-danger"
-            >__jhiTranslateTag__('global.messages.validate.email.minlength')</small>
-          }
+                @if (emailRef?.errors?.minlength) {
+                  <small class="form-text text-danger">__jhiTranslateTag__('global.messages.validate.email.minlength')</small>
+                }
 
-          @if (emailRef?.errors?.maxlength) {
-            <small class="form-text text-danger"
-            >__jhiTranslateTag__('global.messages.validate.email.maxlength')</small>
-          }
+                @if (emailRef?.errors?.maxlength) {
+                  <small class="form-text text-danger">__jhiTranslateTag__('global.messages.validate.email.maxlength')</small>
+                }
+              </div>
+            }
           </div>
         }
         </div>

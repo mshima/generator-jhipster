@@ -97,20 +97,20 @@ describe('Account Service', () => {
   });
 
 <%_ if (generateUserManagement) { _%>
-describe('save', () => {
-  it('should call account saving endpoint with correct values', () => {
-    // GIVEN
-    const account = accountWithAuthorities([]);
+  describe('save', () => {
+    it('should call account saving endpoint with correct values', () => {
+      // GIVEN
+      const account = accountWithAuthorities([]);
 
-    // WHEN
-    service.save(account).subscribe();
-    const testRequest = httpMock.expectOne({ method: 'POST', url: applicationConfigService.getEndpointFor('api/account') });
-    testRequest.flush({});
+      // WHEN
+      service.save(account).subscribe();
+      const testRequest = httpMock.expectOne({ method: 'POST', url: applicationConfigService.getEndpointFor('api/account') });
+      testRequest.flush({});
 
-    // THEN
-    expect(testRequest.request.body).toEqual(account);
+      // THEN
+      expect(testRequest.request.body).toEqual(account);
+    });
   });
-});
 
 <%_ } _%>
   describe('authenticate', () => {

@@ -163,8 +163,9 @@ export class <%= componentName %> implements OnInit {
     track<%= primaryKey.nameCapitalized %> = (item: I<%= entityAngularName %>): <%= primaryKey.tsType %> => this.<%= entityInstance %>Service.get<%= entityAngularName %>Identifier(item);
 <%_ } _%>
 
-    ngOnInit(): void {
-      this.subscription = combineLatest([this.activatedRoute.queryParamMap, this.activatedRoute.data]).pipe(
+  ngOnInit(): void {
+    this.subscription = combineLatest([this.activatedRoute.queryParamMap, this.activatedRoute.data])
+      .pipe(
         tap(([params, data]) => this.fillComponentAttributeFromRoute(params, data)),
 <%_ if (paginationInfiniteScroll) { _%>
         tap(() => this.reset()),

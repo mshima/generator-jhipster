@@ -34,10 +34,9 @@ const <%= entityInstance %>Resolve = (route: ActivatedRouteSnapshot): Observable
         mergeMap((<%= entityInstance %>: HttpResponse<I<%= entityAngularName %>>) => {
           if (<%= entityInstance %>.body) {
             return of(<%= entityInstance %>.body);
-          } else {
+          }
             inject(Router).navigate(['404']);
             return EMPTY;
-          }
         }),
       );
   }

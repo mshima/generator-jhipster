@@ -81,8 +81,8 @@ describe('<%= entityAngularName %> Management Update Component', () => {
         <%= otherEntity.entityInstance %>Service = TestBed.inject(<%= otherEntity.entityAngularName %>Service);
 <%_ } _%>
 
-        comp = fixture.componentInstance;
-    });
+    comp = fixture.componentInstance;
+  });
 
     describe('ngOnInit', () => {
 <%_ for (const relationshipsByEntityNeedingOptions of allRelationshipsByEntityNeedingOptions) { _%>
@@ -171,6 +171,7 @@ describe('<%= entityAngularName %> Management Update Component', () => {
             expect(comp.<%= entityInstance %>).toEqual(<%= entityInstance %>);
         });
     });
+  });
 
     describe('save', () => {
 <%_ if (updatableEntity) { _%>
