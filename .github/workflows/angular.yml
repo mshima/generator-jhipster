@@ -174,15 +174,9 @@ jobs:
         uses: jwalton/gh-docker-logs@v2
       - name: 'ANALYSIS: Sonar analysis'
         if: >-
-          github.event_name == 'push' &&
           github.repository == 'jhipster/generator-jhipster' &&
-          matrix.sonar-analyse == 'true' &&
-          steps.compare.outputs.equals != 'true' &&
-          matrix.workspaces != 'true' &&
-          matrix.skip-frontend-tests != 'true' &&
-          needs.build-matrix.outputs.client != 'false' &&
-          matrix.skip-backend-tests != 'true' &&
-          needs.build-matrix.outputs.server != 'false'
+          github.event_name == 'push' &&
+          matrix.sonar-analyse == 'true'
         run: |
           ./mvnw -ntp --batch-mode initialize org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar \
             -Dsonar.host.url=https://sonarcloud.io \
@@ -191,6 +185,24 @@ jobs:
             -Dsonar.login=$SONAR_TOKEN
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # Cache save doesn't work with deep path exclude https://github.com/actions/toolkit/issues/713, remove manually
+      - name: Create application cache
+        if: >-
+          github.event_name == 'push' &&
+          matrix.sonar-analyse == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            app/*
+            !app/node_modules
+            !app/package-lock.json
+            !app/target
+            app/target/*
+            !app/target/node
+            !app/target/generated-sources
+            !app/target/*.original
+            !app/target/*.jar
+          key: application-${{ matrix.name }}-${{ github.sha }}
   check-angular:
     permissions:
       contents: none

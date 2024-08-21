@@ -63,8 +63,8 @@ writeFileSync(
                     'jhipster-bom-cicd-version': BUILD_JHIPSTER_BOM ? JHIPSTER_BOM_CICD_VERSION : undefined,
                     'gradle-cache': generatorOptions?.workspaces || name.includes('gradle') ? true : undefined,
                     ...sample,
-                    'skip-backend-tests': sample['skip-backend-tests'] ? 'true' : 'false',
-                    'skip-frontend-tests': sample['skip-frontend-tests'] ? 'true' : 'false',
+                    'skip-backend-tests': sample['skip-backend-tests'] && sample['sonar-analyse'] !== 'true' ? 'true' : 'false',
+                    'skip-frontend-tests': sample['skip-frontend-tests'] && sample['sonar-analyse'] !== 'true' ? 'true' : 'false',
                   };
                 });
             } catch (error) {
