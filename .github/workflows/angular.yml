@@ -106,7 +106,16 @@ jobs:
         if: matrix.sonar-analyse == 'true'
         uses: actions/cache/restore@v4
         with:
-          path: app
+          path: |
+            app/*
+            !app/node_modules
+            !app/package-lock.json
+            !app/target
+            app/target/*
+            !app/target/node
+            !app/target/generated-sources
+            !app/target/*.original
+            !app/target/*.jar
           key: application-${{ matrix.name }}-${{ github.event.pull_request.base.sha }}
           restore-keys: |
             application-${{ matrix.name }}-
