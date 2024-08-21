@@ -102,6 +102,14 @@ jobs:
       #----------------------------------------------------------------------
       - run: npm ci --ignore-scripts
         working-directory: ${{ github.workspace }}/generator-jhipster
+      - name: Restore application cache
+        if: matrix.sonar-analyse == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: app
+          key: application-${{ matrix.name }}-${{ github.event.pull_request.base.sha }}
+          restore-keys: |
+            application-${{ matrix.name }}-
       - name: 'GENERATION: project'
         run: jhipster.cjs generate-sample ${{ matrix.name }} --skip-jhipster-dependencies --skip-checks --skip-install --no-insight
         env:

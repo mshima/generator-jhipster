@@ -29,8 +29,8 @@ module.exports = {
   globals: {
     ...environment,
   },
-  roots: ['<rootDir>', `<rootDir>/${baseUrl}`],
   modulePaths: [`<rootDir>/${baseUrl}`],
+  roots: ['<rootDir>', `<rootDir>/${baseUrl}`],
   setupFiles: ['jest-date-mock'],
   cacheDirectory: '<rootDir>/<%= this.relativeDir(clientRootDir, temporaryDir) %>jest-cache',
   coverageDirectory: '<rootDir>/<%= this.relativeDir(clientRootDir, temporaryDir) %>test-results/',
