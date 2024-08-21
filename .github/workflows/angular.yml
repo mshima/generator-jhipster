@@ -120,7 +120,7 @@ jobs:
           restore-keys: |
             application-${{ matrix.name }}-
       - name: 'GENERATION: project'
-        run: jhipster.cjs generate-sample ${{ matrix.name }} --skip-jhipster-dependencies --skip-checks --skip-install --no-insight
+        run: jhipster.cjs generate-sample ${{ matrix.name }} --skip-jhipster-dependencies --skip-checks --skip-install --no-insight --force
         env:
           JHI_FOLDER_APP: ${{ github.workspace }}/app
           JHIPSTER_DEPENDENCIES_VERSION: ${{ matrix.jhipster-bom-cicd-version }}
