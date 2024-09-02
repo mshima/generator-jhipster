@@ -17,4 +17,4 @@
  * limitations under the License.
  */
 export * from './blueprint.js';
-export * from './command.js';
+export * from '../command/converter.js';
