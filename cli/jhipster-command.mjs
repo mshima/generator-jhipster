@@ -23,6 +23,9 @@ import { kebabCase } from 'lodash-es';
 import { convertConfigToOption } from '../lib/command/index.js';
 
 export default class JHipsterCommand extends Command {
+  configs = {};
+  blueprintConfigs = {};
+
   createCommand(name) {
     return new JHipsterCommand(name);
   }

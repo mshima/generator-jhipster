@@ -26,6 +26,11 @@ const command: JHipsterCommandDefinition = {
         type: String,
         hide: true,
       },
+      jdl: {
+        tokenType: 'quotedList',
+        type: 'quotedList',
+        tokenValuePattern: /^"[A-Za-z][A-Za-z0-9_]*(?::[A-Za-z][A-Za-z0-9_]+(?::[0-9]+)?)?"$/,
+      },
       scope: 'storage',
     },
   },

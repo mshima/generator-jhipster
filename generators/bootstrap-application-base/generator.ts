@@ -39,7 +39,8 @@ import { GENERATOR_BOOTSTRAP, GENERATOR_COMMON, GENERATOR_PROJECT_NAME } from '.
 import { packageJson } from '../../lib/index.js';
 import { loadLanguagesConfig } from '../languages/support/index.js';
 import { loadAppConfig, loadDerivedAppConfig, loadStoredAppOptions } from '../app/support/index.js';
-import jdlDefinition from '../app/jdl/index.js';
+import { lookupCommandsConfigs } from '../../lib/command/lookup-commands-configs.js';
+import { loadConfigIntoContext } from '../../lib/command/load-into-context.js';
 import { createAuthorityEntity, createUserEntity, createUserManagementEntity } from './utils.js';
 import { exportJDLTransform, importJDLTransform } from './support/index.js';
 
@@ -80,6 +81,7 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
 
           const destinationPath = this.destinationPath();
           const jdlStorePath = this.destinationPath(this.jhipsterConfig.jdlStore);
+          const { jdlDefinition } = this.options;
 
           this.features.commitTransformFactory = () => exportJDLTransform({ destinationPath, jdlStorePath, jdlDefinition });
           await this.pipeline({ refresh: true, pendingFiles: false }, importJDLTransform({ destinationPath, jdlStorePath, jdlDefinition }));
@@ -108,6 +110,16 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
 
   get loading() {
     return this.asLoadingTaskGroup({
+      /**
+       * Avoid having undefined keys in the application object when redering ejs templates
+       */
+      async loadApplicationKeys({ application }) {
+        await loadConfigIntoContext({
+          config: this.config.getAll(),
+          context: application,
+          commandsConfigs: this.options.commandsConfigs ?? (await lookupCommandsConfigs()),
+        });
+      },
       loadApplication({ application, control, applicationDefaults }) {
         loadAppConfig({
           config: this.jhipsterConfigWithDefaults,
