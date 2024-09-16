@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OptionValues should match snapshot 1`] = `
+{
+  "applicationTypeOption": "applicationType",
+  "applicationTypeValueGateway": "gateway",
+  "applicationTypeValueMicroservice": "microservice",
+  "applicationTypeValueMonolith": "monolith",
+  "authenticationTypeOption": "authenticationType",
+  "authenticationTypeValueJwt": "jwt",
+  "authenticationTypeValueOauth2": "oauth2",
+  "authenticationTypeValueSession": "session",
+  "databaseMigrationOption": "databaseMigration",
+  "databaseMigrationValueLiquibase": "liquibase",
+  "databaseTypeOption": "databaseType",
+  "databaseTypeValueCassandra": "cassandra",
+  "databaseTypeValueCouchbase": "couchbase",
+  "databaseTypeValueMongodb": "mongodb",
+  "databaseTypeValueNeo4j": "neo4j",
+  "databaseTypeValueNo": "no",
+  "databaseTypeValueSql": "sql",
+  "defaultPackagingOption": "defaultPackaging",
+  "defaultPackagingValueJar": "jar",
+  "defaultPackagingValueWar": "war",
+  "messageBrokerOption": "messageBroker",
+  "messageBrokerValueKafka": "kafka",
+  "messageBrokerValueNo": "no",
+  "messageBrokerValuePulsar": "pulsar",
+  "serviceDiscoveryTypeOption": "serviceDiscoveryType",
+  "serviceDiscoveryTypeValueConsul": "consul",
+  "serviceDiscoveryTypeValueEureka": "eureka",
+  "serviceDiscoveryTypeValueNo": "no",
+}
+`;

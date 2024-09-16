@@ -167,6 +167,15 @@ type NormalizeChoices<Choices extends readonly [...(string | { value: string })[
 
 /**
  * @example
+ * type Normalized = NormalizeChoices<['angular', { value: 'no' }]>;
+ * type Normalized = ['angular', 'no'];
+ */
+type ChoiceAsRecord<Choices extends readonly [...(string | { value: string })[]]> = {
+  [Val in GetChoiceValue<Choices[number]>]: Val;
+};
+
+/**
+ * @example
  * ```ts
  * type ExplodedCommandChoices = ExplodeCommandChoicesWithInference<{ clientFramework: { choices: ['angular', 'no'] }, clientTestFramework: { choices: ['cypress', 'no'] } }>
  * {
@@ -207,6 +216,17 @@ type ExplodeCommandChoicesNoInference<U extends ParseableConfigs> = {
         : never
       : never
     : never;
+};
+
+type ConfigsWithChoices<U extends Record<string, any>> = {
+  [K in keyof U as U[K] extends { choices: any } ? K : never]: U[K];
+};
+
+export type ExtractOptionValuesfromConfigs<U extends Record<string, any>> = {
+  [K in keyof ConfigsWithChoices<U> as K extends string ? K : never]: {
+    key: K;
+    values: ChoiceAsRecord<U[K]['choices']>;
+  };
 };
 
 type PrepareConfigsWithType<U extends ParseableConfigs> = Simplify<{
