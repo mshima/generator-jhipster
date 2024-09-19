@@ -37,17 +37,10 @@ export const vueFiles = {
     }),
   ],
   microfrontend: [
-    clientRootTemplatesBlock({
+    {
       condition: generator => generator.microfrontend,
-      templates: [
-        'webpack/config.js',
-        'webpack/webpack.common.js',
-        'webpack/webpack.dev.js',
-        'webpack/webpack.prod.js',
-        'webpack/vue.utils.js',
-        'webpack/webpack.microfrontend.js.jhi.vue',
-      ],
-    }),
+      templates: ['rsbuild.module-federation.config.ts', 'rsbuild.config.ts.jhi.vue'],
+    },
     {
       condition: generator => generator.microfrontend,
       ...clientApplicationTemplatesBlock(),
@@ -56,14 +49,15 @@ export const vueFiles = {
     {
       condition: generator => generator.microfrontend,
       ...clientSrcTemplatesBlock(),
-      templates: [
-        'microfrontends/entities-menu.component-test.ts',
-        'microfrontends/entities-menu-test.vue',
-        'microfrontends/entities-router-test.ts',
-      ],
+      templates: ['microfrontends/entities-menu.component-test.ts', 'microfrontends/entities-router-test.ts'],
     },
     {
-      condition: generator => generator.applicationTypeMicroservice,
+      condition: generator => generator.enableTranslation && generator.microfrontend,
+      ...clientSrcTemplatesBlock(),
+      templates: ['microfrontends/entities-menu-test.vue'],
+    },
+    {
+      condition: generator => generator.enableTranslation && generator.applicationTypeMicroservice,
       ...clientApplicationTemplatesBlock(),
       templates: ['entities/entities-menu.spec.ts'],
     },

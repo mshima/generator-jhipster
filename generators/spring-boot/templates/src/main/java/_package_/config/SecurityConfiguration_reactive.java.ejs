@@ -214,19 +214,18 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
             .securityMatcher(new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(
-  <%_ if (clientFrameworkVue) { _%>
                 pathMatchers(
+  <%_ if (clientBundlerRsbuild) { _%>
+                    "/static/**",
+  <%_ } else if (clientBundlerVite) { _%>
                     "/assets/**",
-    <%_ if (microfrontend) { _%>
+  <%_ } else { _%>
                     "/app/**",
                     "/i18n/**",
                     "/content/**",
-    <%_ } _%>
+  <%_ } _%>
                     "/swagger-ui/**"
                 )
-  <%_ } else { _%>
-                pathMatchers("/app/**", "/i18n/**", "/content/**", "/swagger-ui/**")
-  <%_ } _%>
             )))
 <%_ if (!applicationTypeMicroservice) { _%>
             .cors(withDefaults())
@@ -286,7 +285,11 @@ public class SecurityConfiguration {
 <%_ if (applicationTypeGateway) { _%>
   <%_ if (microfrontend) { _%>
                     // microfrontend resources are loaded by webpack without authentication, they need to be public
+    <%_ if (clientBundlerRsbuild) { _%>
+                    .pathMatchers("/services/*/static/**").permitAll()
+    <%_ } _%>
                     .pathMatchers("/services/*/*.js").permitAll()
+                    .pathMatchers("/services/*/content/*.js").permitAll()
                     .pathMatchers("/services/*/*.txt").permitAll()
                     .pathMatchers("/services/*/*.json").permitAll()
                     .pathMatchers("/services/*/*.js.map").permitAll()

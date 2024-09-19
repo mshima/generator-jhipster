@@ -5,6 +5,7 @@ import type { GetFieldType, GetRelationshipType } from '../utils/entity-utils.ts
 import type { TaskTypes as BaseTaskTypes, TaskParamWithControl, TaskParamWithSource } from '../base/tasks.js';
 import type { Entity } from './entity.js';
 import type { ApplicationType, BaseApplicationSource } from './application.js';
+import type { ApplicationConfiguration } from './yo-rc.js';
 
 type ApplicationDefaultsTaskParam = {
   /**
@@ -22,7 +23,7 @@ type ApplicationDefaultsTaskParam = {
    *   { prop: ({ prop }) => prop + '-bar', prop2: 'won\'t override' },
    * );
    */
-  applicationDefaults: (...defaults: Record<any, any>[]) => void;
+  applicationDefaults: (...defaults: (Partial<ApplicationConfiguration> & Record<any, any>)[]) => void;
 };
 
 type TaskParamWithApplication<E = Entity, A = ApplicationType<E>> = TaskParamWithControl & {

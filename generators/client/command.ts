@@ -63,6 +63,14 @@ const command = {
       ],
       scope: 'storage',
     },
+    clientBundler: {
+      cli: {
+        type: String,
+        hide: true,
+      },
+      choices: ['webpack', 'rsbuild', 'vite'],
+      scope: 'storage',
+    },
     microfrontend: {
       description: 'Enable microfrontend support',
       cli: {

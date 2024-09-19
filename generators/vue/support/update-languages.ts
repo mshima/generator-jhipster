@@ -88,7 +88,7 @@ export default function updateLanguagesTask(this: BaseGenerator, taskParam: Upda
   updateLanguagesInPipeTask.call(this, taskParam);
   updateLanguagesInConfigTask.call(this, taskParam);
   if (taskParam.application.microfrontend) {
-    updateLanguagesInWebpackTask.call(this, taskParam);
+    // updateLanguagesInWebpackTask.call(this, taskParam);
   }
   updateLanguagesInDayjsConfigurationTask.call(this, taskParam, {
     configurationFile: `${taskParam.application.clientSrcDir}app/shared/config/dayjs.ts`,

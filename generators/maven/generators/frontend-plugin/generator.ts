@@ -58,7 +58,7 @@ export default class FrontendPluginGenerator extends BaseApplicationGenerator {
         } else if (clientFrameworkVue) {
           checksumIncludedFiles.push('.postcssrc.js', 'tsconfig.app.json');
           if (microfrontend) {
-            checksumIncludedFiles.push('webpack/*.*');
+            checksumIncludedFiles.push('rsbuild.config.ts', 'rsbuild.module-federation.config.ts');
           } else {
             checksumIncludedFiles.push('vite.config.ts');
           }

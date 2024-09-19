@@ -31,7 +31,6 @@ import {
   getTypescriptKeyType as getTSKeyType,
   generateTestEntityId as getTestEntityId,
 } from '../client/support/index.js';
-import { createNeedleCallback } from '../base/support/index.js';
 import { writeEslintClientRootConfigFile } from '../javascript/generators/eslint/support/tasks.js';
 import { cleanupEntitiesFiles, postWriteEntityFiles, writeEntityFiles } from './entity-files-vue.js';
 import cleanupOldFilesTask from './cleanup.js';
@@ -52,6 +51,24 @@ export default class VueGenerator extends BaseApplicationGenerator {
       await this.dependsOnJHipster(GENERATOR_CLIENT);
       await this.dependsOnJHipster(GENERATOR_LANGUAGES);
     }
+  }
+
+  get composing() {
+    return this.asComposingTaskGroup({
+      async composing() {
+        if (
+          this.jhipsterConfig.microfrontend ||
+          this.jhipsterConfig.applicationType === 'microservice' ||
+          (this.jhipsterConfig.microfrontends ?? []).length > 0
+        ) {
+          await this.composeWithJHipster('jhipster:javascript:rsbuild');
+        }
+      },
+    });
+  }
+
+  get [BaseApplicationGenerator.COMPOSING]() {
+    return this.delegateTasksToBlueprint(() => this.composing);
   }
 
   get loading() {
@@ -85,21 +102,8 @@ export default class VueGenerator extends BaseApplicationGenerator {
           webappEnumerationsDir: app => `${app.clientWebappDir}shared/model/enumerations/`,
         });
       },
-      prepareForTemplates({ application, source }) {
+      prepareForTemplates({ application }) {
         application.addPrettierExtensions?.(['html', 'vue', 'css', 'scss']);
-
-        source.addWebpackConfig = args => {
-          const webpackPath = `${application.clientRootDir}webpack/webpack.common.js`;
-          const ignoreNonExisting = this.sharedData.getControl().ignoreNeedlesError && 'Webpack configuration file not found';
-          this.editFile(
-            webpackPath,
-            { ignoreNonExisting },
-            createNeedleCallback({
-              needle: 'jhipster-needle-add-webpack-config',
-              contentToAdd: `,${args.config}`,
-            }),
-          );
-        };
       },
     });
   }
@@ -175,7 +179,16 @@ export default class VueGenerator extends BaseApplicationGenerator {
   get postWriting() {
     return this.asPostWritingTaskGroup({
       addIndexAsset({ source, application }) {
-        if (application.microfrontend) return;
+        if (application.microfrontend) {
+          this.packageJson.merge({
+            devDependencies: {
+              '@rsbuild/plugin-sass': 'latest',
+              '@rsbuild/plugin-vue': 'latest',
+            },
+          });
+          return;
+        }
+
         source.addExternalResourceToRoot!({
           resource: '<script>const global = globalThis;</script>',
           comment: 'Workaround https://github.com/axios/axios/issues/5622',

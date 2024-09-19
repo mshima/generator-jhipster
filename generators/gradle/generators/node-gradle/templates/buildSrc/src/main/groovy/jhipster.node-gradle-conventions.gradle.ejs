@@ -68,10 +68,8 @@ task webapp_test(type: NpmTask) {
         .withPathSensitivity(PathSensitivity.RELATIVE)
     <%_ if (microfrontend) { _%>
 
-    def webpackDevFiles = fileTree("<%= CLIENT_WEBPACK_DIR %>")
-    webpackDevFiles.exclude("webpack.prod.js")
-    inputs.files(webpackDevFiles)
-        .withPropertyName("webpack-dir")
+    inputs.files('rsbuild.config.ts', 'rsbuild.module-federation.config.ts')
+        .withPropertyName("rsbuild")
         .withPathSensitivity(PathSensitivity.RELATIVE)
     <%_ } else { _%>
 
