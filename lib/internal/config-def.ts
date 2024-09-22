@@ -15,9 +15,7 @@ export function loadConfig(
       if (value === undefined || value === null) {
         let source = config;
         if (!source) {
-          if (def.scope === 'context') {
-            source = (this as CoreGenerator).context!;
-          } else if (def.scope === 'blueprint') {
+          if (def.scope === 'blueprint') {
             source = (this as any).blueprintStorage.getAll();
           } else if (def.scope === 'storage' || def.scope === undefined) {
             source = (this as CoreGenerator).jhipsterConfigWithDefaults;
@@ -38,7 +36,7 @@ export function loadConfig(
 export const loadDerivedConfig = (configsDef: JHipsterConfigs | undefined, { application }) => {
   if (configsDef) {
     for (const [name, def] of Object.entries(configsDef)) {
-      if ((def.scope === undefined || ['storage', 'blueprint', 'context'].includes(def.scope)) && def.choices) {
+      if ((def.scope === undefined || ['storage', 'blueprint'].includes(def.scope)) && def.choices) {
         const configVal = application[name];
         for (const choice of def.choices) {
           const choiceVal = typeof choice === 'string' ? choice : choice.value;
