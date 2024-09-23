@@ -33,6 +33,7 @@ export const files = asWriteFilesSection<any>({
         '.blueprint/cli/commands.mjs',
         '.blueprint/generate-sample/command.mjs',
         '.blueprint/generate-sample/generator.mjs',
+        '.blueprint/generate-sample/get-samples.mjs',
         '.blueprint/generate-sample/index.mjs',
         // Always write cli for devBlueprint usage
         'cli/cli.cjs',
@@ -43,6 +44,7 @@ export const files = asWriteFilesSection<any>({
       condition: ctx => !ctx[LOCAL_BLUEPRINT_OPTION] && ctx.githubWorkflows,
       templates: [
         '.blueprint/github-build-matrix/build-matrix.mjs',
+        '.blueprint/github-build-matrix/command.mjs',
         '.blueprint/github-build-matrix/generator.mjs',
         '.blueprint/github-build-matrix/index.mjs',
       ],

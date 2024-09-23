@@ -11,6 +11,9 @@ exports[`generator - generate-blueprint with all option should match snapshot 1`
   ".blueprint/generate-sample/generator.mjs": {
     "stateCleared": "modified",
   },
+  ".blueprint/generate-sample/get-samples.mjs": {
+    "stateCleared": "modified",
+  },
   ".blueprint/generate-sample/index.mjs": {
     "stateCleared": "modified",
   },
@@ -875,6 +878,9 @@ exports[`generator - generate-blueprint with default config should write files a
     "stateCleared": "modified",
   },
   ".blueprint/generate-sample/generator.mjs": {
+    "stateCleared": "modified",
+  },
+  ".blueprint/generate-sample/get-samples.mjs": {
     "stateCleared": "modified",
   },
   ".blueprint/generate-sample/index.mjs": {
