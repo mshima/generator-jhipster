@@ -336,8 +336,8 @@ export const buildCommands = ({
         const command = everything.pop();
         const cmdOptions = everything.pop();
         const args = everything;
-        const commandsConfigs = Object.freeze({ ...command.configs, ...command.blueprintConfigs });
-        const jdlDefinition = buildJDLApplicationConfig(commandsConfigs);
+        const mergedConfigs = Object.freeze({ ...command.configs, ...command.blueprintConfigs });
+        const jdlDefinition = buildJDLApplicationConfig(mergedConfigs);
         const options = {
           ...program.opts(),
           ...cmdOptions,
@@ -346,8 +346,12 @@ export const buildCommands = ({
           entrypointGenerator,
           blueprints: envBuilder?.getBlueprintsOption(),
           positionalArguments: args,
-          jdlDefinition,
-          commandsConfigs,
+          jhipsterDefinition: {
+            jdlDefinition,
+            mainConfigs: Object.freeze({ ...command.configs }),
+            blueprintConfigs: Object.freeze({ ...command.blueprintConfigs }),
+            mergedConfigs,
+          },
         };
         if (options.installPath) {
           // eslint-disable-next-line no-console

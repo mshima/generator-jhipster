@@ -436,7 +436,9 @@ class JHipsterTest extends YeomanTest {
     return super
       .run<GeneratorType>(GeneratorOrNamespace, settings, envOptions)
       .withOptions({
-        jdlDefinition: getDefaultJDLApplicationConfig(),
+        jhipsterDefinition: {
+          jdlDefinition: getDefaultJDLApplicationConfig(),
+        },
       } as any)
       .withAdapterOptions({ log: createJHipsterLogger() }) as any;
   }

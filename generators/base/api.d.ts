@@ -19,9 +19,12 @@ export type JHipsterGeneratorOptions = BaseOptions &
     positionalArguments?: unknown[];
     createEnvBuilder?: any;
     /** @experimental */
-    jdlDefinition?: JDLApplicationConfig;
-    /** @experimental */
-    commandsConfigs?: JHipsterConfigs;
+    jhipsterDefinition?: {
+      jdlDefinition: JDLApplicationConfig;
+      mainConfigs: JHipsterConfigs;
+      blueprintConfigs: JHipsterConfigs;
+      mergedConfigs: JHipsterConfigs;
+    };
 
     /* yeoman options */
     skipYoResolve?: boolean;

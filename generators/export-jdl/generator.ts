@@ -50,7 +50,7 @@ export default class extends BaseGenerator {
     return this.asDefaultTaskGroup({
       convertToJDL() {
         try {
-          const jdlObject = convertToJDL(this.destinationPath(), false, this.options.jdlDefinition);
+          const jdlObject = convertToJDL(this.destinationPath(), false, this.options.jhipsterDefinition?.jdlDefinition);
           if (jdlObject) {
             this.jdlContent = jdlObject.toString();
           }

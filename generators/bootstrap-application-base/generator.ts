@@ -84,7 +84,7 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
 
           const destinationPath = this.destinationPath();
           const jdlStorePath = this.destinationPath(this.jhipsterConfig.jdlStore);
-          const { jdlDefinition } = this.options;
+          const { jdlDefinition } = this.options.jhipsterDefinition ?? {};
 
           this.features.commitTransformFactory = () => exportJDLTransform({ destinationPath, jdlStorePath, jdlDefinition });
           await this.pipeline({ refresh: true, pendingFiles: false }, importJDLTransform({ destinationPath, jdlStorePath, jdlDefinition }));
@@ -441,10 +441,22 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
        * Avoid having undefined keys in the application object when redering ejs templates
        */
       async loadApplicationKeys({ application }) {
-        loadCommandConfigsKeysIntoTemplatesContext({
-          templatesContext: application,
-          commandsConfigs: this.options.commandsConfigs ?? (await lookupCommandsConfigs()),
-        });
+        if (this.options.jhipsterDefinition) {
+          const { mainConfigs, blueprintConfigs } = this.options.jhipsterDefinition;
+          loadCommandConfigsKeysIntoTemplatesContext({
+            templatesContext: application,
+            commandsConfigs: blueprintConfigs,
+          });
+          loadCommandConfigsKeysIntoTemplatesContext({
+            templatesContext: application,
+            commandsConfigs: mainConfigs,
+          });
+        } else {
+          loadCommandConfigsKeysIntoTemplatesContext({
+            templatesContext: application,
+            commandsConfigs: await lookupCommandsConfigs(),
+          });
+        }
       },
       task({ application }) {
         const packageJsonFiles = [this.destinationPath('package.json')];

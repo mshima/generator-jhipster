@@ -134,7 +134,11 @@ export default class JdlGenerator extends BaseGenerator {
           skipUserManagement: this.options.skipUserManagement,
         };
 
-        const importer = createImporterFromContent(this.jdlContents.join('\n'), configuration, this.options.jdlDefinition);
+        const importer = createImporterFromContent(
+          this.jdlContents.join('\n'),
+          configuration,
+          this.options.jhipsterDefinition?.jdlDefinition,
+        );
 
         const importState = importer.import();
 
