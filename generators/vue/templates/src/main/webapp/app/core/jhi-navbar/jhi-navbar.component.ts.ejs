@@ -24,6 +24,7 @@ export default defineComponent({
   <%_ for (const remote of microfrontends) { _%>
     '<%= remote.lowercaseBaseName %>-menu': defineAsyncComponent(() => {
       return importRemote<any>({
+        esm: true,
         url: `./<%= remote.endpointPrefix %>`,
         scope: '<%= remote.lowercaseBaseName %>',
         module: './entities-menu',

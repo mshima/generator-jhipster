@@ -47,6 +47,7 @@ const router = createRouter();
 export const lazyRoutes = Promise.all([
   <%_ for (const remote of microfrontends) { _%>
   importRemote<any>({
+    esm: true,
     url: `./<%= remote.endpointPrefix %>`,
     scope: '<%= remote.lowercaseBaseName %>',
     module: './entities-router',
