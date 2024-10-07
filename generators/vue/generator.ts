@@ -354,18 +354,30 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
         }
       },
       addMicrofrontendDependencies({ application, source }) {
-        const { clientBundlerVite, clientBundlerWebpack, enableTranslation, microfrontend } = application;
+        const { applicationTypeGateway, clientBundlerVite, clientBundlerWebpack, enableTranslation, microfrontend } = application;
         if (!microfrontend) return;
         if (clientBundlerVite) {
           source.mergeClientPackageJson!({
+            dependencies:
+              applicationTypeGateway ?
+                {
+                  '@module-federation/runtime': null,
+                }
+              : {},
             devDependencies: {
-              '@originjs/vite-plugin-federation': '1.3.6',
+              '@module-federation/vite': null,
             },
           });
         } else if (clientBundlerWebpack) {
+          if (applicationTypeGateway) {
+            source.mergeClientPackageJson!({
+              devDependencies: {
+                '@module-federation/enhanced': null,
+              },
+            });
+          }
           source.mergeClientPackageJson!({
             devDependencies: {
-              '@module-federation/enhanced': null,
               'browser-sync-webpack-plugin': null,
               'copy-webpack-plugin': null,
               'css-loader': null,
@@ -393,6 +405,13 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
             },
           });
         }
+      },
+      codeQuality({ application, source }) {
+        if (!application.clientBundlerVite || !application.microfrontend) return;
+
+        // Can be removed for @module-federation/vite 1.15.0 or later.
+        source.addEslintIgnore?.({ ignorePattern: '.__mf__temp/**' });
+        source.addPrettierIgnore?.('.__mf__temp');
       },
       addIndexAsset({ source, application }) {
         if (!application.clientBundlerVite) return;

@@ -22,7 +22,7 @@ const packageJson = require('./package.json');
 const apiVersion = '0.0.1';
 
 const sharedDefaults = { singleton: true, strictVersion: true, requiredVersion: apiVersion };
-const shareMappings = (...mappings) => Object.fromEntries(mappings.map(map => [map, { ...sharedDefaults, version: apiVersion }]));
+const shareMappings = (...mappings) => Object.fromEntries(mappings.map(({ name, ...map }) => [name, { ...sharedDefaults, version: apiVersion, ...map }]));
 
 const shareDependencies = ({ skipList = [] } = {}) =>
   Object.fromEntries(
@@ -45,9 +45,9 @@ module.exports = {
   shared: {
     ...shareDependencies(),
     ...shareMappings(
-      '@/shared/jhipster/constants',
-      '@/shared/alert/alert.service',
-      '@/locale/translation.service',
+      { name: '@/shared/jhipster/constants', import: `${__dirname}/<%- this.relativeDir(clientRootDir, clientSrcDir) %>app/shared/jhipster/constants.ts` },
+      { name: '@/shared/alert/alert.service', import: `${__dirname}/<%- this.relativeDir(clientRootDir, clientSrcDir) %>app/shared/alert/alert.service.ts` },
+      { name: '@/locale/translation.service', import: `${__dirname}/<%- this.relativeDir(clientRootDir, clientSrcDir) %>app/locale/translation.service.ts` },
     ),
   },
   dts: false,

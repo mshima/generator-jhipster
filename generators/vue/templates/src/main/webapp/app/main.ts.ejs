@@ -32,19 +32,33 @@ import TranslationService from '@/locale/translation.service';
 import { useTrackerService } from './admin/tracker/tracker.service';
 <%_ } _%>
 <%_ if (applicationTypeGateway && microfrontend) { _%>
+  <%_ if (clientBundlerVite) { _%>
+import { registerRemotes } from '@module-federation/runtime';
+
+registerRemotes([
+    <%_ for (const remote of microfrontends) { _%>
+  {
+    name: '<%- remote.lowercaseBaseName %>',
+    entry: '/<%- remote.endpointPrefix %>/remoteEntry.js',
+    type: 'module',
+  },
+    <%_ } _%>
+]);
+  <%_ } else { _%>
 import { init } from '@module-federation/enhanced/runtime';
 
 init({
   name: '<%- lowercaseBaseName %>',
   remotes: [
-  <%_ for (const remote of microfrontends) { _%>
+    <%_ for (const remote of microfrontends) { _%>
     {
       name: '<%- remote.lowercaseBaseName %>',
       entry: '/<%- remote.endpointPrefix %>/remoteEntry.js',
     },
-  <%_ } _%>
+    <%_ } _%>
   ],
 });
+  <%_ } _%>
 <%_ } _%>
 
 const pinia = createPinia();
