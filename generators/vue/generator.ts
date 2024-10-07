@@ -177,6 +177,16 @@ export default class VueGenerator extends BaseApplicationGenerator {
 
   get postWriting() {
     return this.asPostWritingTaskGroup({
+      addDependencies({ application }) {
+        const { applicationTypeGateway, microfrontend } = application;
+        if (applicationTypeGateway && microfrontend) {
+          this.packageJson.merge({
+            dependencies: {
+              '@module-federation/runtime': null,
+            },
+          });
+        }
+      },
       addIndexAsset({ source, application }) {
         if (!application.clientBundlerVite) return;
         source.addExternalResourceToRoot!({

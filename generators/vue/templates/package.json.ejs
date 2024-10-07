@@ -55,9 +55,6 @@
     "vue-router": "<%= nodeDependencies['vue-router'] %>"
   },
   "devDependencies": {
-<%_ if (applicationTypeGateway && microfrontend) { _%>
-    "@module-federation/runtime": "<%= nodeDependencies['@module-federation/runtime'] %>",
-<%_ } _%>
 <%_ if (microfrontend) { _%>
   <%_ if (clientBundlerVite) { _%>
     "@originjs/vite-plugin-federation": "1.3.6",
