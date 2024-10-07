@@ -127,7 +127,7 @@
     "default_environment": "prod"
   },
   "scripts": {
-<%_ if (microfrontend) { %>
+<%_ if (clientBundlerWebpack) { %>
     "prettier:check": "prettier --check \"{,src/**/,webpack/,.blueprint/**/}*.{<%= prettierExtensions %>}\"",
     "prettier:format": "prettier --write \"{,src/**/,webpack/,.blueprint/**/}*.{<%= prettierExtensions %>}\"",
 <%_ } else { %>
@@ -150,7 +150,7 @@
     "test:watch": "<%= clientPackageManager %> run vitest",
     "watch": "concurrently npm:start<% if(!skipServer) { %> npm:backend:start<% } %>",
     "webapp:build": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:dev --",
-<%_ if (microfrontend) { %>
+<%_ if (clientBundlerWebpack) { %>
     "webapp:build:dev": "<%= clientPackageManager %> run webpack -- --mode development --env stats=minimal",
     "webapp:build:prod": "<%= clientPackageManager %> run webpack -- --mode production --env stats=minimal",
     "webapp:dev": "<%= clientPackageManager %> run webpack-dev-server -- --mode development --env stats=normal",
@@ -162,7 +162,7 @@
 <%_ } %>
     "webapp:prod": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:prod --",
     "webapp:test": "<%= clientPackageManager %> run test --",
-<%_ if (microfrontend) { %>
+<%_ if (clientBundlerWebpack) { %>
     "webpack-dev-server": "webpack serve --config webpack/webpack.common.js",
     "webpack": "webpack --config webpack/webpack.common.js"
 <%_ } else { %>
