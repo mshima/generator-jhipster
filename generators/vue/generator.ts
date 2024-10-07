@@ -177,6 +177,74 @@ export default class VueGenerator extends BaseApplicationGenerator {
 
   get postWriting() {
     return this.asPostWritingTaskGroup({
+      addPackageJsonScripts({ source, application }) {
+        const { clientBundlerVite, clientBundlerWebpack } = application;
+        if (clientBundlerVite) {
+          this.packageJson.merge({
+            scripts: {
+              'prettier:check': 'prettier --check "{,src/**/,.blueprint/**/}*.{<%= prettierExtensions %>}"',
+              'prettier:format': 'prettier --write "{,src/**/,.blueprint/**/}*.{<%= prettierExtensions %>}"',
+              'webapp:build:dev': '<%= clientPackageManager %> run vite-build',
+              'webapp:build:prod': '<%= clientPackageManager %> run vite-build',
+              'webapp:dev': '<%= clientPackageManager %> run vite-serve',
+              'webapp:serve': '<%= clientPackageManager %> run vite-serve',
+              'vite-serve': 'vite',
+              'vite-build': 'vite build',
+            },
+          });
+        } else if (clientBundlerWebpack) {
+          this.packageJson.merge({
+            scripts: {
+              'prettier:check': 'prettier --check "{,src/**/,webpack/,.blueprint/**/}*.{<%= prettierExtensions %>}"',
+              'prettier:format': 'prettier --write "{,src/**/,webpack/,.blueprint/**/}*.{<%= prettierExtensions %>}"',
+              'webapp:build:dev': '<%= clientPackageManager %> run webpack -- --mode development --env stats=minimal',
+              'webapp:build:prod': '<%= clientPackageManager %> run webpack -- --mode production --env stats=minimal',
+              'webapp:dev': '<%= clientPackageManager %> run webpack-dev-server -- --mode development --env stats=normal',
+              'webpack-dev-server': 'webpack serve --config webpack/webpack.common.js',
+              webpack: 'webpack --config webpack/webpack.common.js',
+            },
+          });
+        }
+      },
+      addMicrofrontendDependencies({ application }) {
+        if (!application.microfrontend) return;
+        if (application.clientBundlerVite) {
+          this.packageJson.merge({
+            devDependencies: {
+              '@originjs/vite-plugin-federation': '1.3.6',
+            },
+          });
+        } else if (application.clientBundlerWebpack) {
+          this.packageJson.merge({
+            devDependencies: {
+              'browser-sync-webpack-plugin': "<%= nodeDependencies['browser-sync-webpack-plugin'] %>",
+              'copy-webpack-plugin': "<%= nodeDependencies['copy-webpack-plugin'] %>",
+              'css-loader': "<%= nodeDependencies['css-loader'] %>",
+              'css-minimizer-webpack-plugin': "<%= nodeDependencies['css-minimizer-webpack-plugin'] %>",
+              'html-webpack-plugin': "<%= nodeDependencies['html-webpack-plugin'] %>",
+              'mini-css-extract-plugin': "<%= nodeDependencies['mini-css-extract-plugin'] %>",
+              'postcss-loader': "<%= nodeDependencies['postcss-loader'] %>",
+              'sass-loader': "<%= nodeDependencies['sass-loader'] %>",
+              'terser-webpack-plugin': "<%= nodeDependencies['terser-webpack-plugin'] %>",
+              'ts-loader': "<%= nodeDependencies['ts-loader'] %>",
+              'vue-loader': "<%= nodeDependencies['vue-loader'] %>",
+              'vue-style-loader': "<%= nodeDependencies['vue-style-loader'] %>",
+              webpack: "<%= nodeDependencies['webpack'] %>",
+              'webpack-bundle-analyzer': "<%= nodeDependencies['webpack-bundle-analyzer'] %>",
+              'webpack-cli': "<%= nodeDependencies['webpack-cli'] %>",
+              'webpack-dev-server': "<%= nodeDependencies['webpack-dev-server'] %>",
+              'webpack-merge': "<%= nodeDependencies['webpack-merge'] %>",
+              'workbox-webpack-plugin': "<%= nodeDependencies['workbox-webpack-plugin'] %>",
+              ...(application.enableTranslation
+                ? {
+                    'folder-hash': "<%= nodeDependencies['folder-hash'] %>",
+                    'merge-jsons-webpack-plugin': "<%= nodeDependencies['merge-jsons-webpack-plugin'] %>",
+                  }
+                : {}),
+            },
+          });
+        }
+      },
       addIndexAsset({ source, application }) {
         if (!application.clientBundlerVite) return;
         source.addExternalResourceToRoot!({
