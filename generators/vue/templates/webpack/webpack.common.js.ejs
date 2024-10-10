@@ -34,6 +34,7 @@ module.exports = async (env, options) => {
 <%_ if (applicationTypeGateway && microfrontend) { _%>
       experiments: {
         topLevelAwait: true,
+        outputModule: true,
       },
 <%_ } _%>
       entry: {
