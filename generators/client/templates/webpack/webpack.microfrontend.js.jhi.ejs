@@ -26,7 +26,11 @@
  });
 _&>
 
+<%_ if (clientFrameworkVue) { _%>
+const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
+<%_ } else { _%>
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+<%_ } _%>
 <&- fragments.importsSection() &>
 <%_ if (!clientFrameworkVue) { _%>
 const packageJson = require('../package.json');
