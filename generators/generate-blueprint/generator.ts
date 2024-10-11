@@ -151,7 +151,9 @@ export default class extends BaseGenerator {
       },
       async compose() {
         if (this.jhipsterConfig[LOCAL_BLUEPRINT_OPTION]) return;
-        const initGenerator = await this.composeWithJHipster(GENERATOR_INIT, { generatorOptions: { packageJsonType: 'module' } });
+        const initGenerator = await this.composeWithJHipster(GENERATOR_INIT, {
+          generatorOptions: { packageJsonType: this.jhipsterConfig.packageJsonType ?? 'module' },
+        });
         initGenerator.generateReadme = false;
       },
     });
