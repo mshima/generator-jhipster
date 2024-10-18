@@ -53,6 +53,10 @@ jobs:
       - run: npm ci --ignore-scripts
       - id: build
         run: bin/jhipster.cjs github-build-matrix dev-server
+      - run: |
+          echo "${{ fromJSON(steps.build.outputs.matrix).include }}"
+          echo "${{ fromJSON(steps.build.outputs.matrix).include.length }}"
+          echo "${{ fromJSON(steps.build.outputs.matrix).include.length > 0 }}"
   applications:
     name: ${{ matrix.job-name }}
     needs: build-matrix
