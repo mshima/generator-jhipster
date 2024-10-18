@@ -68,7 +68,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
-    if: ${{ fromJSON(needs.build-matrix.outputs.matrix).include.length > 0 }}
+    if: ${{ fromJSON(needs.build-matrix.outputs.matrix).include[0] != null }}
     steps:
       #----------------------------------------------------------------------
       # Install all tools and check configuration
