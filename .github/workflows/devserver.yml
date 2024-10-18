@@ -63,8 +63,8 @@ jobs:
     timeout-minutes: 40
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.build-matrix.outputs.matrix)}}
-    if: fromJSON(needs.build-matrix.outputs.matrix).include.length > 0
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    if: ${{ fromJSON(needs.build-matrix.outputs.matrix).include.length > 0 }}
     steps:
       #----------------------------------------------------------------------
       # Install all tools and check configuration
