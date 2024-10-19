@@ -10,11 +10,7 @@ export const mavenDefinition = ({
   nativeBuildToolsVersion?: string;
   databaseTypeSql?: boolean;
 }): MavenDefinition => ({
-  properties: [
-    { property: 'repackage.classifier' },
-    { property: 'native-image-name', value: 'native-executable' },
-    { property: 'native-build-args', value: '--verbose -J-Xmx10g' },
-  ],
+  properties: [{ property: 'repackage.classifier' }, { property: 'native-image-name', value: 'native-executable' }],
   plugins: [
     {
       inProfile: 'prod',
@@ -117,7 +113,7 @@ export const mavenDefinition = ({
                         <execution>
                             <id>build-native</id>
                             <goals>
-                                <goal>build</goal>
+                                <goal>compile-no-fork</goal>
                             </goals>
                             <phase>package</phase>
                         </execution>
@@ -130,14 +126,16 @@ export const mavenDefinition = ({
                         </execution>
                     </executions>
                     <configuration>
+                        <fallback>false</fallback>
                         <classesDirectory>\${project.build.outputDirectory}</classesDirectory>
                         <metadataRepository>
                             <enabled>true</enabled>
                         </metadataRepository>
                         <imageName>\${native-image-name}</imageName>
-                        <buildArgs>
-                            <buildArg>--no-fallback \${native-build-args}</buildArg>
-                        </buildArgs>
+                        <verbose>true</verbose>
+                        <jvmArgs>
+                            <arg>-Xmx10g</arg>
+                        </jvmArgs>
                     </configuration>
                 </plugin>
             </plugins>
@@ -181,6 +179,7 @@ export const mavenDefinition = ({
                            <goals>
                                <goal>test</goal>
                            </goals>
+                           <phase>test</phase>
                        </execution>
                    </executions>
                </plugin>

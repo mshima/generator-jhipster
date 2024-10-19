@@ -40,6 +40,7 @@ describe(`generator - ${generator}`, () => {
           .runJHipster(generator)
           .withMockedJHipsterGenerators()
           .withMockedSource()
+          .withOptions({ ignoreNeedlesError: true })
           .withSharedApplication({})
           .withJHipsterConfig({ buildTool });
       });

@@ -172,13 +172,14 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
         this.packageJson.merge({
           scripts: {
             'native-e2e': 'concurrently -k -s first "npm run native-start" "npm run e2e:headless"',
-            'prenative-start': 'npm run services:up',
           },
         });
         if (buildToolMaven) {
           this.packageJson.merge({
             scripts: {
+              //'native-test': './mvnw -B -Pnative,dev -Dagent test',
               'native-package': './mvnw package -B -ntp -Pnative,prod -DskipTests',
+              'native-package-dev': 'SPRING_PROFILES_ACTIVE=dev ./mvnw package -B -ntp -Pnative,dev,webapp -DskipTests',
               'native-start': './target/native-executable',
             },
           });
@@ -186,6 +187,7 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
           this.packageJson.merge({
             scripts: {
               'native-package': './gradlew nativeCompile -Pprod -x test -x integrationTest',
+              'native-package-dev': 'SPRING_PROFILES_ACTIVE=dev ./gradlew nativeCompile -Pdev -x test -x integrationTest',
               'native-start': './build/native/nativeCompile/native-executable',
             },
           });
@@ -271,6 +273,18 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;`,
                   `.ignoreDependency(simpleNameEndingWith("_BeanFactoryRegistrations"), alwaysTrue())
         .ignoreDependency(belongToAnyOf`,
                 ),
+        );
+      },
+
+      e2e({ application }) {
+        if (!application.devDatabaseTypeH2Any || !application.clientTestFrameworksCypress) return;
+        this.editFile(`${application.cypressDir}e2e/administration/administration.cy.ts`, { assertModified: true }, contents =>
+          contents.replace("describe('/docs')", `describe.skip('/docs')`),
+        );
+        this.editFile(`${application.cypressDir}e2e/account/login-page.cy.ts`, { assertModified: true }, contents =>
+          contents
+            .replace("it('requires username')", `it.skip('requires username')`)
+            .replace("it('requires password')", `it.skip('requires password')`),
         );
       },
     });

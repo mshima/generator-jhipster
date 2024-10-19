@@ -33,6 +33,7 @@ exports[`generator - spring-boot:graalvm with default options should call source
           "content": "            <properties>
           <repackage.classifier>exec</repackage.classifier>
           <native-buildtools.version>'NATIVE-BUILD-TOOLS-VERSION'</native-buildtools.version>
+          <modernizer.skip>true</modernizer.skip>
         </properties>
         <dependencies>
             <dependency>
@@ -87,7 +88,7 @@ exports[`generator - spring-boot:graalvm with default options should call source
                         <execution>
                             <id>build-native</id>
                             <goals>
-                                <goal>build</goal>
+                                <goal>compile-no-fork</goal>
                             </goals>
                             <phase>package</phase>
                         </execution>
@@ -100,14 +101,16 @@ exports[`generator - spring-boot:graalvm with default options should call source
                         </execution>
                     </executions>
                     <configuration>
+                        <fallback>false</fallback>
                         <classesDirectory>\${project.build.outputDirectory}</classesDirectory>
                         <metadataRepository>
                             <enabled>true</enabled>
                         </metadataRepository>
                         <imageName>\${native-image-name}</imageName>
-                        <buildArgs>
-                            <buildArg>--no-fallback \${native-build-args}</buildArg>
-                        </buildArgs>
+                        <verbose>true</verbose>
+                        <jvmArgs>
+                            <arg>-Xmx10g</arg>
+                        </jvmArgs>
                     </configuration>
                 </plugin>
             </plugins>
@@ -151,6 +154,7 @@ exports[`generator - spring-boot:graalvm with default options should call source
                            <goals>
                                <goal>test</goal>
                            </goals>
+                           <phase>test</phase>
                        </execution>
                    </executions>
                </plugin>
@@ -166,10 +170,6 @@ exports[`generator - spring-boot:graalvm with default options should call source
         {
           "property": "native-image-name",
           "value": "native-executable",
-        },
-        {
-          "property": "native-build-args",
-          "value": "--verbose -J-Xmx10g",
         },
       ],
     },

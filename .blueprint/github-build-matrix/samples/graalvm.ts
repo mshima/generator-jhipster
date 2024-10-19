@@ -12,5 +12,5 @@ export const graalvmMatrix = Object.fromEntries(
         { devDatabaseType: ['h2Disk'], nativeSupport: [true], cacheProvider: ['no'] },
       ),
     ),
-  ].map(([key, value]) => [key, { jdl: convertOptionsToJDL(value) }]),
+  ].map(([key, value]) => [key, { os: 'macos-15', jdl: convertOptionsToJDL(value) }]),
 );

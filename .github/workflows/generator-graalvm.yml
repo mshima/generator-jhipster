@@ -43,7 +43,7 @@ jobs:
         run: bin/jhipster.cjs github-build-matrix graalvm --event-name ${{ github.event_name }}
   applications:
     name: ${{ matrix.job-name }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: ${{ github.workspace }}/app
@@ -118,10 +118,10 @@ jobs:
       - name: 'TESTS: backend'
         id: backend
         if: steps.compare.outputs.equals != 'true' && matrix.skip-backend-tests != 'true'
-        run: npm run ci:backend:test
+        run: npm run native-test --if-present
         continue-on-error: ${{matrix.continue-on-backend-tests-error || false}}
         timeout-minutes: 15
-      - run: npm run native-package
+      - run: npm run native-package-dev
         if: steps.compare.outputs.equals != 'true'
         id: packaging
         timeout-minutes: 60
@@ -156,7 +156,7 @@ jobs:
           name: screenshots-${{ matrix.sample }}
           path: ${{ github.workspace }}/app/**/cypress/screenshots
       - name: Dump docker logs
-        if: always()
+        if: always() && contains(matrix.os, 'ubuntu')
         uses: jwalton/gh-docker-logs@v2
 
   check-graalvm:
