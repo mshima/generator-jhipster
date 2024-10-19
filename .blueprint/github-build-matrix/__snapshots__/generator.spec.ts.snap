@@ -562,6 +562,57 @@ exports[`generator - github-build-matrix with docker-compose-integration should 
 }"
 `;
 
+exports[`generator - github-build-matrix with graalvm should match matrix value 1`] = `
+"{
+  "include": [
+    {
+      "job-name": "maven-h2Disk-nativeSupport(true)",
+      "sample": "maven-h2Disk-nativeSupport(true)",
+      "os": "ubuntu-latest",
+      "node-version": "NODE-VERSION",
+      "java-version": "JAVA-VERSION",
+      "npm-version": "NPM-VERSION",
+      "default-environment": "prod",
+      "jwt-secret-key": "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ=",
+      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool maven\\n    devDatabaseType h2Disk\\n    nativeSupport true\\n  }\\n}"
+    },
+    {
+      "job-name": "maven-reactive(true)-h2Disk-nativeSupport(true)",
+      "sample": "maven-reactive(true)-h2Disk-nativeSupport(true)",
+      "os": "ubuntu-latest",
+      "node-version": "NODE-VERSION",
+      "java-version": "JAVA-VERSION",
+      "npm-version": "NPM-VERSION",
+      "default-environment": "prod",
+      "jwt-secret-key": "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ=",
+      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool maven\\n    reactive true\\n    devDatabaseType h2Disk\\n    nativeSupport true\\n  }\\n}"
+    },
+    {
+      "job-name": "gradle-h2Disk-nativeSupport(true)",
+      "sample": "gradle-h2Disk-nativeSupport(true)",
+      "os": "ubuntu-latest",
+      "node-version": "NODE-VERSION",
+      "java-version": "JAVA-VERSION",
+      "npm-version": "NPM-VERSION",
+      "default-environment": "prod",
+      "jwt-secret-key": "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ=",
+      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool gradle\\n    devDatabaseType h2Disk\\n    nativeSupport true\\n  }\\n}"
+    },
+    {
+      "job-name": "gradle-reactive(true)-h2Disk-nativeSupport(true)",
+      "sample": "gradle-reactive(true)-h2Disk-nativeSupport(true)",
+      "os": "ubuntu-latest",
+      "node-version": "NODE-VERSION",
+      "java-version": "JAVA-VERSION",
+      "npm-version": "NPM-VERSION",
+      "default-environment": "prod",
+      "jwt-secret-key": "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ=",
+      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool gradle\\n    reactive true\\n    devDatabaseType h2Disk\\n    nativeSupport true\\n  }\\n}"
+    }
+  ]
+}"
+`;
+
 exports[`generator - github-build-matrix with react should match matrix value 1`] = `
 "{
   "include": [

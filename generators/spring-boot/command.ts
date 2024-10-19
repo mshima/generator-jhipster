@@ -212,6 +212,17 @@ const command = {
       choices: ['liquibase'],
       scope: 'storage',
     },
+    nativeSupport: {
+      description: 'GraalVM Native support',
+      cli: {
+        type: Boolean,
+      },
+      jdl: {
+        type: 'boolean',
+        tokenType: 'BOOLEAN',
+      },
+      scope: 'storage',
+    },
   },
   import: [GENERATOR_JAVA, GENERATOR_LIQUIBASE, GENERATOR_SPRING_DATA_RELATIONAL, 'jhipster:spring-cloud:gateway'],
 } as const satisfies JHipsterCommandDefinition;
