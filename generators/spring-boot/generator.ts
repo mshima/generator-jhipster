@@ -197,6 +197,9 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
         if ([EHCACHE, CAFFEINE, HAZELCAST, INFINISPAN, MEMCACHED, REDIS].includes(cacheProvider!)) {
           await this.composeWithJHipster(GENERATOR_SPRING_CACHE);
         }
+        if (this.jhipsterConfigWithDefaults.nativeSupport) {
+          await this.composeWithJHipster('jhipster:spring-boot:graalvm');
+        }
       },
     });
   }

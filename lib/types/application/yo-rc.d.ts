@@ -27,6 +27,7 @@ export type ApplicationConfiguration = Simplify<
     ExportStoragePropertiesFromCommand<typeof import('../../../generators/project-name/command.js').default> &
     ExportStoragePropertiesFromCommand<typeof import('../../../generators/server/command.js').default> &
     ExportStoragePropertiesFromCommand<typeof import('../../../generators/spring-boot/command.js').default> &
+    ExportStoragePropertiesFromCommand<typeof import('../../../generators/spring-boot/generators/graalvm/command.ts').default> &
     ExportStoragePropertiesFromCommand<typeof import('../../../generators/spring-cloud/generators/gateway/command.js').default> &
     ExportStoragePropertiesFromCommand<typeof import('../../../generators/spring-data-relational/command.js').default>
 >;

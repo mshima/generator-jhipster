@@ -168,9 +168,6 @@ dependencies {
     }
     implementation "io.micrometer:micrometer-registry-prometheus-simpleclient"
 <%_ if (reactive) { _%>
-    runtimeOnly "io.netty:netty-tcnative-boringssl-static"
-<%_ } _%>
-<%_ if (reactive) { _%>
     testImplementation "io.projectreactor.tools:blockhound-junit-platform:${blockhoundJunitPlatformVersion}"
 <%_ } _%>
     implementation "jakarta.annotation:jakarta.annotation-api"

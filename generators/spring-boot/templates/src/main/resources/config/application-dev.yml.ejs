@@ -291,7 +291,7 @@ jhipster:
   registry:
     password: admin
 <%_ } _%>
-<%_ if (!applicationTypeMicroservice) { _%>
+<%_ if (!applicationTypeMicroservice && !nativeSupport) { _%>
   # CORS is only enabled by default with the "dev" profile
   cors:
     # Allow Ionic for JHipster by default (* no longer allowed in Spring Boot 2.4+)
