@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Copyright 2013-2024 the original author or authors from the JHipster project.
  *
@@ -43,7 +42,7 @@ import { lookupCommandsConfigs } from '../../lib/command/lookup-commands-configs
 import { loadCommandConfigsIntoApplication, loadCommandConfigsKeysIntoTemplatesContext } from '../../lib/command/load.js';
 import { getConfigWithDefaults } from '../../lib/jhipster/default-application-options.js';
 import { removeFieldsWithNullishValues } from '../base/support/index.js';
-import { convertFieldBlobType, getBlobContentType, isFieldBinaryType, isFieldBlobType } from '../../lib/application/field-types.js';
+import { convertFieldBlobType, getBlobContentType, isFieldBlobType } from '../../lib/application/field-types.js';
 import { createAuthorityEntity, createUserEntity, createUserManagementEntity } from './utils.js';
 import { exportJDLTransform, importJDLTransform } from './support/index.js';
 
@@ -86,8 +85,11 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
           const jdlStorePath = this.destinationPath(this.jhipsterConfig.jdlStore);
           const { jdlDefinition } = this.options;
 
-          this.features.commitTransformFactory = () => exportJDLTransform({ destinationPath, jdlStorePath, jdlDefinition });
-          await this.pipeline({ refresh: true, pendingFiles: false }, importJDLTransform({ destinationPath, jdlStorePath, jdlDefinition }));
+          this.features.commitTransformFactory = () => exportJDLTransform({ destinationPath, jdlStorePath, jdlDefinition: jdlDefinition! });
+          await this.pipeline(
+            { refresh: true, pendingFiles: false },
+            importJDLTransform({ destinationPath, jdlStorePath, jdlDefinition: jdlDefinition! }),
+          );
         }
       },
     });
@@ -257,7 +259,9 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
 
           if (!relationship.relationshipSide) {
             // Try to create relationshipSide based on best bet.
+            // @ts-ignore deprecated property
             if (relationship.ownerSide !== undefined) {
+              // @ts-ignore deprecated property
               relationship.relationshipSide = relationship.ownerSide ? 'left' : 'right';
             } else {
               // Missing ownerSide (one-to-many/many-to-one relationships) depends on the otherSide existence.
@@ -351,9 +355,10 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator {
 
         for (const entity of entities) {
           for (const field of entity.fields) {
-            if (isFieldBinaryType(field)) {
+            if (isFieldBlobType(field)) {
               field.fieldTypeBlobContent ??= getBlobContentType(field.fieldType);
               if (application.databaseTypeCassandra || entity.databaseType === 'cassandra') {
+                // @ts-expect-error set another type
                 field.fieldType = 'ByteBuffer';
               } else if (isFieldBlobType(field)) {
                 field.fieldType = 'byte[]' as any;
