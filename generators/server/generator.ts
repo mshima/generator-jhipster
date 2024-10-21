@@ -164,7 +164,6 @@ export default class JHipsterServerGenerator extends BaseApplicationGenerator {
           ANGULAR,
           VUE,
           REACT,
-          packagejs: packageJson,
         });
 
         if (this.projectVersion) {
