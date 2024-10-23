@@ -171,7 +171,7 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
         const { buildToolMaven, buildToolGradle } = application;
         this.packageJson.merge({
           scripts: {
-            'native-e2e': 'concurrently -k -s first "npm run native-start" "npm run e2e:headless"',
+            'native-e2e': 'concurrently -k -s first -n application,e2e -c red,blue npm:native-start npm:e2e:headless',
           },
         });
         if (buildToolMaven) {

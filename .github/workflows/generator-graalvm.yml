@@ -19,6 +19,8 @@
 
 name: Incremental Changelog
 on: [workflow_call]
+env:
+  FORCE_COLOR: 2
 jobs:
   build-matrix:
     runs-on: ubuntu-latest
