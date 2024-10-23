@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { extname } from 'path';
+import { basename, extname } from 'path';
 import { isFileStateDeleted, isFileStateModified } from 'mem-fs-editor/state';
 import { passthrough } from '@yeoman/transform';
 import BaseApplicationGenerator from '../../../base-application/index.js';
@@ -121,7 +121,11 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
           },
           passthrough(file => {
             const contents = file.contents.toString('utf8');
-            if (/@(MockBean|SpyBean)/.test(contents) || (application.reactive && /@AuthenticationIntegrationTest/.test(contents))) {
+            if (
+              ['TechnicalStructureTest.java', 'JHipsterBlockHoundIntegration.java'].includes(basename(file.path)) ||
+              /@(MockBean|SpyBean)/.test(contents) ||
+              (application.reactive && /@AuthenticationIntegrationTest/.test(contents))
+            ) {
               file.contents = Buffer.from(
                 addJavaAnnotation(contents, { package: 'org.springframework.test.context.aot', annotation: 'DisabledInAotMode' }),
               );
