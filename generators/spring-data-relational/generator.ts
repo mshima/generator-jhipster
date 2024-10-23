@@ -22,6 +22,7 @@ import BaseApplicationGenerator from '../base-application/index.js';
 import { GENERATOR_LIQUIBASE } from '../generator-list.js';
 import { isReservedTableName } from '../../lib/jhipster/reserved-keywords.js';
 import { databaseTypes } from '../../lib/jhipster/index.js';
+import { addJavaAnnotation } from '../java/support/add-java-annotation.js';
 import writeTask from './files.js';
 import cleanupTask from './cleanup.js';
 import writeEntitiesTask, { cleanupEntitiesTask } from './entity-files.js';
@@ -32,7 +33,6 @@ import {
   getH2MavenDefinition,
   javaSqlDatabaseArtifacts,
 } from './internal/dependencies.js';
-import { addJavaAnnotation } from '../java/support/add-java-annotation.js';
 
 const { SQL } = databaseTypes;
 
@@ -159,7 +159,12 @@ export default class SqlGenerator extends BaseApplicationGenerator {
           {
             condition: reactive,
             dependencies: [
-              { groupId: 'commons-beanutils', artifactId: 'commons-beanutils', version: javaDependencies['commons-beanutils'] },
+              {
+                groupId: 'commons-beanutils',
+                artifactId: 'commons-beanutils',
+                version: javaDependencies['commons-beanutils'],
+                exclusions: [{ groupId: 'commons-logging', artifactId: 'commons-logging' }],
+              },
               { groupId: 'jakarta.persistence', artifactId: 'jakarta.persistence-api' },
               { groupId: 'org.springframework.boot', artifactId: 'spring-boot-starter-data-r2dbc' },
             ],

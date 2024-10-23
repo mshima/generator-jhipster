@@ -61,24 +61,43 @@ export default class BuildToolGenerator extends BaseApplicationGenerator {
       prepareJavaApplication({ application, source }) {
         source.addJavaDependencies = (dependencies, options) => {
           if (application.buildToolMaven) {
-            const annotationProcessors = dependencies.filter(dep => dep.scope === 'annotationProcessor');
-            const importDependencies = dependencies.filter(dep => dep.scope === 'import');
-            const commonDependencies = dependencies.filter(dep => !['annotationProcessor', 'import'].includes(dep.scope!));
-            const convertVersionToRef = ({ version, versionRef, ...artifact }: JavaDependency): MavenDependency =>
-              version || versionRef ? { ...artifact, version: `\${${versionRef ?? artifact.artifactId}.version}` } : artifact;
-            const removeScope = ({ scope: _scope, ...artifact }: MavenDependency) => artifact;
+            const convertVersionToMavenDependency = ({ versionRef, version, exclusions, ...artifact }: JavaDependency): MavenDependency => {
+              // If a version is provided, convert to version ref using artifactId
+              version ??= version || versionRef ? `\${${versionRef ?? artifact.artifactId}.version}` : undefined;
+              const additionalContent = exclusions?.length
+                ? `<exclusions>${exclusions.map(
+                    e => `
+                <exclusion>
+                    <groupId>${e.groupId}</groupId>
+                    <artifactId>${e.artifactId}</artifactId>
+                </exclusion>`,
+                  )}
+                </exclusions>`
+                : '';
+              return versionRef ? { ...artifact, version, additionalContent } : artifact;
+            };
+            const removeScope = ({ scope: _scope, ...artifact }: JavaDependency) => artifact;
+
+            const annotationProcessors = dependencies
+              .filter(dep => dep.scope === 'annotationProcessor')
+              .map(removeScope)
+              .map(convertVersionToMavenDependency);
+            const dependencyManagement = dependencies.filter(dep => dep.scope === 'import').map(convertVersionToMavenDependency);
+            const commonDependencies = dependencies
+              .filter(dep => !['annotationProcessor', 'import'].includes(dep.scope!))
+              .map(convertVersionToMavenDependency);
 
             source.addMavenDefinition?.({
               properties: dependencies
                 .filter(dep => dep.version)
                 .map(({ artifactId, version }) => ({ property: `${artifactId}.version`, value: version })),
               dependencies: [
-                ...commonDependencies.map(convertVersionToRef),
+                ...commonDependencies,
                 // Add a provided scope for annotation processors so that version is not required in annotationProcessor dependencies
                 ...annotationProcessors.filter(dep => !dep.version).map(artifact => ({ ...artifact, scope: 'provided' as const })),
               ],
-              dependencyManagement: importDependencies.map(convertVersionToRef),
-              annotationProcessors: annotationProcessors.map(convertVersionToRef).map(removeScope),
+              dependencyManagement,
+              annotationProcessors,
             });
           }
 
@@ -86,9 +105,10 @@ export default class BuildToolGenerator extends BaseApplicationGenerator {
             source.addGradleDependencies?.(
               dependencies
                 .filter(dep => !dep.version && !dep.versionRef)
-                .map(({ scope, type, ...artifact }) => ({
+                .map(({ scope, type, exclusions, ...artifact }) => ({
                   ...artifact,
                   scope: javaScopeToGradleScope({ scope, type }),
+                  closure: exclusions?.map(({ groupId, artifactId }) => `exclude group: '${groupId}', module: '${artifactId}'`),
                 })),
               options,
             );

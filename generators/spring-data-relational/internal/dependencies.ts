@@ -18,11 +18,11 @@
  */
 
 import type { JavaDependency } from '../../java/types.js';
-import type { MavenDefinition, MavenPlugin } from '../../maven/types.js';
+import type { MavenDependency, MavenPlugin } from '../../maven/types.js';
 
 type DatabaseTypeDependencies = {
-  jdbc: MavenDefinition;
-  r2dbc: MavenDefinition;
+  jdbc: { dependencies: MavenDependency[]; plugins?: MavenPlugin[] };
+  r2dbc: { dependencies?: MavenDependency[] };
 };
 
 const testcontainerFileForDB = {

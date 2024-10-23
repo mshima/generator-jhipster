@@ -47,20 +47,25 @@ const scopeSortOrder = {
   testRuntimeOnly: 6,
 };
 
-const wrapScope = (scope: string, dependency: string) =>
-  `${scope}${scope === 'implementation platform' ? '(' : ' '}${dependency}${scope === 'implementation platform' ? ')' : ''}`;
+const wrapScope = (scope: string, dependency: string, closures?: string[]) => {
+  if (closures?.length || scope === 'implementation platform') {
+    return `${scope}(${dependency})${closures?.length ? ` {\n${closures.join('\n')}\n}` : ''}`;
+  }
+  return `${scope} ${dependency}`;
+};
 
 const serializeDependency = (dependency: GradleDependency) => {
   if ('libraryName' in dependency) {
-    return wrapScope(dependency.scope, `libs.${gradleNameToReference(dependency.libraryName)}`);
+    return wrapScope(dependency.scope, `libs.${gradleNameToReference(dependency.libraryName)}`, dependency.closure);
   }
 
-  const { groupId, artifactId, version, classifier, scope } = dependency;
+  const { groupId, artifactId, version, classifier, scope, closure } = dependency;
   return wrapScope(
     scope,
     classifier && !version
       ? `group: "${groupId}", name: "${artifactId}", classifier: "${classifier}"`
       : `"${groupId}:${artifactId}${version ? `:${version}` : ''}${classifier ? `:${classifier}` : ''}"`,
+    closure,
   );
 };
 
