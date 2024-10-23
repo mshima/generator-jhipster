@@ -88,7 +88,7 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
               'native-start': './build/native/nativeCompile/native-executable',
             }
           : {
-              'native-test': './mvnw -B -Pnative,prod,nativeTest -Dagent test',
+              'native-test': './mvnw -B -Pprod,nativeTest -Dagent test',
               'native-package': './mvnw package -B -ntp -Pnative,prod -DskipTests',
               'native-package-dev': './mvnw package -B -ntp -Pnative,dev,webapp -DskipTests',
               'native-start': './target/native-executable',
