@@ -196,7 +196,7 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
       },
 
       async customizeGradle({ application, source }) {
-        const { buildToolGradle, reactive, springBootDependencies, javaDependencies } = application;
+        const { buildToolGradle, javaDependencies } = application;
         if (!buildToolGradle) return;
 
         source.addGradleDependencyCatalogPlugin!({
