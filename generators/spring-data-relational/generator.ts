@@ -222,6 +222,20 @@ export default class SqlGenerator extends BaseApplicationGenerator {
           });
         }
       },
+      async nativeGradleBuildTool({ application, source }) {
+        const { buildToolGradle, reactive, springBootDependencies, javaDependencies } = application;
+        if (!buildToolGradle) return;
+
+        if (!reactive) {
+          source.addGradleDependencyCatalogVersion!({ name: 'hibernate', version: springBootDependencies?.hibernate });
+          source.addGradleDependencyCatalogPlugin!({
+            addToBuild: true,
+            pluginName: 'hibernate',
+            id: 'org.hibernate.orm',
+            'version.ref': 'hibernate',
+          });
+        }
+      },
     });
   }
 
