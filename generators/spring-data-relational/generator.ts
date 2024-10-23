@@ -32,6 +32,7 @@ import {
   getH2MavenDefinition,
   javaSqlDatabaseArtifacts,
 } from './internal/dependencies.js';
+import { addJavaAnnotation } from '../java/support/add-java-annotation.js';
 
 const { SQL } = databaseTypes;
 
@@ -241,6 +242,28 @@ export default class SqlGenerator extends BaseApplicationGenerator {
 
   get [BaseApplicationGenerator.POST_WRITING]() {
     return this.delegateTasksToBlueprint(() => this.postWriting);
+  }
+
+  get postWritingEntities() {
+    return this.asPostWritingEntitiesTaskGroup({
+      async jsonFilter({ application, entities }) {
+        if (application.reactive || !application.databaseTypeSql) return;
+        for (const entity of entities.filter(({ builtIn, builtInUser, embedded }) => builtInUser || (!builtIn && !embedded))) {
+          const entityClassFilePath = `${application.srcMainJava}/${entity.entityAbsoluteFolder}/domain/${entity.entityClass}.java`;
+          this.editFile(entityClassFilePath, { assertModified: true }, content =>
+            addJavaAnnotation(content, {
+              package: 'com.fasterxml.jackson.annotation',
+              annotation: 'JsonFilter',
+              parameters: () => '"lazyPropertyFilter"',
+            }),
+          );
+        }
+      },
+    });
+  }
+
+  get [BaseApplicationGenerator.POST_WRITING_ENTITIES]() {
+    return this.delegateTasksToBlueprint(() => this.postWritingEntities);
   }
 
   /**

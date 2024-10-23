@@ -156,6 +156,10 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
         await this.composeWithJHipster('jhipster:java:jib');
         await this.composeWithJHipster('jhipster:java:code-quality');
 
+        if (this.jhipsterConfigWithDefaults.graalvmSupport) {
+          await this.composeWithJHipster('jhipster:spring-boot:graalvm');
+        }
+
         if (enableSwaggerCodegen) {
           await this.composeWithJHipster('jhipster:java:openapi-generator');
         }
@@ -196,9 +200,6 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
         }
         if ([EHCACHE, CAFFEINE, HAZELCAST, INFINISPAN, MEMCACHED, REDIS].includes(cacheProvider!)) {
           await this.composeWithJHipster(GENERATOR_SPRING_CACHE);
-        }
-        if (this.jhipsterConfigWithDefaults.graalvmSupport) {
-          await this.composeWithJHipster('jhipster:spring-boot:graalvm');
         }
       },
     });

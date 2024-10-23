@@ -146,15 +146,17 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
   get postWriting() {
     return this.asPostWritingTaskGroup({
       hintsConfiguration({ application }) {
-        const { mainClass, javaPackageSrcDir, packageName } = application;
+        const { mainClass, javaPackageSrcDir, packageName, backendTypeSpringBoot } = application;
 
-        this.editFile(`${javaPackageSrcDir}${mainClass}.java`, { assertModified: true }, contents =>
-          addJavaAnnotation(contents, {
-            package: 'org.springframework.context.annotation',
-            annotation: 'ImportRuntimeHints',
-            parameters: () => `{ ${packageName}.config.NativeConfiguration.JHipsterNativeRuntimeHints.class }`,
-          }),
-        );
+        if (backendTypeSpringBoot) {
+          this.editFile(`${javaPackageSrcDir}${mainClass}.java`, { assertModified: true }, contents =>
+            addJavaAnnotation(contents, {
+              package: 'org.springframework.context.annotation',
+              annotation: 'ImportRuntimeHints',
+              parameters: () => `{ ${packageName}.config.NativeConfiguration.JHipsterNativeRuntimeHints.class }`,
+            }),
+          );
+        }
       },
 
       async packageJson({ application }) {
@@ -207,19 +209,23 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
         );
       },
 
-      restErrors({ application: { javaPackageSrcDir } }) {
-        this.editFile(`${javaPackageSrcDir}/web/rest/errors/FieldErrorVM.java`, { assertModified: true }, contents =>
-          addJavaAnnotation(contents, {
-            package: 'org.springframework.aot.hint.annotation',
-            annotation: 'RegisterReflectionForBinding',
-            parameters: () => '{ FieldErrorVM.class }',
-          }),
-        );
+      restErrors({ application }) {
+        const { javaPackageSrcDir, backendTypeSpringBoot } = application;
+        if (backendTypeSpringBoot) {
+          this.editFile(`${javaPackageSrcDir}/web/rest/errors/FieldErrorVM.java`, { assertModified: true }, contents =>
+            addJavaAnnotation(contents, {
+              package: 'org.springframework.aot.hint.annotation',
+              annotation: 'RegisterReflectionForBinding',
+              parameters: () => '{ FieldErrorVM.class }',
+            }),
+          );
+        }
       },
 
       // workaround for arch error in backend:unit:test caused by gradle's org.graalvm.buildtools.native plugin
-      technicalStructureTest({ application: { buildToolGradle, javaPackageTestDir } }) {
-        if (!buildToolGradle) return;
+      technicalStructureTest({ application }) {
+        const { buildToolGradle, javaPackageTestDir, backendTypeSpringBoot } = application;
+        if (!buildToolGradle || !backendTypeSpringBoot) return;
         this.editFile(
           `${javaPackageTestDir}/TechnicalStructureTest.java`,
           { assertModified: true },
@@ -236,7 +242,7 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
       },
 
       e2e({ application }) {
-        if (!application.devDatabaseTypeH2Any || !application.cypressTests) return;
+        if (!application.devDatabaseTypeH2Any || !application.cypressTests || !application.backendTypeSpringBoot) return;
         this.editFile(`${application.cypressDir}e2e/administration/administration.cy.ts`, { assertModified: true }, contents =>
           contents.replace("describe('/docs'", `describe.skip('/docs'`),
         );
@@ -251,27 +257,5 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
 
   get [BaseApplicationGenerator.POST_WRITING]() {
     return this.delegateTasksToBlueprint(() => this.postWriting);
-  }
-
-  get postWritingEntities() {
-    return this.asPostWritingEntitiesTaskGroup({
-      async jsonFilter({ application, entities }) {
-        if (application.reactive || !application.databaseTypeSql) return;
-        for (const entity of entities.filter(({ builtIn, builtInUser, embedded }) => builtInUser || (!builtIn && !embedded))) {
-          const entityClassFilePath = `${application.srcMainJava}/${entity.entityAbsoluteFolder}/domain/${entity.entityClass}.java`;
-          this.editFile(entityClassFilePath, { assertModified: true }, content =>
-            addJavaAnnotation(content, {
-              package: 'com.fasterxml.jackson.annotation',
-              annotation: 'JsonFilter',
-              parameters: () => '"lazyPropertyFilter"',
-            }),
-          );
-        }
-      },
-    });
-  }
-
-  get [BaseApplicationGenerator.POST_WRITING_ENTITIES]() {
-    return this.delegateTasksToBlueprint(() => this.postWritingEntities);
   }
 }
