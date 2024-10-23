@@ -55,12 +55,13 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
         this.loadJavaDependenciesFromGradleCatalog(application.javaDependencies!);
       },
       addNativeHint({ source, application }) {
-        source.addNativeHint = ({ publicConstructors = [], declaredConstructors = [] }) => {
+        source.addNativeHint = ({ publicConstructors = [], declaredConstructors = [], advanced = [] }) => {
           this.editFile(
             `${application.javaPackageSrcDir}config/NativeConfiguration.java`,
             addJavaImport('org.springframework.aot.hint.MemberCategory'),
             createNeedleCallback({
               contentToAdd: [
+                ...advanced,
                 ...publicConstructors.map(
                   classPath =>
                     `hints.reflection().registerType(${classPath}, (hint) -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));`,
@@ -155,7 +156,7 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
 
   get postWriting() {
     return this.asPostWritingTaskGroup({
-      hints({ application }) {
+      hintsConfiguration({ application }) {
         const { mainClass, javaPackageSrcDir, packageName } = application;
 
         this.editFile(`${javaPackageSrcDir}${mainClass}.java`, { assertModified: true }, contents =>

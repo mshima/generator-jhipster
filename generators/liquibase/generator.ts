@@ -517,6 +517,7 @@ export default class LiquibaseGenerator extends BaseEntityChangesGenerator {
         // Hints may be dropped if newer version is supported
         // https://github.com/oracle/graalvm-reachability-metadata/blob/master/metadata/org.liquibase/liquibase-core/index.json
         source.addNativeHint!({
+          advanced: ['hints.resources().registerPattern("config/liquibase/*");'],
           publicConstructors: ['liquibase.ui.LoggerUIService.class'],
           declaredConstructors: [
             'liquibase.database.LiquibaseTableNamesFactory.class',
