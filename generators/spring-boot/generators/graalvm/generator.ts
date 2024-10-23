@@ -205,16 +205,6 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
           version: javaDependencies!.nativeBuildTools!,
         });
 
-        if (!reactive) {
-          source.addGradleDependencyCatalogVersion!({ name: 'hibernate', version: springBootDependencies?.hibernate });
-          source.addGradleDependencyCatalogPlugin!({
-            addToBuild: true,
-            pluginName: 'hibernate',
-            id: 'org.hibernate.orm',
-            'version.ref': 'hibernate',
-          });
-        }
-
         source.applyFromGradle!({ script: 'gradle/native.gradle' });
       },
 
@@ -225,27 +215,6 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
         source.addMavenDefinition!(
           mavenDefinition({ reactive, nativeBuildToolsVersion: javaDependencies!.nativeBuildTools!, databaseTypeSql }),
         );
-      },
-
-      async logoutResource({ application: { srcMainJava, packageFolder, authenticationTypeOauth2, reactive, generateAuthenticationApi } }) {
-        if (!authenticationTypeOauth2 || !generateAuthenticationApi) return;
-        const filePath = `${srcMainJava}${packageFolder}/web/rest/LogoutResource.java`;
-
-        this.editFile(filePath, { assertModified: true }, content =>
-          content
-            .replace('@AuthenticationPrincipal(expression = "idToken") OidcIdToken idToken', '@AuthenticationPrincipal OidcUser oidcUser')
-            .replace(
-              'import org.springframework.security.oauth2.core.oidc.OidcIdToken;',
-              `import org.springframework.security.oauth2.core.oidc.OidcIdToken;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;`,
-            )
-            .replace('@param idToken the ID token.', '@param oidcUser the OIDC user.'),
-        );
-        if (reactive) {
-          this.editFile(filePath, { assertModified: true }, content => content.replace(', idToken)', ', oidcUser.getIdToken())'));
-        } else {
-          this.editFile(filePath, { assertModified: true }, content => content.replace('(idToken.', `(oidcUser.getIdToken().`));
-        }
       },
 
       restErrors({ application: { javaPackageSrcDir } }) {
