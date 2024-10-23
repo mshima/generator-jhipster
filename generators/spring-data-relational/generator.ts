@@ -212,7 +212,7 @@ export default class SqlGenerator extends BaseApplicationGenerator {
         }
       },
       nativeHints({ application, source }) {
-        if (!application.nativeSupport) return;
+        if (!application.graalvmSupport) return;
         if (application.databaseTypeSql && !application.reactive) {
           // Latest hibernate-core version supported by Reachability Repository is 6.5.0.Final
           // Hints may be dropped if newer version is supported

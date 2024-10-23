@@ -17,7 +17,7 @@ export const graalvmMatrix = Object.fromEntries(
     {
       'java-version': '21',
       'jdl-base': convertOptionsToJDL({ ...value, devDatabaseType: 'h2Disk', cacheProvider: 'no' }),
-      jdl: convertOptionsToJDL({ ...value, devDatabaseType: 'h2Disk', nativeSupport: true }),
+      jdl: convertOptionsToJDL({ ...value, devDatabaseType: 'h2Disk', graalvmSupport: true }),
     },
   ]),
 );

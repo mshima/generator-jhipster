@@ -575,7 +575,7 @@ exports[`generator - github-build-matrix with graalvm should match matrix value 
       "default-environment": "prod",
       "jwt-secret-key": "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ=",
       "jdl-base": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool maven\\n    devDatabaseType h2Disk\\n    cacheProvider no\\n  }\\n}",
-      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool maven\\n    devDatabaseType h2Disk\\n    nativeSupport true\\n  }\\n}"
+      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool maven\\n    devDatabaseType h2Disk\\n    graalvmSupport true\\n  }\\n}"
     },
     {
       "job-name": "maven-reactive(true)",
@@ -587,7 +587,7 @@ exports[`generator - github-build-matrix with graalvm should match matrix value 
       "default-environment": "prod",
       "jwt-secret-key": "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ=",
       "jdl-base": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool maven\\n    reactive true\\n    devDatabaseType h2Disk\\n    cacheProvider no\\n  }\\n}",
-      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool maven\\n    reactive true\\n    devDatabaseType h2Disk\\n    nativeSupport true\\n  }\\n}"
+      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool maven\\n    reactive true\\n    devDatabaseType h2Disk\\n    graalvmSupport true\\n  }\\n}"
     },
     {
       "job-name": "gradle",
@@ -599,7 +599,7 @@ exports[`generator - github-build-matrix with graalvm should match matrix value 
       "default-environment": "prod",
       "jwt-secret-key": "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ=",
       "jdl-base": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool gradle\\n    devDatabaseType h2Disk\\n    cacheProvider no\\n  }\\n}",
-      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool gradle\\n    devDatabaseType h2Disk\\n    nativeSupport true\\n  }\\n}"
+      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool gradle\\n    devDatabaseType h2Disk\\n    graalvmSupport true\\n  }\\n}"
     },
     {
       "job-name": "gradle-reactive(true)",
@@ -611,7 +611,7 @@ exports[`generator - github-build-matrix with graalvm should match matrix value 
       "default-environment": "prod",
       "jwt-secret-key": "ZjY4MTM4YjI5YzMwZjhjYjI2OTNkNTRjMWQ5Y2Q0Y2YwOWNmZTE2NzRmYzU3NTMwM2NjOTE3MTllOTM3MWRkMzcyYTljMjVmNmQ0Y2MxOTUzODc0MDhhMTlkMDIxMzI2YzQzZDM2ZDE3MmQ3NjVkODk3OTVmYzljYTQyZDNmMTQ=",
       "jdl-base": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool gradle\\n    reactive true\\n    devDatabaseType h2Disk\\n    cacheProvider no\\n  }\\n}",
-      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool gradle\\n    reactive true\\n    devDatabaseType h2Disk\\n    nativeSupport true\\n  }\\n}"
+      "jdl": "application {\\n  config {\\n    testFrameworks [cypress]\\n    buildTool gradle\\n    reactive true\\n    devDatabaseType h2Disk\\n    graalvmSupport true\\n  }\\n}"
     }
   ]
 }"

@@ -156,7 +156,7 @@ spring:
   h2:
     console:
       # JHipster uses a custom h2-console initializer
-  <%_ if (nativeSupport) { _%>
+  <%_ if (graalvmSupport) { _%>
       enabled: '@spring.h2.console.enabled@'
   <%_ } else { _%>
       enabled: true
@@ -295,7 +295,7 @@ jhipster:
   registry:
     password: admin
 <%_ } _%>
-<%_ if (!applicationTypeMicroservice && !nativeSupport) { _%>
+<%_ if (!applicationTypeMicroservice && !graalvmSupport) { _%>
   # CORS is only enabled by default with the "dev" profile
   cors:
     # Allow Ionic for JHipster by default (* no longer allowed in Spring Boot 2.4+)

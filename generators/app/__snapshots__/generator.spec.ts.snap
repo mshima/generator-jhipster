@@ -629,7 +629,7 @@ exports[`generator - app with default config should match snapshot 1`] = `
     "name": "English",
     "rtl": false,
   },
-  "nativeSupport": undefined,
+  "graalvmSupport": undefined,
   "nodeDependencies": {
     "@angular-architects/module-federation": "ANGULAR_ARCHITECTS_MODULE_FEDERATION_VERSION",
     "@angular-architects/module-federation-runtime": "ANGULAR_ARCHITECTS_MODULE_FEDERATION_RUNTIME_VERSION",
@@ -1275,7 +1275,7 @@ exports[`generator - app with gateway should match snapshot 1`] = `
     "name": "English",
     "rtl": false,
   },
-  "nativeSupport": undefined,
+  "graalvmSupport": undefined,
   "nodeDependencies": {
     "@angular-architects/module-federation": "ANGULAR_ARCHITECTS_MODULE_FEDERATION_VERSION",
     "@angular-architects/module-federation-runtime": "ANGULAR_ARCHITECTS_MODULE_FEDERATION_RUNTIME_VERSION",
@@ -1926,7 +1926,7 @@ exports[`generator - app with microservice should match snapshot 1`] = `
     "name": "English",
     "rtl": false,
   },
-  "nativeSupport": undefined,
+  "graalvmSupport": undefined,
   "nodeDependencies": {
     "concurrently": "CONCURRENTLY_VERSION",
     "eslint-config-prettier": "ESLINT_CONFIG_PRETTIER_VERSION",

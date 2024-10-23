@@ -220,7 +220,7 @@ const command = {
       choices: ['liquibase'],
       scope: 'storage',
     },
-    nativeSupport: {
+    graalvmSupport: {
       description: 'GraalVM Native support',
       cli: {
         type: Boolean,
