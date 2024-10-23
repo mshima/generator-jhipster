@@ -227,7 +227,7 @@ export default class SqlGenerator extends BaseApplicationGenerator {
         if (!buildToolGradle) return;
 
         if (!reactive) {
-          source.addGradleDependencyCatalogVersion!({ name: 'hibernate', version: javaManagedProperties?.['hibernate.version']! });
+          source.addGradleDependencyCatalogVersion!({ name: 'hibernate', version: javaManagedProperties!['hibernate.version']! });
           source.addGradleDependencyCatalogPlugin!({
             addToBuild: true,
             pluginName: 'hibernate',

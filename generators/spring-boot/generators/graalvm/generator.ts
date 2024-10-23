@@ -123,10 +123,6 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
             common: [{ templates: ['README.md.jhi.native'] }],
             config: [
               javaMainPackageTemplatesBlock({
-                condition: ctx => !ctx.reactive && ctx.databaseTypeSql,
-                templates: ['config/JacksonNativeConfiguration.java'],
-              }),
-              javaMainPackageTemplatesBlock({
                 templates: ['config/NativeConfiguration.java'],
               }),
             ],
@@ -134,13 +130,6 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
               {
                 condition: ctx => ctx.buildToolGradle,
                 templates: ['gradle/native.gradle'],
-              },
-            ],
-            liquibase: [
-              {
-                condition: ctx => ctx.databaseTypeSql,
-                transform: false,
-                templates: ['src/main/resources/META-INF/native-image/liquibase/reflect-config.json'],
               },
             ],
           },
