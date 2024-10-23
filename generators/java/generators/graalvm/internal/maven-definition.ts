@@ -31,6 +31,8 @@ export const mavenDefinition = ({
             <verbose>true</verbose>
             <jvmArgs>
                 <arg>-Xmx10g</arg>
+                <arg>-Duser.language=en</arg>
+                <arg>-H:IncludeLocales=fr</arg>
             </jvmArgs>
         </configuration>`,
     },
