@@ -82,11 +82,13 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
         const { buildToolGradle, packageJsonScripts } = application;
         const scripts = buildToolGradle
           ? {
+              'native-test': './gradlew nativeTest -Pprod',
               'native-package': './gradlew nativeCompile -Pnative -Pprod -x test -x integrationTest',
               'native-package-dev': './gradlew nativeCompile -Pnative -Pdev -x test -x integrationTest',
               'native-start': './build/native/nativeCompile/native-executable',
             }
           : {
+              'native-test': './mvnw -B -Pnative,prod,nativeTest -Dagent test',
               'native-package': './mvnw package -B -ntp -Pnative,prod -DskipTests',
               'native-package-dev': './mvnw package -B -ntp -Pnative,dev,webapp -DskipTests',
               'native-start': './target/native-executable',
