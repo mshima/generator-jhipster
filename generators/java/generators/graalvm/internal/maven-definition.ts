@@ -29,10 +29,12 @@ export const mavenDefinition = ({
             </metadataRepository>
             <imageName>\${native-image-name}</imageName>
             <verbose>true</verbose>
+            <buildArgs>
+                <buildArg>-Duser.language=en</buildArg>
+                <buildArg>-H:IncludeLocales=fr</buildArg>
+            </buildArgs>
             <jvmArgs>
                 <arg>-Xmx10g</arg>
-                <arg>-Duser.language=en</arg>
-                <arg>-H:IncludeLocales=fr</arg>
             </jvmArgs>
         </configuration>`,
     },
