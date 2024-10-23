@@ -42,3 +42,11 @@ if (project.hasProperty("native")) {
   }
 }
 <%_ } _%>
+
+sourceSets {
+  test {
+      java {
+          exclude '<%= packageFolder %>TechnicalStructureTest.java'
+      }
+  }
+}
