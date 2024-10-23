@@ -237,6 +237,9 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
                 ),
         );
       },
+      nativeHints({ source }) {
+        source.addNativeHint!({ resources: ['i18n/*'] });
+      },
     });
   }
 
