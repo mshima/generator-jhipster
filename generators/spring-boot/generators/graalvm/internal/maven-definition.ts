@@ -54,13 +54,6 @@ export const mavenDefinition = ({
         {
           artifactId: 'commons-beanutils',
           groupId: 'commons-beanutils',
-          additionalContent: `
-            <exclusions>
-                <exclusion>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>`,
         },
       ]
     : [],

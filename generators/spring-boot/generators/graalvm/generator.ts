@@ -145,20 +145,6 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
 
   get postWriting() {
     return this.asPostWritingTaskGroup({
-      hintsConfiguration({ application }) {
-        const { mainClass, javaPackageSrcDir, packageName, backendTypeSpringBoot } = application;
-
-        if (backendTypeSpringBoot) {
-          this.editFile(`${javaPackageSrcDir}${mainClass}.java`, { assertModified: true }, contents =>
-            addJavaAnnotation(contents, {
-              package: 'org.springframework.context.annotation',
-              annotation: 'ImportRuntimeHints',
-              parameters: () => `{ ${packageName}.config.NativeConfiguration.JHipsterNativeRuntimeHints.class }`,
-            }),
-          );
-        }
-      },
-
       async packageJson({ application }) {
         const { buildToolMaven, buildToolGradle } = application;
         this.packageJson.merge({
@@ -209,7 +195,21 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
         );
       },
 
-      restErrors({ application }) {
+      springBootHintsConfiguration({ application }) {
+        const { mainClass, javaPackageSrcDir, packageName, backendTypeSpringBoot } = application;
+
+        if (backendTypeSpringBoot) {
+          this.editFile(`${javaPackageSrcDir}${mainClass}.java`, { assertModified: true }, contents =>
+            addJavaAnnotation(contents, {
+              package: 'org.springframework.context.annotation',
+              annotation: 'ImportRuntimeHints',
+              parameters: () => `{ ${packageName}.config.NativeConfiguration.JHipsterNativeRuntimeHints.class }`,
+            }),
+          );
+        }
+      },
+
+      springBootRestErrors({ application }) {
         const { javaPackageSrcDir, backendTypeSpringBoot } = application;
         if (backendTypeSpringBoot) {
           this.editFile(`${javaPackageSrcDir}/web/rest/errors/FieldErrorVM.java`, { assertModified: true }, contents =>
@@ -223,7 +223,7 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
       },
 
       // workaround for arch error in backend:unit:test caused by gradle's org.graalvm.buildtools.native plugin
-      technicalStructureTest({ application }) {
+      springBootTechnicalStructureTest({ application }) {
         const { buildToolGradle, javaPackageTestDir, backendTypeSpringBoot } = application;
         if (!buildToolGradle || !backendTypeSpringBoot) return;
         this.editFile(
@@ -241,7 +241,7 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
         );
       },
 
-      e2e({ application }) {
+      springBootE2e({ application }) {
         if (!application.devDatabaseTypeH2Any || !application.cypressTests || !application.backendTypeSpringBoot) return;
         this.editFile(`${application.cypressDir}e2e/administration/administration.cy.ts`, { assertModified: true }, contents =>
           contents.replace("describe('/docs'", `describe.skip('/docs'`),
