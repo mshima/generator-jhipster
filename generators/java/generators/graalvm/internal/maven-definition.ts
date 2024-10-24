@@ -30,8 +30,8 @@ export const mavenDefinition = ({
             <imageName>\${native-image-name}</imageName>
             <verbose>true</verbose>
             <buildArgs>
-                <buildArg>-Duser.language=en</buildArg>
-                <buildArg>-H:IncludeLocales=fr</buildArg>
+                <buildArg>-Duser.language=${nativeLanguageDefinition.languageTag}</buildArg>
+                <buildArg>-H:IncludeLocales=${languagesDefinition.map(def => def.languageTag).join(',')}</buildArg>
             </buildArgs>
             <jvmArgs>
                 <arg>-Xmx10g</arg>
