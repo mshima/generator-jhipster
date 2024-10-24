@@ -36,6 +36,7 @@ export const mavenDefinition = ({
             <buildArgs>
                 <buildArg>-Duser.language=${userLanguage}</buildArg>
                 <buildArg>-H:IncludeLocales=${languages.join(',')}</buildArg>
+                <buildArg>--initialize-at-run-time=com.tngtech.archunit,ch.qos.logback,org.springframework.boot.logging.logback</buildArg>
             </buildArgs>
             <jvmArgs>
                 <arg>-Xms4g</arg>
