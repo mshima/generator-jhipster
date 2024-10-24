@@ -122,12 +122,16 @@ export default class GraalvmGenerator extends BaseApplicationGenerator {
           passthrough(file => {
             const contents = file.contents.toString('utf8');
             if (
-              ['TechnicalStructureTest.java', 'JHipsterBlockHoundIntegration.java'].includes(basename(file.path)) ||
               /@(MockBean|SpyBean)/.test(contents) ||
               (application.reactive && /@AuthenticationIntegrationTest/.test(contents))
             ) {
               file.contents = Buffer.from(
                 addJavaAnnotation(contents, { package: 'org.springframework.test.context.aot', annotation: 'DisabledInAotMode' }),
+              );
+            }
+            if (['TechnicalStructureTest.java', 'JHipsterBlockHoundIntegration.java'].includes(basename(file.path))) {
+              file.contents = Buffer.from(
+                addJavaAnnotation(contents, { package: 'org.junit.jupiter.api', annotation: 'DisabledInNativeImage' }),
               );
             }
           }),
