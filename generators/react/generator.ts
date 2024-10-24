@@ -198,12 +198,6 @@ export default class ReactGenerator extends BaseApplicationGenerator {
     return this.asPostWritingTaskGroup({
       addMicrofrontendDependencies({ application }) {
         if (!application.microfrontend) return;
-        const { applicationTypeGateway } = application;
-        if (applicationTypeGateway) {
-          this.packageJson.merge({
-            devDependencies: { '@module-federation/utilities': null },
-          });
-        }
         this.packageJson.merge({
           devDependencies: { '@module-federation/enhanced': null },
         });
