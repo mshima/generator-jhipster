@@ -63,7 +63,7 @@ const Admin = Loadable({
 
   <%_ for (const remote of microfrontends) { _%>
 const <%= remote.capitalizedBaseName %>Routes = React.lazy((async () =>
-  loadRemote<any>('<%= remote.lowercaseBaseName %>/entities-routes')).catch(() => import('app/shared/error/error-loading')),
+  loadRemote<any>('<%= remote.lowercaseBaseName %>/entities-routes'))().catch(() => import('app/shared/error/error-loading')),
 );
 
   <%_ } _%>
