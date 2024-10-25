@@ -155,9 +155,16 @@ export default class ReactGenerator extends BaseApplicationGenerator {
 
   get writing() {
     return this.asWritingTaskGroup({
-      async cleanup({ control }) {
+      async cleanup({ control, application }) {
         await control.cleanupFiles({
           '8.6.1': ['.eslintrc.json', '.eslintignore'],
+          '8.7.2': [
+            [
+              Boolean(application.microfrontend && application.applicationTypeGateway),
+              `${application.srcMainWebapp}microfrontends/entities-menu.tsx`,
+              `${application.srcMainWebapp}microfrontends/entities-routes.tsx`,
+            ],
+          ],
         });
       },
       cleanupOldFilesTask,
@@ -191,12 +198,6 @@ export default class ReactGenerator extends BaseApplicationGenerator {
     return this.asPostWritingTaskGroup({
       addMicrofrontendDependencies({ application }) {
         if (!application.microfrontend) return;
-        const { applicationTypeGateway } = application;
-        if (applicationTypeGateway) {
-          this.packageJson.merge({
-            devDependencies: { '@module-federation/utilities': null },
-          });
-        }
         this.packageJson.merge({
           devDependencies: { '@module-federation/enhanced': null },
         });
