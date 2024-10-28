@@ -25,7 +25,7 @@ import BaseGenerator from '../base-application/index.js';
 import { PRIORITY_NAMES_LIST as BASE_PRIORITY_NAMES_LIST } from '../base/priorities.js';
 
 import * as GENERATOR_LIST from '../generator-list.js';
-import { packageJson } from '../../lib/index.js';
+import { getPackageRoot, packageJson } from '../../lib/index.js';
 import { BLUEPRINT_API_VERSION, NODE_VERSION } from '../generator-constants.js';
 import { files, generatorFiles } from './files.js';
 import {
@@ -57,6 +57,7 @@ export default class extends BaseGenerator {
   recreatePackageLock!: boolean;
   skipWorkflows!: boolean;
   ignoreExistingGenerators!: boolean;
+  installJhipsterDependencyFolder!: boolean;
 
   async _beforeQueue() {
     if (!this.fromBlueprint) {
@@ -360,7 +361,14 @@ export default class extends BaseGenerator {
         const caretDependency = {
           'generator-jhipster': `^${packagejs.version}`,
         };
-        if (this.jhipsterConfig.dynamic) {
+        if (this.installJhipsterDependencyFolder) {
+          this.packageJson.merge({
+            dependencies: {
+              'generator-jhipster': `file:../generator-jhipster/`,
+            },
+            engines: caretDependency,
+          });
+        } else if (this.jhipsterConfig.dynamic) {
           this.packageJson.merge({
             devDependencies: exactDependency,
             peerDependencies: caretDependency,

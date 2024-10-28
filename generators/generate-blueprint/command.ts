@@ -75,6 +75,13 @@ const command = {
       },
       scope: 'storage',
     },
+    installJhipsterDependencyFolder: {
+      cli: {
+        description: 'Install JHipster dependency folder',
+        type: Boolean,
+      },
+      scope: 'generator',
+    },
   },
   options: {
     [GENERATE_SNAPSHOTS]: {
