@@ -154,8 +154,8 @@ class AccountResourceIT {
             .getContext()
             .setAuthentication(registerAuthenticationToken(authorizedClientService, clientRegistration, testAuthenticationToken()));
 
-        restAccountMockMvc.perform(get("/api/account")
-            .accept(MediaType.APPLICATION_JSON))
+        restAccountMockMvc
+            .perform(get("/api/account").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.login").value(TEST_USER_LOGIN))

@@ -113,8 +113,7 @@ class SecurityUtilsUnitTest {
 
         List<GrantedAuthority> authorities = SecurityUtils.extractAuthorityFromClaims(claims);
 
-        assertThat(authorities).isNotNull().isNotEmpty().hasSize(2)
-            .containsAll(expectedAuthorities);
+        assertThat(authorities).isNotNull().isNotEmpty().hasSize(2).containsAll(expectedAuthorities);
     }
 
 <%_ } _%>

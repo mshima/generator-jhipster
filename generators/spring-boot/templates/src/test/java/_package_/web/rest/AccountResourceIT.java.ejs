@@ -192,7 +192,8 @@ class AccountResourceIT {
 <%_ if (reactive) { _%>
     void testAuthenticatedUser() {
         accountWebTestClient
-            .get().uri("/api/authenticate")
+            .get()
+            .uri("/api/authenticate")
             .accept(MediaType.TEXT_PLAIN)
             .exchange()
             .expectStatus().isOk()

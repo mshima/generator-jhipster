@@ -93,7 +93,12 @@ public class OAuth2TestUtil {
     public static OAuth2AuthenticationToken registerAuthenticationToken(<%= reactivePrefix %>OAuth2AuthorizedClientService authorizedClientService, ClientRegistration clientRegistration, OAuth2AuthenticationToken authentication) {
         Map<String, Object> userDetails = authentication.getPrincipal().getAttributes();
 
-        OAuth2AccessToken token = new OAuth2AccessToken(TokenType.BEARER, "Token", (Instant)userDetails.get("auth_time"), (Instant)userDetails.get("exp"));
+        OAuth2AccessToken token = new OAuth2AccessToken(
+            TokenType.BEARER,
+            "Token",
+            (Instant) userDetails.get("auth_time"),
+            (Instant) userDetails.get("exp")
+        );
 
         authorizedClientService.saveAuthorizedClient(
             new OAuth2AuthorizedClient(clientRegistration, authentication.getName(), token),
