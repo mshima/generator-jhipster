@@ -35,8 +35,8 @@ const <%= entityInstance %>Resolve = (route: ActivatedRouteSnapshot): Observable
           if (<%= entityInstance %>.body) {
             return of(<%= entityInstance %>.body);
           }
-            inject(Router).navigate(['404']);
-            return EMPTY;
+          inject(Router).navigate(['404']);
+          return EMPTY;
         }),
       );
   }
