@@ -16,7 +16,7 @@
       <font-awesome-icon icon="bars" />
     </b-navbar-toggle>
 
-    <b-collapse is-nav id="header-tabs">
+    <b-collapse id="header-tabs" is-nav>
       <b-navbar-nav class="ml-auto">
         <b-nav-item to="/" exact>
           <span>
@@ -24,7 +24,7 @@
             <span v-text="t$('global.menu.home')">Home</span>
           </span>
         </b-nav-item>
-        <b-nav-item-dropdown right id="entity-menu" v-if="authenticated" active-class="active" class="pointer" data-cy="entity">
+        <b-nav-item-dropdown v-if="authenticated" id="entity-menu" right active-class="active" class="pointer" data-cy="entity">
           <template #button-content>
             <span class="navbar-dropdown-menu">
               <font-awesome-icon icon="th-list" />
@@ -40,9 +40,9 @@
           <!-- jhipster-needle-add-entity-to-menu - JHipster will add entities to the menu here -->
         </b-nav-item-dropdown>
         <b-nav-item-dropdown
-          right
-          id="admin-menu"
           v-if="hasAnyAuthority('ROLE_ADMIN') && authenticated"
+          id="admin-menu"
+          right
           :class="{ 'router-link-active': subIsActive('/admin') }"
           active-class="active"
           class="pointer"
@@ -110,17 +110,17 @@
           <b-dropdown-item
             v-for="(value, key) in languages"
             :key="`lang-${key}`"
-            @click="changeLanguage(key)"
             :class="{ active: isActiveLanguage(key) }"
+            @click="changeLanguage(key)"
           >
             {{ value.name }}
           </b-dropdown-item>
         </b-nav-item-dropdown>
 <%_ } _%>
         <b-nav-item-dropdown
+          id="account-menu"
           right
           href="javascript:void(0);"
-          id="account-menu"
           :class="{ 'router-link-active': subIsActive('/account') }"
           active-class="active"
           class="pointer"
@@ -137,7 +137,7 @@
             <font-awesome-icon icon="wrench" />
             <span v-text="t$('global.menu.account.settings')">Settings</span>
           </b-dropdown-item>
-          <b-dropdown-item data-cy="passwordItem" to="/account/password" v-if="authenticated" active-class="active">
+          <b-dropdown-item v-if="authenticated" data-cy="passwordItem" to="/account/password" active-class="active">
             <font-awesome-icon icon="lock" />
             <span v-text="t$('global.menu.account.password')">Password</span>
           </b-dropdown-item>
@@ -152,7 +152,7 @@
             <font-awesome-icon icon="sign-out-alt" />
             <span v-text="t$('global.menu.account.logout')">Sign out</span>
           </b-dropdown-item>
-          <b-dropdown-item data-cy="login" v-if="!authenticated" @click="openLogin()" id="login" active-class="active">
+          <b-dropdown-item v-if="!authenticated" id="login" data-cy="login" active-class="active" @click="openLogin()">
             <font-awesome-icon icon="sign-in-alt" />
             <span v-text="t$('global.menu.account.login')">Sign in</span>
           </b-dropdown-item>
@@ -172,9 +172,10 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  /* ==========================================================================
-    Navbar
-    ========================================================================== */
+/* ==========================================================================
+ * Navbar
+ * ==========================================================================
+ */
   .navbar-version {
     font-size: 0.65em;
 <%_ if (clientThemeNone) { _%>

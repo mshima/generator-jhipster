@@ -7,10 +7,10 @@
       >
     </h2>
 
-    <div class="alert alert-success" v-if="success" v-html="t$('sessions.messages.success')">
+    <div v-if="success" class="alert alert-success" v-html="t$('sessions.messages.success')">
       <strong>Session invalidated!</strong>
     </div>
-    <div class="alert alert-danger" v-if="error" v-html="t$('sessions.messages.error')">
+    <div v-if="error" class="alert alert-danger" v-html="t$('sessions.messages.error')">
       <strong>An error has occurred!</strong> The session could not be invalidated.
     </div>
 

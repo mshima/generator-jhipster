@@ -44,11 +44,7 @@ module.exports = {
   shareScope: 'default',
   shared: {
     ...shareDependencies(),
-    ...shareMappings(
-      '@/shared/security/authority',
-      '@/shared/alert/alert.service',
-      '@/locale/translation.service',
-    ),
+    ...shareMappings('@/shared/security/authority', '@/shared/alert/alert.service', '@/locale/translation.service'),
   },
   dts: false,
   manifest: false,

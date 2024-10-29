@@ -2,7 +2,7 @@
   <div class="modal-body">
     <div class="row justify-content-center">
       <div class="col-md-8">
-        <b-alert show data-cy="loginError" variant="danger" v-if="authenticationError" v-html="t$('login.messages.error.authentication')">
+        <b-alert v-if="authenticationError" show data-cy="loginError" variant="danger" v-html="t$('login.messages.error.authentication')">
           <strong>Failed to sign in!</strong> Please check your credentials and try again.
         </b-alert>
       </div>
@@ -11,11 +11,11 @@
           <b-form-group :label="t$('global.form[\'username.label\']')" label-for="username">
             <b-form-input
               id="username"
+              v-model="login"
               type="text"
               name="username"
               autofocus
               :placeholder="t$('global.form[\'username.placeholder\']')"
-              v-model="login"
               data-cy="username"
             >
             </b-form-input>
@@ -23,10 +23,10 @@
           <b-form-group :label="t$('login.form.password')" label-for="password">
             <b-form-input
               id="password"
+              v-model="password"
               type="password"
               name="password"
               :placeholder="t$('login.form[\'password.placeholder\']')"
-              v-model="password"
               data-cy="password"
             >
             </b-form-input>
@@ -45,8 +45,8 @@
             <b-link
               :to="'/account/reset/request'"
               class="alert-link"
-              v-text="t$('login.password.forgot')"
               data-cy="forgetYourPasswordSelector"
+              v-text="t$('login.password.forgot')"
               >Did you forget your password?</b-link
             >
           </b-alert>

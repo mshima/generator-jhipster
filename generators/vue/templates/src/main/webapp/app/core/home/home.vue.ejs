@@ -8,11 +8,11 @@
       <p class="lead" v-text="t$('home.subtitle')">This is your homepage</p>
 
       <div>
-        <div class="alert alert-success" v-if="authenticated">
+        <div v-if="authenticated" class="alert alert-success">
           <span v-if="username" v-text="t$('home.logged.message', { username: username })">You are logged in as user "{{ username }}"</span>
         </div>
 
-        <div class="alert alert-warning" v-if="!authenticated">
+        <div v-if="!authenticated" class="alert alert-warning">
           <span v-text="t$('global.messages.info.authenticated.prefix')">If you want to </span>
           <a class="alert-link" @click="openLogin()" v-text="t$('global.messages.info.authenticated.link')">sign in</a
           ><span v-html="t$('global.messages.info.authenticated.suffix')"
@@ -30,9 +30,7 @@
 <%_ } _%>
       </div>
 
-      <p v-text="t$('home.question')">
-        If you have any question on JHipster:
-      </p>
+      <p v-text="t$('home.question')">If you have any question on JHipster:</p>
 
       <ul>
         <li><a href="<%- hipsterDocumentationLink %>" target="_blank" rel="noopener noreferrer"

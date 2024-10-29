@@ -17,12 +17,12 @@
     >&nbsp;
     <div class="mt-2">&nbsp;</div>
     Filter
-    <input type="text" v-model="threadDumpFilter" class="form-control" />
-    <div class="pad" v-for="(entry, key) of filteredThreadDump" :key="key">
+    <input v-model="threadDumpFilter" type="text" class="form-control" />
+    <div v-for="(entry, key) of filteredThreadDump" :key="key" class="pad">
       <h6>
         <span class="badge" :class="getBadgeClass(entry.threadState)">{{ entry.threadState }}</span
         >&nbsp;{{ entry.threadName }} (ID {{ entry.threadId }})
-        <a @click="entry.show = !entry.show" href="javascript:void(0);">
+        <a href="javascript:void(0);" @click="entry.show = !entry.show">
           <span :hidden="entry.show" v-text="t$('metrics.jvm.threads.dump.show')">Show StackTrace</span>
           <span :hidden="!entry.show" v-text="t$('metrics.jvm.threads.dump.hide')">Hide StackTrace</span>
         </a>
@@ -41,11 +41,11 @@
       <table class="table table-sm table-responsive" aria-describedby="Metrics">
         <thead>
           <tr>
-            <th v-text="t$('metrics.jvm.threads.dump.blockedtime')" scope="col">Blocked Time</th>
-            <th v-text="t$('metrics.jvm.threads.dump.blockedcount')" scope="col">Blocked Count</th>
-            <th v-text="t$('metrics.jvm.threads.dump.waitedtime')" scope="col">Waited Time</th>
-            <th v-text="t$('metrics.jvm.threads.dump.waitedcount')" scope="col">Waited Count</th>
-            <th v-text="t$('metrics.jvm.threads.dump.lockname')" scope="col">Lock Name</th>
+            <th scope="col" v-text="t$('metrics.jvm.threads.dump.blockedtime')">Blocked Time</th>
+            <th scope="col" v-text="t$('metrics.jvm.threads.dump.blockedcount')">Blocked Count</th>
+            <th scope="col" v-text="t$('metrics.jvm.threads.dump.waitedtime')">Waited Time</th>
+            <th scope="col" v-text="t$('metrics.jvm.threads.dump.waitedcount')">Waited Count</th>
+            <th scope="col" v-text="t$('metrics.jvm.threads.dump.lockname')">Lock Name</th>
           </tr>
         </thead>
         <tbody>
