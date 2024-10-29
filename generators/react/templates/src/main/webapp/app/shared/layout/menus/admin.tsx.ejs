@@ -47,7 +47,9 @@ const adminMenuItems = () => (
 );
 
 const openAPIItem = () => (
-  <MenuItem icon="book" to="/admin/docs"><Translate contentKey="global.menu.admin.apidocs">API</Translate></MenuItem>
+  <MenuItem icon="book" to="/admin/docs">
+    <Translate contentKey="global.menu.admin.apidocs">API</Translate>
+  </MenuItem>
 );
 
 <% if (devDatabaseTypeH2Any) { %>

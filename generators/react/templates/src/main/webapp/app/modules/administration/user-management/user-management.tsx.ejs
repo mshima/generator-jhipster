@@ -149,7 +149,8 @@ export const UserManagement = () => {
               <Translate contentKey="userManagement.lastModifiedBy">Last Modified By</Translate> <FontAwesomeIcon icon={getSortIconByFieldName('lastModifiedBy')} />
             </th>
             <th id="modified-date-sort" className="hand" onClick={sort('lastModifiedDate')}>
-              <Translate contentKey="userManagement.lastModifiedDate">Last Modified Date</Translate> <FontAwesomeIcon icon={getSortIconByFieldName('lastModifiedDate')} />
+              <Translate contentKey="userManagement.lastModifiedDate">Last Modified Date</Translate>
+              <FontAwesomeIcon icon={getSortIconByFieldName('lastModifiedDate')} />
             </th>
             <th />
 <%_ } _%>
@@ -222,8 +223,7 @@ export const UserManagement = () => {
                 </div>
               </td>
             </tr>
-          ))
-        }
+          ))}
         </tbody>
       </Table>
 <%_ if (!databaseTypeCassandra) { _%>
