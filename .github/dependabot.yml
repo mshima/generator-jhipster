@@ -249,7 +249,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '08:30'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - 'theme: dependencies'
       - 'theme: cache'
@@ -271,7 +271,7 @@ updates:
     schedule:
       interval: 'daily'
       time: '08:30'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - 'theme: dependencies'
       - 'skip-changelog'
