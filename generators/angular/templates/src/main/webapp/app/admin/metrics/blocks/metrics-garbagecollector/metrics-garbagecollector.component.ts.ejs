@@ -17,6 +17,7 @@
  limitations under the License.
 -%>
 import { Component, input } from '@angular/core';
+import { NgbProgressbar } from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
 import { GarbageCollector } from 'app/admin/metrics/metrics.model';
@@ -25,7 +26,7 @@ import { GarbageCollector } from 'app/admin/metrics/metrics.model';
   standalone: true,
   selector: '<%= jhiPrefixDashed %>-metrics-garbagecollector',
   templateUrl: './metrics-garbagecollector.component.html',
-  imports: [SharedModule],
+  imports: [SharedModule, NgbProgressbar],
 })
 export class MetricsGarbageCollectorComponent {
   /**

@@ -17,6 +17,7 @@
  limitations under the License.
 -%>
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { NgbProgressbar } from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
 import { ProcessMetrics } from 'app/admin/metrics/metrics.model';
@@ -26,7 +27,7 @@ import { ProcessMetrics } from 'app/admin/metrics/metrics.model';
   selector: '<%= jhiPrefixDashed %>-metrics-system',
   templateUrl: './metrics-system.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SharedModule],
+  imports: [SharedModule, NgbProgressbar],
 })
 export class MetricsSystemComponent {
   /**

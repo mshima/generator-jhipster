@@ -18,6 +18,7 @@
 -%>
 import { Component, inject, signal, OnInit<% if (microfrontend && enableTranslation && applicationTypeGateway) { %>, createNgModule, Injector<% } %> } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { NgbCollapseModule, NgbDropdownModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 <%_ if (enableTranslation) { _%>
 import { TranslateService } from '@ngx-translate/core';
 <%_ } _%>
@@ -49,6 +50,9 @@ import NavbarItem from './navbar-item.model';
     RouterModule,
     SharedModule,
     HasAnyAuthorityDirective,
+    NgbCollapseModule,
+    NgbDropdownModule,
+    NgbNavModule,
 <%_ if (enableTranslation) { _%>
     ActiveMenuDirective,
 <%_ } _%>
