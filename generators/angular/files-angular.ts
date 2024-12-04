@@ -71,6 +71,10 @@ export const files = {
       condition: ctx => ctx.clientBundlerExperimentalEsbuild && ctx.enableTranslation,
       templates: ['i18n/index.ts'],
     }),
+    clientRootTemplatesBlock({
+      condition: ctx => ctx.clientBundlerExperimentalEsbuild && ctx.microfrontend,
+      templates: ['module-federation.config.cjs', 'build-plugins/module-federation-esbuild.mjs'],
+    }),
   ],
   sass: [
     {
