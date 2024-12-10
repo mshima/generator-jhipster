@@ -100,6 +100,9 @@ export default class AngularGenerator extends BaseApplicationGenerator {
           if (application.enableI18nRTL) {
             application.javaNodeBuildPaths?.push('postcss.conf.json');
           }
+          if (application.microfrontend) {
+            application.javaNodeBuildPaths?.push('module-federation.config.cjs');
+          }
         }
       },
       addNeedles({ source, application }) {
@@ -302,13 +305,14 @@ export default class AngularGenerator extends BaseApplicationGenerator {
   get postWriting() {
     return this.asPostWritingTaskGroup({
       clientBundler({ application, source }) {
-        const { clientBundlerExperimentalEsbuild, enableTranslation, nodeDependencies } = application;
+        const { clientBundlerExperimentalEsbuild, enableTranslation, nodeDependencies, microfrontend } = application;
         if (clientBundlerExperimentalEsbuild) {
           source.mergeClientPackageJson!({
             devDependencies: {
               '@angular-builders/custom-esbuild': null,
               globby: null,
               ...(enableTranslation ? { 'folder-hash': null, deepmerge: null } : {}),
+              ...(microfrontend ? { '@module-federation/esbuild': null, deepmerge: null } : {}),
             },
           });
         } else {

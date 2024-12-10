@@ -118,6 +118,7 @@
       "jdl-samples": "mf-ng-eureka-jwt-psql-ehcache",
       "generatorOptions": {
         "workspaces": true,
+        "clientBundler": "experimentalEsbuild",
         "monorepository": true
       }
     },
