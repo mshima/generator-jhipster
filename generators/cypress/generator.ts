@@ -231,7 +231,7 @@ export default class CypressGenerator extends BaseApplicationGenerator {
             ...(clientFrameworkAngular
               ? {
                   e2e: 'ng e2e',
-                  'e2e:devserver': `concurrently -k -s first -n backend,e2e -c red,blue npm:backend:start "npm run ci:server:await && ng run ${dasherizedBaseName}:cypress-headless${cypressCoverage ? ':instrumenter' : ''}"`,
+                  'e2e:devserver': `concurrently -k -s first -n backend,e2e -c red,blue npm:backend:start "npm run ci:server:await && ng run ${dasherizedBaseName}:cypress-headless${cypressCoverage ? ':e2e' : ''}"`,
                 }
               : {
                   e2e: 'npm run e2e:cypress:headed --',
@@ -344,8 +344,8 @@ export default class CypressGenerator extends BaseApplicationGenerator {
           // Add 'ng build --configuration instrumenter' support
           const e2eConfigurations = {
             configurations: {
-              instrumenter: {
-                devServerTarget: `${dasherizedBaseName}:serve:instrumenter`,
+              e2e: {
+                devServerTarget: `${dasherizedBaseName}:serve:e2e`,
               },
             },
           };
@@ -354,8 +354,8 @@ export default class CypressGenerator extends BaseApplicationGenerator {
             projects: {
               [dasherizedBaseName]: {
                 architect: {
-                  build: { configurations: { instrumenter: {} } },
-                  serve: { configurations: { instrumenter: { buildTarget: `${dasherizedBaseName}:build:instrumenter` } } },
+                  build: { configurations: { e2e: {}, instrumenter: {} } },
+                  serve: { configurations: { e2e: { buildTarget: `${dasherizedBaseName}:build:e2e` } } },
                   e2e: e2eConfigurations,
                   'cypress-headless': e2eConfigurations,
                   'cypress-open': e2eConfigurations,
@@ -365,7 +365,7 @@ export default class CypressGenerator extends BaseApplicationGenerator {
           });
 
           source.addWebpackConfig?.({
-            config: `targetOptions.configuration === 'instrumenter'
+            config: `targetOptions.configuration === 'e2e' || targetOptions.configuration === 'instrumenter'
       ? {
           module: {
             rules: [
@@ -381,7 +381,7 @@ export default class CypressGenerator extends BaseApplicationGenerator {
                 ],
                 enforce: 'post',
                 include: path.resolve(__dirname, '../${CLIENT_MAIN_SRC_DIR}'),
-                exclude: [/\\.(e2e|spec)\\.ts$/, /node_modules/, /(ngfactory|ngstyle)\\.js/],
+                exclude: [/\\.(cy|spec)\\.ts$/, /node_modules/, /(ngfactory|ngstyle)\\.js/],
               },
             ],
           },
