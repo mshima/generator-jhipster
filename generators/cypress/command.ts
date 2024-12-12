@@ -18,19 +18,23 @@
  */
 import type { JHipsterCommandDefinition } from '../../lib/command/index.js';
 
-const command: JHipsterCommandDefinition = {
-  options: {
+const command = {
+  configs: {
     cypressCoverage: {
       description: 'Enable Cypress code coverage report generation',
-      type: Boolean,
+      cli: {
+        type: Boolean,
+      },
       scope: 'storage',
     },
     cypressAudit: {
       description: 'Enable cypress-audit/lighthouse report generation',
-      type: Boolean,
+      cli: {
+        type: Boolean,
+      },
       scope: 'storage',
     },
   },
-};
+} as const satisfies JHipsterCommandDefinition;
 
 export default command;

@@ -147,6 +147,7 @@ export type CommonClientServerApplication<Entity> = BaseApplication &
   AuthenticationProperties<Entity> &
   SpringBootApplication &
   ClientApplication &
+  ExportApplicationPropertiesFromCommand<typeof import('../cypress/command.ts').default> &
   ExportApplicationPropertiesFromCommand<typeof import('../git/command.ts').default> &
   ExportApplicationPropertiesFromCommand<typeof import('../project-name/command.ts').default> &
   ApplicationProperties & {
