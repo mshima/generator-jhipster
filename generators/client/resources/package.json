@@ -4,6 +4,7 @@
   },
   "devDependencies": {
     "@cypress/code-coverage": "3.13.9",
+    "@cypress/schematic": "2.5.1",
     "babel-loader": "9.2.1",
     "babel-plugin-istanbul": "7.0.0",
     "cypress": "13.16.1",
