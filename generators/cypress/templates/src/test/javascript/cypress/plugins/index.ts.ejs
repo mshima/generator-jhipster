@@ -74,7 +74,9 @@ export default <% if (cypressCoverage) { %>async <% } %>(on: Cypress.PluginEvent
     (await import('cypress-monocart-coverage')).default(on, config, {
       name: 'jhipster-sample-application Cypress Coverage Report',
       entryFilter: {
-        '**/{*_ts,main,common}.js': true,
+        '**/node_modules/**': false,
+        '**/polyfills.js': false,
+        '**/**': true
       },
       sourceFilter: {
         '**/src/main/webapp/**': true,
