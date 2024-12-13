@@ -30,9 +30,10 @@
 // You can read more here:
 // https://on.cypress.io/configuration
 // ***********************************************************
-<%_ if (cypressCoverage) { _%>
-import '@cypress/code-coverage/support';
-<%_ } _%>
+import { createRequire } from 'module';
+if (process.env.CYPRESS_COVERAGE) {
+  createRequire(import.meta.url)('cypress-monocart-coverage');
+}
 
 <%_ if (generateUserManagement) { _%>
 import './account';

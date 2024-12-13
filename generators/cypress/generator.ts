@@ -231,7 +231,7 @@ export default class CypressGenerator extends BaseApplicationGenerator {
             ...(clientFrameworkAngular
               ? {
                   e2e: 'ng e2e',
-                  'e2e:devserver': `concurrently -k -s first -n backend,e2e -c red,blue npm:backend:start "npm run ci:server:await && ng run ${dasherizedBaseName}:cypress-headless${cypressCoverage ? ':e2e' : ''}"`,
+                  'e2e:devserver': `concurrently -k -s first -n backend,e2e -c red,blue npm:backend:start "npm run ci:server:await && ng run ${dasherizedBaseName}:cypress-run${cypressCoverage ? ':coverage' : ''}"`,
                 }
               : {
                   e2e: 'npm run e2e:cypress:headed --',
@@ -267,7 +267,7 @@ export default class CypressGenerator extends BaseApplicationGenerator {
                     },
                   },
                 },
-                'cypress-headless': {
+                'cypress-run': {
                   builder: '@cypress/schematic:cypress',
                   options: {
                     devServerTarget: `${dasherizedBaseName}:serve`,
@@ -319,10 +319,7 @@ export default class CypressGenerator extends BaseApplicationGenerator {
         const clientPackageJson = this.createStorage(this.destinationPath(application.clientRootDir!, 'package.json'));
         clientPackageJson.merge({
           devDependencies: {
-            '@cypress/code-coverage': application.nodeDependencies['@cypress/code-coverage'],
-            'babel-loader': application.nodeDependencies['babel-loader'],
-            'babel-plugin-istanbul': application.nodeDependencies['babel-plugin-istanbul'],
-            nyc: application.nodeDependencies.nyc,
+            'cypress-monocart-coverage': null,
           },
           scripts: {
             'clean-coverage': 'rimraf .nyc_output coverage',
@@ -342,10 +339,13 @@ export default class CypressGenerator extends BaseApplicationGenerator {
           });
 
           // Add 'ng build --configuration instrumenter' support
-          const e2eConfigurations = {
+          const coverageConfigurations = {
             configurations: {
-              e2e: {
-                devServerTarget: `${dasherizedBaseName}:serve:e2e`,
+              coverage: {
+                devServerTarget: `${dasherizedBaseName}:serve:coverage`,
+                env: {
+                  CYPRESS_COVERAGE: true,
+                },
               },
             },
           };
@@ -354,18 +354,18 @@ export default class CypressGenerator extends BaseApplicationGenerator {
             projects: {
               [dasherizedBaseName]: {
                 architect: {
-                  build: { configurations: { e2e: {}, instrumenter: {} } },
-                  serve: { configurations: { e2e: { buildTarget: `${dasherizedBaseName}:build:e2e` } } },
-                  e2e: e2eConfigurations,
-                  'cypress-headless': e2eConfigurations,
-                  'cypress-open': e2eConfigurations,
+                  build: { configurations: { coverage: { sourceMap: true, namedChunks: true }, instrumenter: {} } },
+                  serve: { configurations: { coverage: { buildTarget: `${dasherizedBaseName}:build:coverage` } } },
+                  e2e: coverageConfigurations,
+                  'cypress-run': coverageConfigurations,
+                  'cypress-open': coverageConfigurations,
                 },
               },
             },
           });
 
           source.addWebpackConfig?.({
-            config: `targetOptions.configuration === 'e2e' || targetOptions.configuration === 'instrumenter'
+            config: `targetOptions.configuration === 'coverage' || targetOptions.configuration === 'instrumenter'
       ? {
           module: {
             rules: [

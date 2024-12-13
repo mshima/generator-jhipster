@@ -42,7 +42,7 @@ module.exports = async (config, options, targetOptions) => {
 
 <%_ } _%>
   // PLUGINS
-  if (targetOptions.configuration !== 'e2e' && config.mode === 'development') {
+  if (targetOptions.configuration !== 'coverage' && config.mode === 'development') {
     config.plugins.push(
       new ESLintPlugin({
         configType: 'flat',
@@ -61,7 +61,7 @@ module.exports = async (config, options, targetOptions) => {
     config.devServer.proxy = proxyConfig({ tls });
   }
 
-  if (targetOptions.configuration !== 'e2e' && (targetOptions.target === 'serve' || config.watch)) {
+  if (targetOptions.configuration !== 'coverage' && (targetOptions.target === 'serve' || config.watch)) {
     config.plugins.push(
       new BrowserSyncPlugin(
         {
@@ -103,7 +103,7 @@ module.exports = async (config, options, targetOptions) => {
     );
   }
 
-  if (targetOptions.configuration !== 'e2e' && config.mode === 'production') {
+  if (targetOptions.configuration !== 'coverage' && config.mode === 'production') {
     config.plugins.push(
       new BundleAnalyzerPlugin({
         analyzerMode: 'static',
