@@ -76,7 +76,7 @@ export default <% if (cypressCoverage) { %>async <% } %>(on: Cypress.PluginEvent
       entryFilter: {
         '**/node_modules/**': false,
         '**/polyfills.js': false,
-        '**/**': true,
+        '**/*.js': true,
       },
       sourceFilter: {
         '**/<%- clientSrcDir %>**': true,
