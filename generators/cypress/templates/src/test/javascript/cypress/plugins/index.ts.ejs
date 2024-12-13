@@ -76,10 +76,10 @@ export default <% if (cypressCoverage) { %>async <% } %>(on: Cypress.PluginEvent
       entryFilter: {
         '**/node_modules/**': false,
         '**/polyfills.js': false,
-        '**/**': true
+        '**/**': true,
       },
       sourceFilter: {
-        '**/src/main/webapp/**': true,
+        '**/<%- clientSrcDir %>**': true,
       },
       outputDir: './target/cypress-coverage-reports',
       reports: ['v8', 'console-details'],
