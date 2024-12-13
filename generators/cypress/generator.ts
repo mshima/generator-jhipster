@@ -317,12 +317,6 @@ export default class CypressGenerator extends BaseApplicationGenerator {
         });
 
         if (clientFrameworkAngular) {
-          source.mergeClientPackageJson?.({
-            scripts: {
-              'poste2e:devserver': 'nyc report',
-            },
-          });
-
           // Add 'ng build --configuration instrumenter' support
           const coverageConfigurations = {
             configurations: {
