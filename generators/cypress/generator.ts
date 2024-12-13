@@ -69,21 +69,6 @@ export default class CypressGenerator extends BaseApplicationGenerator {
     return this.delegateTasksToBlueprint(() => this.prompting);
   }
 
-  get configuring() {
-    return this.asConfiguringTaskGroup({
-      async configureCypressOptions() {
-        if (this.jhipsterConfigWithDefaults.cypressCoverage && this.jhipsterConfigWithDefaults.clientBundler === 'experimentalEsbuild') {
-          this.log.warn('Code coverage for Cypress tests is not supported with the experimental ESBuild bundler.');
-          this.jhipsterConfig.cypressCoverage = false;
-        }
-      },
-    });
-  }
-
-  get [BaseApplicationGenerator.CONFIGURING]() {
-    return this.delegateTasksToBlueprint(() => this.configuring);
-  }
-
   get loading() {
     return this.asLoadingTaskGroup({
       prepareForTemplates({ application }) {
