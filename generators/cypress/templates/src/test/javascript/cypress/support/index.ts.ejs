@@ -31,9 +31,8 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 <%_ if (cypressCoverage) { _%>
-import { createRequire } from 'module';
-if (process.env.CYPRESS_COVERAGE) {
-  createRequire(import.meta.url)('cypress-monocart-coverage');
+if (Cypress.env('CYPRESS_COVERAGE')) {
+  require('cypress-monocart-coverage/support');
 }
 <%_ } _%>
 
