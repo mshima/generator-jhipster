@@ -75,6 +75,7 @@ export default <% if (cypressCoverage) { %>async <% } %>(on: Cypress.PluginEvent
       name: 'jhipster-sample-application Cypress Coverage Report',
       entryFilter: {
         '**/node_modules/**': false,
+        '**/swagger-ui/**': false,
         '**/polyfills.js': false,
         '**/*.js': true,
       },
