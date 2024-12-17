@@ -67,26 +67,23 @@ describe('<%= entityAngularName %> Management Component', () => {
                         data: of({
                             defaultSort: '<%- primaryKey.name %>,asc',
                         }),
-                        queryParamMap: of(
-                            jest.requireActual('@angular/router').convertToParamMap({
-                                page: '1',
-                                size: '1',
-                                sort: '<%- primaryKey.name %>,desc',
+                        queryParams: of({
+                          page: '1',
+                          size: '1',
+                          sort: '<%- primaryKey.name %>,desc',
 <%_ if (jpaMetamodelFiltering) { _%>
-                                'filter[someId.in]': 'dc4279ea-cfb9-11ec-9d64-0242ac120002',
+                          'filter[someId.in]': 'dc4279ea-cfb9-11ec-9d64-0242ac120002',
 <%_ } _%>
-                            })
-                        ),
+                        }),
                         snapshot: {
-                            queryParams: {},
-                            queryParamMap: jest.requireActual('@angular/router').convertToParamMap({
-                                page: '1',
-                                size: '1',
-                                sort: '<%- primaryKey.name %>,desc',
+                            queryParams: {
+                              page: '1',
+                              size: '1',
+                              sort: '<%- primaryKey.name %>,desc',
 <%_ if (jpaMetamodelFiltering) { _%>
-                                'filter[someId.in]': 'dc4279ea-cfb9-11ec-9d64-0242ac120002',
+                              'filter[someId.in]': 'dc4279ea-cfb9-11ec-9d64-0242ac120002',
 <%_ } _%>
-                            }),
+                            },
                         },
                     }
                 }
@@ -125,12 +122,12 @@ describe('<%= entityAngularName %> Management Component', () => {
         });
 
     it('Should call load all on init', () => {
-        // WHEN
-        comp.ngOnInit();
+      fixture.detectChanges();
+      TestBed.flushEffects();
 
-        // THEN
-        expect(service.query).toHaveBeenCalled();
-        expect(comp.<%= entityInstancePlural %>()[0]).toEqual(expect.objectContaining(<%- testEntityPrimaryKey %>));
+      // THEN
+      expect(service.query).toHaveBeenCalled();
+      expect(comp.<%= entityInstancePlural %>()[0]).toEqual(expect.objectContaining(<%- testEntityPrimaryKey %>));
     });
 
     describe('track<%= primaryKey.nameCapitalized %>', () => {
@@ -167,11 +164,11 @@ describe('<%= entityAngularName %> Management Component', () => {
 <%_ } _%>
 
     it('should calculate the sort attribute for an id', () => {
-        // WHEN
-        comp.ngOnInit();
+      fixture.detectChanges();
+      TestBed.flushEffects();
 
-        // THEN
-        expect(service.query).toHaveBeenLastCalledWith(expect.objectContaining({ sort: ['<%- primaryKey.fields.map(field => field.fieldName).join(',') %>,<%= order %>'] }));
+      // THEN
+      expect(service.query).toHaveBeenLastCalledWith(expect.objectContaining({ sort: ['<%- primaryKey.fields.map(field => field.fieldName).join(',') %>,<%= order %>'] }));
     });
 <%_ if (paginationInfiniteScroll) { _%>
 
@@ -190,8 +187,8 @@ describe('<%= entityAngularName %> Management Component', () => {
 <%_ if (jpaMetamodelFiltering && paginationPagination) { _%>
 
   it('should calculate the filter attribute', () => {
-    // WHEN
-    comp.ngOnInit();
+    fixture.detectChanges();
+    TestBed.flushEffects();
 
     // THEN
     expect(service.query).toHaveBeenLastCalledWith(expect.objectContaining({ 'someId.in': ['dc4279ea-cfb9-11ec-9d64-0242ac120002'] }));
