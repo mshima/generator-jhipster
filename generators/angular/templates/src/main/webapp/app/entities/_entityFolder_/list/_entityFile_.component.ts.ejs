@@ -425,7 +425,7 @@ export class <%= componentName %> implements OnInit {
 
 <%_ if (jpaMetamodelFiltering && paginationPagination) { _%>
       filterOptions?.forEach(filterOption => {
-        queryParamsObj[filterOption.nameAsQueryParam()] = filterOption.values;
+        queryParamsObj[filterOption.nameAsQueryParam] = filterOption.values;
       });
 <%_ } _%>
 

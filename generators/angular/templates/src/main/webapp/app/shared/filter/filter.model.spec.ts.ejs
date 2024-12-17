@@ -10,7 +10,7 @@ describe('FilterModel Tests', () => {
     });
 
     it('nameAsQueryParam returns query key', () => {
-      expect(filterOption.nameAsQueryParam()).toEqual('filter[foo]');
+      expect(filterOption.nameAsQueryParam).toEqual('filter[foo]');
     });
 
     describe('addValue', () => {
