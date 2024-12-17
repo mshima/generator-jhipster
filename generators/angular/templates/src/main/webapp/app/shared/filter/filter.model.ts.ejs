@@ -2,7 +2,7 @@ import { ParamMap } from '@angular/router';
 import { Subject } from 'rxjs';
 
 export interface IFilterOptions {
-  readonly filterChanges: Subject<FilterOption[]>;
+  readonly filterChanges: Subject<IFilterOption[]>;
   get filterOptions(): IFilterOption[];
   hasAnyFilterSet(): boolean;
   clear(): boolean;
@@ -14,7 +14,7 @@ export interface IFilterOptions {
 export interface IFilterOption {
   name: string;
   values: string[];
-  nameAsQueryParam(): string;
+  nameAsQueryParam: string;
 }
 
 export class FilterOption implements IFilterOption {
@@ -25,7 +25,7 @@ export class FilterOption implements IFilterOption {
     this.values = [...new Set(values)];
   }
 
-  nameAsQueryParam(): string {
+  get nameAsQueryParam(): string {
     return `filter[${this.name}]`;
   }
 
@@ -56,6 +56,14 @@ export class FilterOption implements IFilterOption {
     return new FilterOption(this.name, this.values.concat());
   }
 
+  toPlainObject(): IFilterOption {
+    return {
+      name: this.name,
+      values: this.values,
+      nameAsQueryParam: this.nameAsQueryParam,
+    };
+  }
+
   equals(other: IFilterOption): boolean {
     return (
       this.name === other.name &&
@@ -67,15 +75,15 @@ export class FilterOption implements IFilterOption {
 }
 
 export class FilterOptions implements IFilterOptions {
-  readonly filterChanges = new Subject<FilterOption[]>();
+  readonly filterChanges = new Subject<IFilterOption[]>();
   private _filterOptions: FilterOption[];
 
   constructor(filterOptions: FilterOption[] = []) {
     this._filterOptions = filterOptions;
   }
 
-  get filterOptions(): FilterOption[] {
-    return this._filterOptions.filter(option => option.isSet());
+  get filterOptions(): IFilterOption[] {
+    return this._filterOptions.filter(option => option.isSet()).map(option => option.toPlainObject());
   }
 
   hasAnyFilterSet(): boolean {
@@ -129,7 +137,7 @@ export class FilterOptions implements IFilterOptions {
   }
 
   protected changed(): void {
-    this.filterChanges.next(this.filterOptions.map(option => option.clone()));
+    this.filterChanges.next(this.filterOptions);
   }
 
   protected equals(other: FilterOptions): boolean {
