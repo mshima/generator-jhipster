@@ -192,14 +192,18 @@ export default class WorkspacesGenerator extends BaseWorkspacesGenerator {
           } = this.fs.readJSON(this.fetchFromInstalledJHipster(GENERATOR_ANGULAR, 'resources', 'package.json'));
 
           this.packageJson.merge({
-            devDependencies: {
-              rxjs, // Set version to workaround https://github.com/npm/cli/issues/4437
-            },
             overrides: {
-              'browser-sync': browserSyncVersion,
               webpack: webpackVersion,
             },
           });
+
+          if (applications.some(app => app.microfrontend)) {
+            this.packageJson.merge({
+              overrides: {
+                'browser-sync': browserSyncVersion,
+              },
+            });
+          }
         }
 
         if (applications.some(app => app.backendTypeJavaAny)) {

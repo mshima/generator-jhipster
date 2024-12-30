@@ -32,6 +32,9 @@ exports[`generator - angular gateway-jwt-skipUserManagement(true)-withAdminUi(fa
   "clientRoot/package.json": {
     "stateCleared": "modified",
   },
+  "clientRoot/proxy.config.mjs": {
+    "stateCleared": "modified",
+  },
   "clientRoot/src/404.html": {
     "stateCleared": "modified",
   },
@@ -671,9 +674,6 @@ exports[`generator - angular gateway-jwt-skipUserManagement(true)-withAdminUi(fa
   "clientRoot/webpack/logo-jhipster.png": {
     "stateCleared": "modified",
   },
-  "clientRoot/webpack/proxy.conf.js": {
-    "stateCleared": "modified",
-  },
   "clientRoot/webpack/webpack.custom.js": {
     "stateCleared": "modified",
   },
@@ -702,7 +702,6 @@ exports[`generator - angular gateway-jwt-skipUserManagement(true)-withAdminUi(fa
       "dependencies": {},
       "devDependencies": {
         "@angular-builders/custom-webpack": null,
-        "browser-sync-webpack-plugin": null,
         "copy-webpack-plugin": null,
         "eslint-webpack-plugin": null,
         "webpack-bundle-analyzer": null,
@@ -710,7 +709,6 @@ exports[`generator - angular gateway-jwt-skipUserManagement(true)-withAdminUi(fa
         "webpack-notifier": null,
       },
       "overrides": {
-        "browser-sync": "BROWSER_SYNC_VERSION",
         "webpack": "WEBPACK_VERSION",
       },
     },
@@ -748,6 +746,9 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
     "stateCleared": "modified",
   },
   "clientRoot/package.json": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/proxy.config.mjs": {
     "stateCleared": "modified",
   },
   "clientRoot/src/404.html": {
@@ -1611,9 +1612,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
   "clientRoot/webpack/logo-jhipster.png": {
     "stateCleared": "modified",
   },
-  "clientRoot/webpack/proxy.conf.js": {
-    "stateCleared": "modified",
-  },
   "clientRoot/webpack/webpack.custom.js": {
     "stateCleared": "modified",
   },
@@ -1645,7 +1643,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
       },
       "devDependencies": {
         "@angular-builders/custom-webpack": null,
-        "browser-sync-webpack-plugin": null,
         "copy-webpack-plugin": null,
         "eslint-webpack-plugin": null,
         "folder-hash": null,
@@ -1655,7 +1652,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
         "webpack-notifier": null,
       },
       "overrides": {
-        "browser-sync": "BROWSER_SYNC_VERSION",
         "webpack": "WEBPACK_VERSION",
       },
     },
@@ -1693,6 +1689,9 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
     "stateCleared": "modified",
   },
   "clientRoot/package.json": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/proxy.config.mjs": {
     "stateCleared": "modified",
   },
   "clientRoot/src/404.html": {
@@ -2310,9 +2309,6 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
   "clientRoot/webpack/logo-jhipster.png": {
     "stateCleared": "modified",
   },
-  "clientRoot/webpack/proxy.conf.js": {
-    "stateCleared": "modified",
-  },
   "clientRoot/webpack/webpack.custom.js": {
     "stateCleared": "modified",
   },
@@ -2349,7 +2345,6 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
       "dependencies": {},
       "devDependencies": {
         "@angular-builders/custom-webpack": null,
-        "browser-sync-webpack-plugin": null,
         "copy-webpack-plugin": null,
         "eslint-webpack-plugin": null,
         "webpack-bundle-analyzer": null,
@@ -2357,8 +2352,15 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
         "webpack-notifier": null,
       },
       "overrides": {
-        "browser-sync": "BROWSER_SYNC_VERSION",
         "webpack": "WEBPACK_VERSION",
+      },
+    },
+    {
+      "devDependencies": {
+        "browser-sync-webpack-plugin": null,
+      },
+      "overrides": {
+        "browser-sync": "BROWSER_SYNC_VERSION",
       },
     },
   ],
@@ -2395,6 +2397,9 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
     "stateCleared": "modified",
   },
   "package.json": {
+    "stateCleared": "modified",
+  },
+  "proxy.config.mjs": {
     "stateCleared": "modified",
   },
   "src/main/webapp/404.html": {
@@ -3021,9 +3026,6 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
   "webpack/logo-jhipster.png": {
     "stateCleared": "modified",
   },
-  "webpack/proxy.conf.js": {
-    "stateCleared": "modified",
-  },
   "webpack/webpack.custom.js": {
     "stateCleared": "modified",
   },
@@ -3059,7 +3061,6 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
       },
       "devDependencies": {
         "@angular-builders/custom-webpack": null,
-        "browser-sync-webpack-plugin": null,
         "copy-webpack-plugin": null,
         "eslint-webpack-plugin": null,
         "folder-hash": null,
@@ -3069,8 +3070,15 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
         "webpack-notifier": null,
       },
       "overrides": {
-        "browser-sync": "BROWSER_SYNC_VERSION",
         "webpack": "WEBPACK_VERSION",
+      },
+    },
+    {
+      "devDependencies": {
+        "browser-sync-webpack-plugin": null,
+      },
+      "overrides": {
+        "browser-sync": "BROWSER_SYNC_VERSION",
       },
     },
   ],
@@ -3107,6 +3115,9 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
     "stateCleared": "modified",
   },
   "package.json": {
+    "stateCleared": "modified",
+  },
+  "proxy.config.mjs": {
     "stateCleared": "modified",
   },
   "src/main/webapp/404.html": {
@@ -4141,9 +4152,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
   "webpack/logo-jhipster.png": {
     "stateCleared": "modified",
   },
-  "webpack/proxy.conf.js": {
-    "stateCleared": "modified",
-  },
   "webpack/webpack.custom.js": {
     "stateCleared": "modified",
   },
@@ -4172,7 +4180,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
       },
       "devDependencies": {
         "@angular-builders/custom-webpack": null,
-        "browser-sync-webpack-plugin": null,
         "copy-webpack-plugin": null,
         "eslint-webpack-plugin": null,
         "folder-hash": null,
@@ -4182,7 +4189,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
         "webpack-notifier": null,
       },
       "overrides": {
-        "browser-sync": "BROWSER_SYNC_VERSION",
         "webpack": "WEBPACK_VERSION",
       },
     },
@@ -4220,6 +4226,9 @@ exports[`generator - angular monolith-oauth2-withAdminUi(false)-skipJhipsterDepe
     "stateCleared": "modified",
   },
   "package.json": {
+    "stateCleared": "modified",
+  },
+  "proxy.config.mjs": {
     "stateCleared": "modified",
   },
   "src/main/webapp/404.html": {
@@ -4834,9 +4843,6 @@ exports[`generator - angular monolith-oauth2-withAdminUi(false)-skipJhipsterDepe
   "webpack/logo-jhipster.png": {
     "stateCleared": "modified",
   },
-  "webpack/proxy.conf.js": {
-    "stateCleared": "modified",
-  },
   "webpack/webpack.custom.js": {
     "stateCleared": "modified",
   },
@@ -4862,7 +4868,6 @@ exports[`generator - angular monolith-oauth2-withAdminUi(false)-skipJhipsterDepe
       "dependencies": {},
       "devDependencies": {
         "@angular-builders/custom-webpack": null,
-        "browser-sync-webpack-plugin": null,
         "copy-webpack-plugin": null,
         "eslint-webpack-plugin": null,
         "webpack-bundle-analyzer": null,
@@ -4870,7 +4875,6 @@ exports[`generator - angular monolith-oauth2-withAdminUi(false)-skipJhipsterDepe
         "webpack-notifier": null,
       },
       "overrides": {
-        "browser-sync": "BROWSER_SYNC_VERSION",
         "webpack": "WEBPACK_VERSION",
       },
     },
@@ -4908,6 +4912,9 @@ exports[`generator - angular monolith-session-skipUserManagement(true)-withAdmin
     "stateCleared": "modified",
   },
   "package.json": {
+    "stateCleared": "modified",
+  },
+  "proxy.config.mjs": {
     "stateCleared": "modified",
   },
   "src/main/webapp/404.html": {
@@ -5531,9 +5538,6 @@ exports[`generator - angular monolith-session-skipUserManagement(true)-withAdmin
   "webpack/logo-jhipster.png": {
     "stateCleared": "modified",
   },
-  "webpack/proxy.conf.js": {
-    "stateCleared": "modified",
-  },
   "webpack/webpack.custom.js": {
     "stateCleared": "modified",
   },
@@ -5559,7 +5563,6 @@ exports[`generator - angular monolith-session-skipUserManagement(true)-withAdmin
       "dependencies": {},
       "devDependencies": {
         "@angular-builders/custom-webpack": null,
-        "browser-sync-webpack-plugin": null,
         "copy-webpack-plugin": null,
         "eslint-webpack-plugin": null,
         "webpack-bundle-analyzer": null,
@@ -5567,7 +5570,6 @@ exports[`generator - angular monolith-session-skipUserManagement(true)-withAdmin
         "webpack-notifier": null,
       },
       "overrides": {
-        "browser-sync": "BROWSER_SYNC_VERSION",
         "webpack": "WEBPACK_VERSION",
       },
     },
