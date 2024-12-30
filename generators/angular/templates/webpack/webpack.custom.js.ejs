@@ -23,7 +23,9 @@ const path = require('path');
 const { hashElement } = require('folder-hash');
 const MergeJsonWebpackPlugin = require('merge-jsons-webpack-plugin');
 <%_ } _%>
+<%_ if (microfrontend) { _%>
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+<%_ } _%>
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const WebpackNotifierPlugin = require('webpack-notifier');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -53,6 +55,7 @@ module.exports = async (config, options, targetOptions) => {
       }),
     );
   }
+<%_ if (microfrontend) { _%>
 
   // configuring proxy for back end service
   const tls = config.devServer?.server?.type === 'https';
@@ -98,6 +101,7 @@ module.exports = async (config, options, targetOptions) => {
       ),
     );
   }
+<%_ } _%>
 
   if (config.mode === 'production') {
     config.plugins.push(
