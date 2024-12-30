@@ -109,6 +109,8 @@
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
             "buildTarget": "<%= dasherizedBaseName %>:build:development",
+            "open": true,
+            "proxyConfig": "proxy.config.mjs",
             "port": <%= devServerPort %>
           },
           "configurations": {

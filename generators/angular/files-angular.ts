@@ -31,6 +31,7 @@ export const files = {
         { sourceFile: 'eslint.config.js.jhi.angular', destinationFile: ctx => `${ctx.eslintConfigFile}.jhi.angular` },
         'ngsw-config.json',
         'package.json',
+        'proxy.config.mjs',
         'tsconfig.json',
         'tsconfig.app.json',
         'tsconfig.spec.json',
@@ -45,23 +46,13 @@ export const files = {
   webpack: [
     clientRootTemplatesBlock({
       condition: ctx => ctx.clientBundlerWebpack,
-      templates: [
-        'angular.json',
-        'webpack/environment.js',
-        'webpack/proxy.conf.js',
-        'webpack/webpack.custom.js',
-        'webpack/logo-jhipster.png',
-      ],
+      templates: ['angular.json', 'webpack/environment.js', 'webpack/webpack.custom.js', 'webpack/logo-jhipster.png'],
     }),
   ],
   esbuild: [
     clientRootTemplatesBlock({
       condition: ctx => ctx.clientBundlerExperimentalEsbuild,
-      templates: [
-        { sourceFile: 'angular.json.esbuild', destinationFile: 'angular.json' },
-        'proxy.config.mjs',
-        'build-plugins/define-esbuild.mjs',
-      ],
+      templates: [{ sourceFile: 'angular.json.esbuild', destinationFile: 'angular.json' }, 'build-plugins/define-esbuild.mjs'],
     }),
     clientRootTemplatesBlock({
       condition: ctx => ctx.clientBundlerExperimentalEsbuild && ctx.enableTranslation,
