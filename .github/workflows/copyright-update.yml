@@ -43,7 +43,7 @@ jobs:
       # Update the copyright headers
       - name: Find and Replace
         run: |
-          grep -rlZE "Copyright 20[0-9]{2}" . | xargs -0 sed -i -e "s/Copyright \([0-9]{4}\)-\([0-9]{4}\)/Copyright \1-$(date +'%Y')/g"
+          grep -rlZE "Copyright 20[0-9]{2}" . | xargs -0 sed -i -E "s/Copyright ([0-9]{4})-([0-9]{4})/Copyright \1-$(date +'%Y')/g"
           git diff
       # Create PR
       - name: Create Pull Request
