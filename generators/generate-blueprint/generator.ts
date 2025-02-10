@@ -401,11 +401,10 @@ export default class extends BaseGenerator {
           await this.spawnCommand('npm', ['install'], { stdio: 'inherit' });
         }
 
-        try {
-          if (this.options[LINK_JHIPSTER_DEPENDENCY]) {
-            this.log.verboseInfo('Linking generator-jhipster');
-            await this.spawnCommand('npm', ['link', 'generator-jhipster'], { stdio: 'inherit' });
-          }
+        if (this.options[LINK_JHIPSTER_DEPENDENCY]) {
+          this.log.verboseInfo('Linking generator-jhipster');
+          await this.spawnCommand('npm', ['link', 'generator-jhipster'], { stdio: 'inherit' });
+        }
 
         if (generateSnapshots) {
           try {
