@@ -26,10 +26,13 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import <%= packageName %>.repository.UserRepository;
 <%_ } _%>
 <%_ if (reactive) { _%>
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 <%_ } _%>
 
+<%_ if (reactive) { _%>
+@MockitoBean(types = {ReactiveUserDetailsService.class<% if (reactive && generateBuiltInUserEntity) { %>, UserRepository.class<% } %>})
+<%_ } _%>
 public class JwtAuthenticationTestUtils {
 <%_ if (!reactive) { _%>
 
@@ -52,16 +55,6 @@ public class JwtAuthenticationTestUtils {
     private MeterRegistry meterRegistry() {
         return new SimpleMeterRegistry();
     }
-<%_ if (reactive) { _%>
-
-    @MockitoSpyBean
-    private ReactiveUserDetailsService userDetailsService;
-<%_ } _%>
-<%_ if (reactive && generateBuiltInUserEntity) { _%>
-
-    @MockitoSpyBean
-    private UserRepository userRepository;
-<%_ } _%>
 
     public static String createValidToken(String jwtKey) {
         return createValidTokenForUser(jwtKey, "anonymous");
