@@ -438,7 +438,8 @@ public class <%= entityClass %>Resource {
                 .map(res -> ResponseEntity.ok()
                 .headers(HeaderUtil.createEntityUpdateAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, res.get<%= primaryKey.nameCapitalized %>()<% if (primaryKey.type !== 'String') { %>.toString()<% } %>))
                 .body(res)
-            );
+            )
+        });
   <%_ } else { _%>
         ;
         return ResponseUtil.wrapOrNotFound(
