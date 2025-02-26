@@ -398,7 +398,7 @@ public class <%= entityClass %>Resource {
   <%_ } _%>
 
   <%_ const mapOrFlatMap = reactive ? 'flatMap' : 'map' _%>
-        <%- reactive ? 'return' : 'var result =' %> <%= entityInstance %><%- serviceNo ? 'Repository.findById' : 'Service.findOne' %>(<%= primaryKey.name %>)
+        <%- reactive ? '' : 'var result =' %> <%= entityInstance %><%- serviceNo ? 'Repository.findById' : 'Service.findOne' %>(<%= primaryKey.name %>)
   <%_ if (serviceNo && dtoMapstruct) { _%>
             .<%= mapOrFlatMap %>(<%= mapper %>::toDto)
   <%_ } _%>
