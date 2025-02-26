@@ -37,12 +37,15 @@ import java.util.Optional;
 
 import java.util.UUID;
 <%_ } _%>
+<%_ if (serviceNo && anyPropertyHasValidation) { _%>
+import <%= packageName %>.repository.ValidatedCrudRepository;
+<%_ } _%>
 
 /**
  * <%= springDataDescription %> repository for the <%= persistClass %> entity.
  */
 @Repository
-public interface <%= entityClass %>Repository extends MongoRepository<<%= persistClass %>, <%= primaryKey.type %>> {
+public interface <%= entityClass %>Repository extends MongoRepository<<%= persistClass %>, <%= primaryKey.type %>><% if (serviceNo && anyPropertyHasValidation) { %>, ValidatedCrudRepository<<%= persistClass %>, <%= primaryKey.type %>><% } %> {
 <%_ if (implementsEagerLoadApis) { _%>
 
     @Query("{}")

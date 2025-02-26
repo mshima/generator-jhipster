@@ -42,6 +42,9 @@ import org.springframework.stereotype.Repository;
 <%_ if (primaryKey.typeUUID) { _%>
 import java.util.UUID;
 <%_ } _%>
+<%_ if (serviceNo && anyPropertyHasValidation) { _%> 
+import <%= packageName %>.repository.ValidatedCrudRepository;
+<%_ } _%>
 
 import static <%= entityAbsoluteClass %>.TYPE_NAME;
 
@@ -57,7 +60,7 @@ import static <%= entityAbsoluteClass %>.TYPE_NAME;
     let pageOrFlux = reactive ? 'Flux' : 'Page';
 _%>
 @Repository
-public interface <%= entityClass %>Repository extends JHipsterCouchbaseRepository<<%= persistClass %>, <%= primaryKey.type %>><% if (jpaMetamodelFiltering) { %>, JpaSpecificationExecutor<<%= persistClass %>><% } %><% if (searchEngineAny) { %>, CouchbaseSearchRepository<<%= persistClass %>, <%= primaryKey.type %>><% } %> {
+public interface <%= entityClass %>Repository extends JHipsterCouchbaseRepository<<%= persistClass %>, <%= primaryKey.type %>><% if (searchEngineAny) { %>, CouchbaseSearchRepository<<%= persistClass %>, <%= primaryKey.type %>><% } %><% if (serviceNo && anyPropertyHasValidation) { %>, ValidatedCrudRepository<<%= persistClass %>, <%= primaryKey.type %>><% } %> {
   <%_
   var notEmbeddedRelationships = relationships.filter(relationship => !relationship.otherEntityIsEmbedded)
   if (notEmbeddedRelationships.length !== 0) { %>
