@@ -77,6 +77,7 @@ import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.<% if (reactive) { %>reactive.<% } %>ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 <%_ if (entitySpringPreAuthorize) { _%>
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -166,6 +167,9 @@ public class <%= entityClass %>Resource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 <%_ } _%>
+
+    @Autowired
+    private <%= entityClass %>Resource <%= entityInstance %>Resource;
 
     <%_
     const instanceType = restClass;
@@ -417,35 +421,8 @@ public class <%= entityClass %>Resource {
   <%_ if (serviceNo && dtoMapstruct) { _%>
             .<%= mapOrFlatMap %>(<%= mapper %>::toEntity)
   <%_ } _%>
-            .<%= mapOrFlatMap %>(<%= entityInstance %><%- serviceNo ? 'Repository::save' : 'Service::save' %><% if (anyPropertyHasValidation) { %>Validated<% } %>)
-  <%_ if (serviceNo && searchEngineElasticsearch) { _%>
-            .<%= mapOrFlatMap %>(saved<%= entityClass %> -> {
-    <%_ if(reactive) { %>
-                <%= entityInstance %>SearchRepository.save(saved<%= entityClass %>);
-                return Mono.just(saved<%= entityClass %>);
-    <%_ } else { %>
-                <%= entityInstance %>SearchRepository.index(saved<%= entityClass %>);
-                return saved<%= entityClass %>;
-    <%_ } %>
-            })
-  <%_ } _%>
-  <%_ if (serviceNo && dtoMapstruct) { _%>
-            .<%= mapOrFlatMap %>(<%= mapper %>::toDto)
-  <%_ } _%>
-  <%_ if (reactive) { _%>
-            .flatMap(res -> result
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                .map(res -> ResponseEntity.ok()
-                .headers(HeaderUtil.createEntityUpdateAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, res.get<%= primaryKey.nameCapitalized %>()<% if (primaryKey.type !== 'String') { %>.toString()<% } %>))
-                .body(res)
-            );
-  <%_ } else { _%>
-        ;
-        return ResponseUtil.wrapOrNotFound(
-            result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, <%= primaryKey.name %><% if (primaryKey.type !== 'String') { %>.toString()<% } %>)
-        );
-  <%_ } _%>
+            // Call wrapped update<%= entityClass %> to validate the entity.
+            .<%= mapOrFlatMap %>(res -> <%= entityInstance %>Resource.update<%= entityClass %>(<%= primaryKey.name %>, res));
     }
 <%_ } _%>
 
