@@ -435,9 +435,11 @@ public class <%= entityClass %>Resource {
   <%_ if (reactive) { _%>
             .flatMap(res -> result
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                .map(res -> ResponseEntity.ok()
-                .headers(HeaderUtil.createEntityUpdateAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, res.get<%= primaryKey.nameCapitalized %>()<% if (primaryKey.type !== 'String') { %>.toString()<% } %>))
-                .body(res)
+                .map(res ->
+                    ResponseEntity.ok()
+                        .headers(HeaderUtil.createEntityUpdateAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, res.get<%= primaryKey.nameCapitalized %>()<% if (primaryKey.type !== 'String') { %>.toString()<% } %>))
+                        .body(res)
+                )
             )
         });
   <%_ } else { _%>
