@@ -268,6 +268,7 @@ export default class SpringBootGenerator extends BaseApplicationGenerator {
             (reactive && data.databaseTypeSql) ||
             (!reactive && data.databaseTypeMongodb) ||
             (!reactive && data.databaseTypeCassandra),
+          reactivePrefix: reactive ? 'Reactive' : '',
           reactorBlock: reactive ? '.block()' : '',
           reactorBlockOptional: reactive ? '.blockOptional()' : '',
         });
