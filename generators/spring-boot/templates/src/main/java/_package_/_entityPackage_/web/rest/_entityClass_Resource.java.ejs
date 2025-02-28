@@ -362,7 +362,7 @@ public class <%= entityClass %>Resource {
     ) throws URISyntaxException {
         LOG.debug("REST request to partial update <%= entityClass %> partially : {}, {}", <%= primaryKey.name %>, <%= instanceName %>);
         var idNode = <%= instanceName %>.remove("<%- primaryKey.name %>");
-        if (idNode.isEmpty()) {
+        if (!idNode.isValueNode()) {
             throw BadRequestAlertException.idnull(ENTITY_NAME);
         }
         if (!idNode.<%- primaryKey.typeLong || primaryKey.typeInteger ? 'isIntegralNumber' : 'isTextual' %>()) {
