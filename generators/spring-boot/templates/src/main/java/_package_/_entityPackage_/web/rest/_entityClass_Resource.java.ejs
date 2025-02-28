@@ -362,11 +362,13 @@ public class <%= entityClass %>Resource {
     ) throws URISyntaxException {
         LOG.debug("REST request to partial update <%= entityClass %> partially : {}, {}", <%= primaryKey.name %>, <%= instanceName %>);
         var idNode = <%= instanceName %>.remove("<%- primaryKey.name %>");
-        if (!idNode.<%- primaryKey.typeLong || primaryKey.typeInteger ? 'isIntegralNumber' : 'isTextual' %>()) {
+        if (idNode.isEmpty()) {
             throw BadRequestAlertException.idnull(ENTITY_NAME);
         }
-        var idNodeValue = idNode.<%- primaryKey.typeLong ? 'longValue' : primaryKey.typeInteger ? 'intValue' : 'textValue' %>();
-        if (!Objects.equals(<%= primaryKey.name %><%- primaryKey.typeUUID ? '.toString()' : '' %>, idNodeValue)) {
+        if (!idNode.<%- primaryKey.typeLong || primaryKey.typeInteger ? 'isIntegralNumber' : 'isTextual' %>()) {
+            throw BadRequestAlertException.idinvalid(ENTITY_NAME);
+        }
+        if (!Objects.equals(<%= primaryKey.name %><%- primaryKey.typeUUID ? '.toString()' : '' %>, idNode.<%- primaryKey.typeLong ? 'longValue' : primaryKey.typeInteger ? 'intValue' : 'textValue' %>())) {
             throw BadRequestAlertException.idinvalid(ENTITY_NAME);
         }
 
@@ -423,7 +425,7 @@ public class <%= entityClass %>Resource {
   <%_ if (reactive) { _%>
             .switchIfEmpty(Mono.error(BadRequestAlertException.idnotfound(ENTITY_NAME)))
   <%_ } _%>
-            .map(res -> 
+            .map(res ->
                 ResponseEntity.ok()
                     .headers(HeaderUtil.createEntityUpdateAlert(applicationName, <%= enableTranslation %>, ENTITY_NAME, res.get<%= primaryKey.nameCapitalized %>()<% if (primaryKey.type !== 'String') { %>.toString()<% } %>))
                     .body(res)
