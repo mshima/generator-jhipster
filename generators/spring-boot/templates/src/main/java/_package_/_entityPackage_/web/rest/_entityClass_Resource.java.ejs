@@ -372,22 +372,6 @@ public class <%= entityClass %>Resource {
             throw BadRequestAlertException.idinvalid(ENTITY_NAME);
         }
 
-  <%_ if (saveUserSnapshot) { _%>
-    <% for (const userRelationship of relationships.filter(rel => rel.otherEntity.builtInUser)) { %>
-      <%_ if (userRelationship.collection) { _%>
-        if (<%= instanceName %>.get<%= userRelationship.relationshipNameCapitalizedPlural %>() != null) {
-            // Save users in case they are new and only exist in gateway
-            userRepository.saveAll(<%= instanceName %>.get<%= userRelationship.relationshipNameCapitalizedPlural %>());
-        }
-      <%_ } else { _%>
-        if (<%= instanceName %>.get<%= userRelationship.relationshipNameCapitalized %>() != null) {
-            // Save user in case it's new and only exists in gateway
-            userRepository.save(<%= instanceName %>.get<%= userRelationship.relationshipNameCapitalized %>());
-        }
-      <%_ } _%>
-    <% } %>
-  <%_ } _%>
-
   <%_ const mapOrFlatMap = reactive ? 'flatMap' : 'map' _%>
         return <%= entityInstance %><%- serviceNo ? 'Repository.findById' : 'Service.findOne' %>(<%= primaryKey.name %>)
   <%_ if (serviceNo && dtoMapstruct) { _%>
@@ -399,6 +383,21 @@ public class <%= entityClass %>Resource {
                     em.clear();
   <%_ } _%>
                     existing<%= entityClass %> = this.om.readerForUpdating(existing<%= entityClass %>).readValue(<%= instanceName %>);
+  <%_ if (saveUserSnapshot) { _%>
+    <% for (const userRelationship of relationships.filter(rel => rel.otherEntity.builtInUser)) { %>
+      <%_ if (userRelationship.collection) { _%>
+                    if (existing<%= entityClass %>.get<%= userRelationship.relationshipNameCapitalizedPlural %>() != null) {
+                        // Save users in case they are new and only exist in gateway
+                        userRepository.saveAll(existing<%= entityClass %>.get<%= userRelationship.relationshipNameCapitalizedPlural %>());
+                    }
+      <%_ } else { _%>
+                    if (existing<%= entityClass %>.get<%= userRelationship.relationshipNameCapitalized %>() != null) {
+                        // Save user in case it's new and only exists in gateway
+                        userRepository.save(existing<%= entityClass %>.get<%= userRelationship.relationshipNameCapitalized %>());
+                    }
+      <%_ } _%>
+    <% } %>
+  <%_ } _%>
                     return existing<%= entityClass %>;
                 } catch (IOException e) {
                     LOG.error("Error updating the entity", e);
