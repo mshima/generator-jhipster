@@ -505,6 +505,14 @@ export const baseServerFiles = {
       templates: ['web/rest/WithUnauthenticatedMockUser.java'],
     },
   ],
+  commonRepository: [
+    {
+      path: `${SERVER_MAIN_SRC_DIR}_package_/`,
+      renameTo: moveToJavaPackageSrcDir,
+      condition: ctx => !ctx.databaseTypeNo,
+      templates: ['repository/ValidatedCrudRepository.java'],
+    },
+  ],
 };
 
 export const serverFiles = mergeSections(

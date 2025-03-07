@@ -54,11 +54,26 @@ import java.util.Optional;
 <%_ if (primaryKey.typeUUID) { _%>
 import java.util.UUID;
 <%_ } _%>
+<%_ if (anyPropertyHasValidation) { _%> 
+import jakarta.validation.Valid;
+<%_ } _%>
 
 /**
  * Service Interface for managing {@link <%= entityAbsoluteClass %>}.
  */
 public interface <%= entityClass %>Service {
+<%_ if (anyPropertyHasValidation) { _%> 
+
+    /**
+     * Update a validated <%= entityInstance %>.
+     *
+     * @param <%- instanceName %> the entity to save.
+     * @return the persisted entity.
+     */
+    default <%- wrapMono(restClass) %> updateValidated(@Valid <%= restClass %> <%- instanceName %>) {
+        return this.update(<%- instanceName %>);
+    }
+<%_ } _%>
 
     /**
      * Save a <%= entityInstance %>.
@@ -75,14 +90,6 @@ public interface <%= entityClass %>Service {
      * @return the persisted entity.
      */
      <% if (reactive) { %>Mono<<% } %><%= instanceType %><% if (reactive) { %>><% } %> update(<%= instanceType %> <%= instanceName %>);
-
-    /**
-     * Partially updates a <%= entityInstance %>.
-     *
-     * @param <%= instanceName %> the entity to update partially.
-     * @return the persisted entity.
-     */
-    <% if (reactive) { %>Mono<% } else { %>Optional<% } %><<%= instanceType %>> partialUpdate(<%= instanceType %> <%= instanceName %>);
 <%_ if (!jpaMetamodelFiltering) {  _%>
 
     /**

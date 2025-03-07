@@ -83,6 +83,12 @@ exports[`generator - server composing databaseType option no with jwt should mat
   "src/main/java/com/mycompany/myapp/package-info.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/myapp/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/myapp/repository/package-info.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/myapp/security/AuthoritiesConstants.java": {
     "stateCleared": "modified",
   },
@@ -305,6 +311,12 @@ exports[`generator - server composing databaseType option no with oauth2 should 
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/myapp/package-info.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/myapp/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/myapp/repository/package-info.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/myapp/security/AuthoritiesConstants.java": {
@@ -532,6 +544,12 @@ exports[`generator - server composing databaseType option no with session should
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/myapp/package-info.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/myapp/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/myapp/repository/package-info.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/myapp/security/AuthoritiesConstants.java": {
@@ -852,6 +870,9 @@ exports[`generator - server with entities should match files snapshot 1`] = `
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/myapp/repository/UserRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/myapp/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/myapp/repository/package-info.java": {

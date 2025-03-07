@@ -140,6 +140,9 @@ exports[`generator - couchbase gateway-jwt-gradle-enableTranslation(true)-com.my
   "src/main/java/com/mycompany/repository/UserRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -616,6 +619,9 @@ exports[`generator - couchbase microservice-jwt-reactive(false)-maven-enableTran
   "src/main/java/tech/jhipster/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/tech/jhipster/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -963,6 +969,9 @@ exports[`generator - couchbase microservice-jwt-reactive(true)-gradle-enableTran
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -1304,6 +1313,9 @@ exports[`generator - couchbase microservice-oauth2-reactive(true)-gradle-enableT
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -1637,6 +1649,9 @@ exports[`generator - couchbase monolith-jwt-reactive(false)-maven-enableTranslat
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/UserRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -2142,6 +2157,9 @@ exports[`generator - couchbase monolith-jwt-reactive(true)-gradle-enableTranslat
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -2484,6 +2502,9 @@ exports[`generator - couchbase monolith-oauth2-reactive(false)-maven-enableTrans
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -2854,6 +2875,9 @@ exports[`generator - couchbase monolith-oauth2-reactive(true)-gradle-enableTrans
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/repository/package-info.java": {
     "stateCleared": "modified",
   },
@@ -3220,6 +3244,9 @@ exports[`generator - couchbase monolith-session-reactive(false)-maven-enableTran
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/UserRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/tech/jhipster/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/tech/jhipster/repository/package-info.java": {
@@ -3684,6 +3711,9 @@ exports[`generator - couchbase monolith-session-reactive(true)-gradle-enableTran
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/SimpleRepository.java": {
+    "stateCleared": "modified",
+  },
+  "src/main/java/com/mycompany/repository/ValidatedCrudRepository.java": {
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/repository/package-info.java": {
