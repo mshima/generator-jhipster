@@ -616,7 +616,9 @@ function preparePostEntityCommonDerivedPropertiesNotTyped(entity: any) {
   if (entity.primaryKey) {
     derivedPrimaryKeyProperties(entity.primaryKey);
     entity.requiresPersistableImplementation =
-      entity.requiresPersistableImplementation || entity.fields.some(field => field.requiresPersistableImplementation);
+      entity.requiresPersistableImplementation ||
+      entity.fields.some(field => field.requiresPersistableImplementation) ||
+      entity.relationships.some(rel => rel.id);
   }
 
   const types = entity.relationships
