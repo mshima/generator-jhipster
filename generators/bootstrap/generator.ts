@@ -30,6 +30,7 @@ import { PRETTIER_EXTENSIONS } from '../generator-constants.js';
 import { GENERATOR_UPGRADE } from '../generator-list.js';
 import { PRIORITY_NAMES, QUEUES } from '../base-application/priorities.js';
 import type { Features as BaseFeatures, Options as BaseOptions } from '../base/types.d.ts';
+import { createNeedleTransform } from '../base-core/support/needles.js';
 import {
   autoCrlfTransform,
   createESLintTransform,
@@ -239,11 +240,17 @@ export default class BootstrapGenerator extends BaseGenerator {
       };
     }
 
+    const removeNeedlesTransforms: FileTransform<MemFsEditorFile>[] = [];
+    if (this.jhipsterConfig.removeNeedles) {
+      removeNeedlesTransforms.push(createNeedleTransform());
+    }
+
     const transformStreams = [
       ...skipYoResolveTransforms,
       forceYoFiles(),
       createSortConfigFilesTransform(),
       createForceWriteConfigFilesTransform(),
+      ...removeNeedlesTransforms,
       ...prettierTransforms,
       ...autoCrlfTransforms,
       createConflicterTransform(this.env.adapter, { ...this.env.conflicterOptions, customizeActions }),
