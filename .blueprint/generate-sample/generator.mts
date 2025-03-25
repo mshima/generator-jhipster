@@ -16,7 +16,7 @@ export default class extends BaseGenerator {
   sampleYorcFolder;
 
   constructor(args, options, features) {
-    super(args, options, { queueCommandTasks: true, ...features });
+    super(args, options, { jhipsterBootstrap: false, queueCommandTasks: true, ...features });
   }
 
   get [BaseGenerator.INITIALIZING]() {
@@ -92,7 +92,7 @@ export default class extends BaseGenerator {
           if (sample.jdlFiles) {
             await this.composeWithJHipster(GENERATOR_JDL, {
               generatorArgs: sample.jdlFiles,
-              generatorOptions: { jsonOnly: true, destinationRoot: this.projectFolder },
+              generatorOptions: { jsonOnly: true, destinationRoot: this.projectFolder, ...generatorOptions },
             });
           }
           await this.composeWithJHipster(GENERATOR_APP, { generatorOptions });
