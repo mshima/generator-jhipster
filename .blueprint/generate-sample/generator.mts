@@ -89,7 +89,7 @@ export default class extends BaseGenerator<Config & { entities: string[] }> {
           if (sample.jdlFiles) {
             await this.composeWithJHipster(GENERATOR_JDL, {
               generatorArgs: sample.jdlFiles,
-              generatorOptions: { jsonOnly: true, destinationRoot: this.projectFolder },
+              generatorOptions: { jsonOnly: true, destinationRoot: this.projectFolder, ...generatorOptions },
             });
           }
           await this.composeWithJHipster(GENERATOR_APP, { generatorOptions });
