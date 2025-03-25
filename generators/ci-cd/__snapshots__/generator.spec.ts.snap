@@ -327,6 +327,7 @@ exports[`generator - ci-cd cli with multiples values should match context snapsh
   "projectVersion": "0.0.1-SNAPSHOT",
   "reactive": false,
   "rememberMeKey": undefined,
+  "removeNeedles": undefined,
   "routes": undefined,
   "sampleWritten": undefined,
   "searchEngine": "no",
