@@ -4,13 +4,12 @@
   },
   "devDependencies": {
     "@cypress/code-coverage": "3.14.0",
-    "babel-loader": "9.2.1",
-    "babel-plugin-istanbul": "7.0.0",
+    "@cypress/schematic": "3.0.0",
     "cypress": "14.2.1",
     "cypress-audit": "1.1.0",
+    "cypress-monocart-coverage": "1.0.1",
     "eslint-plugin-cypress": "4.2.0",
     "lighthouse": "12.5.1",
-    "nyc": "17.1.0",
     "swagger-ui-dist": "5.20.2"
   },
   "packageManager": "npm@11"

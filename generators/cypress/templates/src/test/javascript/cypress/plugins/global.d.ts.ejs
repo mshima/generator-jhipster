@@ -16,10 +16,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-// workaround missing typings https://github.com/cypress-io/code-coverage/issues/257
-declare module '@cypress/code-coverage/task' {
+// workaround missing typings
+declare module 'cypress-monocart-coverage' {
   export default function codecov(
     on: Cypress.PluginEvents,
-    config: Cypress.PluginConfigOptions
+    config: Cypress.PluginConfigOptions,
+    options: any,
   ): void;
 }
+declare module 'cypress-monocart-coverage/support';
