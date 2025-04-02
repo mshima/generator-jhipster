@@ -27,8 +27,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import reactor.util.context.Context;
 <%_ if (authenticationTypeJwt) { _%>
-    import static <%= packageName %>.security.SecurityUtils.USER_ID_CLAIM;
-    <%_ } _%>
+import static <%= packageName %>.security.SecurityUtils.USER_ID_CLAIM;
+<%_ } _%>
 
 <%_ if (authenticationTypeOauth2) { _%>
 import java.time.Instant;
