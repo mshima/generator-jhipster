@@ -18,6 +18,11 @@
 -%>
 package <%= packageName %>.web.rest;
 
+<%_ if (generateUserManagement) { _%>
+import static <%= packageName %>.security.SecurityUtils.USER_ID_CLAIM;
+import static org.assertj.core.api.Assertions.assertThat;
+<%_ } _%>
+
 import <%= packageName %>.IntegrationTest;
 <%_ if (generateUserManagement) { _%>
   <%_ if (databaseTypeSql && reactive) { _%>
@@ -38,6 +43,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 <%_ } _%>
 import org.springframework.http.MediaType;
 <%_ if (generateUserManagement) { _%>
+import com.nimbusds.jwt.JWTParser;
 import org.springframework.security.crypto.password.PasswordEncoder;
 <%_ } _%>
 <%_ if (reactive) { _%>
@@ -128,6 +134,15 @@ class AuthenticateControllerIT {
             .exchange()
             .expectStatus().isOk()
             .expectHeader().valueMatches("Authorization", "Bearer .+")
+  <%_ if (generateUserManagement) { _%>
+            .expectHeader()
+            .value("Authorization", header -> {
+                var token = header.substring("Bearer ".length());
+                var jwt = JWTParser.parse(token);
+                assertThat(jwt.getJWTClaimsSet().getClaim(USER_ID_CLAIM)).isEqualTo(user.getId());
+                assertThat(jwt.getJWTClaimsSet().getSubject()).isEqualTo(login.getUsername());
+            })
+  <%_ } _%>
             .expectBody()
             .jsonPath("$.id_token").isNotEmpty();
 <%_ } else { _%>
@@ -137,6 +152,14 @@ class AuthenticateControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id_token").isString())
             .andExpect(jsonPath("$.id_token").isNotEmpty())
+  <%_ if (generateUserManagement) { _%>
+            .andDo(result -> {
+                var token = result.getResponse().getHeader("Authorization").substring("Bearer ".length());
+                var jwt = JWTParser.parse(token);
+                assertThat(jwt.getJWTClaimsSet().getClaim(USER_ID_CLAIM)).isEqualTo(user.getId());
+                assertThat(jwt.getJWTClaimsSet().getSubject()).isEqualTo(login.getUsername());
+            })
+  <%_ } _%>
             .andExpect(header().string("Authorization", not(nullValue())))
             .andExpect(header().string("Authorization", not(is(emptyString()))));
 <%_ } _%>
