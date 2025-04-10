@@ -2,7 +2,7 @@ import { computed, <% if (applicationTypeGateway && microfrontend) { %>defineAsy
 <%_ if (enableTranslation) { _%>
 import { useI18n } from 'vue-i18n';
 <%_ } _%>
-import type LoginService from '@/account/login.service';
+import { useLogin } from '@/account/login';
 import type AccountService from '@/account/account.service';
 <%_ if (enableTranslation) { _%>
 import languages from '@/shared/config/languages';
@@ -30,7 +30,6 @@ export default defineComponent({
 <%_ } _%>
   },
   setup() {
-    const loginService = inject<LoginService>('loginService');
     const accountService = inject<AccountService>('accountService');
     const currentLanguage = inject('currentLanguage', () => computed(() => navigator.language ?? '<%- nativeLanguage %>'), true);
 <%_ if (enableTranslation) { _%>
@@ -41,6 +40,7 @@ export default defineComponent({
     };
 <%_ } _%>
 
+    const login = useLogin();
     const router = useRouter();
     const store = useStore();
 
@@ -51,11 +51,11 @@ export default defineComponent({
     const inProduction = computed(() => store.activeProfiles.indexOf('prod') > -1);
     const authenticated = computed(() => store.authenticated);
 
-    const openLogin = () => {
+    const showLogin = () => {
 <%_ if (!authenticationTypeOauth2) { _%>
-      loginService.openLogin();
+      login.showLogin();
 <%_ } else { %>
-      loginService.login();
+      login.login();
 <%_ } _%>
     };
 
@@ -75,7 +75,7 @@ export default defineComponent({
         router.push('/');
       }
 <%_ } else { _%>
-      const response = await loginService.logout();
+      const response = await login.logout();
       store.logout();
   <%_ if (authenticationTypeOauth2) { _%>
       window.location.href = response.data.logoutUrl;
@@ -95,7 +95,7 @@ export default defineComponent({
       logout,
       subIsActive,
       accountService,
-      openLogin,
+      showLogin,
 <%_ if (enableTranslation) { _%>
       changeLanguage,
       languages: languages(),

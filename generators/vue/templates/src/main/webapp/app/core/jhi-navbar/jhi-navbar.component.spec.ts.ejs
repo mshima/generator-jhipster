@@ -1,14 +1,31 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
 import { vitest } from 'vitest';
 import { computed } from 'vue';
 import { shallowMount } from '@vue/test-utils';
-import JhiNavbar from './jhi-navbar.vue';
 import { type Router } from 'vue-router';
 import { createTestingPinia } from '@pinia/testing';
 
 import { useStore } from '@/store';
 import { createRouter } from '@/router';
-import <% if (authenticationTypeOauth2) { %>type <% } %>LoginService from '@/account/login.service';
-
+import { useLogin } from '@/account/login';
+import JhiNavbar from './jhi-navbar.vue';
 <%_ if (applicationTypeGateway && microfrontend) { _%>
 
 vitest.mock('@module-federation/enhanced/runtime', () => ({
@@ -23,7 +40,7 @@ const store = useStore();
 
 describe('JhiNavbar', () => {
   let jhiNavbar: JhiNavbarComponentType;
-  let loginService: LoginService;
+  let login: ReturnType<typeof useLogin>;
   const accountService = { hasAnyAuthorityAndCheckAuth: vitest.fn().mockImplementation(() => Promise.resolve(true)) };
 <%_ if (enableTranslation) { _%>
   const changeLanguage = vitest.fn();
@@ -32,16 +49,6 @@ describe('JhiNavbar', () => {
 
   beforeEach(() => {
     router = createRouter();
-<%_ if (authenticationTypeJwt) { _%>
-    loginService = new LoginService({ emit: vitest.fn() });
-    vitest.spyOn(loginService, 'openLogin');
-<%_ } else if (authenticationTypeSession) { _%>
-    loginService = new LoginService({ emit: vitest.fn() });
-    vitest.spyOn(loginService, 'openLogin');
-    vitest.spyOn(loginService, 'logout');
-<%_ } else if (authenticationTypeOauth2) { _%>
-    loginService = { login: vitest.fn(), logout: vitest.fn() };
-<%_ } _%>
     const wrapper = shallowMount(JhiNavbar, {
       global: {
         plugins: [pinia, router],
@@ -57,7 +64,6 @@ describe('JhiNavbar', () => {
           'b-navbar-brand': true,
         },
         provide: {
-          loginService,
           currentLanguage: computed(() => 'foo'),
 <%_ if (enableTranslation) { _%>
           changeLanguage,
@@ -67,6 +73,7 @@ describe('JhiNavbar', () => {
       },
     });
     jhiNavbar = wrapper.vm;
+    login = useLogin();
   });
 
   it('should not have user data set', () => {
@@ -89,11 +96,11 @@ describe('JhiNavbar', () => {
   });
 
   it('should use login service', () => {
-    jhiNavbar.openLogin();
+    jhiNavbar.showLogin();
 <%_ if (!authenticationTypeOauth2) { _%>
-    expect(loginService.openLogin).toHaveBeenCalled();
+    expect(login.showLogin).toHaveBeenCalled();
 <%_ } else { _%>
-    expect(loginService.login).toHaveBeenCalled();
+    expect(login.login).toHaveBeenCalled();
 <%_ } _%>
   });
 
@@ -107,14 +114,14 @@ describe('JhiNavbar', () => {
     store.setAuthentication({ login: 'test' });
 <%_ if (authenticationTypeOauth2) { _%>
     const logoutUrl = '/to-match';
-    (loginService.logout as any).mockReturnValue(Promise.resolve({ data: { logoutUrl } }));
+    (login.logout as any).mockReturnValue(Promise.resolve({ data: { logoutUrl } }));
 <%_ } else if (!authenticationTypeJwt) { _%>
-    (loginService.logout as any).mockReturnValue(Promise.resolve({}));
+    (login.logout as any).mockReturnValue(Promise.resolve({}));
 <%_ } _%>
     await jhiNavbar.logout();
 
 <%_ if (!authenticationTypeJwt) { _%>
-    expect(loginService.logout).toHaveBeenCalled();
+    expect(login.logout).toHaveBeenCalled();
   <%_ if (authenticationTypeOauth2) { _%>
     expect(router.currentRoute.value.path).toBe(logoutUrl);
   <%_ } _%>

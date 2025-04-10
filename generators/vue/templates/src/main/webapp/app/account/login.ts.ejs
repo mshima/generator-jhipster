@@ -1,0 +1,70 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%_ if (authenticationTypeJwt || authenticationTypeSession) { _%>
+import { ref } from 'vue';
+import { defineStore } from 'pinia';
+<%_ } _%>
+<%_ if (authenticationTypeOauth2 || authenticationTypeSession) { _%>
+import axios, { type AxiosPromise } from 'axios';
+<%_ } _%>
+
+<%_ if (authenticationTypeOauth2) { _%>
+export const useLogin = ({
+  login: (loc: { href: string; hostname: string; pathname: string; port?: string } = window.location): void => {
+    const port = loc.port ? `:${loc.port}` : '';
+    let contextPath = loc.pathname;
+    if (contextPath.endsWith('accessdenied')) {
+      contextPath = contextPath.substring(0, contextPath.indexOf('accessdenied'));
+    }
+    if (contextPath.endsWith('forbidden')) {
+      contextPath = contextPath.substring(0, contextPath.indexOf('forbidden'));
+    }
+    if (!contextPath.endsWith('/')) {
+      contextPath = `${contextPath}/`;
+    }
+    // If you have configured multiple OIDC providers, then, you can update this URL to /login.
+    // It will show a Spring Security generated login page with links to configured OIDC providers.
+    loc.href = `//${loc.hostname}${port}${contextPath}oauth2/authorization/oidc`;
+  },
+  logout: (): AxiosPromise<any> => axios.post('api/logout'),
+});
+<%_ } else { _%>
+export const useLogin = defineStore('login', () => {
+  const loginModalOpen = ref(false);
+
+  function showLogin() {
+    loginModalOpen.value = true;
+  }
+
+  function hideLogin() {
+    loginModalOpen.value = false;
+  }
+
+  return {
+    loginModalOpen,
+    showLogin,
+    hideLogin,
+  <%_ if (authenticationTypeSession) { _%>
+    logout(): AxiosPromise<any> {
+      return axios.post('api/logout');
+    },
+  <%_ } _%>
+  };
+});
+<%_ } _%>

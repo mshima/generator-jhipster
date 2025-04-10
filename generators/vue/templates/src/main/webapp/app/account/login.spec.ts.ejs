@@ -1,4 +1,4 @@
-import LoginService from './login.service';
+import { useLogin } from './login';
 <%_ if (!authenticationTypeJwt) { _%>
 import axios from 'axios';
 import sinon from 'sinon';
@@ -9,18 +9,18 @@ const axiosStub = {
 };
 <%_ } _%>
 
-describe('Login Service test suite', () => {
-  let loginService: LoginService;
+describe('Login test suite', () => {
+  let login: ReturnType<typeof useLogin>;
 
   beforeEach(() => {
-    loginService = new LoginService(<% if (!authenticationTypeOauth2) { %>{ emit: vitest.fn() }<% } %>);
+    login = useLogin();
   });
 
 <%_ if (authenticationTypeOauth2) { _%>
   it('should build url for login', () => {
     const loc = { href: '', hostname: 'localhost', pathname: '/' };
 
-    loginService.login(loc);
+    login.login(loc);
 
     expect(loc.href).toBe('//localhost/oauth2/authorization/oidc');
   });
@@ -28,7 +28,7 @@ describe('Login Service test suite', () => {
   it('should build url for login with loc.pathname equals to /accessdenied', () => {
     const loc = { href: '', hostname: 'localhost', pathname: '/accessdenied' };
 
-    loginService.login(loc);
+    login.login(loc);
 
     expect(loc.href).toBe('//localhost/oauth2/authorization/oidc');
   });
@@ -36,7 +36,7 @@ describe('Login Service test suite', () => {
   it('should build url for login with loc.pathname equals to /forbidden', () => {
     const loc = { href: '', hostname: 'localhost', pathname: '/forbidden' };
 
-    loginService.login(loc);
+    login.login(loc);
 
     expect(loc.href).toBe('//localhost/oauth2/authorization/oidc');
   });
@@ -44,7 +44,7 @@ describe('Login Service test suite', () => {
   it('should build url for login with loc.pathname equals to /accessdenied', () => {
     const loc = { href: '', hostname: 'localhost', pathname: '/accessdenied' };
 
-    loginService.login(loc);
+    login.login(loc);
 
     expect(loc.href).toBe('//localhost/oauth2/authorization/oidc');
   });
@@ -52,7 +52,7 @@ describe('Login Service test suite', () => {
   it('should build url for login with loc.pathname equals to /forbidden', () => {
     const loc = { href: '', hostname: 'localhost', pathname: '/forbidden' };
 
-    loginService.login(loc);
+    login.login(loc);
 
     expect(loc.href).toBe('//localhost/oauth2/authorization/oidc');
   });
@@ -60,7 +60,7 @@ describe('Login Service test suite', () => {
   it('should build url for login behind client proxy', () => {
     const loc = {href: '', port: '<%= serverPort %>', hostname: 'localhost', pathname: '/'};
 
-    loginService.login(loc);
+    login.login(loc);
 
     expect(loc.href).toBe('//localhost:<%= serverPort %>/oauth2/authorization/oidc');
   });
@@ -68,7 +68,7 @@ describe('Login Service test suite', () => {
 
 <%_ if (!authenticationTypeJwt) { _%>
   it('should call global logout when asked to', () => {
-    loginService.logout();
+    login.logout();
 
     expect(axiosStub.post.calledWith('api/logout')).toBeTruthy();
   });
