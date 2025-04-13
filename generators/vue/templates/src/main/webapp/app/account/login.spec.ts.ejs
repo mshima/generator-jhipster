@@ -1,4 +1,7 @@
 import { useLogin } from './login';
+<%_ if (authenticationTypeSession) { _%>
+import { createTestingPinia } from '@pinia/testing';
+<%_ } _%>
 <%_ if (!authenticationTypeJwt) { _%>
 import axios from 'axios';
 import sinon from 'sinon';
@@ -13,6 +16,9 @@ describe('Login test suite', () => {
   let login: ReturnType<typeof useLogin>;
 
   beforeEach(() => {
+<%_ if (authenticationTypeSession) { _%>
+createTestingPinia();
+<%_ } _%>
     login = useLogin();
   });
 

@@ -25,7 +25,7 @@ import axios, { type AxiosPromise } from 'axios';
 <%_ } _%>
 
 <%_ if (authenticationTypeOauth2) { _%>
-export const useLogin = ({
+const login = {
   login: (loc: { href: string; hostname: string; pathname: string; port?: string } = window.location): void => {
     const port = loc.port ? `:${loc.port}` : '';
     let contextPath = loc.pathname;
@@ -43,7 +43,9 @@ export const useLogin = ({
     loc.href = `//${loc.hostname}${port}${contextPath}oauth2/authorization/oidc`;
   },
   logout: (): AxiosPromise<any> => axios.post('api/logout'),
-});
+};
+
+export const useLogin = () => login;
 <%_ } else { _%>
 export const useLogin = defineStore('login', () => {
   const loginModalOpen = ref(false);
