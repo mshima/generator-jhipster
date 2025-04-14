@@ -17,6 +17,7 @@
  limitations under the License.
 -%>
 <template>
+  <BToastOrchestrator />
   <div id="app">
     <ribbon></ribbon>
     <div id="app-header">
@@ -27,7 +28,7 @@
         <router-view></router-view>
       </div>
 <%_ if (!authenticationTypeOauth2) { _%>
-      <b-modal id="login-page" v-model="loginModalOpen" hide-footer lazy>
+      <b-modal id="login-page" style="display: block" v-model="loginModalOpen" hide-footer lazy>
         <template #modal-title>
           <span data-cy="loginTitle" id="login-title" v-text="t$('login.title')">Sign in</span>
         </template>

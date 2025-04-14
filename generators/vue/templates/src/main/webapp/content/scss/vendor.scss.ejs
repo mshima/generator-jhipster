@@ -22,26 +22,16 @@
 put Sass variables here:
 eg $input-color: red;
 ****************************/
-// Override Boostrap variables
-<%_ if (clientThemeNone) { _%>
-@import 'bootstrap-variables';
-<%_ } _%>
-// Import Bootstrap source files from node_modules
 <%_ if (!clientThemeNone) { _%>
 @import 'bootswatch/dist/<%= clientTheme %>/variables';
 <%_ } _%>
+// Override Bootstrap variables
+@import 'bootstrap-variables';
+// Import Bootstrap source files from node_modules
 @import 'bootstrap/scss/bootstrap';
-@import 'bootstrap-vue/src/index.scss';
+@import 'bootstrap-vue-next/src/styles/styles.scss';
 <%_ if (!clientThemeNone) { _%>
 @import 'bootswatch/dist/<%= clientTheme %>/bootswatch';
-/* Dirty fix on navbar active link with bootswatch theme */
-nav li.router-link-active .navbar-dropdown-menu {
-  color: $navbar-<%_ if (clientThemeLight) { _%>light<%_ } else { _%>dark<%_ } _%>-active-color;
-}
 <%_ } _%>
-<%_ if (enableI18nRTL) { _%>
-@import '@content/scss/rtl.scss';
-<%_ } _%>
-
 
 /* jhipster-needle-scss-add-vendor JHipster will add new css style */
