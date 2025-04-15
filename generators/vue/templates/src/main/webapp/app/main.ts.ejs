@@ -56,7 +56,6 @@ const i18n = initI18N();
 <%_ } _%>
 
 const app = createApp({
-  template: '<App/>',
   components: { App },
   setup() {
 <%_ if (authenticationUsesCsrf) { _%>
@@ -176,6 +175,7 @@ const app = createApp({
     provide('microfrontendI18n', false);
 <%_ } _%>
   },
+  template: '<App/>',
 });
 
 initFortAwesome(app);

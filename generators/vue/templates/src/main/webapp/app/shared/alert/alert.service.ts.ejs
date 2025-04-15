@@ -4,15 +4,15 @@ import { type Composer, useI18n } from 'vue-i18n';
 <%_ } _%>
 
 export const useAlertService = () => {
-  const bvToast = useToastController();
-  if (!bvToast) {
+  const toastController = useToastController();
+  if (!toastController) {
     throw new Error('BootstrapVue toast component was not found');
   }
 <%_ if (enableTranslation) { _%>
   const i18n = useI18n();
 <%_ } _%>
   return new AlertService({
-    bvToast,
+    toastController,
 <%_ if (enableTranslation) { _%>
     i18n,
 <%_ } _%>
@@ -20,30 +20,30 @@ export const useAlertService = () => {
 };
 
 export default class AlertService {
-  private bvToast: ReturnType<typeof useToastController>;
+  private toastController: ReturnType<typeof useToastController>;
 <%_ if (enableTranslation) { _%>
   private i18n: Composer;
 <%_ } _%>
 
   constructor({
-    bvToast,
+    toastController,
 <%_ if (enableTranslation) { _%>
     i18n,
 <%_ } _%>
   }: {
-    bvToast: ReturnType<typeof useToastController>;
+    toastController: ReturnType<typeof useToastController>;
 <%_ if (enableTranslation) { _%>
     i18n: Composer,
 <%_ } _%>
   }) {
-    this.bvToast = bvToast;
+    this.toastController = toastController;
 <%_ if (enableTranslation) { _%>
     this.i18n = i18n;
 <%_ } _%>
   }
 
   public showInfo(toastMessage: string, props: BToastProps = {}) {
-    this.bvToast.show!({
+    this.toastController.show!({
       props: {
         pos: 'top-center',
         title: 'Info',
