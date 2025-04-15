@@ -32,8 +32,8 @@
         </tbody>
       </table>
     </div>
-    <b-modal ref="healthModal">
-      <template #modal-title>
+    <b-modal style="display: block" ref="healthModal" okOnly>
+      <template #title>
         <h4 v-if="currentHealth" class="modal-title" id="showHealthLabel">
 <%_ if (enableTranslation) { _%>
           <span v-text="t$('health.indicator.' + baseName(currentHealth.name))" />

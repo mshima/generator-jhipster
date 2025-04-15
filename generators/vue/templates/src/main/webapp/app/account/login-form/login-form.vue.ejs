@@ -1,12 +1,12 @@
 <template>
-  <div class="modal-body">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <b-alert show data-cy="loginError" variant="danger" v-if="authenticationError" v-html="t$('login.messages.error.authentication')">
+  <div class="d-flex justify-content-center">
+    <div class="row">
+      <div class="col-md-12">
+        <b-alert data-cy="loginError" variant="danger" :model-value="authenticationError" v-html="t$('login.messages.error.authentication')">
           <strong>Failed to sign in!</strong> Please check your credentials and try again.
         </b-alert>
       </div>
-      <div class="col-md-8">
+      <div class="col-md-12">
         <b-form @submit.prevent="doLogin()">
           <b-form-group :label="t$('global.form[\'username.label\']')" label-for="username">
             <b-form-input
@@ -41,7 +41,7 @@
         <p></p>
         <%_ if (generateUserManagement) { _%>
         <div>
-          <b-alert show variant="warning">
+          <b-alert :model-value="true" variant="warning">
             <b-link
               :to="'/account/reset/request'"
               class="alert-link"
@@ -52,7 +52,7 @@
           </b-alert>
         </div>
         <div>
-          <b-alert show variant="warning">
+          <b-alert :model-value="true" variant="warning">
             <span v-text="t$('global.messages.info.register.noaccount')">You don't have an account yet?</span>
             <b-link :to="'/register'" class="alert-link" v-text="t$('global.messages.info.register.link')">Register a new account</b-link>
           </b-alert>

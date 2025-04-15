@@ -351,8 +351,8 @@
       </table>
     </div>
 
-    <b-modal ref="metricsModal" size="lg">
-      <template #modal-title>
+    <b-modal style="display: block" ref="metricsModal" size="lg" okOnly>
+      <template #title>
         <h4 class="modal-title" id="showMetricsLabel" v-text="t$('metrics.jvm.threads.dump.title')">Threads dump</h4>
       </template>
       <metrics-modal :thread-dump="threadData"></metrics-modal>
