@@ -3,7 +3,7 @@
         <h2 id="page-heading" data-cy="<%= entityClass %>Heading">
             <span v-text="t$('<%= i18nKeyPrefix %>.home.title')" id="<%= entityFileName %>-heading"><%= entityClassPluralHumanized %></span>
             <div class="d-flex justify-content-end">
-                <button class="btn btn-info mr-2" @click="handleSyncList" :disabled="isFetching">
+                <button class="btn btn-info me-2" @click="handleSyncList" :disabled="isFetching">
                     <font-awesome-icon icon="sync" :spin="isFetching"></font-awesome-icon> <span v-text="t$('<%= i18nKeyPrefix %>.home.refreshListLabel')">Refresh List</span>
                 </button>
 <%_ if (!readOnly) { _%>
@@ -120,7 +120,7 @@
                     </td>
   <%_ } _%>
 <%_ } _%>
-                    <td class="text-right">
+                    <td class="text-end">
                         <div class="btn-group">
   <%_ if (authenticationTypeSession) { _%>
                             <router-link :to="{name: '<%= entityAngularName %>View', params: {<%= entityInstance %>Id: <%= entityInstance %>.<%= primaryKey.name %>}}" class="btn btn-info btn-sm details" data-cy="entityDetailsButton">
@@ -168,14 +168,14 @@
             </table>
         </div>
 <%_ if (!readOnly) { _%>
-        <b-modal ref="removeEntity" id="removeEntity" >
-            <template #modal-title>
+        <b-modal style="display: block" ref="removeEntity" id="removeEntity" >
+            <template #title>
                 <span id="<%= i18nKeyPrefix %>.delete.question" data-cy="<%= entityInstance %>DeleteDialogHeading" v-text="t$('entity.delete.title')">Confirm delete operation</span>
             </template>
             <div class="modal-body">
                 <p id="<%= jhiPrefixDashed %>-delete-<%= entityInstance %>-heading" v-text="t$('<%= i18nKeyPrefix %>.delete.question', {'id': removeId})">Are you sure you want to delete this <%= entityClassHumanized %>?</p>
             </div>
-            <template #modal-footer>
+            <template #footer>
                 <div>
                     <button type="button" class="btn btn-secondary" v-text="t$('entity.action.cancel')" @click="closeDialog()">Cancel</button>
                     <button type="button" class="btn btn-primary" id="<%= jhiPrefixDashed %>-confirm-delete-<%= entityInstance %>" data-cy="entityConfirmDeleteButton" v-text="t$('entity.action.delete')" @click="remove<%= entityAngularName %>()">Delete</button>
@@ -187,7 +187,7 @@
   <%_ if (paginationPagination) { _%>
         <div v-show="<%=entityInstancePlural %> && <%=entityInstancePlural %>.length > 0">
             <div class="row justify-content-center">
-                <jhi-item-count :page="page" :total="queryCount" :itemsPerPage="itemsPerPage"></jhi-item-count>
+                <jhi-item-count :page="page" :total="queryCount" :items-per-page="itemsPerPage"></jhi-item-count>
             </div>
             <div class="row justify-content-center">
                 <b-pagination size="md" :total-rows="totalItems" v-model="page" :per-page="itemsPerPage"></b-pagination>

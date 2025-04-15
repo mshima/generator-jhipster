@@ -17,14 +17,14 @@
     </b-navbar-toggle>
 
     <b-collapse is-nav id="header-tabs">
-      <b-navbar-nav class="ml-auto">
+      <b-navbar-nav class="ms-auto">
         <b-nav-item to="/" exact>
           <span>
             <font-awesome-icon icon="home" />
             <span v-text="t$('global.menu.home')">Home</span>
           </span>
         </b-nav-item>
-        <b-nav-item-dropdown right id="entity-menu" v-if="authenticated" active-class="active" class="pointer" data-cy="entity">
+        <b-nav-item-dropdown end id="entity-menu" v-if="authenticated" active-class="active" class="pointer" data-cy="entity">
           <template #button-content>
             <span class="navbar-dropdown-menu">
               <font-awesome-icon icon="th-list" />
@@ -102,7 +102,7 @@
 <%_ } _%>
         </b-nav-item-dropdown>
 <%_ if (enableTranslation) { _%>
-        <b-nav-item-dropdown id="languagesnavBarDropdown" right v-if="languages && Object.keys(languages).length > 1">
+        <b-nav-item-dropdown id="languagesnavBarDropdown" end v-if="languages && Object.keys(languages).length > 1">
           <template #button-content>
             <font-awesome-icon icon="flag" />
             <span class="no-bold" v-text="t$('global.menu.language')">Language</span>
@@ -152,7 +152,7 @@
             <font-awesome-icon icon="sign-out-alt" />
             <span v-text="t$('global.menu.account.logout')">Sign out</span>
           </b-dropdown-item>
-          <b-dropdown-item data-cy="login" v-if="!authenticated" @click="openLogin()" id="login" active-class="active">
+          <b-dropdown-item data-cy="login" v-if="!authenticated" @click="showLogin()" id="login" active-class="active">
             <font-awesome-icon icon="sign-in-alt" />
             <span v-text="t$('global.menu.account.login')">Sign in</span>
           </b-dropdown-item>
