@@ -28,7 +28,7 @@
         <router-view></router-view>
       </div>
 <%_ if (!authenticationTypeOauth2) { _%>
-      <b-modal id="login-page" style="display: block" v-model="loginModalOpen" :no-footer="true" lazy>
+      <b-modal id="login-page" :style="loginModalOpen? {display: 'block'}:{}" v-model="loginModalOpen" :no-footer="true" lazy>
         <template #title>
           <span data-cy="loginTitle" id="login-title" v-text="t$('login.title')">Sign in</span>
         </template>
