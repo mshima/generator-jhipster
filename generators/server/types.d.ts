@@ -182,6 +182,7 @@ export type SpringBootApplication = JavaApplication &
     communicationSpringWebsocket: boolean;
     anyEntityHasRelationshipWithUser: boolean;
     requiresDeleteAllUsers: boolean;
+    reactivePrefix: string;
     reactorBlock: string;
     reactorBlockOptional: string;
 
