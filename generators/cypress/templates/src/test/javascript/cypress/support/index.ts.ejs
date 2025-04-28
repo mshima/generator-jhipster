@@ -33,6 +33,11 @@
 <%_ if (cypressCoverage) { _%>
 import '@cypress/code-coverage/support';
 <%_ } _%>
+<%_ if (clientFrameworkVue) { _%>
+
+// Workaround for https://github.com/bootstrap-vue-next/bootstrap-vue-next/issues/2668
+Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop completed with undelivered notifications.'));
+<%_ } _%>
 
 <%_ if (generateUserManagement) { _%>
 import './account';
