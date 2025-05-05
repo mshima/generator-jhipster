@@ -50,6 +50,19 @@ const command: JHipsterCommandDefinition = {
       scope: 'generator',
     },
   },
+  configs: {
+    removeNeedles: {
+      description: 'Remove needles, needles are used by entity and language generators to inject code',
+      cli: {
+        type: Boolean,
+      },
+      jdl: {
+        tokenType: 'BOOLEAN',
+        type: 'boolean',
+      },
+      scope: 'storage',
+    },
+  },
 };
 
 export default command;
