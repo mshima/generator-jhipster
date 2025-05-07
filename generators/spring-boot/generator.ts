@@ -571,9 +571,17 @@ ${classProperties
       },
       addSpringdoc({ application, source }) {
         const springdocDependency = `springdoc-openapi-starter-${application.reactive ? 'webflux' : 'webmvc'}-api`;
-        source.addJavaDependencies?.([
-          { groupId: 'org.springdoc', artifactId: springdocDependency, version: application.javaDependencies!.springdoc },
-        ]);
+        source.addJavaDefinition?.({
+          dependencies: [
+            {
+              groupId: 'org.springdoc',
+              artifactId: 'springdoc-openapi-bom',
+              type: 'pom',
+              version: application.javaDependencies!.springdoc,
+            },
+            { groupId: 'org.springdoc', artifactId: springdocDependency },
+          ],
+        });
         if (application.reactive) {
           source.addAllowBlockingCallsInside?.({ classPath: 'org.springdoc.core.service.OpenAPIService', method: 'build' });
           source.addAllowBlockingCallsInside?.({ classPath: 'org.springdoc.core.service.OpenAPIService', method: 'getWebhooks' });
