@@ -37,13 +37,16 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 <%_ } _%>
+<%_ if (serviceNo && anyPropertyHasValidation) { _%>
+import <%= packageName %>.repository.ValidatedCrudRepository;
+<%_ } _%>
 
 /**
  * <%= springDataDescription %> repository for the <%= persistClass %> entity.
  */
 @SuppressWarnings("unused")
 @Repository
-public interface <%= entityClass %>Repository extends ReactiveMongoRepository<<%= persistClass %>, <%= primaryKey.type %>> {
+public interface <%= entityClass %>Repository extends ReactiveMongoRepository<<%= persistClass %>, <%= primaryKey.type %>><% if (serviceNo && anyPropertyHasValidation) { %>, ValidatedCrudRepository<<%= persistClass %>, <%= primaryKey.type %>><% } %> {
 
 <%_ if (!paginationNo) { _%>
     Flux<<%= persistClass %>> findAllBy(Pageable pageable);

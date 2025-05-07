@@ -854,6 +854,9 @@ exports[`generator - server with entities should match files snapshot 1`] = `
   "src/main/java/com/mycompany/myapp/repository/UserRepository.java": {
     "stateCleared": "modified",
   },
+  "src/main/java/com/mycompany/myapp/repository/ValidatedCrudRepository.java": {
+    "stateCleared": "modified",
+  },
   "src/main/java/com/mycompany/myapp/repository/package-info.java": {
     "stateCleared": "modified",
   },
