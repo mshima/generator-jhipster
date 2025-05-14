@@ -22,6 +22,12 @@
 @import 'bootswatch/dist/<%= clientTheme %>/variables';
 <%_ } _%>
 @import 'bootstrap/scss/variables';
+// Import Bootstrap source files from node_modules
+@import 'bootstrap/scss/bootstrap';
+<%_ if (!clientThemeNone) { _%>
+@import 'bootswatch/dist/<%= clientTheme %>/bootswatch';
+<%_ } _%>
+@import 'bootstrap-vue-next/dist/bootstrap-vue-next.css';
 
 /* ==============================================================
 Bootstrap tweaks
@@ -229,7 +235,7 @@ ui bootstrap tweaks
 // Add space between icon and text in dropdowns
 .dropdown-menu svg:first-child,
 .btn svg:first-child,
-.dropdown-item svg:first-child {
+.nav-item span svg:first-child {
   margin-right: 0.4em;
 }
 
