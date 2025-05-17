@@ -21,7 +21,7 @@
  */
 import chalk from 'chalk';
 
-import BaseApplicationGenerator from '../base-application/index.js';
+import BaseGenerator from '../base/index.js';
 import JSONToJDLEntityConverter from '../../lib/jdl/converters/json-to-jdl-entity-converter.js';
 import JSONToJDLOptionConverter from '../../lib/jdl/converters/json-to-jdl-option-converter.js';
 import type { JHipsterGeneratorFeatures, JHipsterGeneratorOptions } from '../base/api.js';
@@ -33,7 +33,7 @@ import { replaceSensitiveConfig } from './support/utils.js';
 
 const isInfoCommand = commandName => commandName === 'info' || undefined;
 
-export default class InfoGenerator extends BaseApplicationGenerator {
+export default class InfoGenerator extends BaseGenerator<{ appsFolders?: string[]; baseName?: string; packages?: string[] }> {
   constructor(args: string | string[], options: JHipsterGeneratorOptions, features: JHipsterGeneratorFeatures) {
     super(args, options, {
       jhipsterBootstrap: false,
@@ -44,7 +44,7 @@ export default class InfoGenerator extends BaseApplicationGenerator {
     });
   }
 
-  get [BaseApplicationGenerator.INITIALIZING]() {
+  get [BaseGenerator.INITIALIZING]() {
     return this.asInitializingTaskGroup({
       sayHello() {
         this.log.log(chalk.white('Welcome to the JHipster Information Sub-Generator\n'));
