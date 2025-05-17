@@ -109,6 +109,24 @@ export default class AngularGenerator extends BaseApplicationGenerator<unknown, 
           const ignoreNonExisting = chalk.yellow('Reference to entities not added to menu.');
           const editCallback = addToEntitiesMenu(param);
           this.editFile(filePath, { ignoreNonExisting }, editCallback);
+
+          this.editFile(
+            `${application.clientSrcDir}app/entities/entity-navbar-items.ts`,
+            createNeedleCallback({
+              needle: 'add-entity-navbar',
+              contentToAdd: param.entities.map(
+                entity => `{
+  name: '${entity.entityAngularName}',
+  route: '/${entity.entityPage}',${
+    application.enableTranslation
+      ? `
+  translationKey: 'global.menu.entities.${entity.entityTranslationKey}',`
+      : ''
+  }
+  },`,
+              ),
+            }),
+          );
         };
         source.addAdminRoute = (args: Omit<Parameters<typeof addRoute>[0], 'needle'>) =>
           this.editFile(
