@@ -114,7 +114,7 @@ export default class AngularGenerator extends BaseApplicationGenerator<unknown, 
             `${application.clientSrcDir}app/entities/entity-navbar-items.ts`,
             createNeedleCallback({
               needle: 'add-entity-navbar',
-              contentToAdd: param.entities.map(
+              contentToAdd: param.entities.filter(e => !e.adminEntity).map(
                 entity => `{
   name: '${entity.entityAngularName}',
   route: '/${entity.entityPage}',${
