@@ -143,16 +143,6 @@ export default class InfoGenerator extends BaseGenerator<{ appsFolders?: string[
     let jdlObject;
     const entities = new Map<string, Entity>();
     try {
-      this.getExistingEntities().forEach(({ name, definition: entity }) => {
-        if (entity.fields) {
-          for (const field of entity.fields) {
-            if (field.fieldType === 'byte[]') {
-              convertFieldBlobType(field);
-            }
-          }
-        }
-        entities.set(name, entity);
-      });
       jdlObject = JSONToJDLEntityConverter.convertEntitiesToJDL(entities);
       JSONToJDLOptionConverter.convertServerOptionsToJDL({ 'generator-jhipster': this.config.getAll() }, jdlObject);
     } catch (error) {
