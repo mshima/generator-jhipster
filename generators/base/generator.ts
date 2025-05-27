@@ -638,9 +638,6 @@ export default class BaseGenerator<
         }
       }
       if (blueprintCommand?.override) {
-        if (this.generatorCommand) {
-          this.log.warn('Command already set, multiple blueprints may be overriding the command. Unexpected behavior may occur.');
-        }
         // Use the blueprint command if it is set to override.
         this.generatorCommand = blueprintCommand;
       }

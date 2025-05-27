@@ -156,7 +156,7 @@ export default class CoreGenerator<
 
   blueprintStorage?: Storage;
   /** Allow to use a specific definition at current command operations */
-  generatorCommand?: JHipsterCommandDefinition;
+  #generatorCommand?: JHipsterCommandDefinition;
   /**
    * @experimental
    * Additional commands to be considered
@@ -255,7 +255,7 @@ You can ignore this error by passing '--skip-checks' to jhipster command.`);
   /**
    * Get arguments for the priority
    */
-  getArgsForPriority(_priorityName: string) {
+  getArgsForPriority(_priorityName: string): any[] {
     return [{}];
   }
 
@@ -360,20 +360,27 @@ You can ignore this error by passing '--skip-checks' to jhipster command.`);
     });
   }
 
+  set generatorCommand(command: JHipsterCommandDefinition) {
+    if (this.#generatorCommand) {
+      throw new Error(`Generator command already set for ${this.options.namespace}`);
+    }
+    this.#generatorCommand = command;
+  }
+
   /**
    * Get the current Command Definition for the generator.
-   * `generatorCommand` takes precedence.
+   * `#generatorCommand` takes precedence.
    */
   async #getCurrentJHipsterCommand(): Promise<JHipsterCommandDefinition> {
-    if (!this.generatorCommand) {
+    if (!this.#generatorCommand) {
       const { command } = ((await this._meta?.importModule?.()) ?? {}) as any;
       if (!command) {
         throw new Error(`Command not found for generator ${this.options.namespace}`);
       }
-      this.generatorCommand = command;
+      this.#generatorCommand = command;
       return command;
     }
-    return this.generatorCommand;
+    return this.#generatorCommand;
   }
 
   /**
