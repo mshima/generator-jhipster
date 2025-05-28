@@ -120,6 +120,7 @@ spring:
     contexts: test
 <%_ } _%>
   jackson:
+    default-property-inclusion: non_null
     serialization:
       write-durations-as-timestamps: false
 <%_ if (databaseTypeCassandra) { _%>
