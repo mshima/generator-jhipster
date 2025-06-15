@@ -4,7 +4,7 @@ import type { Application as ClientApplication } from '../client/types.js';
 import type { Application as SpringBootApplication } from '../spring-boot/types.js';
 import type { Application as SpringDataRelationalApplication } from '../spring-data-relational/index.js';
 import type { Application as LiqbuibaseApplication } from '../liquibase/index.js';
-import type { I18nApplication } from '../languages/types.js';
+import type { Application as I18nApplication } from '../languages/types.js';
 import type { EntityAll } from './entity-all.js';
 import type { Application as BaseApplication } from './types.js';
 

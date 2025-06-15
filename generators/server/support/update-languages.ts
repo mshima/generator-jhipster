@@ -18,26 +18,29 @@
  */
 
 import { asPostWritingTask } from '../../base-application/support/task-type-inference.js';
+import type { Application as ServerApplication, Entity as ServerEntity } from '../types.js';
 
 /**
  * Update Languages In MailServiceIT
  *
  * @param application
  */
-export const updateLanguagesInMailServiceITTask = asPostWritingTask(function updateLanguagesInMailServiceITTask({ application, control }) {
-  const { javaPackageTestDir, languagesDefinition } = application;
-  const { ignoreNeedlesError: ignoreNonExisting } = control as any;
-  let newContent = 'private static final String[] languages = {\n';
-  languagesDefinition?.forEach((language, i) => {
-    newContent += `        "${language.languageTag}"${i !== languagesDefinition.length - 1 ? ',' : ''}\n`;
-  });
-  newContent += '        // jhipster-needle-i18n-language-constant - JHipster will add/remove languages in this array\n    };';
+export const updateLanguagesInMailServiceITTask = asPostWritingTask<ServerEntity, ServerApplication<ServerEntity>>(
+  function updateLanguagesInMailServiceITTask({ application }) {
+    const { javaPackageTestDir, languagesDefinition } = application;
+    const { ignoreNeedlesError: ignoreNonExisting } = this as any;
+    let newContent = 'private static final String[] languages = {\n';
+    languagesDefinition?.forEach((language, i) => {
+      newContent += `        "${language.languageTag}"${i !== languagesDefinition.length - 1 ? ',' : ''}\n`;
+    });
+    newContent += '        // jhipster-needle-i18n-language-constant - JHipster will add/remove languages in this array\n    };';
 
-  this.editFile(`${javaPackageTestDir}/service/MailServiceIT.java`, { ignoreNonExisting }, content =>
-    content.replace(/private.*static.*String.*languages.*\{([^}]*jhipster-needle-i18n-language-constant[^}]*)\};/g, newContent),
-  );
-});
+    this.editFile(`${javaPackageTestDir}/service/MailServiceIT.java`, { ignoreNonExisting }, content =>
+      content.replace(/private.*static.*String.*languages.*\{([^}]*jhipster-needle-i18n-language-constant[^}]*)\};/g, newContent),
+    );
+  },
+);
 
-export default asPostWritingTask(function updateLanguagesTask(this, taskParam) {
+export default asPostWritingTask<ServerEntity, ServerApplication<ServerEntity>>(function updateLanguagesTask(this, taskParam) {
   updateLanguagesInMailServiceITTask.call(this, taskParam);
 });
