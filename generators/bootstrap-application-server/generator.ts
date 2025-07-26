@@ -38,6 +38,7 @@ import {
   getPrimaryKeyValue,
   hibernateSnakeCase,
   loadRequiredConfigDerivedProperties,
+  preparePostEntityServerDerivedProperties,
   prepareRelationship,
 } from '../server/support/index.js';
 import { getGradleLibsVersionsProperties } from '../gradle/support/index.js';
@@ -241,6 +242,9 @@ export default class BoostrapApplicationServer extends BaseApplicationGenerator<
         // derivedPrimary uses '@MapsId', which requires for each relationship id field to have corresponding field in the model
         const derivedFields = primaryKey.derivedFields;
         entity.fields.unshift(...derivedFields!);
+      },
+      prepareEntityDerivedProperties({ entity }) {
+        preparePostEntityServerDerivedProperties(entity as any);
       },
     });
   }

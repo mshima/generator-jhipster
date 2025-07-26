@@ -33,6 +33,8 @@ import {
   loadEntitiesOtherSide,
   prepareEntity as prepareEntityForTemplates,
   prepareField as prepareFieldForTemplates,
+  preparePostEntitiesCommonDerivedProperties,
+  preparePostEntityCommonDerivedProperties,
   prepareRelationship,
   stringifyApplicationData,
 } from '../base-application/support/index.js';
@@ -133,6 +135,7 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator<
           packageJsonScripts: {},
           clientPackageJsonScripts: {},
           testFrameworks: [],
+          dockerContainers: {},
         });
       },
     });
@@ -513,6 +516,9 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator<
         };
         entity.hasCyclicRequiredRelationship = detectCyclicRequiredRelationship(entity, new Set());
       },
+      prepareEntityDerivedProperties({ entity }) {
+        preparePostEntityCommonDerivedProperties(entity);
+      },
     });
   }
 
@@ -573,6 +579,19 @@ export default class BootstrapApplicationBase extends BaseApplicationGenerator<
             }
           }),
         );
+      },
+      postPreparingEntities({ entities }) {
+        preparePostEntitiesCommonDerivedProperties(entities);
+      },
+      checkProperties({ entities }) {
+        for (const entity of entities) {
+          const properties = [...entity.fields.map(entity => entity.propertyName), ...entity.relationships.map(rel => rel.propertyName)];
+          if (new Set(properties).size !== properties.length) {
+            // Has duplicated properties.
+            const duplicated = [...new Set(properties.filter((v, i, a) => a.indexOf(v) !== i))];
+            throw new Error(`You have duplicate properties in entity ${entity.name}: ${duplicated.join(', ')}`);
+          }
+        }
       },
     });
   }

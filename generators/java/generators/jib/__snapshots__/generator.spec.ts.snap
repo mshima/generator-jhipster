@@ -113,7 +113,7 @@ exports[`generator - java:jib with defaults options should match source snapshot
         },
         {
           "property": "jib-maven-plugin.image",
-          "value": "java-jre-placeholder",
+          "value": undefined,
         },
         {
           "property": "jib-maven-plugin.architecture",

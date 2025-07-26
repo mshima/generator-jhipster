@@ -53,7 +53,7 @@ jib-plugin = { module = "com.google.cloud.tools:jib-gradle-plugin", version = "'
 jib {
     configurationName = "productionRuntimeClasspath"
     from {
-        image = "java-jre-placeholder"
+        image = ""
         platforms {
             platform {
                 architecture = "\${findProperty('jibArchitecture') ?: 'amd64'}"
