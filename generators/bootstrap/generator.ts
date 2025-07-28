@@ -25,11 +25,12 @@ import { createCommitTransform } from 'mem-fs-editor/transform';
 import type { Options as PrettierOptions } from 'prettier';
 import type { FileTransform, PipelineOptions } from 'mem-fs';
 
-import BaseGenerator from '../base/index.js';
+import { CommandBaseGenerator as BaseGenerator } from '../base/index.js';
 import { PRETTIER_EXTENSIONS } from '../generator-constants.js';
 import { GENERATOR_UPGRADE } from '../generator-list.js';
 import { PRIORITY_NAMES, QUEUES } from '../base-application/priorities.js';
 import type { Features as BaseFeatures, Options as BaseOptions } from '../base/types.d.ts';
+import { createNeedleTransform } from '../base-core/support/needles.js';
 import {
   autoCrlfTransform,
   createESLintTransform,
@@ -40,6 +41,7 @@ import {
   createSortConfigFilesTransform,
   isPrettierConfigFilePath,
 } from './support/index.js';
+import type command from './command.ts';
 
 const { MULTISTEP_TRANSFORM, PRE_CONFLICTS } = PRIORITY_NAMES;
 const { MULTISTEP_TRANSFORM_QUEUE, PRE_CONFLICTS_QUEUE } = QUEUES;
@@ -47,7 +49,7 @@ const { MULTISTEP_TRANSFORM_QUEUE, PRE_CONFLICTS_QUEUE } = QUEUES;
 const MULTISTEP_TRANSFORM_PRIORITY = BaseGenerator.asPriority(MULTISTEP_TRANSFORM);
 const PRE_CONFLICTS_PRIORITY = BaseGenerator.asPriority(PRE_CONFLICTS);
 
-export default class BootstrapGenerator extends BaseGenerator {
+export default class BootstrapGenerator extends BaseGenerator<typeof command> {
   static MULTISTEP_TRANSFORM = MULTISTEP_TRANSFORM_PRIORITY;
 
   static PRE_CONFLICTS = PRE_CONFLICTS_PRIORITY;
@@ -239,11 +241,17 @@ export default class BootstrapGenerator extends BaseGenerator {
       };
     }
 
+    const removeNeedlesTransforms: FileTransform<MemFsEditorFile>[] = [];
+    if (this.jhipsterConfig.removeNeedles) {
+      removeNeedlesTransforms.push(createNeedleTransform());
+    }
+
     const transformStreams = [
       ...skipYoResolveTransforms,
       forceYoFiles(),
       createSortConfigFilesTransform(),
       createForceWriteConfigFilesTransform(),
+      ...removeNeedlesTransforms,
       ...prettierTransforms,
       ...autoCrlfTransforms,
       createConflicterTransform(this.env.adapter, { ...this.env.conflicterOptions, customizeActions }),
