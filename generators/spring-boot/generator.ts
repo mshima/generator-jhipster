@@ -34,7 +34,7 @@ import { mutateData } from '../../lib/utils/index.ts';
 import BaseApplicationGenerator from '../base-application/index.ts';
 import { createNeedleCallback, isWin32 } from '../base-core/support/index.ts';
 import { editPropertiesFileCallback } from '../base-core/support/properties-file.ts';
-import type { Config as ClientConfig } from '../client/types.ts';
+import type { Config as ClientConfig, Entity as ClientEntity } from '../client/types.ts';
 import type { Source as CommonSource } from '../common/types.ts';
 import type { Entity as CypressEntity } from '../cypress/types.ts';
 import { ADD_SPRING_MILESTONE_REPOSITORY } from '../generator-constants.js';
@@ -161,6 +161,7 @@ export default class SpringBootGenerator extends SpringBootApplicationGenerator 
       async composing() {
         const {
           applicationType,
+          authenticationType,
           databaseType,
           graalvmSupport,
           searchEngine,
@@ -175,6 +176,10 @@ export default class SpringBootGenerator extends SpringBootApplicationGenerator 
         await this.composeWithJHipster(GENERATOR_DOCKER);
         await this.composeWithJHipster('jhipster:java:jib');
         await this.composeWithJHipster('jhipster:java:code-quality');
+
+        if (authenticationType === 'jwt' || authenticationType === 'oauth2') {
+          await this.composeWithJHipster(`jhipster:spring-boot:${authenticationType}`);
+        }
 
         if (graalvmSupport) {
           await this.composeWithJHipster('jhipster:java:graalvm');
@@ -442,7 +447,7 @@ ${classProperties
     return this.asPreparingEachEntityTaskGroup({
       prepareEntity({ entity, application }) {
         if (entity.entityRestLayer === false) {
-          entity.entityClientModelOnly = true;
+          (entity as unknown as ClientEntity).entityClientModelOnly = true;
         }
 
         const hasAnyAuthority = (authorities: string[]): string | undefined =>
@@ -571,7 +576,7 @@ ${classProperties
           entityJavaCustomFilters: sortedUniqBy(entity.fields.map(field => field.propertyJavaCustomFilter).filter(Boolean), 'type'),
         });
 
-        mutateData(entity as CypressEntity, {
+        mutateData(entity as unknown as CypressEntity, {
           __override__: true,
           // Reactive with some r2dbc databases doesn't allow insertion without data.
           workaroundEntityCannotBeEmpty: ({ reactive, prodDatabaseType }: any) =>
@@ -799,7 +804,7 @@ ${classProperties
         const { buildToolExecutable } = application;
         this.log.ok('Spring Boot application generated successfully.');
 
-        if (application.dockerServices?.length && !control.enviromentHasDockerCompose) {
+        if (application.dockerServices?.length && !control.environmentHasDockerCompose) {
           const dockerComposeCommand = chalk.yellow.bold('docker compose');
           this.log('');
           this.log

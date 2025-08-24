@@ -16,13 +16,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { camelCase, kebabCase, upperFirst } from 'lodash-es';
-import pluralize from 'pluralize';
 
 import { mutateData } from '../../../../lib/utils/object.ts';
-import { normalizePathEnd } from '../../../../lib/utils/path.ts';
-import { upperFirstCamelCase } from '../../../../lib/utils/string.ts';
 import BaseApplicationGenerator from '../../../base-application/index.ts';
+import { LOGIN_REGEX, MAIN_DIR, TEST_DIR } from '../../../generator-constants.js';
+import { mutateEntity as commonMutateEntity, mutateField as commonMutateField } from '../../entity.ts';
 import type {
   Application as CommonApplication,
   Config as CommonConfig,
@@ -38,6 +36,7 @@ export default class BootstrapGenerator extends BaseApplicationGenerator<CommonE
       await this.composeWithBlueprints();
     }
 
+    await this.dependsOnBootstrap('javascript');
     await this.dependsOnBootstrap('base-application');
     await this.dependsOnBootstrap('languages');
   }
@@ -58,8 +57,43 @@ export default class BootstrapGenerator extends BaseApplicationGenerator<CommonE
 
   get preparing() {
     return this.asPreparingTaskGroup({
+      setupConstants({ applicationDefaults }) {
+        // Make constants available in templates
+        applicationDefaults({
+          srcMain: MAIN_DIR,
+          srcTest: TEST_DIR,
+          // TODO drop clientPackageManager
+          clientPackageManager: ({ nodePackageManager }) => nodePackageManager,
+
+          loginRegex: LOGIN_REGEX,
+
+          jwtSecretKey: undefined,
+          gatewayServerPort: undefined,
+        });
+      },
       prepareApplication({ applicationDefaults }) {
         applicationDefaults({
+          backendType: 'Java',
+          backendTypeSpringBoot: ({ backendType }) => backendType === 'Java',
+          backendTypeJavaAny: ({ backendTypeSpringBoot }) => backendTypeSpringBoot,
+
+          temporaryDir: ({ backendType, buildTool }) => {
+            if (['Java'].includes(backendType!)) {
+              return buildTool === 'gradle' ? 'build/' : 'target/';
+            }
+            return 'temp/';
+          },
+          clientDistDir: ({ backendType, temporaryDir, buildTool }) => {
+            if (['Java'].includes(backendType!)) {
+              return `${temporaryDir}${buildTool === 'gradle' ? 'resources/main/' : 'classes/'}static/`;
+            }
+            return 'dist/';
+          },
+
+          authenticationTypeSession: data => data.authenticationType === 'session',
+          authenticationTypeJwt: data => data.authenticationType === 'jwt',
+          authenticationTypeOauth2: data => data.authenticationType === 'oauth2',
+
           authenticationUsesCsrf: ({ authenticationType }) => ['oauth2', 'session'].includes(authenticationType!),
           endpointPrefix: ({ applicationType, lowercaseBaseName }) =>
             applicationType === 'microservice' ? `services/${lowercaseBaseName}` : '',
@@ -108,55 +142,26 @@ export default class BootstrapGenerator extends BaseApplicationGenerator<CommonE
 
   get preparingEachEntity() {
     return this.asPreparingEachEntityFieldTaskGroup({
-      prepareEntity({ application, entity }) {
-        mutateData(entity, {
-          __override__: true,
-          entityAngularJSSuffix: data => {
-            const entityAngularJSSuffix = data.entityAngularJSSuffix ?? data.angularJSSuffix ?? '';
-            return entityAngularJSSuffix.startsWith('-') || !entityAngularJSSuffix ? entityAngularJSSuffix : `-${entityAngularJSSuffix}`;
-          },
-        });
-
-        mutateData(entity, {
-          __override__: false,
-          // Implement i18n variant ex: 'male', 'female' when applied
-          entityI18nVariant: 'default',
-          clientRootFolder: '',
-          entityFileName: data => kebabCase(data.entityNameCapitalized + upperFirst(data.entityAngularJSSuffix)),
-          entityAngularName: data => upperFirst(data.entityNameCapitalized) + upperFirstCamelCase(data.entityAngularJSSuffix!),
-          entityReactName: data => upperFirst(data.entityNameCapitalized) + upperFirstCamelCase(data.entityAngularJSSuffix!),
-          entityAngularNamePlural: data => pluralize(data.entityAngularName),
-          entityApiUrl: data => data.entityNamePluralizedAndSpinalCased,
-          entityFolderName: data => `${normalizePathEnd(data.clientRootFolder)}${data.entityFileName}`,
-          entityModelFileName: data => data.entityFolderName,
-          entityPluralFileName: data => `${data.entityNamePluralizedAndSpinalCased}${data.entityAngularJSSuffix}`,
-          entityServiceFileName: data => data.entityFileName,
-          entityStateName: data => kebabCase(data.entityAngularName),
-          entityUrl: data => data.entityStateName,
-          entityTranslationKey: data =>
-            data.clientRootFolder ? camelCase(`${data.clientRootFolder}-${data.entityInstance}`) : data.entityInstance,
-          entityTranslationKeyMenu: data =>
-            camelCase(data.clientRootFolder ? `${data.clientRootFolder}-${data.entityStateName}` : data.entityStateName),
-          i18nKeyPrefix: data => data.i18nKeyPrefix ?? `${application.frontendAppName}.${data.entityTranslationKey}`,
-          i18nAlertHeaderPrefix: data =>
-            (data.i18nAlertHeaderPrefix ?? data.microserviceAppName)
-              ? `${data.microserviceAppName}.${data.entityTranslationKey}`
-              : data.i18nKeyPrefix,
-          entityApi: ({ microserviceName }) => (microserviceName ? `services/${microserviceName.toLowerCase()}/` : ''),
-          entityPage: ({ microserviceName, entityFileName }) =>
-            microserviceName && application.microfrontend && application.applicationTypeMicroservice
-              ? `${microserviceName.toLowerCase()}/${entityFileName}`
-              : `${entityFileName}`,
-          paginationPagination: data => data.pagination === 'pagination',
-          paginationInfiniteScroll: data => data.pagination === 'infinite-scroll',
-          paginationNo: data => data.pagination === 'no',
-        });
+      prepareEntity({ entity }) {
+        mutateData(entity, commonMutateEntity);
       },
     });
   }
 
   get [BaseApplicationGenerator.PREPARING_EACH_ENTITY]() {
     return this.preparingEachEntity;
+  }
+
+  get preparingEachEntityField() {
+    return this.asPreparingEachEntityFieldTaskGroup({
+      preparing({ field }) {
+        mutateData(field, commonMutateField);
+      },
+    });
+  }
+
+  get [BaseApplicationGenerator.PREPARING_EACH_ENTITY_FIELD]() {
+    return this.delegateTasksToBlueprint(() => this.preparingEachEntityField);
   }
 
   get default() {
@@ -174,6 +179,9 @@ export default class BootstrapGenerator extends BaseApplicationGenerator<CommonE
             ],
           });
         }
+      },
+      hasNonBuiltInEntity({ application, entities }) {
+        application.hasNonBuiltInEntity = entities.filter(e => !e.builtIn).length > 0;
       },
     });
   }

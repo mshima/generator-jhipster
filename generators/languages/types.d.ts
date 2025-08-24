@@ -16,16 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import type { HandleCommandTypes } from '../../lib/command/types.ts';
 import type {
   Application as BaseApplicationApplication,
   Config as BaseApplicationConfig,
   Entity as BaseApplicationEntity,
-  Field as BaseApplicationField,
   Options as BaseApplicationOptions,
-  Relationship as BaseApplicationRelationship,
   Source as BaseApplicationSource,
 } from '../base-application/types.d.ts';
+import type { Application as JavascriptApplication } from '../javascript/types.ts';
 
 import type command from './command.ts';
 import type { Language } from './support/languages.ts';
@@ -41,6 +41,7 @@ export type Source = BaseApplicationSource & {
 };
 
 export type Application<E extends BaseApplicationEntity = BaseApplicationEntity> = BaseApplicationApplication<E> &
+  JavascriptApplication &
   Omit<Command['Application'], 'languages' | 'languagesDefinition'> & {
     enableTranslation: boolean;
     enableI18nRTL: boolean;
@@ -48,18 +49,7 @@ export type Application<E extends BaseApplicationEntity = BaseApplicationEntity>
     nativeLanguageDefinition: Language;
     languages: string[];
     languagesDefinition: readonly Language[];
+    i18nDir: string;
   };
 
-export { BaseApplicationField as Field, BaseApplicationRelationship as Relationship };
-
-export interface Entity<
-  F extends BaseApplicationField = BaseApplicationField,
-  R extends BaseApplicationRelationship = BaseApplicationRelationship,
-> extends BaseApplicationEntity<F, R> {
-  entityTranslationKey: string;
-  entityTranslationKeyMenu: string;
-
-  entityI18nVariant: string;
-  i18nKeyPrefix: string;
-  i18nAlertHeaderPrefix: string;
-}
+export * from './entity.ts';

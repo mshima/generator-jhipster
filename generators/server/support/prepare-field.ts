@@ -21,7 +21,7 @@ import assert from 'node:assert';
 import { snakeCase, upperFirst } from 'lodash-es';
 
 import { databaseTypes, entityOptions, fieldTypes, reservedKeywords } from '../../../lib/jhipster/index.ts';
-import { applyDerivedProperty, mutateData } from '../../../lib/utils/index.ts';
+import { buildMutateDataForProperty, mutateData } from '../../../lib/utils/index.ts';
 import type CoreGenerator from '../../base-core/generator.ts';
 import { formatDocAsApiDescription, formatDocAsJavaDoc } from '../../java/support/doc.ts';
 import type { Field as LiquibaseField } from '../../liquibase/types.d.ts';
@@ -70,9 +70,7 @@ export default function prepareField(
 
   const { reactive: entityReactive, prodDatabaseType: entityProdDatabaseType } = entityWithConfig as any;
   if (field.id && entityWithConfig.primaryKey) {
-    if (field.autoGenerate === undefined) {
-      field.autoGenerate = !entityWithConfig.primaryKey.composite && ([INTEGER, LONG, UUID] as string[]).includes(field.fieldType);
-    }
+    field.autoGenerate ??= !entityWithConfig.primaryKey.composite && ([INTEGER, LONG, UUID] as string[]).includes(field.fieldType);
 
     if (!field.autoGenerate) {
       field.liquibaseAutoIncrement = false;
@@ -164,7 +162,8 @@ export default function prepareField(
   } else {
     field.javaFieldType = field.fieldType;
   }
-  applyDerivedProperty(field, 'javaFieldType', ['String', 'Integer', 'Long', 'UUID']);
+
+  mutateData(field, buildMutateDataForProperty('javaFieldType', ['String', 'Integer', 'Long', 'UUID']));
 
   if (field.fieldTypeInteger || field.fieldTypeLong || field.fieldTypeString || field.fieldTypeUUID) {
     if (field.fieldTypeInteger) {

@@ -49,7 +49,7 @@ export default class DockerGenerator extends BaseApplicationGenerator<Applicatio
     }
 
     if (!this.delegateToBlueprint) {
-      await this.dependsOnBootstrap('base-application');
+      await this.dependsOnBootstrap('common');
       await this.dependsOnBootstrap('docker');
     }
   }
@@ -316,7 +316,7 @@ export default class DockerGenerator extends BaseApplicationGenerator<Applicatio
   get end() {
     return this.asEndTaskGroup({
       async dockerComposeUp({ control }) {
-        if (!control.enviromentHasDockerCompose) {
+        if (!control.environmentHasDockerCompose) {
           this.log('');
           this.log.warn(
             'Docker Compose V2 is not installed on your computer. Some features may not work as expected. Read https://docs.docker.com/compose/install/',

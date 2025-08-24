@@ -119,7 +119,7 @@ export default class AngularGenerator extends BaseApplicationGenerator<
           const addRouteCallback = addEntitiesRoute(param);
           this.editFile(routeTemplatePath, { ignoreNonExisting: ignoreNonExistingRoute }, addRouteCallback);
 
-          const filePath = `${application.clientSrcDir}app/layouts/navbar/navbar.component.html`;
+          const filePath = `${application.clientSrcDir}app/layouts/navbar/navbar.html`;
           const ignoreNonExisting = chalk.yellow('Reference to entities not added to menu.');
           const editCallback = addToEntitiesMenu(param);
           this.editFile(filePath, { ignoreNonExisting }, editCallback);
@@ -135,7 +135,7 @@ export default class AngularGenerator extends BaseApplicationGenerator<
 
         source.addItemToAdminMenu = (args: Omit<Parameters<typeof addItemToMenu>[0], 'needle' | 'enableTranslation' | 'jhiPrefix'>) => {
           this.editFile(
-            `${application.clientSrcDir}app/layouts/navbar/navbar.component.html`,
+            `${application.clientSrcDir}app/layouts/navbar/navbar.html`,
             addItemToAdminMenu({
               enableTranslation: application.enableTranslation,
               jhiPrefix: application.jhiPrefix,
@@ -150,7 +150,7 @@ export default class AngularGenerator extends BaseApplicationGenerator<
         source.addLanguagesInFrontend = ({ languagesDefinition }) => {
           if (application.clientBundlerExperimentalEsbuild) {
             this.editFile(
-              `${application.clientSrcDir}i18n/index.ts`,
+              `${application.i18nDir}index.ts`,
               createNeedleCallback({
                 needle: 'i18n-language-loader',
                 contentToAdd: languagesDefinition.map(
@@ -371,14 +371,14 @@ export default class AngularGenerator extends BaseApplicationGenerator<
         }
       },
       sonar({ application, source }) {
-        const { clientDistDir, clientSrcDir, temporaryDir } = application;
+        const { clientDistDir, clientSrcDir, i18nDir, temporaryDir } = application;
         source.addSonarProperties?.([
           { key: 'sonar.test.inclusions', value: `${clientSrcDir}app/**/*.spec.ts`, valueSep: ', ' },
           { key: 'sonar.testExecutionReportPaths', value: `${temporaryDir}/test-results/jest/TESTS-results-sonar.xml` },
           { key: 'sonar.javascript.lcov.reportPaths', value: `${temporaryDir}/test-results/lcov.info` },
           {
             key: 'sonar.exclusions',
-            value: `${clientSrcDir}content/**/*.*, ${clientSrcDir}i18n/*.ts, ${clientDistDir}**/*.*`,
+            value: `${clientSrcDir}content/**/*.*, ${i18nDir}*.ts, ${clientDistDir}**/*.*`,
             valueSep: ', ',
           },
         ]);

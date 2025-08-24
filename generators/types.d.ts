@@ -30,6 +30,7 @@ export type GeneratorsWithBootstrap =
   | 'jdl'
   | 'kubernetes'
   | 'languages'
+  | 'project-name'
   | 'server'
   | 'spring-boot';
 // jhipster-needle-add-generator-with-bootstrap
@@ -109,6 +110,8 @@ type GeneratorsByNamespace = {
   'jhipster:java:node': import('./java/generators/node/generator.ts').default;
   'jhipster:java:openapi-generator': import('./java/generators/openapi-generator/generator.ts').default;
   'jhipster:java:server': import('./java/generators/server/generator.ts').default;
+  javascript: import('./javascript/generator.ts').default;
+  'jhipster:javascript': import('./javascript/generator.ts').default;
   'jhipster:javascript:bootstrap': import('./javascript/generators/bootstrap/generator.ts').default;
   'jhipster:javascript:eslint': import('./javascript/generators/eslint/generator.ts').default;
   'jhipster:javascript:husky': import('./javascript/generators/husky/generator.ts').default;
@@ -135,6 +138,7 @@ type GeneratorsByNamespace = {
   'jhipster:maven:jib': import('./maven/generators/jib/generator.ts').default;
   'project-name': import('./project-name/generator.ts').default;
   'jhipster:project-name': import('./project-name/generator.ts').default;
+  'jhipster:project-name:bootstrap': import('./project-name/generators/bootstrap/generator.ts').default;
   react: import('./react/generator.ts').default;
   'jhipster:react': import('./react/generator.ts').default;
   server: import('./server/generator.ts').default;
@@ -143,6 +147,8 @@ type GeneratorsByNamespace = {
   'spring-boot': import('./spring-boot/generator.ts').default;
   'jhipster:spring-boot': import('./spring-boot/generator.ts').default;
   'jhipster:spring-boot:bootstrap': import('./spring-boot/generators/bootstrap/generator.ts').default;
+  'jhipster:spring-boot:jwt': import('./spring-boot/generators/jwt/generator.ts').default;
+  'jhipster:spring-boot:oauth2': import('./spring-boot/generators/oauth2/generator.ts').default;
   'spring-cache': import('./spring-cache/generator.ts').default;
   'jhipster:spring-cache': import('./spring-cache/generator.ts').default;
   'spring-cloud-stream': import('./spring-cloud-stream/generator.ts').default;

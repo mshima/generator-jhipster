@@ -20,7 +20,7 @@ import assert from 'node:assert';
 
 import { passthrough } from '@yeoman/transform';
 import chalk from 'chalk';
-import { kebabCase, lowerFirst, upperFirst } from 'lodash-es';
+import { lowerFirst, upperFirst } from 'lodash-es';
 import type { MemFsEditorFile } from 'mem-fs-editor';
 import { isFileStateModified } from 'mem-fs-editor/state';
 
@@ -32,11 +32,12 @@ import type { ApplicationAll } from '../../../../lib/types/application-all.ts';
 import { mutateData, removeFieldsWithNullishValues } from '../../../../lib/utils/index.ts';
 import { loadDerivedConfig } from '../../../base-core/internal/config-def.ts';
 import { isWin32 } from '../../../base-core/support/index.ts';
-import { LOGIN_REGEX } from '../../../generator-constants.js';
 import { GENERATOR_COMMON } from '../../../generator-list.ts';
 import serverCommand from '../../../server/command.ts';
 import type { Application as SpringBootApplication } from '../../../spring-boot/types.ts';
 import type { Application as SpringDataRelationalApplication } from '../../../spring-data-relational/types.ts';
+import { mutateApplication } from '../../application.ts';
+import { mutateRelationship, mutateRelationshipWithEntity } from '../../entity.ts';
 import BaseApplicationGenerator from '../../index.ts';
 import { convertFieldBlobType, getBlobContentType, isFieldBinaryType, isFieldBlobType } from '../../internal/types/field-types.ts';
 import { createAuthorityEntity, createUserEntity, createUserManagementEntity } from '../../internal/utils.ts';
@@ -113,28 +114,7 @@ export default class BootstrapBaseApplicationGenerator extends BaseApplicationGe
         loadDerivedConfig(serverCommand.configs, { application });
       },
       loadApplication({ applicationDefaults }) {
-        applicationDefaults({
-          jhiPrefixCapitalized: ({ jhiPrefix }) => upperFirst(jhiPrefix),
-          jhiPrefixDashed: ({ jhiPrefix }) => kebabCase(jhiPrefix),
-
-          backendType: 'Java',
-          temporaryDir: ({ backendType, buildTool }) => {
-            if (['Java'].includes(backendType!)) {
-              return buildTool === 'gradle' ? 'build/' : 'target/';
-            }
-            return 'temp/';
-          },
-          clientDistDir: ({ backendType, temporaryDir, buildTool }) => {
-            if (['Java'].includes(backendType!)) {
-              return `${temporaryDir}${buildTool === 'gradle' ? 'resources/main/' : 'classes/'}static/`;
-            }
-            return 'dist/';
-          },
-
-          authenticationTypeSession: data => data.authenticationType === 'session',
-          authenticationTypeJwt: data => data.authenticationType === 'jwt',
-          authenticationTypeOauth2: data => data.authenticationType === 'oauth2',
-        });
+        applicationDefaults(mutateApplication);
       },
       loadApplicationKeysForEjs({ application }) {
         mutateData(application as unknown as SpringBootApplication, {
@@ -169,7 +149,7 @@ export default class BootstrapBaseApplicationGenerator extends BaseApplicationGe
   get preparing() {
     return this.asPreparingTaskGroup({
       /**
-       * Avoid having undefined keys in the application object when redering ejs templates
+       * Avoid having undefined keys in the application object when rendering ejs templates
        */
       async loadApplicationKeys({ application }) {
         const { applyDefaults = getConfigWithDefaults, commandsConfigs = await lookupCommandsConfigs() } = this.options;
@@ -179,7 +159,7 @@ export default class BootstrapBaseApplicationGenerator extends BaseApplicationGe
           commandsConfigs,
         });
       },
-      prepareApplication({ application, applicationDefaults }) {
+      prepareApplication({ application }) {
         if (application.microfrontends && application.microfrontends.length > 0) {
           application.microfrontends.forEach(microfrontend => {
             const { baseName } = microfrontend;
@@ -200,20 +180,6 @@ export default class BootstrapBaseApplicationGenerator extends BaseApplicationGe
         if (application.microfrontend && application.applicationTypeMicroservice && !application.gatewayServerPort) {
           application.gatewayServerPort = 8080;
         }
-
-        applicationDefaults({
-          __override__: false,
-          // TODO drop clientPackageManager
-          clientPackageManager: ({ nodePackageManager }) => nodePackageManager,
-
-          backendTypeSpringBoot: ({ backendType }) => backendType === 'Java',
-          backendTypeJavaAny: ({ backendTypeSpringBoot }) => backendTypeSpringBoot,
-
-          loginRegex: LOGIN_REGEX,
-
-          jwtSecretKey: undefined,
-          gatewayServerPort: undefined,
-        });
       },
     });
   }
@@ -383,12 +349,10 @@ export default class BootstrapBaseApplicationGenerator extends BaseApplicationGe
             }
           }
           for (const relationship of entity.relationships) {
-            if (relationship.ownerSide === undefined) {
-              // ownerSide backward compatibility
-              relationship.ownerSide =
-                relationship.relationshipType === 'many-to-one' ||
-                (relationship.relationshipType !== 'one-to-many' && relationship.relationshipSide === 'left');
-            }
+            // ownerSide backward compatibility
+            relationship.ownerSide ??=
+              relationship.relationshipType === 'many-to-one' ||
+              (relationship.relationshipType !== 'one-to-many' && relationship.relationshipSide === 'left');
           }
         }
       },
@@ -433,6 +397,14 @@ export default class BootstrapBaseApplicationGenerator extends BaseApplicationGe
   get preparingEachEntityRelationship() {
     return this.asPreparingEachEntityRelationshipTaskGroup({
       prepareRelationshipsForTemplates({ entity, relationship }) {
+        const entityName = entity.name;
+        if (!relationship.otherEntity) {
+          throw new Error(
+            `Error at entity ${entityName}: could not find the entity of the relationship ${stringifyApplicationData(relationship)}`,
+          );
+        }
+        mutateData(relationship, mutateRelationship, mutateRelationshipWithEntity);
+
         prepareRelationship.call(this, entity, relationship);
       },
     });
@@ -483,7 +455,7 @@ export default class BootstrapBaseApplicationGenerator extends BaseApplicationGe
   get default() {
     return this.asDefaultTaskGroup({
       /**
-       * Avoid having undefined keys in the application object when redering ejs templates
+       * Avoid having undefined keys in the application object when rendering ejs templates
        */
       async loadApplicationKeys({ application }) {
         if (this.options.commandsConfigs) {
@@ -498,9 +470,6 @@ export default class BootstrapBaseApplicationGenerator extends BaseApplicationGe
           templatesContext: application,
           commandsConfigs: await lookupCommandsConfigs(),
         });
-      },
-      hasNonBuiltInEntity({ application, entities }) {
-        application.hasNonBuiltInEntity = entities.filter(e => !e.builtIn).length > 0;
       },
       task({ application }) {
         const packageJsonFiles = [this.destinationPath('package.json')];

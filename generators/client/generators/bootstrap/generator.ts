@@ -16,9 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { getFrontendAppName } from '../../../../lib/utils/index.ts';
-import { CLIENT_MAIN_SRC_DIR, CLIENT_TEST_SRC_DIR, LOGIN_REGEX_JS } from '../../../generator-constants.js';
+import { getFrontendAppName, mutateData } from '../../../../lib/utils/index.ts';
+import { CLIENT_TEST_SRC_DIR, LOGIN_REGEX_JS } from '../../../generator-constants.js';
 import clientCommand from '../../command.ts';
+import { mutateEntity, mutateField } from '../../entity.ts';
 import { ClientApplicationGenerator } from '../../generator.ts';
 import { filterEntitiesForClient, filterEntityPropertiesForClient, preparePostEntityClientDerivedProperties } from '../../support/index.ts';
 import type { Features as ClientFeatures, Options as ClientOptions } from '../../types.d.ts';
@@ -59,9 +60,7 @@ export default class ClientBootstrap extends ClientApplicationGenerator {
       loadDefaults({ applicationDefaults }) {
         applicationDefaults({
           __override__: false,
-          clientRootDir: '',
           clientDistDir: 'dist/',
-          clientSrcDir: ({ clientRootDir }) => `${clientRootDir}${clientRootDir ? 'src/' : CLIENT_MAIN_SRC_DIR}`,
           clientTestDir: ({ clientRootDir }) => `${clientRootDir}${clientRootDir ? 'test/' : CLIENT_TEST_SRC_DIR}`,
           frontendAppName: ({ baseName }) => getFrontendAppName({ baseName }),
           microfrontend: application => {
@@ -87,6 +86,36 @@ export default class ClientBootstrap extends ClientApplicationGenerator {
 
   get [ClientApplicationGenerator.PREPARING]() {
     return this.preparing;
+  }
+
+  get preparingEachEntity() {
+    return this.asPreparingEachEntityTaskGroup({
+      preparing({ application, entity }) {
+        mutateData(entity, mutateEntity, {
+          __override__: false,
+          entityPage: ({ microserviceName, entityFileName }) =>
+            microserviceName && application.microfrontend && application.applicationTypeMicroservice
+              ? `${microserviceName.toLowerCase()}/${entityFileName}`
+              : `${entityFileName}`,
+        });
+      },
+    });
+  }
+
+  get [ClientApplicationGenerator.PREPARING_EACH_ENTITY]() {
+    return this.delegateTasksToBlueprint(() => this.preparingEachEntity);
+  }
+
+  get preparingEachEntityField() {
+    return this.asPreparingEachEntityFieldTaskGroup({
+      preparing({ field }) {
+        mutateData(field, mutateField);
+      },
+    });
+  }
+
+  get [ClientApplicationGenerator.PREPARING_EACH_ENTITY_FIELD]() {
+    return this.delegateTasksToBlueprint(() => this.preparingEachEntityField);
   }
 
   get default() {

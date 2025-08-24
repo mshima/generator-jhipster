@@ -22,6 +22,11 @@ import { escape, min } from 'lodash-es';
 
 import { fieldTypes } from '../../lib/jhipster/index.ts';
 import type { EntityAll } from '../../lib/types/application-all.d.ts';
+import { mutateData } from '../../lib/utils/object.ts';
+import {
+  mutateRelationship as mutateBaseApplicationRelationship,
+  mutateRelationshipWithEntity as mutateBaseApplicationRelationshipWithEntity,
+} from '../base-application/entity.ts';
 import {
   loadRequiredConfigIntoEntity,
   prepareCommonFieldForTemplates,
@@ -32,11 +37,12 @@ import {
 import type { DerivedField } from '../base-application/types.ts';
 import BaseEntityChangesGenerator from '../base-entity-changes/index.ts';
 import type { BaseChangelog } from '../base-entity-changes/types.ts';
-import type { Entity as CommonEntity } from '../common/types.ts';
+import { mutateField as commonMutateField } from '../common/entity.ts';
+import type { Entity as CommonEntity, Field as CommonField } from '../common/types.ts';
 import { prepareEntity as prepareEntityForServer } from '../java/support/index.ts';
 import type { MavenProperty } from '../maven/types.ts';
 import { getFKConstraintName, getUXConstraintName, prepareField as prepareServerFieldForTemplates } from '../server/support/index.ts';
-import type { Entity as ServerEntity, Field as CommonField } from '../server/types.ts';
+import type { Entity as ServerEntity } from '../server/types.ts';
 import type { Source as SpringBootSource } from '../spring-boot/index.ts';
 import { prepareSqlApplicationProperties } from '../spring-data-relational/support/index.ts';
 
@@ -200,7 +206,8 @@ export default class LiquibaseGenerator<
               prepareEntityPrimaryKeyForTemplates.call(this, { entity: entity as unknown as EntityAll, application });
             }
             for (const field of entity.fields ?? []) {
-              prepareCommonFieldForTemplates(entity as unknown as CommonEntity, field as unknown as CommonField, this);
+              prepareCommonFieldForTemplates(entity, field, this);
+              mutateData(field as CommonField, commonMutateField);
               prepareServerFieldForTemplates(application as any, entity as unknown as ServerEntity, field as any, this);
               prepareFieldForLiquibase(application, field);
             }
@@ -213,6 +220,7 @@ export default class LiquibaseGenerator<
             // Prepare them.
             const entity = databaseChangelog.previousEntity!;
             for (const relationship of entity.relationships ?? []) {
+              mutateData(relationship, mutateBaseApplicationRelationship, mutateBaseApplicationRelationshipWithEntity);
               prepareRelationship.call(this, entity, relationship, true);
               prepareRelationshipForLiquibase({ application, entity, relationship });
             }

@@ -24,7 +24,6 @@ import BaseApplicationGenerator from '../base-application/index.ts';
 import type { PropertiesFileLines } from '../base-core/support/index.ts';
 import { editPropertiesFileCallback } from '../base-core/support/index.ts';
 import { createPrettierTransform } from '../bootstrap/support/prettier-support.ts';
-import { MAIN_DIR, TEST_DIR } from '../generator-constants.js';
 import { GENERATOR_COMMON, GENERATOR_GIT } from '../generator-list.ts';
 
 import { writeFiles } from './files.ts';
@@ -49,7 +48,8 @@ export default class CommonGenerator extends BaseApplicationGenerator<
     }
 
     if (!this.delegateToBlueprint) {
-      await this.dependsOnBootstrap('base-application');
+      await this.dependsOnBootstrap('common');
+      await this.dependsOnJHipster('javascript');
       await this.dependsOnJHipster(GENERATOR_GIT);
     }
   }
@@ -92,39 +92,6 @@ export default class CommonGenerator extends BaseApplicationGenerator<
     return this.delegateTasksToBlueprint(() => this.composing);
   }
 
-  get configuringEachEntity() {
-    return this.asConfiguringEachEntityTaskGroup({
-      migrateEntity({ entityConfig, entityStorage }) {
-        for (const field of entityConfig.fields!) {
-          if (field.javadoc) {
-            field.documentation ??= field.javadoc;
-            delete field.javadoc;
-          }
-          if (field.fieldTypeJavadoc) {
-            field.fieldTypeDocumentation ??= field.fieldTypeJavadoc;
-            delete field.fieldTypeJavadoc;
-          }
-        }
-        for (const relationship of entityConfig.relationships!) {
-          if (relationship.javadoc) {
-            relationship.documentation = relationship.javadoc;
-            delete relationship.javadoc;
-          }
-        }
-        if (entityConfig.javadoc) {
-          entityConfig.documentation = entityConfig.javadoc;
-          delete entityConfig.javadoc;
-        } else {
-          entityStorage.save();
-        }
-      },
-    });
-  }
-
-  get [BaseApplicationGenerator.CONFIGURING_EACH_ENTITY]() {
-    return this.delegateTasksToBlueprint(() => this.configuringEachEntity);
-  }
-
   // Public API method used by the getter and also by Blueprints
   get loading() {
     return this.asLoadingTaskGroup({
@@ -150,13 +117,6 @@ export default class CommonGenerator extends BaseApplicationGenerator<
   // Public API method used by the getter and also by Blueprints
   get preparing() {
     return this.asPreparingTaskGroup({
-      setupConstants({ applicationDefaults }) {
-        // Make constants available in templates
-        applicationDefaults({
-          srcMain: MAIN_DIR,
-          srcTest: TEST_DIR,
-        });
-      },
       sonarSourceApi({ source }) {
         source.ignoreSonarRule = ({ ruleId, ruleKey, resourceKey, comment }) => {
           this.editFile(
@@ -211,6 +171,39 @@ export default class CommonGenerator extends BaseApplicationGenerator<
 
   get [BaseApplicationGenerator.PREPARING]() {
     return this.delegateTasksToBlueprint(() => this.preparing);
+  }
+
+  get configuringEachEntity() {
+    return this.asConfiguringEachEntityTaskGroup({
+      migrateEntity({ entityConfig, entityStorage }) {
+        for (const field of entityConfig.fields!) {
+          if (field.javadoc) {
+            field.documentation ??= field.javadoc;
+            delete field.javadoc;
+          }
+          if (field.fieldTypeJavadoc) {
+            field.fieldTypeDocumentation ??= field.fieldTypeJavadoc;
+            delete field.fieldTypeJavadoc;
+          }
+        }
+        for (const relationship of entityConfig.relationships!) {
+          if (relationship.javadoc) {
+            relationship.documentation = relationship.javadoc;
+            delete relationship.javadoc;
+          }
+        }
+        if (entityConfig.javadoc) {
+          entityConfig.documentation = entityConfig.javadoc;
+          delete entityConfig.javadoc;
+        } else {
+          entityStorage.save();
+        }
+      },
+    });
+  }
+
+  get [BaseApplicationGenerator.CONFIGURING_EACH_ENTITY]() {
+    return this.delegateTasksToBlueprint(() => this.configuringEachEntity);
   }
 
   get default() {

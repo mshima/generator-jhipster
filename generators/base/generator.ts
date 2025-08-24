@@ -166,7 +166,7 @@ export default class BaseGenerator<
     return this.getContextData<Control>('jhipster:control', {
       factory: () => {
         let jhipsterOldVersion: string | null;
-        let enviromentHasDockerCompose: undefined | boolean;
+        let environmentHasDockerCompose: undefined | boolean;
         const customizeRemoveFiles: ((file: string) => string | undefined)[] = [];
         return {
           get existingProject(): boolean {
@@ -184,12 +184,12 @@ export default class BaseGenerator<
             }
             return jhipsterOldVersion;
           },
-          get enviromentHasDockerCompose(): boolean {
-            if (enviromentHasDockerCompose === undefined) {
+          get environmentHasDockerCompose(): boolean {
+            if (environmentHasDockerCompose === undefined) {
               const commandReturn = execaCommandSync('docker compose version', { reject: false, stdio: 'pipe' });
-              enviromentHasDockerCompose = !commandReturn || !commandReturn.failed; // TODO looks to be a bug on ARM MaCs and execaCommandSync, does not return anything, assuming mac users are smart and install docker.
+              environmentHasDockerCompose = !commandReturn || !commandReturn.failed; // TODO looks to be a bug on ARM MaCs and execaCommandSync, does not return anything, assuming mac users are smart and install docker.
             }
-            return enviromentHasDockerCompose;
+            return environmentHasDockerCompose;
           },
           customizeRemoveFiles,
           isJhipsterVersionLessThan(version: string): boolean {
@@ -268,7 +268,7 @@ export default class BaseGenerator<
     // Use started counter or use stored creationTimestamp if creationTimestamp option is passed
     const creationTimestamp = this.options.creationTimestamp ? this.config.get('creationTimestamp') : undefined;
     let now = new Date();
-    // Miliseconds is ignored for changelogDate.
+    // Milliseconds is ignored for changelogDate.
     now.setMilliseconds(0);
     // Run reproducible timestamp when regenerating the project with reproducible option or an specific timestamp.
     if (reproducible || creationTimestamp) {

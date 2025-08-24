@@ -24,7 +24,7 @@ import { createTranslationReplacer } from './translate-react.ts';
 
 describe('generator - react - transform', () => {
   describe('replaceReactTranslations', () => {
-    let replaceReactTranslations;
+    let replaceReactTranslations: ReturnType<typeof createTranslationReplacer>;
     beforeEach(() => {
       let value = 0;
       replaceReactTranslations = createTranslationReplacer(
@@ -133,7 +133,7 @@ export const Home = () => {
         <span className="hipster rounded" />
       </Col>
       <Col md="9">
-        <h2><Translate contentKey="home.title">Welcome,  Hipster!</Translate></h2>
+        <h2><Translate contentKey="home.title">Welcome, Hipster!</Translate></h2>
         <p className="lead">
         <Translate contentKey="home.subtitle"> This is your homepage </Translate>
          </p>
