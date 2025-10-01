@@ -29,8 +29,10 @@ export default class extends BaseGenerator {
         let convertToGitHubMatrixInclude = true;
         let randomEnvironment = false;
         switch (this.workflow) {
-          case 'docker-compose-integration': {
-            const { samples, warnings } = await getGithubSamplesGroup(this.templatePath('../samples/'), this.workflow);
+          case 'docker-compose-integration':
+          case 'daily-builds/angular-webpack': {
+            const [group, workflow] = this.workflow.includes('/') ? this.workflow.split('/') : ['', this.workflow];
+            const { samples, warnings } = await getGithubSamplesGroup(this.templatePath(`../samples/${group}`), workflow);
             matrix = samples;
             if (warnings.length) {
               this.log.warn(warnings.join('\n'));
