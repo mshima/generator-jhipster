@@ -18,8 +18,9 @@
 
 name: Copyright Update
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 31 12 *' # Repeats December 31st every year
+    - cron: '0 0 1 1 *' # Repeats January 1st every year
 
 permissions:
   contents: read
@@ -30,9 +31,9 @@ jobs:
       contents: write # for peter-evans/create-pull-request to create branch
       pull-requests: write # for peter-evans/create-pull-request to create a PR
     name: copyright update
-    if: github.repository == 'jhipster/generator-jhipster'
+    if: github.repository == 'jhipster/generator-jhipster' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 6
     steps:
       # Checkout
       - uses: actions/checkout@v6
@@ -42,9 +43,8 @@ jobs:
       # Update the copyright headers
       - name: Find and Replace
         run: |
-          CURRENT_YEAR=$(date +'%Y')
-          NEW_YEAR=$(($CURRENT_YEAR + 1))
-          grep -rlZE "Copyright ([0-9]+)-$CURRENT_YEAR" . | xargs -0 sed -i -E "s/Copyright ([0-9]+)-$CURRENT_YEAR/Copyright \1-$NEW_YEAR/g"
+          grep -rlZE "Copyright 20[0-9]{2}" . | xargs -0 sed -i -E "s/Copyright ([0-9]{4})-([0-9]{4})/Copyright \1-$(date +'%Y')/g"
+          git diff
       # Create PR
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
