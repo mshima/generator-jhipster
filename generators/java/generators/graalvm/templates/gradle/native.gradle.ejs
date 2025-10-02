@@ -37,12 +37,4 @@ processResources {
   }
 }
   <%_ } _%>
-
-if (project.hasProperty("native")) {
-  hibernate {
-    enhancement {
-      enableLazyInitialization = true
-    }
-  }
-}
 <%_ } _%>
