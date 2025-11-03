@@ -57,10 +57,14 @@
     "sonar-scanner": "3.1.0",
 <%_ } _%>
 <%_ if (microfrontend) { _%>
-  <%_ if (applicationTypeGateway) { _%>
+  <%_ if (clientBundlerWebpack) { _%>
+    <%_ if (applicationTypeGateway) { _%>
     "@angular-architects/module-federation-runtime": "<%= nodeDependencies['@angular-architects/module-federation-runtime'] %>",
-  <%_ } _%>
+    <%_ } _%>
     "@angular-architects/module-federation": "<%= nodeDependencies['@angular-architects/module-federation'] %>",
+  <%_ } else { _%>
+    "@module-federation/enhanced": null,
+  <%_ } _%>
 <%_ } _%>
 <%_ if (clientTestFrameworkJest) { _%>
     "@angular-builders/jest": "<%= nodeDependencies['@angular-builders/jest'] %>",

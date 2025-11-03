@@ -1,0 +1,7 @@
+import type { Plugin, PluginBuild } from 'esbuild';
+import federationConfig from '../../federation.config.js';
+import { moduleFederationPlugin } from '@module-federation/esbuild/plugin';
+
+const modFedPlugin: Plugin = moduleFederationPlugin(federationConfig);
+
+export default modFedPlugin;

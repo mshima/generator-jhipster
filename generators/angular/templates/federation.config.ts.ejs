@@ -1,0 +1,20 @@
+import { withFederation, shareAll } from '@module-federation/esbuild/build';
+
+export default withFederation({
+  name: '<%= lowercaseBaseName %>',
+<%_ if (applicationTypeMicroservice) { _%>
+  exposes: {
+  <%_ if (enableTranslation) { _%>
+    './translation-module': 'app/shared/language/translation.module.ts',
+  <%_ } _%>
+    './entity-navbar-items': 'app/entities/entity-navbar-items.ts',
+    './entity-routes': 'app/entities/entity.routes.ts',
+  },
+<%_ } _%>
+  ...shareAll({
+    singleton: true,
+    strictVersion: true,
+    requiredVersion: 'auto',
+    includeSecondaries: false,
+  }),
+});

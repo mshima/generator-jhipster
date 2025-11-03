@@ -34,7 +34,11 @@ import { AccountService } from 'app/core/auth/account.service';
 import { LoginService } from 'app/login/login.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
 <% if (microfrontend && applicationTypeGateway) { %>
+  <%_ if (clientBundlerWebpack) { _%>
 import { loadNavbarItems, loadTranslationModule } from 'app/core/microfrontend';
+  <%_ } else { _%>
+import { loadRemote } from '@module-federation/enhanced';
+  <%_ } _%>
 <%_ } _%>
 import { environment } from 'environments/environment';
 import NavbarItem from './navbar-item.model';
@@ -137,12 +141,20 @@ export default class Navbar implements OnInit {
   loadMicrofrontendsEntities(): void {
     // Lazy load microfrontend entities.
   <%_ for (const remote of microfrontends) { _%>
+    <% if (clientBundlerWebpack) { %>
     loadNavbarItems('<%= remote.lowercaseBaseName %>').then(
+    <%_ } else { _%>
+    loadRemote<any>('<%= remote.lowercaseBaseName %>/entity-navbar-items').then(
+    <%_ } _%>
       async items => {
         this.<%= remote.lowercaseBaseName %>EntityNavbarItems.set(items);
-    <%_ if (enableTranslation && applicationTypeGateway) { _%>
+    <%_ if (enableTranslation) { _%>
         try {
+      <% if (clientBundlerWebpack) { %>
           const LazyTranslationModule = await loadTranslationModule('<%= remote.lowercaseBaseName %>');
+      <%_ } else { _%>
+          const LazyTranslationModule = await loadRemote<any>('<%= remote.lowercaseBaseName %>/translation-module');
+      <%_ } _%>
           createNgModule(LazyTranslationModule, this.injector);
         } catch (error) {
           // eslint-disable-next-line no-console
