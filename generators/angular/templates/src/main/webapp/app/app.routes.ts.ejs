@@ -23,7 +23,11 @@ import { errorRoute } from './layouts/error/error.route';
 import { Authority } from 'app/config/authority.constants';
 
 <%_ if (applicationTypeGateway && microfrontend) { _%>
+  <%_ if (clientBundlerWebpack) { _%>
 import { loadEntityRoutes } from './core/microfrontend';
+  <%_ } else { _%>
+import { loadRemote } from '@module-federation/enhanced';
+  <%_ } _%>
 <%_ } _%>
 
 import { UserRouteAccessService } from 'app/core/auth/user-route-access.service';
@@ -70,7 +74,11 @@ const routes: Routes = [
   <%_ for (const remote of microfrontends) { _%>
   {
     path: '<%= remote.lowercaseBaseName %>',
+    <% if (clientBundlerWebpack) { %>
     loadChildren: () => loadEntityRoutes('<%= remote.lowercaseBaseName %>'),
+    <%_ } else { _%>
+    loadChildren: () => loadRemote<any>('<%= remote.lowercaseBaseName %>/entity-routes'),
+    <%_ } _%>
   },
   <%_ } _%>
 <%_ } _%>

@@ -18,7 +18,11 @@
 -%>
 // eslint-disable @typescript-eslint/no-unsafe-return
 import { Type } from '@angular/core';
+<%_ if (clientBundlerWebpack) { _%>
 import { loadRemoteModule } from '@angular-architects/module-federation-runtime';
+<%_ } else { _%>
+import { loadRemote } from '@module-federation/enhanced';
+<%_ } _%>
 
 import NavbarItem from 'app/layouts/navbar/navbar-item.model';
 

@@ -109,12 +109,16 @@ export const files = asWriteFilesSection({
   ],
   microfrontend: [
     clientRootTemplatesBlock({
-      condition: generator => generator.clientBundlerWebpack && generator.microfrontend,
+      condition: data => data.clientBundlerWebpack && data.microfrontend,
       templates: ['webpack/webpack.microfrontend.js'],
     }),
     clientApplicationTemplatesBlock({
-      condition: data => data.microfrontend && data.applicationTypeGateway,
+      condition: data => data.clientBundlerWebpack && data.microfrontend && data.applicationTypeGateway,
       templates: ['core/microfrontend/index.ts'],
+    }),
+    clientRootTemplatesBlock({
+      condition: generator => generator.clientBundlerEsbuild && generator.microfrontend,
+      templates: ['build-plugins/federation-esbuild.ts', 'federation.config.ts'],
     }),
     clientApplicationTemplatesBlock({
       condition: data => data.microfrontend && data.applicationTypeMicroservice,

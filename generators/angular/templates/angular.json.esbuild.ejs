@@ -42,6 +42,9 @@
 <%_ if (enableTranslation) { _%>
               "build-plugins/i18n-esbuild.ts",
 <%_ } _%>
+<%_ if (microfrontend) { _%>
+              "build-plugins/federation-esbuild.ts",
+<%_ } _%>
               "build-plugins/define-esbuild.ts"
             ],
             "outputPath": {
