@@ -118,9 +118,6 @@
     "update-snapshot": "esmocha --no-insight --no-parallel --update-snapshot --",
     "update-snapshots": "esmocha test generators cli .blueprint lib/jdl lib --forbid-only --update-snapshot --enable-source-maps"
   },
-  "overrides": {
-    "@eslint/core": "$@eslint/core"
-  },
   "dependencies": {
     "@eslint/core": "1.0.0",
     "@eslint/js": "9.39.1",
@@ -207,10 +204,10 @@
     "rimraf": "6.1.0",
     "sinon": "21.0.0",
     "sinon-chai": "4.0.1",
-    "yeoman-test": "11.1.0"
+    "yeoman-test": "^11.1.1"
   },
   "peerDependencies": {
-    "yeoman-test": "11.1.0"
+    "yeoman-test": "^11.1.1"
   },
   "peerDependenciesMeta": {
     "yeoman-test": {
@@ -225,5 +222,8 @@
     "type": "opencollective",
     "url": "https://opencollective.com/generator-jhipster",
     "logo": "https://opencollective.com/opencollective/logo.txt"
+  },
+  "overrides": {
+    "@eslint/core": "$@eslint/core"
   }
 }
