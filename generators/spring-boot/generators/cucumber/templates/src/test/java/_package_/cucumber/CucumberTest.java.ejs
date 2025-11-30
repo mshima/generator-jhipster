@@ -31,6 +31,6 @@ import org.springframework.test.context.ActiveProfiles;
 class CucumberTest {
     @BeforeClass
     public static void setUp() {
-        System.setProperty("spring.profiles.active", "test");
+        System.setProperty("spring.profiles.active", "prod");
     }
 }
