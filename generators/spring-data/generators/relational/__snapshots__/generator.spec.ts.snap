@@ -107,7 +107,6 @@ exports[`generator - sql gateway-jwt-mariadb-reactive(true)-gradle-enableTransla
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -183,19 +182,11 @@ exports[`generator - sql gateway-jwt-mariadb-reactive(true)-gradle-enableTransla
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mariadb",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -379,7 +370,6 @@ exports[`generator - sql gateway-jwt-mssql-reactive(true)-gradle-enableTranslati
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": "prod",
             },
           ],
         },
@@ -455,19 +445,11 @@ exports[`generator - sql gateway-jwt-mssql-reactive(true)-gradle-enableTranslati
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mssqlserver",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -631,7 +613,6 @@ exports[`generator - sql gateway-jwt-mysql-reactive(false)-maven-enableTranslati
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": undefined,
             },
           ],
         },
@@ -707,12 +688,10 @@ exports[`generator - sql gateway-jwt-mysql-reactive(false)-maven-enableTranslati
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -870,7 +849,6 @@ exports[`generator - sql gateway-jwt-mysql-reactive(true)-gradle-enableTranslati
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -946,19 +924,11 @@ exports[`generator - sql gateway-jwt-mysql-reactive(true)-gradle-enableTranslati
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mysql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -1184,12 +1154,10 @@ exports[`generator - sql gateway-jwt-oracle-reactive(false)-maven-enableTranslat
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": undefined,
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -1405,19 +1373,11 @@ exports[`generator - sql gateway-jwt-oracle-reactive(true)-gradle-enableTranslat
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "oracle-xe",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -1565,7 +1525,6 @@ exports[`generator - sql gateway-jwt-postgresql-reactive(false)-maven-enableTran
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": undefined,
             },
           ],
         },
@@ -1641,12 +1600,10 @@ exports[`generator - sql gateway-jwt-postgresql-reactive(false)-maven-enableTran
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": undefined,
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -1801,7 +1758,6 @@ exports[`generator - sql gateway-jwt-postgresql-reactive(true)-gradle-enableTran
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
           ],
         },
@@ -1877,19 +1833,11 @@ exports[`generator - sql gateway-jwt-postgresql-reactive(true)-gradle-enableTran
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "postgresql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -2053,7 +2001,6 @@ exports[`generator - sql gateway-oauth2-mariadb-reactive(false)-maven-enableTran
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -2129,19 +2076,11 @@ exports[`generator - sql gateway-oauth2-mariadb-reactive(false)-maven-enableTran
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mariadb",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -2352,7 +2291,6 @@ exports[`generator - sql gateway-oauth2-mariadb-reactive(true)-gradle-enableTran
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -2428,19 +2366,11 @@ exports[`generator - sql gateway-oauth2-mariadb-reactive(true)-gradle-enableTran
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mariadb",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -2604,7 +2534,6 @@ exports[`generator - sql gateway-oauth2-mssql-reactive(false)-maven-enableTransl
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": "prod",
             },
           ],
         },
@@ -2680,19 +2609,11 @@ exports[`generator - sql gateway-oauth2-mssql-reactive(false)-maven-enableTransl
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mssqlserver",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -2903,7 +2824,6 @@ exports[`generator - sql gateway-oauth2-mssql-reactive(true)-gradle-enableTransl
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": "prod",
             },
           ],
         },
@@ -2979,19 +2899,11 @@ exports[`generator - sql gateway-oauth2-mssql-reactive(true)-gradle-enableTransl
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mssqlserver",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -3205,7 +3117,6 @@ exports[`generator - sql gateway-oauth2-mysql-reactive(true)-gradle-enableTransl
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -3281,19 +3192,11 @@ exports[`generator - sql gateway-oauth2-mysql-reactive(true)-gradle-enableTransl
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mysql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -3565,19 +3468,11 @@ exports[`generator - sql gateway-oauth2-oracle-reactive(true)-gradle-enableTrans
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "oracle-xe",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -3775,7 +3670,6 @@ exports[`generator - sql gateway-oauth2-postgresql-reactive(true)-gradle-enableT
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
           ],
         },
@@ -3851,19 +3745,11 @@ exports[`generator - sql gateway-oauth2-postgresql-reactive(true)-gradle-enableT
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "postgresql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -4027,7 +3913,6 @@ exports[`generator - sql microservice-jwt-mariadb-reactive(true)-gradle-enableTr
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": undefined,
             },
           ],
         },
@@ -4103,12 +3988,10 @@ exports[`generator - sql microservice-jwt-mariadb-reactive(true)-gradle-enableTr
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -4243,7 +4126,6 @@ exports[`generator - sql microservice-jwt-mssql-reactive(true)-gradle-enableTran
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": undefined,
             },
           ],
         },
@@ -4319,12 +4201,10 @@ exports[`generator - sql microservice-jwt-mssql-reactive(true)-gradle-enableTran
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -4447,7 +4327,6 @@ exports[`generator - sql microservice-jwt-mysql-reactive(false)-maven-enableTran
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -4523,19 +4402,11 @@ exports[`generator - sql microservice-jwt-mysql-reactive(false)-maven-enableTran
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mysql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -4702,7 +4573,6 @@ exports[`generator - sql microservice-jwt-mysql-reactive(true)-gradle-enableTran
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": undefined,
             },
           ],
         },
@@ -4778,12 +4648,10 @@ exports[`generator - sql microservice-jwt-mysql-reactive(true)-gradle-enableTran
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -4968,19 +4836,11 @@ exports[`generator - sql microservice-jwt-oracle-reactive(false)-maven-enableTra
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "oracle-xe",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -5192,12 +5052,10 @@ exports[`generator - sql microservice-jwt-oracle-reactive(true)-gradle-enableTra
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": undefined,
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -5317,7 +5175,6 @@ exports[`generator - sql microservice-jwt-postgresql-reactive(false)-maven-enabl
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
           ],
         },
@@ -5393,19 +5250,11 @@ exports[`generator - sql microservice-jwt-postgresql-reactive(false)-maven-enabl
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "postgresql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -5569,7 +5418,6 @@ exports[`generator - sql microservice-jwt-postgresql-reactive(true)-gradle-enabl
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": undefined,
             },
           ],
         },
@@ -5645,12 +5493,10 @@ exports[`generator - sql microservice-jwt-postgresql-reactive(true)-gradle-enabl
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": undefined,
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -5767,7 +5613,6 @@ exports[`generator - sql microservice-oauth2-mariadb-reactive(false)-maven-enabl
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": undefined,
             },
           ],
         },
@@ -5843,12 +5688,10 @@ exports[`generator - sql microservice-oauth2-mariadb-reactive(false)-maven-enabl
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -6003,7 +5846,6 @@ exports[`generator - sql microservice-oauth2-mariadb-reactive(true)-gradle-enabl
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -6079,19 +5921,11 @@ exports[`generator - sql microservice-oauth2-mariadb-reactive(true)-gradle-enabl
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mariadb",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -6237,7 +6071,6 @@ exports[`generator - sql microservice-oauth2-mssql-reactive(false)-maven-enableT
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": undefined,
             },
           ],
         },
@@ -6313,12 +6146,10 @@ exports[`generator - sql microservice-oauth2-mssql-reactive(false)-maven-enableT
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -6473,7 +6304,6 @@ exports[`generator - sql microservice-oauth2-mssql-reactive(true)-gradle-enableT
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": "prod",
             },
           ],
         },
@@ -6549,19 +6379,11 @@ exports[`generator - sql microservice-oauth2-mssql-reactive(true)-gradle-enableT
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mssqlserver",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -6748,7 +6570,6 @@ exports[`generator - sql microservice-oauth2-mysql-reactive(true)-gradle-enableT
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -6824,19 +6645,11 @@ exports[`generator - sql microservice-oauth2-mysql-reactive(true)-gradle-enableT
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mysql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -7081,19 +6894,11 @@ exports[`generator - sql microservice-oauth2-oracle-reactive(true)-gradle-enable
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "oracle-xe",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -7264,7 +7069,6 @@ exports[`generator - sql microservice-oauth2-postgresql-reactive(true)-gradle-en
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
           ],
         },
@@ -7340,19 +7144,11 @@ exports[`generator - sql microservice-oauth2-postgresql-reactive(true)-gradle-en
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "postgresql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -7516,7 +7312,6 @@ exports[`generator - sql monolith-jwt-mariadb-reactive(false)-maven-enableTransl
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -7592,19 +7387,11 @@ exports[`generator - sql monolith-jwt-mariadb-reactive(false)-maven-enableTransl
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mariadb",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -7768,7 +7555,6 @@ exports[`generator - sql monolith-jwt-mariadb-reactive(true)-gradle-enableTransl
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": undefined,
             },
           ],
         },
@@ -7844,12 +7630,10 @@ exports[`generator - sql monolith-jwt-mariadb-reactive(true)-gradle-enableTransl
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -7984,7 +7768,6 @@ exports[`generator - sql monolith-jwt-mssql-reactive(false)-maven-enableTranslat
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": "prod",
             },
           ],
         },
@@ -8060,19 +7843,11 @@ exports[`generator - sql monolith-jwt-mssql-reactive(false)-maven-enableTranslat
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mssqlserver",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -8236,7 +8011,6 @@ exports[`generator - sql monolith-jwt-mssql-reactive(true)-gradle-enableTranslat
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": undefined,
             },
           ],
         },
@@ -8312,12 +8086,10 @@ exports[`generator - sql monolith-jwt-mssql-reactive(true)-gradle-enableTranslat
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -8455,7 +8227,6 @@ exports[`generator - sql monolith-jwt-mysql-reactive(false)-maven-enableTranslat
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -8531,19 +8302,11 @@ exports[`generator - sql monolith-jwt-mysql-reactive(false)-maven-enableTranslat
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mysql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -8710,7 +8473,6 @@ exports[`generator - sql monolith-jwt-mysql-reactive(true)-gradle-enableTranslat
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": undefined,
             },
           ],
         },
@@ -8786,12 +8548,10 @@ exports[`generator - sql monolith-jwt-mysql-reactive(true)-gradle-enableTranslat
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -8991,19 +8751,11 @@ exports[`generator - sql monolith-jwt-oracle-reactive(false)-maven-enableTransla
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "oracle-xe",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -9215,12 +8967,10 @@ exports[`generator - sql monolith-jwt-oracle-reactive(true)-gradle-enableTransla
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": undefined,
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -9355,7 +9105,6 @@ exports[`generator - sql monolith-jwt-postgresql-reactive(false)-maven-enableTra
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
           ],
         },
@@ -9431,19 +9180,11 @@ exports[`generator - sql monolith-jwt-postgresql-reactive(false)-maven-enableTra
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "postgresql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -9607,7 +9348,6 @@ exports[`generator - sql monolith-jwt-postgresql-reactive(true)-gradle-enableTra
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": undefined,
             },
           ],
         },
@@ -9683,12 +9423,10 @@ exports[`generator - sql monolith-jwt-postgresql-reactive(true)-gradle-enableTra
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": undefined,
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -9805,7 +9543,6 @@ exports[`generator - sql monolith-oauth2-mariadb-reactive(false)-maven-enableTra
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": undefined,
             },
           ],
         },
@@ -9881,12 +9618,10 @@ exports[`generator - sql monolith-oauth2-mariadb-reactive(false)-maven-enableTra
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -10041,7 +9776,6 @@ exports[`generator - sql monolith-oauth2-mariadb-reactive(true)-gradle-enableTra
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -10117,19 +9851,11 @@ exports[`generator - sql monolith-oauth2-mariadb-reactive(true)-gradle-enableTra
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mariadb",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -10275,7 +10001,6 @@ exports[`generator - sql monolith-oauth2-mssql-reactive(false)-maven-enableTrans
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": undefined,
             },
           ],
         },
@@ -10351,12 +10076,10 @@ exports[`generator - sql monolith-oauth2-mssql-reactive(false)-maven-enableTrans
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -10511,7 +10234,6 @@ exports[`generator - sql monolith-oauth2-mssql-reactive(true)-gradle-enableTrans
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": "prod",
             },
           ],
         },
@@ -10587,19 +10309,11 @@ exports[`generator - sql monolith-oauth2-mssql-reactive(true)-gradle-enableTrans
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mssqlserver",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -10748,7 +10462,6 @@ exports[`generator - sql monolith-oauth2-mysql-reactive(false)-maven-enableTrans
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": undefined,
             },
           ],
         },
@@ -10824,12 +10537,10 @@ exports[`generator - sql monolith-oauth2-mysql-reactive(false)-maven-enableTrans
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": undefined,
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -10987,7 +10698,6 @@ exports[`generator - sql monolith-oauth2-mysql-reactive(true)-gradle-enableTrans
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -11063,19 +10773,11 @@ exports[`generator - sql monolith-oauth2-mysql-reactive(true)-gradle-enableTrans
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mysql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -11286,12 +10988,10 @@ exports[`generator - sql monolith-oauth2-oracle-reactive(false)-maven-enableTran
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": undefined,
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -11507,19 +11207,11 @@ exports[`generator - sql monolith-oauth2-oracle-reactive(true)-gradle-enableTran
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "oracle-xe",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -11652,7 +11344,6 @@ exports[`generator - sql monolith-oauth2-postgresql-reactive(false)-maven-enable
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": undefined,
             },
           ],
         },
@@ -11728,12 +11419,10 @@ exports[`generator - sql monolith-oauth2-postgresql-reactive(false)-maven-enable
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": undefined,
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": undefined,
               "scope": "test",
             },
           ],
@@ -11888,7 +11577,6 @@ exports[`generator - sql monolith-oauth2-postgresql-reactive(true)-gradle-enable
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
           ],
         },
@@ -11964,19 +11652,11 @@ exports[`generator - sql monolith-oauth2-postgresql-reactive(true)-gradle-enable
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "postgresql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -12140,7 +11820,6 @@ exports[`generator - sql monolith-session-mariadb-reactive(false)-maven-enableTr
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -12216,19 +11895,11 @@ exports[`generator - sql monolith-session-mariadb-reactive(false)-maven-enableTr
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mariadb",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -12412,7 +12083,6 @@ exports[`generator - sql monolith-session-mariadb-reactive(true)-gradle-enableTr
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -12488,19 +12158,11 @@ exports[`generator - sql monolith-session-mariadb-reactive(true)-gradle-enableTr
             {
               "artifactId": "mariadb-java-client",
               "groupId": "org.mariadb.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mariadb",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mariadb",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -12664,7 +12326,6 @@ exports[`generator - sql monolith-session-mssql-reactive(false)-maven-enableTran
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": "prod",
             },
           ],
         },
@@ -12740,19 +12401,11 @@ exports[`generator - sql monolith-session-mssql-reactive(false)-maven-enableTran
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mssqlserver",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -12936,7 +12589,6 @@ exports[`generator - sql monolith-session-mssql-reactive(true)-gradle-enableTran
             {
               "artifactId": "r2dbc-mssql",
               "groupId": "io.r2dbc",
-              "inProfile": "prod",
             },
           ],
         },
@@ -13012,19 +12664,11 @@ exports[`generator - sql monolith-session-mssql-reactive(true)-gradle-enableTran
             {
               "artifactId": "mssql-jdbc",
               "groupId": "com.microsoft.sqlserver",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mssqlserver",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mssqlserver",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -13191,7 +12835,6 @@ exports[`generator - sql monolith-session-mysql-reactive(false)-maven-enableTran
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -13267,19 +12910,11 @@ exports[`generator - sql monolith-session-mysql-reactive(false)-maven-enableTran
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mysql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -13466,7 +13101,6 @@ exports[`generator - sql monolith-session-mysql-reactive(true)-gradle-enableTran
             {
               "artifactId": "r2dbc-mysql",
               "groupId": "io.asyncer",
-              "inProfile": "prod",
             },
           ],
         },
@@ -13542,19 +13176,11 @@ exports[`generator - sql monolith-session-mysql-reactive(true)-gradle-enableTran
             {
               "artifactId": "mysql-connector-j",
               "groupId": "com.mysql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "mysql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "mysql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -13783,19 +13409,11 @@ exports[`generator - sql monolith-session-oracle-reactive(false)-maven-enableTra
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "oracle-xe",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -14027,19 +13645,11 @@ exports[`generator - sql monolith-session-oracle-reactive(true)-gradle-enableTra
             {
               "artifactId": "ojdbc8",
               "groupId": "com.oracle.database.jdbc",
-              "inProfile": "prod",
             },
             {
               "artifactId": "oracle-xe",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "oracle-xe",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -14190,7 +13800,6 @@ exports[`generator - sql monolith-session-postgresql-reactive(false)-maven-enabl
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
           ],
         },
@@ -14266,19 +13875,11 @@ exports[`generator - sql monolith-session-postgresql-reactive(false)-maven-enabl
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "postgresql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },
@@ -14462,7 +14063,6 @@ exports[`generator - sql monolith-session-postgresql-reactive(true)-gradle-enabl
             {
               "artifactId": "r2dbc-postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
           ],
         },
@@ -14538,19 +14138,11 @@ exports[`generator - sql monolith-session-postgresql-reactive(true)-gradle-enabl
             {
               "artifactId": "postgresql",
               "groupId": "org.postgresql",
-              "inProfile": "prod",
             },
             {
               "artifactId": "postgresql",
               "groupId": "org.testcontainers",
-              "inProfile": "prod",
               "scope": "test",
-            },
-            {
-              "artifactId": "postgresql",
-              "groupId": "org.testcontainers",
-              "inProfile": "dev",
-              "scope": "provided",
             },
           ],
         },

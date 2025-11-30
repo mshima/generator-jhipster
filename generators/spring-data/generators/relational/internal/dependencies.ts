@@ -18,7 +18,7 @@
  */
 
 import type { JavaDependency } from '../../../../java/types.ts';
-import type { MavenDefinition, MavenDependency, MavenPlugin } from '../../../../maven/types.ts';
+import type { MavenDefinition, MavenPlugin } from '../../../../maven/types.ts';
 
 type DatabaseTypeDependencies = {
   jdbc: MavenDefinition;
@@ -105,24 +105,19 @@ export const getH2MavenDefinition = ({
 
 export const getDatabaseTypeMavenDefinition: (
   databaseType: keyof Omit<typeof javaSqlDatabaseArtifacts, 'h2'>,
-  options: { inProfile?: string; javaDependencies: Record<string, string> },
-) => DatabaseTypeDependencies = (databaseType, { inProfile }) => {
+  options: { javaDependencies: Record<string, string> },
+) => DatabaseTypeDependencies = databaseType => {
   if (!javaSqlDatabaseArtifacts[databaseType]) {
     throw new Error(`Unsupported database type: ${databaseType}`);
   }
   const { jdbc, testContainer } = javaSqlDatabaseArtifacts[databaseType];
-  const testContainerDeps: MavenDependency[] = [{ inProfile, ...testContainer }];
-  if (inProfile === 'prod') {
-    // Add test containers dependency to provided in dev profile, as they need to be in a default profile for IDEs. Avoids `cannot find symbol` error.
-    testContainerDeps.push({ inProfile: 'dev', ...testContainer, scope: 'provided' });
-  }
   return {
     jdbc: {
-      dependencies: [{ inProfile, ...jdbc }, ...testContainerDeps],
+      dependencies: [{ ...jdbc }, { ...testContainer }],
     },
     r2dbc:
       databaseType !== 'oracle'
-        ? { dependencies: [{ inProfile, ...javaSqlDatabaseArtifacts[databaseType].r2dbc }] } // r2dbc uses jdbc for testcontainers.
+        ? { dependencies: [{ ...javaSqlDatabaseArtifacts[databaseType].r2dbc }] } // r2dbc uses jdbc for testcontainers.
         : {},
   };
 };

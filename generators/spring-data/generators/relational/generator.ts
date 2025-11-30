@@ -166,7 +166,6 @@ export default class SqlGenerator extends BaseApplicationGenerator<
 
         const { prodDatabaseType, devDatabaseTypeH2Any } = application;
         const dbDefinitions = getDatabaseTypeMavenDefinition(prodDatabaseType, {
-          inProfile: devDatabaseTypeH2Any ? 'prod' : undefined,
           javaDependencies,
         });
         const h2Definitions = devDatabaseTypeH2Any ? getH2MavenDefinition({ prodDatabaseType, packageFolder }) : undefined;
