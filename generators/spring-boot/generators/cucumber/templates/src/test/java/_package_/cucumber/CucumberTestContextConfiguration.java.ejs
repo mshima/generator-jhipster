@@ -23,12 +23,14 @@ import <%= packageName %>.security.AuthoritiesConstants;
 
 import io.cucumber.spring.CucumberContextConfiguration;
 
+import org.junit.BeforeClass;
 <%_ if (reactive) { _%>
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 <%_ } else { _%>
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 <%_ } _%>
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 
 @CucumberContextConfiguration
 @IntegrationTest
@@ -38,4 +40,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 @AutoConfigureMockMvc
 <%_ } _%>
 @WithMockUser(authorities = AuthoritiesConstants.ADMIN)
-public class CucumberTestContextConfiguration {}
+@ActiveProfiles("prod")
+public class CucumberTestContextConfiguration {
+    @BeforeClass
+    public static void setUp() {
+        System.setProperty("spring.profiles.active", "prod");
+    }
+}
