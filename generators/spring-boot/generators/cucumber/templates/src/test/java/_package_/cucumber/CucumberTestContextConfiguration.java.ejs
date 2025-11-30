@@ -32,6 +32,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("prod")
 @CucumberContextConfiguration
 @IntegrationTest
 <%_ if (reactive) { _%>
@@ -40,7 +41,6 @@ import org.springframework.test.context.ActiveProfiles;
 @AutoConfigureMockMvc
 <%_ } _%>
 @WithMockUser(authorities = AuthoritiesConstants.ADMIN)
-@ActiveProfiles("prod")
 public class CucumberTestContextConfiguration {
     @BeforeClass
     public static void setUp() {
