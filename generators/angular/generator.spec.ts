@@ -90,6 +90,44 @@ describe(`generator - ${clientFramework}`, () => {
       it('should match generated files snapshot', () => {
         expect(runResult.getStateSnapshot()).toMatchSnapshot();
       });
+
+      it('should match application snapshot', () => {
+        const application = runResult.application!;
+        expect(application).toMatchSnapshot({
+          addLanguageCallbacks: expect.any(Array),
+          customizeTemplatePaths: expect.any(Array),
+          dockerContainers: expect.any(Object),
+          entities: expect.any(Array),
+          languages: expect.any(Array),
+          javaNodeBuildPaths: expect.any(Array),
+          jhipsterPackageJson: expect.any(Object),
+          nodeDependencies: expect.any(Object),
+          prettierExtensions: expect.any(Array),
+          prettierFolders: expect.any(Array),
+          supportedLanguages: expect.any(Array),
+          ...(application?.generateBuiltInUserEntity
+            ? {
+                user: expect.any(Object),
+              }
+            : {}),
+          ...(application?.generateBuiltInAuthorityEntity
+            ? {
+                authority: expect.any(Object),
+              }
+            : {}),
+          ...(application?.generateUserManagement
+            ? {
+                userManagement: expect.any(Object),
+              }
+            : {}),
+          ...(application?.enableTranslation
+            ? {
+                languagesToGenerateDefinition: expect.any(Array),
+              }
+            : {}),
+        });
+      });
+
       it('should match source calls snapshot', () => {
         expect(runResult.sourceCallsArg).toMatchSnapshot();
       });
@@ -147,6 +185,24 @@ describe(`generator - ${clientFramework}`, () => {
           });
         }
       });
+    });
+  });
+
+  describe('enableTranslation: false', () => {
+    before(async () => {
+      await helpers
+        .runJHipster(generator)
+        .withJHipsterConfig({
+          clientFramework,
+          enableTranslation: false,
+        })
+        .withSharedApplication({ getWebappTranslation: () => 'translated-value' })
+        .withMockedSource()
+        .withMockedGenerators(['jhipster:common', 'jhipster:client:i18n']);
+    });
+
+    it('should add value title in *.routes.ts files', () => {
+      runResult.assertFileContent(`${CLIENT_MAIN_SRC_DIR}app/admin/admin.routes.ts`, /title: 'translated-value'/);
     });
   });
 });

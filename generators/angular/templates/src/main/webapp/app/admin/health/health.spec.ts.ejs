@@ -20,7 +20,7 @@
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 <%_ } _%>
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 <%_ if (enableTranslation) { _%>
 import { TranslateModule } from '@ngx-translate/core';
 <%_ } _%>
@@ -40,7 +40,6 @@ describe('Health', () => {
 <%_ if (enableTranslation) { _%>
       imports: [TranslateModule.forRoot()],
 <%_ } _%>
-      providers: [provideHttpClient()],
     });
   });
 
@@ -70,7 +69,7 @@ describe('Health', () => {
 
       // THEN
       expect(service.checkHealth).toHaveBeenCalled();
-      expect(comp.health).toEqual(health);
+      expect(comp.health()).toEqual(health);
     });
 
     it('should handle a 503 on refreshing health data', () => {
@@ -83,7 +82,7 @@ describe('Health', () => {
 
       // THEN
       expect(service.checkHealth).toHaveBeenCalled();
-      expect(comp.health).toEqual(health);
+      expect(comp.health()).toEqual(health);
     });
   });
 });

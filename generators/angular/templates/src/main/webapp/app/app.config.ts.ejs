@@ -16,12 +16,17 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { ApplicationConfig, LOCALE_ID, importProvidersFrom, inject, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, importProvidersFrom, inject } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { Router, RouterFeatures, TitleStrategy, provideRouter, withComponentInputBinding, withDebugTracing, withNavigationErrorHandler, NavigationError } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
+import { provideHttpClient, withInterceptorsFromDi, withInterceptors } from '@angular/common/http';
+<%_ if (authenticationTypeJwt) { _%>
+import { authInterceptor } from 'app/core/interceptor/auth.interceptor';
+<%_ } _%>
+import { errorHandlerInterceptor } from 'app/core/interceptor/error-handler.interceptor';
+import { notificationInterceptor } from 'app/core/interceptor/notification.interceptor';
+import { authExpiredInterceptor } from 'app/core/interceptor/auth-expired.interceptor';
 import { NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 
 import './config/dayjs';
@@ -29,7 +34,6 @@ import './config/dayjs';
 import { TranslationModule } from 'app/shared/language/translation.module';
 <%_ } _%>
 import { environment } from 'environments/environment';
-import { httpInterceptorProviders } from './core/interceptor';
 import FindLanguageFromKeyPipe from 'app/shared/language/find-language-from-key.pipe';
 import routes from './app.routes';
 import { NgbDateDayjsAdapter } from './config/datepicker-adapter';
@@ -56,7 +60,6 @@ if (environment.DEBUG_INFO_ENABLED) {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZonelessChangeDetection(),
     provideRouter(routes, ...routerFeatures),
     importProvidersFrom(BrowserModule),
     // Set this to true to enable service worker (PWA)
@@ -64,14 +67,13 @@ export const appConfig: ApplicationConfig = {
 <%_ if (enableTranslation) { _%>
     importProvidersFrom(TranslationModule),
 <%_ } _%>
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptors([<%_ if (authenticationTypeJwt) { _%>authInterceptor, <%_ } _%>authExpiredInterceptor, errorHandlerInterceptor, notificationInterceptor]), withInterceptorsFromDi()),
     Title,
     { provide: LOCALE_ID, useValue: '<%= angularLocaleId %>' },
     { provide: NgbDateAdapter, useClass: NgbDateDayjsAdapter },
 <%_ if (enableI18nRTL) { _%>
     FindLanguageFromKeyPipe,
 <%_ } _%>
-    httpInterceptorProviders,
     { provide: TitleStrategy, useClass: AppPageTitleStrategy },
   ],
 };

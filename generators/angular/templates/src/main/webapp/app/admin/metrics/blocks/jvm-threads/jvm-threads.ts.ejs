@@ -19,15 +19,19 @@
 import { Component, inject, computed, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
 
-import SharedModule from 'app/shared/shared.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Thread, ThreadState } from 'app/admin/metrics/metrics.model';
 import { MetricsModalThreads } from '../metrics-modal-threads/metrics-modal-threads';
 
 @Component({
   selector: '<%= jhiPrefixDashed %>-jvm-threads',
   templateUrl: './jvm-threads.html',
-  imports: [SharedModule, DecimalPipe],
+  imports: [NgbModule, DecimalPipe<% if (enableTranslation) { %>, TranslateDirective, TranslateModule<% } %>],
 })
 export class JvmThreads {
   threads = input<Thread[] | undefined>();

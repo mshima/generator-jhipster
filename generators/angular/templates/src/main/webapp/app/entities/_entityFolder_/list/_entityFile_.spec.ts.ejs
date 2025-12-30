@@ -24,7 +24,7 @@ _%>
 <%_ if (clientTestFrameworkVitest) { _%>
 import { MockInstance, afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 <%_ } _%>
-import { provideHttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpHeaders, HttpResponse } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   ComponentFixture, TestBed,
@@ -60,13 +60,12 @@ describe('<%= entityAngularName %> Management Component', () => {
     let comp: <%= entityAngularName %>;
     let fixture: ComponentFixture<<%= entityAngularName %>>;
     let service: <%= entityAngularName %>Service;
-    let routerNavigateSpy: <%- clientTestFrameworkJest ? 'jest.SpyInstance<Promise<boolean>>' : 'MockInstance' %>;
+    let routerNavigateSpy: MockInstance;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             <%_ if (enableTranslation) { _%>imports: [TranslateModule.forRoot()],<%_ } _%>
             providers: [
-                provideHttpClient(),
                 provideHttpClientTesting(),
                 {
                     provide: ActivatedRoute,

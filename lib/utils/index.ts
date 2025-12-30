@@ -20,6 +20,7 @@ export * from './basename.ts';
 export * from './contents.ts';
 export * from './derived-property.ts';
 export * from './logger.ts';
+export * from './lookup.ts';
 export * from './namespace.ts';
 export * from './object.ts';
 export * from './path.ts';

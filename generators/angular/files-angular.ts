@@ -43,16 +43,9 @@ export const files = asWriteFilesSection({
       templates: ['postcss.config.json'],
     }),
   ],
-  jest: [
-    clientRootTemplatesBlock({
-      condition: ctx => ctx.clientTestFrameworkJest,
-      templates: ['jest.conf.js'],
-    }),
-  ],
   vitest: [
-    clientSrcTemplatesBlock({
-      condition: ctx => ctx.clientTestFrameworkVitest,
-      templates: ['default-test-providers.ts'],
+    clientRootTemplatesBlock({
+      templates: ['vitest-base.config.ts'],
     }),
   ],
   webpack: [
@@ -322,7 +315,6 @@ export const files = asWriteFilesSection({
         'core/interceptor/error-handler.interceptor.ts',
         'core/interceptor/notification.interceptor.ts',
         'core/interceptor/auth-expired.interceptor.ts',
-        'core/interceptor/index.ts',
 
         // request
         'core/request/request-util.ts',
@@ -344,7 +336,6 @@ export const files = asWriteFilesSection({
     {
       ...clientApplicationTemplatesBlock(),
       templates: [
-        'shared/shared.module.ts',
         'shared/date/index.ts',
         'shared/date/duration.pipe.ts',
         'shared/date/format-medium-date.pipe.ts',

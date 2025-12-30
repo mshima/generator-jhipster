@@ -61,6 +61,7 @@ type GeneratorsByNamespace = {
   'jhipster:client': import('./client/generator.ts').default;
   'jhipster:client:bootstrap': import('./client/generators/bootstrap/generator.ts').default;
   'jhipster:client:common': import('./client/generators/common/generator.ts').default;
+  'jhipster:client:encode-csrf-token': import('./client/generators/encode-csrf-token/generator.ts').default;
   'jhipster:client:i18n': import('./client/generators/i18n/generator.ts').default;
   common: import('./common/generator.ts').default;
   'jhipster:common': import('./common/generator.ts').default;
@@ -117,11 +118,9 @@ type GeneratorsByNamespace = {
   'jhipster:jdl:bootstrap': import('./jdl/generators/bootstrap/generator.ts').default;
   kubernetes: import('./kubernetes/generator.ts').default;
   'jhipster:kubernetes': import('./kubernetes/generator.ts').default;
-  'kubernetes-helm': import('./kubernetes-helm/generator.ts').default;
-  'jhipster:kubernetes-helm': import('./kubernetes-helm/generator.ts').default;
-  'kubernetes-knative': import('./kubernetes-knative/generator.ts').default;
-  'jhipster:kubernetes-knative': import('./kubernetes-knative/generator.ts').default;
   'jhipster:kubernetes:bootstrap': import('./kubernetes/generators/bootstrap/generator.ts').default;
+  'jhipster:kubernetes:helm': import('./kubernetes/generators/helm/generator.ts').default;
+  'jhipster:kubernetes:knative': import('./kubernetes/generators/knative/generator.ts').default;
   languages: import('./languages/generator.ts').default;
   'jhipster:languages': import('./languages/generator.ts').default;
   'jhipster:languages:bootstrap': import('./languages/generators/bootstrap/generator.ts').default;
@@ -146,11 +145,9 @@ type GeneratorsByNamespace = {
   'jhipster:spring-boot:websocket': import('./spring-boot/generators/websocket/generator.ts').default;
   'spring-cache': import('./spring-cache/generator.ts').default;
   'jhipster:spring-cache': import('./spring-cache/generator.ts').default;
-  'spring-cloud-stream': import('./spring-cloud-stream/generator.ts').default;
-  'jhipster:spring-cloud-stream': import('./spring-cloud-stream/generator.ts').default;
-  'jhipster:spring-cloud-stream:kafka': import('./spring-cloud-stream/generators/kafka/generator.ts').default;
-  'jhipster:spring-cloud-stream:pulsar': import('./spring-cloud-stream/generators/pulsar/generator.ts').default;
   'jhipster:spring-cloud:gateway': import('./spring-cloud/generators/gateway/generator.ts').default;
+  'jhipster:spring-cloud:kafka': import('./spring-cloud/generators/kafka/generator.ts').default;
+  'jhipster:spring-cloud:pulsar': import('./spring-cloud/generators/pulsar/generator.ts').default;
   'spring-data': import('./spring-data/generator.ts').default;
   'jhipster:spring-data': import('./spring-data/generator.ts').default;
   'jhipster:spring-data:cassandra': import('./spring-data/generators/cassandra/generator.ts').default;

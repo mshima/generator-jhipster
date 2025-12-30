@@ -19,7 +19,6 @@
 <%_ if (clientTestFrameworkVitest) { _%>
 import { Mock, afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 <%_ } _%>
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -50,7 +49,7 @@ function accountWithAuthorities(authorities: string[]): Account {
   };
 }
 
-const mockFn = (value: string | null): <%- clientTestFrameworkJest ? 'jest.Mock<string | null>' : 'Mock' %> => <%= clientTestFramework %>.fn(() => value);
+const mockFn = (value: string | null): Mock => <%= clientTestFramework %>.fn(() => value);
 
 describe('Account Service', () => {
   let service: AccountService;
@@ -72,7 +71,6 @@ describe('Account Service', () => {
       ],
       <%_ } _%>
       providers: [
-        provideHttpClient(),
         provideHttpClientTesting(),
         {
           provide: StateStorageService,
@@ -156,7 +154,8 @@ describe('Account Service', () => {
       // Once more
       service.identity().subscribe();
       // Then there is only request
-      httpMock.expectOne({ method: 'GET' });
+      const requests = httpMock.match({ method: 'GET' });
+      expect(requests.length).toBe(1);
     });
 
     it('should call /account only once if not logged out after first authentication and should call /account again if user has logged out', () => {
@@ -176,7 +175,8 @@ describe('Account Service', () => {
       service.identity().subscribe();
 
       // Then there is a new request
-      httpMock.expectOne({ method: 'GET' });
+      const requests = httpMock.match({ method: 'GET' });
+      expect(requests.length).toBe(1);
     });
 
 <%_ if (enableTranslation) { _%>
