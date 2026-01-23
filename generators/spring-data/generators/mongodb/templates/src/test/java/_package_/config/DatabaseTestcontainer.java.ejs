@@ -33,7 +33,9 @@ import org.testcontainers.junit.jupiter.Container;
 public class DatabaseTestcontainer {
 	@Bean
 	@ServiceConnection
-	public static MongoDBContainer mongoDbContainer = new MongoDBContainer("<%- dockerContainers.mongodb %>").withReuse(true).withLogConsumer(
-		new Slf4jLogConsumer(LoggerFactory.getLogger(DatabaseTestcontainer.class))
-	);
+	public static MongoDBContainer mongoDbContainer() {
+        return new MongoDBContainer("<%- dockerContainers.mongodb %>")
+            .withReuse(true)
+            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(DatabaseTestcontainer.class)));
+    }
 }
