@@ -92,7 +92,7 @@ export default class MongoDBGenerator extends SpringBootApplicationGenerator {
       },
       integrationTest({ application, source }) {
         source.editJavaFile!(`${application.javaPackageTestDir}IntegrationTest.java`, {
-          imports: [`${application.packageName}.config.MongoDbTestContainer`],
+          imports: [`${application.packageName}.config.DatabaseTestcontainer`],
           annotations: [
             {
               package: 'org.springframework.context.annotation',
