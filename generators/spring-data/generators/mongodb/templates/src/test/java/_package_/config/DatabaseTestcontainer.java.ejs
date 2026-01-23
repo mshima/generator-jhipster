@@ -35,7 +35,7 @@ public class DatabaseTestcontainer {
 	@ServiceConnection
 	public static MongoDBContainer mongoDbContainer() {
         return new MongoDBContainer("<%- dockerContainers.mongodb %>")
-            .withReuse(true)
-            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(DatabaseTestcontainer.class)));
+            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(DatabaseTestcontainer.class)))
+            .withReuse(true);
     }
 }
