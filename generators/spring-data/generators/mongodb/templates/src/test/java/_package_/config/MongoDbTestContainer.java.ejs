@@ -28,13 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.mongodb.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class MongoDbTestContainer {
     @Bean
-    @Container
-    public static MongoDBContainer mongoDbContainer() {
+    public MongoDBContainer mongoDbContainer() {
         return new MongoDBContainer("<%- dockerContainers.mongodb %>")
             .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(MongoDbTestContainer.class)))
             .withReuse(true);
