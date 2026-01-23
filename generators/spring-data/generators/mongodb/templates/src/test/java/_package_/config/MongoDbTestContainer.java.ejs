@@ -18,12 +18,9 @@
 -%>
 package <%= packageName %>.config;
 
-import java.util.Collections;
-
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -32,14 +29,10 @@ import org.testcontainers.mongodb.MongoDBContainer;
 @TestConfiguration(proxyBeanMethods = false)
 public class MongoDbTestContainer {
     @Bean
+    @ServiceConnection
     public MongoDBContainer mongoDbContainer() {
         return new MongoDBContainer("<%- dockerContainers.mongodb %>")
             .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(MongoDbTestContainer.class)))
             .withReuse(true);
-    }
-
-    @Bean
-    public DynamicPropertyRegistrar apiServerPropertiesRegistrar(MongoDBContainer mongoDbContainer) {
-        return registry -> registry.add("spring.mongodb.uri", mongoDbContainer::getReplicaSetUrl);
     }
 }
