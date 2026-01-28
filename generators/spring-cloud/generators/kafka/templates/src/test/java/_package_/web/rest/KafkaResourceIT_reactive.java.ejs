@@ -18,7 +18,8 @@
 -%>
 package <%= packageName %>.web.rest;
 
-import <%= packageName %>.IntegrationTest;
+import <%= packageName %>.<%= mainClass %>;
+import <%= packageName %>.config.KafkaTestContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 <%_ if (authenticationUsesCsrf) { _%>
@@ -33,11 +34,13 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -47,11 +50,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.MimeTypeUtils;
 
-@IntegrationTest
-@AutoConfigureWebTestClient(timeout = IntegrationTest.DEFAULT_TIMEOUT)
+@SpringBootTest(classes = <%= mainClass %>.class)
+@AutoConfigureWebTestClient
 @WithMockUser
-@ImportAutoConfiguration(TestChannelBinderConfiguration.class)
-@ActiveProfiles({ "kafka" })
+@Import(TestChannelBinderConfiguration.class)
+@ImportTestcontainers(KafkaTestContainer.class)
+@ActiveProfiles("kafka")
 class <%= upperFirstCamelCaseBaseName %>KafkaResourceIT {
     private static String KAFKA_API = "/api/<%= dasherizedBaseName %>-kafka/{command}";
 
