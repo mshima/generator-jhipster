@@ -18,7 +18,8 @@
 -%>
 package <%= packageName %>.web.rest;
 
-import <%= packageName %>.IntegrationTest;
+import <%= packageName %>.<%= mainClass %>;
+import <%= packageName %>.config.KafkaTestContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -34,11 +35,13 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.GenericMessage;
@@ -48,12 +51,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.MimeTypeUtils;
 
-@IntegrationTest
+@SpringBootTest(classes = <%= mainClass %>.class)
 @AutoConfigureMockMvc
 @WithMockUser
-@ImportAutoConfiguration(TestChannelBinderConfiguration.class)
-@ActiveProfiles({ "kafka" })
+@Import(TestChannelBinderConfiguration.class)
+@ImportTestcontainers(KafkaTestContainer.class)
+@ActiveProfiles("kafka")
 class <%= upperFirstCamelCaseBaseName %>KafkaResourceIT {
+    private static String KAFKA_API = "/api/<%= dasherizedBaseName %>-kafka/";
 
     @Autowired
     private MockMvc restMockMvc;
@@ -66,7 +71,7 @@ class <%= upperFirstCamelCaseBaseName %>KafkaResourceIT {
 
     @Test
     void producesMessages() throws Exception {
-        restMockMvc.perform(post("/api/<%= dasherizedBaseName %>-kafka/publish?message=value-produce")<% if (authenticationUsesCsrf) { %>.with(csrf())<% } %>).andExpect(status().isOk());
+        restMockMvc.perform(post(KAFKA_API + "publish?message=value-produce")<% if (authenticationUsesCsrf) { %>.with(csrf())<% } %>).andExpect(status().isOk());
         assertThat(output.receive(1000, "binding-out-0").getPayload()).isEqualTo("value-produce".getBytes());
     }
 
@@ -82,7 +87,7 @@ class <%= upperFirstCamelCaseBaseName %>KafkaResourceIT {
         MessageHeaders headers = new MessageHeaders(map);
         Message<String> testMessage = new GenericMessage<>("value-consume", headers);
         MvcResult mvcResult = restMockMvc
-            .perform(get("/api/<%= dasherizedBaseName %>-kafka/register"))
+            .perform(get(KAFKA_API + "register"))
             .andExpect(status().isOk())
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -91,7 +96,7 @@ class <%= upperFirstCamelCaseBaseName %>KafkaResourceIT {
             Thread.sleep(100);
             String content = mvcResult.getResponse().getContentAsString();
             if (content.contains("data:value-consume")) {
-                restMockMvc.perform(get("/api/<%= dasherizedBaseName %>-kafka/unregister"));
+                restMockMvc.perform(get(KAFKA_API + "unregister"));
                 return;
             }
         }
