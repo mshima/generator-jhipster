@@ -25,8 +25,8 @@ import {
 } from '../../support/commands';
 
 describe('login page', () => {
-  let username;
-  let password;
+  let username: string;
+  let password: string;
 
   before(() => {
     cy.credentials().then(credentials => {
