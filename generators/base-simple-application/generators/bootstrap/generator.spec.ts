@@ -47,4 +47,22 @@ describe(`generator - ${generator}`, () => {
       expect(result.composedMockedGenerators).toMatchInlineSnapshot(`[]`);
     });
   });
+
+  describe('security hardening', () => {
+    before(async () => {
+      await helpers
+        .runJHipster(generator)
+        // eslint-disable-next-line no-template-curly-in-string
+        .withJHipsterConfig({ applicationProperty: '${injected}' } as any)
+        .withSkipWritingPriorities();
+    });
+
+    it('should be applied to application config', () => {
+      expect(result.application).toMatchObject(
+        expect.objectContaining({
+          applicationProperty: '',
+        }),
+      );
+    });
+  });
 });
