@@ -2,7 +2,7 @@ import type { Config } from 'eslint/config';
 import imports from 'eslint-plugin-import-x';
 import unusedImports from 'eslint-plugin-unused-imports';
 
-export const jsRules: Record<string, string | [string, ...any[]]> = {
+export const jsRules: NonNullable<Config['rules']> = {
   'dot-notation': 'error',
   eqeqeq: ['error', 'always', { null: 'ignore' }],
   'no-else-return': 'error',

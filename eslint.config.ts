@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import { type Config, defineConfig } from 'eslint/config';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
-import ejs from 'eslint-plugin-ejs-templates';
+import { customizeEjs } from 'eslint-plugin-ejs-templates';
 import imports from 'eslint-plugin-import-x';
 import n from 'eslint-plugin-n';
 import prettier from 'eslint-plugin-prettier/recommended';
@@ -15,7 +15,6 @@ import jhipster from './lib/eslint/index.ts';
 const tsFiles = ['**/*.{ts,mts,cts}'];
 const jsFiles = ['**/*.{js,cjs,mjs}'];
 const jsTsFiles = [...jsFiles, ...tsFiles];
-
 export default defineConfig(
   {
     files: jsTsFiles,
@@ -126,37 +125,14 @@ export default defineConfig(
     },
   },
   prettier,
-  ejs.configs.base,
-  {
-    files: ['**/*.ejs'],
-    plugins: {
-      '@stylistic': stylistic,
+  ...customizeEjs(
+    {
+      html: 'never',
+      prettierBlacklist: true,
+      stylisticBlacklist: true,
     },
-    linterOptions: {
-      reportUnusedDisableDirectives: 'error',
-    },
-    rules: {
-      'ejs-templates/prefer-raw': 'error',
-      'ejs-templates/prefer-slurping-codeonly': 'error',
-      'ejs-templates/experimental-prefer-slurp-multiline': 'error',
-      'ejs-templates/prefer-single-line-tags': ['error', { mode: 'braces' }],
-      'ejs-templates/slurp-newline': 'error',
-
-      'prettier/prettier': 'off',
-      ...js.configs.recommended.rules,
-      ...jsRules,
-      'prefer-destructuring': ['error', { array: false, object: true }],
-      '@stylistic/no-multi-spaces': 'error',
-      '@stylistic/comma-spacing': 'error',
-      '@stylistic/object-curly-spacing': ['error', 'always'],
-      '@stylistic/space-infix-ops': 'error',
-      '@stylistic/quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: 'never' }],
-      '@stylistic/semi': 'error',
-      '@stylistic/comma-dangle': ['error', 'always-multiline'],
-      '@stylistic/template-curly-spacing': 'error',
-
-      'ejs-templates/indent': 'error',
-      'ejs-templates/format': 'error',
-    },
-  },
+    js.configs.recommended,
+    { rules: jsRules },
+    stylistic.configs.customize({ jsx: false, semi: true }),
+  ),
 );
