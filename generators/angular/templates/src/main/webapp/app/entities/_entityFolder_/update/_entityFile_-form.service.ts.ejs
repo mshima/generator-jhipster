@@ -47,7 +47,7 @@ type <%- entityAngularName %>FormGroupInput = I<%- entityAngularName %> | Partia
 /**
  * Type that converts some properties for forms.
  */
-type FormValueOf<T extends I<%- entityAngularName %> | New<%- entityAngularName %>> = Omit<T, '<%- fields.filter(field => field.fieldTypeTimed).map(field => field.fieldName).join('\' | \'') %>'> & {
+type FormValueOf<T extends I<%- entityAngularName %> | New<%- entityAngularName %>> = Omit<T, '<%- fields.filter(field => field.fieldTypeTimed).map(field => field.fieldName).join("' | '") %>'> & {
   <%_ for (const field of fields.filter(field => field.fieldTypeTimed)) { _%>
   <%- field.fieldName %>?: string | null;
   <%_ } _%>
@@ -59,7 +59,7 @@ type New<%- entityAngularName %>FormRawValue =  FormValueOf<New<%- entityAngular
 <%_ } _%>
 <%_ if (containDefaultProperties) { _%>
 
-type <%- entityAngularName %>FormDefaults = Pick<New<%- entityAngularName %>, '<%- formDefaultProperties.join('\' | \'') %>'>;
+type <%- entityAngularName %>FormDefaults = Pick<New<%- entityAngularName %>, '<%- formDefaultProperties.join("' | '") %>'>;
 <%_ } _%>
 
 type <%- entityAngularName %>FormGroupContent = {

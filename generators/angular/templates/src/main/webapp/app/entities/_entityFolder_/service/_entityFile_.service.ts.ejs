@@ -58,7 +58,7 @@ export type PartialUpdate<%- entityAngularName %> = Partial<I<%- entityAngularNa
 
 <%_ if (requiresRestTypeConversion) { _%>
 type RestOf<T extends I<%- entityAngularName %><% if (!readOnly) { %> | New<%- entityAngularName %><% } %>> =
-  Omit<T, '<%- fields.filter(field => field.fieldTypeTemporal).map(field => field.fieldName).join('\' | \'') %>'> &
+  Omit<T, '<%- fields.filter(field => field.fieldTypeTemporal).map(field => field.fieldName).join("' | '") %>'> &
   {
   <%_ for (const field of fields.filter(field => field.fieldTypeTemporal)) { _%>
   <%- field.fieldName %>?: string | null;

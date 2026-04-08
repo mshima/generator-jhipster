@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import { type Config, defineConfig } from 'eslint/config';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
-import { customizeEjs } from 'eslint-plugin-ejs-templates';
+import ejs from 'eslint-plugin-ejs-templates';
 import imports from 'eslint-plugin-import-x';
 import n from 'eslint-plugin-n';
 import prettier from 'eslint-plugin-prettier/recommended';
@@ -15,6 +15,7 @@ import jhipster from './lib/eslint/index.ts';
 const tsFiles = ['**/*.{ts,mts,cts}'];
 const jsFiles = ['**/*.{js,cjs,mjs}'];
 const jsTsFiles = [...jsFiles, ...tsFiles];
+
 export default defineConfig(
   {
     files: jsTsFiles,
@@ -125,15 +126,19 @@ export default defineConfig(
     },
   },
   prettier,
-  ...customizeEjs(
+  ejs.configs.customize(
     {
       html: 'never',
       prettierBlacklist: true,
       stylisticBlacklist: true,
     },
-    js.configs.recommended,
-    { rules: jsRules },
-    stylistic.configs.customize({ jsx: false, semi: true }),
-    { rules: { '@stylistic/quotes': ['error', 'single', { allowTemplateLiterals: 'never', avoidEscape: true }] } },
+    {
+      rules: jsRules,
+      extends: [js.configs.recommended],
+    },
+    {
+      rules: { '@stylistic/quotes': ['error', 'single', { allowTemplateLiterals: 'never', avoidEscape: true }] },
+      extends: [stylistic.configs.customize({ jsx: false, semi: true })],
+    },
   ),
 );
