@@ -134,5 +134,6 @@ export default defineConfig(
     js.configs.recommended,
     { rules: jsRules },
     stylistic.configs.customize({ jsx: false, semi: true }),
+    { rules: { '@stylistic/quotes': ['error', 'single', { allowTemplateLiterals: 'never', avoidEscape: true }] } },
   ),
 );
