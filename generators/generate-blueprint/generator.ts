@@ -33,7 +33,6 @@ import {
   requiredConfig,
   subGeneratorPrompts,
 } from './constants.ts';
-import { files, generatorFiles } from './files.ts';
 import { lookupGeneratorsNamespaces } from './internal/lookup-namespaces.ts';
 import type {
   Application as GenerateBlueprintApplication,
@@ -126,6 +125,11 @@ export default class extends GenerateBlueprintBaseGenerator {
       requiredConfig() {
         this.config.defaults(requiredConfig());
       },
+      migrateTypescript({ control }) {
+        if (control.isJhipsterVersionLessThan('9.0.1')) {
+          this.jhipsterConfig.javascriptBlueprint = true;
+        }
+      },
     });
   }
 
@@ -163,13 +167,22 @@ export default class extends GenerateBlueprintBaseGenerator {
       async writing({ application }) {
         application.sampleWritten = this.jhipsterConfig.sampleWritten;
         await this.writeFiles({
-          sections: files,
+          sections: {
+            baseFiles: [
+              {
+                condition: data => data.commands.length > 0,
+                templates: ['cli/commands.cjs'],
+              },
+            ],
+          },
           context: application,
         });
         this.jhipsterConfig.sampleWritten = true;
       },
       async writingGenerators({ application }) {
         if (!application.generators) return;
+        const templateExtension = application.javascriptBlueprint ? 'mjs' : 'ts';
+        const outputExtension = application.javascriptBlueprint ? application.blueprintMjsExtension : 'ts';
         for (const generator of Object.keys(application.generators)) {
           const subGeneratorStorage = this.getSubGeneratorStorage(generator);
           const subGeneratorConfig = subGeneratorStorage.getAll();
@@ -194,8 +207,48 @@ export default class extends GenerateBlueprintBaseGenerator {
             generatorClass: upperFirst(camelCase(jhipsterGenerator)),
             priorities,
           };
-          await this.writeFiles({
-            sections: generatorFiles,
+          await this.writeFiles<typeof subTemplateData>({
+            sections: {
+              generator: [
+                {
+                  path: 'generators/generator',
+                  to: data => `${data.application.blueprintsPath}${data.generator.replaceAll(':', '/generators/')}`,
+                  templates: [
+                    { sourceFile: `index.${templateExtension}`, destinationFile: `index.${outputExtension}` },
+                    {
+                      sourceFile: `command.${templateExtension}`,
+                      destinationFile: `command.${outputExtension}`,
+                      override: data => !data.ignoreExistingGenerators,
+                    },
+                    {
+                      sourceFile: `generator.${templateExtension}.jhi`,
+                      destinationFile: `generator.${outputExtension}.jhi`,
+                      override: data => !data.ignoreExistingGenerators,
+                    },
+                    {
+                      condition: data => !data.generator.startsWith('entity') && !data.application[LOCAL_BLUEPRINT_OPTION],
+                      sourceFile: `generator.spec.${templateExtension}`,
+                      destinationFile: `generator.spec.${outputExtension}`,
+                      override: data => !data.ignoreExistingGenerators,
+                    },
+                  ],
+                },
+                {
+                  path: 'generators/generator',
+                  to: data => `${data.application.blueprintsPath}${data.generator.replaceAll(':', '/generators/')}`,
+                  condition(data) {
+                    return !data.written && data.priorities.some(priority => priority.name === 'writing');
+                  },
+                  transform: false,
+                  templates: [
+                    {
+                      sourceFile: 'templates/template-file.ejs',
+                      destinationFile: data => `templates/template-file-${data.generator}.ejs`,
+                    },
+                  ],
+                },
+              ],
+            },
             context: subTemplateData,
           });
           subGeneratorStorage.set(WRITTEN, true);

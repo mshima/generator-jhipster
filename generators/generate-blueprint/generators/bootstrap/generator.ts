@@ -47,9 +47,10 @@ export default class BootstrapGenerator extends BlueprintGenerator {
       async preparing({ applicationDefaults }) {
         applicationDefaults(defaultConfig(), {
           blueprintsPath: data => (data.localBlueprint ? '.blueprint/' : 'generators/'),
-          githubRepository: data => `jhipster/generator-jhipster-${data.baseName}`,
           blueprintMjsExtension: data => (data.js ? 'js' : 'mjs'),
           cliName: data => (data.cli ? `jhipster-${data.baseName}` : undefined),
+          githubRepository: data => `jhipster/generator-jhipster-${data.baseName}`,
+          javascriptBlueprint: false,
         });
       },
       prepareCommands({ application }) {

@@ -41,6 +41,7 @@ export default class StandaloneBlueprintGenerator extends GenerateBlueprintBaseG
   get writing() {
     return this.asWritingTaskGroup({
       async writeBlueprintFiles({ application }) {
+        const extension = application.javascriptBlueprint ? 'mjs' : 'ts';
         await this.writeFiles({
           blocks: [
             {
@@ -51,12 +52,12 @@ export default class StandaloneBlueprintGenerator extends GenerateBlueprintBaseG
                 'eslint.config.ts.jhi.blueprint',
                 'README.md',
                 'tsconfig.json',
-                'vitest.config.ts',
-                'vitest.test-setup.ts',
-                '.blueprint/cli/commands.mjs',
-                '.blueprint/generate-sample/command.mjs',
-                '.blueprint/generate-sample/generator.mjs',
-                '.blueprint/generate-sample/index.mjs',
+                `vitest.config.ts`,
+                `vitest.test-setup.ts`,
+                `.blueprint/cli/commands.${extension}`,
+                `.blueprint/generate-sample/command.${extension}`,
+                `.blueprint/generate-sample/generator.${extension}`,
+                `.blueprint/generate-sample/index.${extension}`,
                 // Always write cli for devBlueprint usage
                 'cli/cli.cjs',
                 { sourceFile: 'cli/cli-customizations.cjs', override: false },
@@ -65,10 +66,10 @@ export default class StandaloneBlueprintGenerator extends GenerateBlueprintBaseG
             {
               condition: ctx => ctx.githubWorkflows,
               templates: [
-                '.blueprint/github-build-matrix/command.mjs',
-                '.blueprint/github-build-matrix/generator.mjs',
-                '.blueprint/github-build-matrix/generator.spec.mjs',
-                '.blueprint/github-build-matrix/index.mjs',
+                `.blueprint/github-build-matrix/command.${extension}`,
+                `.blueprint/github-build-matrix/generator.${extension}`,
+                `.blueprint/github-build-matrix/generator.spec.${extension}`,
+                `.blueprint/github-build-matrix/index.${extension}`,
               ],
             },
             {

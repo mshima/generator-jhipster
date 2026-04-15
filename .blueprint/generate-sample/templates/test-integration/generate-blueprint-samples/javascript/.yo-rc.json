@@ -3,6 +3,7 @@
     "additionalSubGenerators": "",
     "baseName": "foo",
     "cli": true,
+    "javascriptBlueprint": true,
     "localBlueprint": false,
     "generators": {
       "client": {

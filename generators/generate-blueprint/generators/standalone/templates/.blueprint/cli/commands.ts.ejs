@@ -16,5 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { default } from './generator.ts';
-export { default as command } from './command.ts';
+
+const defaultCommands = {
+  'generate-sample': {
+    desc: 'Generate a test sample',
+    blueprint: '@jhipster/jhipster-dev',
+  },
+<%_ if (githubWorkflows) { _%>
+  'github-build-matrix': {
+    desc: 'Build a matrix of jobs for github actions',
+    blueprint: '@jhipster/jhipster-dev',
+  },
+<%_ } _%>
+};
+
+export default defaultCommands;

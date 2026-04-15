@@ -24,6 +24,9 @@ env:
 jobs:
   check-generator-generate-blueprint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sample: ['javascript', 'typescript']
     defaults:
       run:
         working-directory: ${{ github.workspace }}/app
@@ -66,10 +69,11 @@ jobs:
           cd ..
           mkdir generator-jhipster-foo
           cd generator-jhipster-foo
-          cp ${{ github.workspace }}/generator-jhipster/.blueprint/generate-sample/templates/test-integration/generate-blueprint-samples/default/.yo-rc.json .
+          cp ${{ github.workspace }}/generator-jhipster/.blueprint/generate-sample/templates/test-integration/generate-blueprint-samples/${{ matrix.sample }}/.yo-rc.json .
           jhipster.cjs generate-blueprint --force --link-jhipster-dependency --generate-snapshots
           npm link
           cat package.json
+          jhipster.cjs info
       - name: 'GENERATION: project'
         run: jhipster-foo --defaults --client-test-frameworks cypress --skip-jhipster-dependencies
         env:
