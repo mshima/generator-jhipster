@@ -127,7 +127,7 @@ export default class extends GenerateBlueprintBaseGenerator {
       },
       migrateTypescript({ control }) {
         if (control.isJhipsterVersionLessThan('9.0.1')) {
-          this.jhipsterConfig.javascriptBlueprint = true;
+          this.jhipsterConfig.javascriptBlueprint ??= true;
         }
       },
     });

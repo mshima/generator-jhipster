@@ -11,6 +11,7 @@ exports[`generator - generate-blueprint with all option should match application
   "backendTypeJavaAny": true,
   "backendTypeSpringBoot": true,
   "baseName": "jhipster",
+  "blueprintCliName": "cli.cts",
   "blueprintMjsExtension": "js",
   "blueprintsPath": "generators/",
   "buildTool": "maven",
@@ -168,10 +169,10 @@ exports[`generator - generate-blueprint with all option should match snapshot 1`
   "README.md": {
     "stateCleared": "modified",
   },
-  "cli/cli-customizations.cjs": {
+  "cli/cli-customizations.cts": {
     "stateCleared": "modified",
   },
-  "cli/cli.cjs": {
+  "cli/cli.cts": {
     "stateCleared": "modified",
   },
   "generators/angular/command.ts": {
@@ -1667,6 +1668,7 @@ exports[`generator - generate-blueprint with default config should match applica
   "backendTypeJavaAny": true,
   "backendTypeSpringBoot": true,
   "baseName": "jhipster",
+  "blueprintCliName": "cli.cts",
   "blueprintMjsExtension": "js",
   "blueprintsPath": "generators/",
   "buildTool": "maven",
@@ -1823,10 +1825,10 @@ exports[`generator - generate-blueprint with default config should write files a
   "README.md": {
     "stateCleared": "modified",
   },
-  "cli/cli-customizations.cjs": {
+  "cli/cli-customizations.cts": {
     "stateCleared": "modified",
   },
-  "cli/cli.cjs": {
+  "cli/cli.cts": {
     "stateCleared": "modified",
   },
   "package.json": {

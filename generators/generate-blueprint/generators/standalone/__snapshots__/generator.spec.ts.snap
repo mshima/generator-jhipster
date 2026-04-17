@@ -28,10 +28,10 @@ exports[`generator - generate-blueprint:standalone with defaults options should 
   "README.md": {
     "stateCleared": "modified",
   },
-  "cli/cli-customizations.cjs": {
+  "cli/cli-customizations.cts": {
     "stateCleared": "modified",
   },
-  "cli/cli.cjs": {
+  "cli/cli.cts": {
     "stateCleared": "modified",
   },
   "package.json": {
