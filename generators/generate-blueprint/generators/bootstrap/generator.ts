@@ -33,7 +33,7 @@ export default class BootstrapGenerator extends BlueprintGenerator {
   get loading() {
     return this.asLoadingTaskGroup({
       async loading({ applicationDefaults }) {
-        applicationDefaults({ commands: () => [], typescriptEslint: false });
+        applicationDefaults({ commands: () => [] });
       },
     });
   }

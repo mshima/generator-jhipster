@@ -143,8 +143,6 @@ export default class extends GenerateBlueprintBaseGenerator {
         if (this.jhipsterConfig[LOCAL_BLUEPRINT_OPTION]) {
           await this.composeWithJHipster('jhipster:generate-blueprint:local');
         } else {
-          const initGenerator = await this.composeWithJHipster('init');
-          initGenerator.generateReadme = false;
           await this.composeWithJHipster('jhipster:generate-blueprint:standalone');
         }
       },

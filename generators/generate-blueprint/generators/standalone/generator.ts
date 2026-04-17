@@ -36,6 +36,8 @@ export default class StandaloneBlueprintGenerator extends GenerateBlueprintBaseG
     }
 
     await this.dependsOnBootstrap('generate-blueprint');
+    const initGenerator = await this.dependsOnJHipster('init');
+    initGenerator.generateReadme = false;
   }
 
   get preparing() {
@@ -153,7 +155,7 @@ export default class StandaloneBlueprintGenerator extends GenerateBlueprintBaseG
           files: defaultPublishedFiles,
           scripts: {
             ejslint: 'ejslint generators/**/*.ejs',
-            lint: 'eslint .',
+            lint: 'eslint',
             'lint-fix': 'npm run ejslint && npm run lint -- --fix',
             pretest: 'npm run prettier-check && npm run lint && tsc',
             test: 'vitest run',
@@ -177,6 +179,13 @@ export default class StandaloneBlueprintGenerator extends GenerateBlueprintBaseG
             node: jhipsterPackageJson.engines.node,
           },
         });
+        if (!application.javascriptBlueprint) {
+          this.packageJson.merge({
+            devDependencies: {
+              'typescript': mainDependencies['typescript'],
+            },
+          });
+        }
       },
       addCliToPackageJson({ application }) {
         const { cli, cliName } = application;
