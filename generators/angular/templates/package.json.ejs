@@ -90,7 +90,7 @@
     "default_environment": "prod"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint",
     "lint:fix": "<%- nodePackageManager %> run lint -- --fix",
     "cleanup": "rimraf <%- this.relativeDir(clientRootDir, temporaryDir) %>",
     "clean-www": "rimraf <%- this.relativeDir(clientRootDir, clientDistDir) %>",
