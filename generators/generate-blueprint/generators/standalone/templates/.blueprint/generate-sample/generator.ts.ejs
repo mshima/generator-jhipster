@@ -5,12 +5,12 @@ import BaseCoreGenerator from 'generator-jhipster/generators/base-core';
 import { getGithubSamplesGroup } from 'generator-jhipster/ci';
 
 export default class extends BaseCoreGenerator {
-  samplesFolder: string | undefined;
+  samplesFolder?: string;
   samplesGroup!: string;
   sampleName!: string;
-  all!: boolean;
-  sampleType!: string;
-  sampleFile!: string;
+  all?: boolean;
+  sampleType?: string;
+  sampleFile?: string;
   generatorOptions: any;
 
   get [BaseCoreGenerator.WRITING]() {

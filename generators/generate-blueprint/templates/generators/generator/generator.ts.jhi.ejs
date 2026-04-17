@@ -49,18 +49,20 @@ export async function createGenerator(env) {
 <%_ } else { _%>
 export default class extends <%- generatorClass %>Generator {
 <%_ } _%>
+<%_ if (sbs || !customGenerator) { -%>
   constructor(args, opts, features) {
     super(args, opts, { ...features,
-<%_ if (sbs) { -%>
+  <%_ if (sbs) { -%>
       sbsBlueprint: true,
-<%_ } else if (!customGenerator) { -%>
+  <%_ } else if (!customGenerator) { -%>
       checkBlueprint: true,
       // Dropped it once migration is done.
       jhipster7Migration: true,
-<%_ } -%>
+  <%_ } -%>
     });
   }
 
+<%_ } -%>
 <%_ if (!sbs && !customGenerator) { _%>
   async beforeQueue() {
     await super.beforeQueue();
