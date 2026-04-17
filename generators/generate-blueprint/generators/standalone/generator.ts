@@ -72,6 +72,7 @@ export default class StandaloneBlueprintGenerator extends GenerateBlueprintBaseG
                 `.blueprint/generate-sample/command.${extension}`,
                 `.blueprint/generate-sample/generator.${extension}`,
                 `.blueprint/generate-sample/index.${extension}`,
+                ...(application.javascriptBlueprint ? [] : ['generators/base-generator.ts']),
                 // Always write cli for devBlueprint usage
                 `cli/${application.blueprintCliName}`,
                 { sourceFile: `cli/cli-customizations.c${application.javascriptBlueprint ? 'j' : 't'}s`, override: false },
