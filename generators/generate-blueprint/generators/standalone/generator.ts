@@ -182,7 +182,7 @@ export default class StandaloneBlueprintGenerator extends GenerateBlueprintBaseG
         if (!application.javascriptBlueprint) {
           this.packageJson.merge({
             devDependencies: {
-              'typescript': mainDependencies['typescript'],
+              typescript: mainDependencies.typescript,
             },
           });
         }
