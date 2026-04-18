@@ -25,7 +25,7 @@
   });
 -&>
 <%_ if (!application.dynamic) { _%>
-import <%- generatorClass %>Generator from 'generator-jhipster/generators/<%- jhipsterGenerator %>';
+import <%- upperFirstCamelCaseBaseName %>Generator from '../base-generator.ts';
 <%_ } _%>
 <%_ if (priorities.find(priority => priority.name === 'initializing')) { _%>
 import command from './command.<%- blueprintMjsExtension %>';
@@ -47,7 +47,7 @@ export async function createGenerator(env) {
 
   return class extends <%- generatorClass %>Generator {
 <%_ } else { _%>
-export default class extends <%- generatorClass %>Generator {
+export default class extends <%- upperFirstCamelCaseBaseName %>Generator {
 <%_ } _%>
 <%_ if (sbs || !customGenerator) { -%>
   constructor(args, opts, features) {
@@ -73,7 +73,7 @@ export default class extends <%- generatorClass %>Generator {
 <&- fragments.<%- priority.name %>Section() -&>
 <& if (!fragments.<%- priority.name %>Section()) { -&>
 
-  get [<%- generatorClass %>Generator.<%- priority.constant %>]() {
+  get [<%- application.dynamic ? generatorClass : upperFirstCamelCaseBaseName %>Generator.<%- priority.constant %>]() {
     return this.<%- priority.asTaskGroup %>({
   <%_ if (!sbs && !customGenerator) { _%>
       ...super.<%- priority.name %>,
