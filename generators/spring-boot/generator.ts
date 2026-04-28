@@ -949,7 +949,7 @@ ${application.jhipsterDependenciesVersion?.includes('-CICD') ? '' : '// '}mavenL
             dependencies: [
               { groupId: 'com.fasterxml.jackson.datatype', artifactId: 'jackson-datatype-hppc' },
               { groupId: 'com.fasterxml.jackson.datatype', artifactId: 'jackson-datatype-jsr310' },
-              { groupId: 'io.micrometer', artifactId: 'micrometer-registry-prometheus-simpleclient' },
+              { groupId: 'io.micrometer', artifactId: 'micrometer-registry-prometheus' },
               { groupId: 'org.apache.commons', artifactId: 'commons-lang3' },
               { groupId: 'org.mapstruct', artifactId: 'mapstruct', versionRef: 'mapstruct' },
               { groupId: 'org.mapstruct', artifactId: 'mapstruct-processor', versionRef: 'mapstruct', scope: 'annotationProcessor' },
