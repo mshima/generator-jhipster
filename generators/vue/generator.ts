@@ -117,7 +117,7 @@ export default class VueGenerator extends ClientApplicationGenerator {
         }
       },
       async javaNodeBuildPaths({ application }) {
-        const { clientBundlerVite, clientBundlerWebpack, microfrontend, javaNodeBuildPaths } = application;
+        const { clientBundlerRsbuild, clientBundlerVite, clientBundlerWebpack, microfrontend, javaNodeBuildPaths } = application;
 
         javaNodeBuildPaths?.push('.postcssrc.js', 'tsconfig.json', 'tsconfig.app.json');
         if (microfrontend) {
@@ -127,6 +127,8 @@ export default class VueGenerator extends ClientApplicationGenerator {
           javaNodeBuildPaths?.push('webpack/');
         } else if (clientBundlerVite) {
           javaNodeBuildPaths?.push('vite.config.ts');
+        } else if (clientBundlerRsbuild) {
+          javaNodeBuildPaths?.push('rsbuild.config.ts');
         }
       },
       prepareForTemplates({ application, source }) {
@@ -352,10 +354,26 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
               webpack: 'webpack --config webpack/webpack.common.js',
             },
           });
+        } else {
+          source.mergeClientPackageJson!({
+            devDependencies: {
+              '@rsbuild/core': null,
+              '@rsbuild/plugin-sass': null,
+              '@rsbuild/plugin-vue': null,
+            },
+            scripts: {
+              start: 'rsbuild dev',
+              build: 'rsbuild build',
+              'webapp:build:dev': `${nodePackageManager} run build -- --mode=development`,
+              'webapp:build:prod': `${nodePackageManager} run build -- --mode=production`,
+              'webapp:dev': `${nodePackageManager} run start`,
+              'webapp:serve': `${nodePackageManager} start`,
+            },
+          });
         }
       },
       addMicrofrontendDependencies({ application, source }) {
-        const { clientBundlerVite, clientBundlerWebpack, microfrontend } = application;
+        const { applicationTypeGateway, clientBundlerRsbuild, clientBundlerVite, clientBundlerWebpack, microfrontend } = application;
         if (!microfrontend) return;
         if (clientBundlerVite) {
           source.mergeClientPackageJson!({
@@ -385,6 +403,17 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
               'webpack-dev-server': null,
               'webpack-merge': null,
               'workbox-webpack-plugin': null,
+            },
+          });
+        } else if (clientBundlerRsbuild) {
+          source.mergeClientPackageJson!({
+            devDependencies: {
+              '@module-federation/rsbuild-plugin': null,
+              ...(applicationTypeGateway ?
+                {
+                  '@module-federation/enhanced': null,
+                }
+              : {}),
             },
           });
         }
