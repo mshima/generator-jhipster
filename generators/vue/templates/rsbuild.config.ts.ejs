@@ -44,10 +44,14 @@ export default defineConfig({
   plugins: [
     pluginVue(),
     pluginSass(),
-<%_ if (microfrontend) { _%>
-    new ModuleFederationPlugin(mfConfig),
-<%_ } _%>
   ],
+<%_ if (microfrontend) { _%>
+  tools: {
+    rspack: {
+      plugins: [new ModuleFederationPlugin(mfConfig)],
+    },
+  },
+<%_ } _%>
   output: {
 <%_ if (microfrontend) { _%>
     assetPrefix: 'auto',
