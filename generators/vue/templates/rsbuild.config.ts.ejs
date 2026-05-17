@@ -48,6 +48,9 @@ export default defineConfig({
 <%_ if (microfrontend) { _%>
   tools: {
     rspack: {
+      experiments: {
+        asyncStartup: true,
+      },
       plugins: [new ModuleFederationPlugin(mfConfig)],
     },
   },
