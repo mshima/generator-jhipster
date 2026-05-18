@@ -287,18 +287,15 @@ public class SecurityConfiguration {
                     .pathMatchers("/api/**").authenticated()
 <%_ if (applicationTypeGateway) { _%>
   <%_ if (microfrontend) { _%>
-                    // microfrontend resources are loaded by webpack without authentication, they need to be public
-    <%_ if (clientBundlerVite) { _%>
+                    // microfrontend resources are loaded without authentication, they need to be public
+                    .pathMatchers("/services/*/*.js", "/services/*/*.js.map", "/services/*/*.txt").permitAll()
+                    // Vite
                     .pathMatchers("/services/*/assets/**").permitAll()
-                    .pathMatchers("/services/*/*.js").permitAll()
-    <%_ } else if (clientBundlerRsbuild) { _%>
+                    // Rsbuild
                     .pathMatchers("/services/*/static/**").permitAll()
-                    .pathMatchers("/services/*/*.js").permitAll()
-    <%_ } else { _%>
-                    .pathMatchers("/services/*/*.js").permitAll()
-                    .pathMatchers("/services/*/*.txt").permitAll()
+    <%_ if (clientFrameworkAngular || clientFrameworkReact) { _%>
+                    // I18n files
                     .pathMatchers("/services/*/*.json").permitAll()
-                    .pathMatchers("/services/*/*.js.map").permitAll()
     <%_ } _%>
   <%_ } _%>
                     .pathMatchers("/services/*/management/health/readiness").permitAll()

@@ -53,7 +53,7 @@ export default defineConfig({
   },
 <%_ } _%>
   output: {
-<%_ if (microfrontend) { _%>
+<%_ if (microfrontend && applicationTypeGateway) { _%>
     module: true,
     chunkFormat: 'module',
 <%_ } _%>
