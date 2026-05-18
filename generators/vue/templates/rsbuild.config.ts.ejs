@@ -54,7 +54,11 @@ export default defineConfig({
 <%_ } _%>
   output: {
 <%_ if (microfrontend) { _%>
+  <%_ if (applicationTypeMicroservice) { _%>
+    assetPrefix: 'auto',
+  <%_ } else { _%>
     module: true,
+  <%_ } _%>
 <%_ } _%>
     cleanDistPath: true,
     distPath: {
