@@ -44,14 +44,10 @@ export default defineConfig({
   plugins: [
     pluginVue(),
     pluginSass(),
-  ],
 <%_ if (microfrontend) { _%>
-  tools: {
-    rspack: {
-      plugins: [new ModuleFederationPlugin(mfConfig)],
-    },
-  },
+    new ModuleFederationPlugin(mfConfig),
 <%_ } _%>
+  ],
   output: {
 <%_ if (microfrontend) { _%>
   <%_ if (applicationTypeMicroservice) { _%>
