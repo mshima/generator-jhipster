@@ -97,6 +97,8 @@ export default class VueGenerator extends ClientApplicationGenerator {
   get preparing() {
     return this.asPreparingTaskGroup({
       loadPackageJson({ application }) {
+        application.clientBundlerWebpack = application.clientBundlerWebpack || application.clientBundlerRsbuild;
+        application.devServerPortProxy = 9000;
         this.loadNodeDependenciesFromPackageJson(
           application.nodeDependencies,
           this.fetchFromInstalledJHipster('vue', 'resources', 'package.json'),
@@ -125,9 +127,11 @@ export default class VueGenerator extends ClientApplicationGenerator {
         }
         if (clientBundlerWebpack) {
           javaNodeBuildPaths?.push('webpack/');
-        } else if (clientBundlerVite) {
+        }
+        if (clientBundlerVite) {
           javaNodeBuildPaths?.push('vite.config.ts');
-        } else if (clientBundlerRsbuild) {
+        }
+        if (clientBundlerRsbuild) {
           javaNodeBuildPaths?.push('rsbuild.config.ts');
         }
       },
@@ -332,7 +336,7 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
   get postWriting() {
     return this.asPostWritingTaskGroup({
       addPackageJsonScripts({ application, source }) {
-        const { clientBundlerVite, clientBundlerWebpack, nodePackageManager } = application;
+        const { clientBundlerRsbuild, clientBundlerVite, clientBundlerWebpack, nodePackageManager } = application;
         if (clientBundlerVite) {
           source.mergeClientPackageJson!({
             scripts: {
@@ -344,7 +348,8 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
               'vite-build': 'vite build',
             },
           });
-        } else if (clientBundlerWebpack) {
+        }
+        if (clientBundlerWebpack) {
           source.mergeClientPackageJson!({
             scripts: {
               'webapp:build:dev': `${nodePackageManager} run webpack -- --mode development --env stats=minimal`,
@@ -354,7 +359,8 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
               webpack: 'webpack --config webpack/webpack.common.js',
             },
           });
-        } else {
+        }
+        if (clientBundlerRsbuild) {
           source.mergeClientPackageJson!({
             devDependencies: {
               '@rsbuild/core': null,
@@ -381,7 +387,8 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
               '@originjs/vite-plugin-federation': '1.3.6',
             },
           });
-        } else if (clientBundlerWebpack) {
+        }
+        if (clientBundlerWebpack) {
           source.mergeClientPackageJson!({
             devDependencies: {
               '@module-federation/enhanced': null,
@@ -405,7 +412,8 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
               'workbox-webpack-plugin': null,
             },
           });
-        } else if (clientBundlerRsbuild) {
+        }
+        if (clientBundlerRsbuild) {
           source.mergeClientPackageJson!({
             devDependencies: {
               '@module-federation/rsbuild-plugin': null,
