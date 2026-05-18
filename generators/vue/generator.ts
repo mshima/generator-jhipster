@@ -97,8 +97,8 @@ export default class VueGenerator extends ClientApplicationGenerator {
   get preparing() {
     return this.asPreparingTaskGroup({
       loadPackageJson({ application }) {
-        application.clientBundlerWebpack = application.clientBundlerWebpack || application.clientBundlerRsbuild;
-        application.devServerPortProxy = 9000;
+        // application.clientBundlerWebpack = application.clientBundlerWebpack || application.clientBundlerRsbuild;
+        // application.devServerPortProxy = 9000;
         this.loadNodeDependenciesFromPackageJson(
           application.nodeDependencies,
           this.fetchFromInstalledJHipster('vue', 'resources', 'package.json'),
