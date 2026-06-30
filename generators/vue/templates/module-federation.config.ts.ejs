@@ -43,6 +43,9 @@ export default {
     // jhipster-needle-expose
   },
   filename: 'remoteEntry.js',
+  library: {
+    type: 'module',
+  },
   shareScope: 'default',
   shared: {
     ...shareDependencies(),
@@ -53,5 +56,10 @@ export default {
     ),
   },
   dts: false,
-  manifest: true,
+  manifest: {
+    additionalData: ({ stats }) => {
+      stats.metaData.remoteEntry.type = 'module';
+      return stats;
+    },
+  },
 } as const satisfies Parameters<typeof createModuleFederationConfig>[0];
