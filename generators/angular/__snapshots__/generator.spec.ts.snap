@@ -103,7 +103,7 @@ describe("UserManagement Management Delete Component", () => {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/entities/admin/user-management/delete/user-management-delete-dialog.ts": {
-    "contents": "import { Component, ChangeDetectionStrategy, inject } from "@angular/core";
+    "contents": "import { Component, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap/modal";
 
@@ -114,7 +114,6 @@ import { UserManagementService } from "../service/user-management.service";
 import { ITEM_DELETED_EVENT } from "app/config/navigation.constants";
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./user-management-delete-dialog.html",
   imports: [FormsModule, FontAwesomeModule, AlertError],
 })
@@ -286,7 +285,7 @@ describe("UserManagement Management Detail Component", () => {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/entities/admin/user-management/detail/user-management-detail.ts": {
-    "contents": "import { Component, ChangeDetectionStrategy, input } from "@angular/core";
+    "contents": "import { Component, input } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
@@ -300,7 +299,6 @@ import {
 import { IUserManagement } from "../user-management.model";
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: "jhi-user-management-detail",
   templateUrl: "./user-management-detail.html",
   imports: [
@@ -718,7 +716,7 @@ describe("UserManagement Management Component", () => {
       deleteModalMock = { componentInstance: {}, closed: new Subject() };
       // NgbModal is not a singleton using TestBed.inject.
       // ngbModal = TestBed.inject(NgbModal);
-      ngbModal = (comp as any).modalService;
+      ngbModal = (comp as unknown as { modalService: NgbModal }).modalService;
       vitest.spyOn(ngbModal, "open").mockReturnValue(deleteModalMock);
     });
 
@@ -755,7 +753,6 @@ describe("UserManagement Management Component", () => {
   "src/main/webapp/app/entities/admin/user-management/list/user-management.ts": {
     "contents": "import {
   Component,
-  ChangeDetectionStrategy,
   computed,
   effect,
   inject,
@@ -810,7 +807,6 @@ import { UserManagementService } from "../service/user-management.service";
 import { UserManagementDeleteDialog } from "../delete/user-management-delete-dialog";
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: "jhi-user-management",
   templateUrl: "./user-management.html",
   imports: [
@@ -1387,13 +1383,12 @@ describe("UserManagement Service", () => {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/entities/admin/user-management/service/user-management.service.ts": {
-    "contents": "import { computed, inject, Injectable, signal } from "@angular/core";
+    "contents": "import { computed, inject, Service, signal } from "@angular/core";
 import { HttpClient, HttpResponse, httpResource } from "@angular/common/http";
 import { map, Observable } from "rxjs";
 
 import dayjs from "dayjs/esm";
 
-import { isPresent } from "app/core/util/operators";
 import { ApplicationConfigService } from "app/core/config/application-config.service";
 import { createRequestOption } from "app/core/request/request-util";
 import { IUserManagement, NewUserManagement } from "../user-management.model";
@@ -1417,7 +1412,7 @@ export type NewRestUserManagement = RestOf<NewUserManagement>;
 export type PartialUpdateRestUserManagement =
   RestOf<PartialUpdateUserManagement>;
 
-@Injectable()
+@Service()
 export class UserManagementsService {
   readonly userManagementsParams = signal<
     | Record<
@@ -1467,7 +1462,7 @@ export class UserManagementsService {
   }
 }
 
-@Injectable({ providedIn: "root" })
+@Service()
 export class UserManagementService extends UserManagementsService {
   protected readonly http = inject(HttpClient);
 
@@ -1550,7 +1545,10 @@ export class UserManagementService extends UserManagementsService {
     userManagementCollection: Type[],
     ...userManagementsToCheck: (Type | null | undefined)[]
   ): Type[] {
-    const userManagements: Type[] = userManagementsToCheck.filter(isPresent);
+    const userManagements: Type[] = userManagementsToCheck.filter(
+      (userManagementItem) =>
+        userManagementItem !== null && userManagementItem !== undefined,
+    );
     if (userManagements.length > 0) {
       const userManagementCollectionIdentifiers = userManagementCollection.map(
         (userManagementItem) =>
@@ -1701,7 +1699,7 @@ describe("UserManagement Form Service", () => {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/entities/admin/user-management/update/user-management-form.service.ts": {
-    "contents": "import { Injectable } from "@angular/core";
+    "contents": "import { Service } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 
 import dayjs from "dayjs/esm";
@@ -1760,7 +1758,7 @@ type UserManagementFormGroupContent = {
 
 export type UserManagementFormGroup = FormGroup<UserManagementFormGroupContent>;
 
-@Injectable({ providedIn: "root" })
+@Service()
 export class UserManagementFormService {
   createUserManagementFormGroup(
     userManagement?: UserManagementFormGroupInput,
@@ -2196,7 +2194,7 @@ describe("UserManagement Management Update Component", () => {
       expect(comp.isSaving()).toEqual(false);
     });
 
-    it("should call create service on save for new entity", () => {
+    it("should call update service on save for new entity", () => {
       // GIVEN
       const saveSubject = new Subject<IUserManagement>();
       const userManagement = { login: "Oswald.Kertzmann" };
@@ -2204,7 +2202,7 @@ describe("UserManagement Management Update Component", () => {
         .spyOn(userManagementFormService, "getUserManagement")
         .mockReturnValue({ login: null });
       vitest
-        .spyOn(userManagementService, "create")
+        .spyOn(userManagementService, "update")
         .mockReturnValue(saveSubject);
       vitest.spyOn(comp, "previousState");
       activatedRoute.data = of({ userManagement: null });
@@ -2218,7 +2216,9 @@ describe("UserManagement Management Update Component", () => {
 
       // THEN
       expect(userManagementFormService.getUserManagement).toHaveBeenCalled();
-      expect(userManagementService.create).toHaveBeenCalled();
+      expect(userManagementService.update).toHaveBeenCalledWith(
+        expect.objectContaining({ login: null }),
+      );
       expect(comp.isSaving()).toEqual(false);
       expect(comp.previousState).toHaveBeenCalled();
     });
@@ -2250,13 +2250,7 @@ describe("UserManagement Management Update Component", () => {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/entities/admin/user-management/update/user-management-update.ts": {
-    "contents": "import {
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-  OnInit,
-} from "@angular/core";
+    "contents": "import { Component, inject, signal, OnInit } from "@angular/core";
 import { HttpResponse } from "@angular/common/http";
 import { ActivatedRoute } from "@angular/router";
 import { finalize, Observable } from "rxjs";
@@ -2273,7 +2267,6 @@ import { IUserManagement } from "../user-management.model";
 import { UserManagementService } from "../service/user-management.service";
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: "jhi-user-management-update",
   templateUrl: "./user-management-update.html",
   imports: [FontAwesomeModule, AlertError, ReactiveFormsModule],
@@ -2308,15 +2301,9 @@ export class UserManagementUpdate implements OnInit {
     const userManagement = this.userManagementFormService.getUserManagement(
       this.editForm,
     );
-    if (userManagement.login === null) {
-      this.subscribeToSaveResponse(
-        this.userManagementService.create(userManagement),
-      );
-    } else {
-      this.subscribeToSaveResponse(
-        this.userManagementService.update(userManagement),
-      );
-    }
+    this.subscribeToSaveResponse(
+      this.userManagementService.update(userManagement as IUserManagement),
+    );
   }
 
   protected subscribeToSaveResponse(
@@ -2546,7 +2533,6 @@ exports[`generator - angular gateway-jwt-skipUserManagement(true)-withAdminUi(fa
   "clientTestDir": "clientRoot/test/",
   "clientTestFramework": "vitest",
   "clientTestFrameworkAny": true,
-  "clientTestFrameworkJest": false,
   "clientTestFrameworkName": "Vitest",
   "clientTestFrameworkVitest": true,
   "clientTestFrameworks": undefined,
@@ -3517,6 +3503,7 @@ exports[`generator - angular gateway-jwt-skipUserManagement(true)-withAdminUi(fa
       "devDependencies": {
         "eslint-config-prettier": "ESLINT_CONFIG_PRETTIER_VERSION",
         "eslint-plugin-prettier": "ESLINT_PLUGIN_PRETTIER_VERSION",
+        "globals": "GLOBALS_VERSION",
         "jiti": "JITI_VERSION",
       },
     },
@@ -3525,7 +3512,7 @@ exports[`generator - angular gateway-jwt-skipUserManagement(true)-withAdminUi(fa
     {
       "overrides": [
         {
-          "files": "src/**/*.html",
+          "files": "clientRoot/src/**/*.html",
           "options": {
             "parser": "angular",
           },
@@ -3596,7 +3583,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
   "clientTestDir": "clientRoot/test/",
   "clientTestFramework": "vitest",
   "clientTestFrameworkAny": true,
-  "clientTestFrameworkJest": false,
   "clientTestFrameworkName": "Vitest",
   "clientTestFrameworkVitest": true,
   "clientTestFrameworks": undefined,
@@ -4788,6 +4774,7 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
       "devDependencies": {
         "eslint-config-prettier": "ESLINT_CONFIG_PRETTIER_VERSION",
         "eslint-plugin-prettier": "ESLINT_PLUGIN_PRETTIER_VERSION",
+        "globals": "GLOBALS_VERSION",
         "jiti": "JITI_VERSION",
       },
     },
@@ -4796,7 +4783,7 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
     {
       "overrides": [
         {
-          "files": "src/**/*.html",
+          "files": "clientRoot/src/**/*.html",
           "options": {
             "parser": "angular",
           },
@@ -4866,7 +4853,6 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
   "clientTestDir": "clientRoot/test/",
   "clientTestFramework": "vitest",
   "clientTestFrameworkAny": true,
-  "clientTestFrameworkJest": false,
   "clientTestFrameworkName": "Vitest",
   "clientTestFrameworkVitest": true,
   "clientTestFrameworks": undefined,
@@ -4942,7 +4928,7 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
   "endpointPrefix": "services/jhipster",
   "entities": Any<Array>,
   "entitySuffix": "",
-  "exposeMicrofrontend": false,
+  "exposeMicrofrontend": true,
   "feignClient": false,
   "filterEntitiesAndPropertiesForClient": [Function],
   "filterEntitiesForClient": [Function],
@@ -5031,7 +5017,16 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
   "messageHeaderNameError": "x-jhipsterapp-error",
   "messageHeaderNameParam": "x-jhipsterapp-params",
   "microfrontend": true,
-  "microfrontends": [],
+  "microfrontends": [
+    {
+      "baseName": "jhipster",
+      "capitalizedBaseName": "Jhipster",
+      "endpointPrefix": "",
+      "lowercaseBaseName": "jhipster",
+      "moduleFederationName": "jhipster",
+      "self": true,
+    },
+  ],
   "monorepository": undefined,
   "nativeLanguage": "en",
   "nativeLanguageDefinition": {
@@ -5210,6 +5205,9 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
     "stateCleared": "modified",
   },
   "clientRoot/src/app/core/interceptor/notification.interceptor.ts": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/src/app/core/microfrontend/index.ts": {
     "stateCleared": "modified",
   },
   "clientRoot/src/app/core/request/request-util.ts": {
@@ -5835,8 +5833,14 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
     },
     {
       "devDependencies": {
+        "@module-federation/enhanced": null,
+      },
+    },
+    {
+      "devDependencies": {
         "eslint-config-prettier": "ESLINT_CONFIG_PRETTIER_VERSION",
         "eslint-plugin-prettier": "ESLINT_PLUGIN_PRETTIER_VERSION",
+        "globals": "GLOBALS_VERSION",
         "jiti": "JITI_VERSION",
       },
     },
@@ -5845,7 +5849,7 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
     {
       "overrides": [
         {
-          "files": "src/**/*.html",
+          "files": "clientRoot/src/**/*.html",
           "options": {
             "parser": "angular",
           },
@@ -5915,7 +5919,6 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
   "clientTestDir": "src/test/javascript/",
   "clientTestFramework": "vitest",
   "clientTestFrameworkAny": true,
-  "clientTestFrameworkJest": false,
   "clientTestFrameworkName": "Vitest",
   "clientTestFrameworkVitest": true,
   "clientTestFrameworks": undefined,
@@ -5991,7 +5994,7 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
   "endpointPrefix": "services/jhipster",
   "entities": Any<Array>,
   "entitySuffix": "",
-  "exposeMicrofrontend": false,
+  "exposeMicrofrontend": true,
   "feignClient": false,
   "filterEntitiesAndPropertiesForClient": [Function],
   "filterEntitiesForClient": [Function],
@@ -6070,7 +6073,16 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
   "messageHeaderNameError": "x-jhipsterapp-error",
   "messageHeaderNameParam": "x-jhipsterapp-params",
   "microfrontend": true,
-  "microfrontends": [],
+  "microfrontends": [
+    {
+      "baseName": "jhipster",
+      "capitalizedBaseName": "Jhipster",
+      "endpointPrefix": "",
+      "lowercaseBaseName": "jhipster",
+      "moduleFederationName": "jhipster",
+      "self": true,
+    },
+  ],
   "monorepository": undefined,
   "nativeLanguage": "en",
   "nativeLanguageDefinition": {
@@ -6387,6 +6399,9 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
     "stateCleared": "modified",
   },
   "src/main/webapp/app/core/interceptor/notification.interceptor.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/core/microfrontend/index.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/core/request/request-util.ts": {
@@ -7022,8 +7037,14 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
     },
     {
       "devDependencies": {
+        "@module-federation/enhanced": null,
+      },
+    },
+    {
+      "devDependencies": {
         "eslint-config-prettier": "ESLINT_CONFIG_PRETTIER_VERSION",
         "eslint-plugin-prettier": "ESLINT_PLUGIN_PRETTIER_VERSION",
+        "globals": "GLOBALS_VERSION",
         "jiti": "JITI_VERSION",
       },
     },
@@ -7103,7 +7124,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
   "clientTestDir": "src/test/javascript/",
   "clientTestFramework": "vitest",
   "clientTestFrameworkAny": true,
-  "clientTestFrameworkJest": false,
   "clientTestFrameworkName": "Vitest",
   "clientTestFrameworkVitest": true,
   "clientTestFrameworks": undefined,
@@ -8471,6 +8491,7 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
       "devDependencies": {
         "eslint-config-prettier": "ESLINT_CONFIG_PRETTIER_VERSION",
         "eslint-plugin-prettier": "ESLINT_PLUGIN_PRETTIER_VERSION",
+        "globals": "GLOBALS_VERSION",
         "jiti": "JITI_VERSION",
       },
     },
@@ -8549,7 +8570,6 @@ exports[`generator - angular monolith-oauth2-withAdminUi(false)-skipJhipsterDepe
   "clientTestDir": "src/test/javascript/",
   "clientTestFramework": "vitest",
   "clientTestFrameworkAny": true,
-  "clientTestFrameworkJest": false,
   "clientTestFrameworkName": "Vitest",
   "clientTestFrameworkVitest": true,
   "clientTestFrameworks": undefined,
@@ -9489,6 +9509,7 @@ exports[`generator - angular monolith-oauth2-withAdminUi(false)-skipJhipsterDepe
       "devDependencies": {
         "eslint-config-prettier": "ESLINT_CONFIG_PRETTIER_VERSION",
         "eslint-plugin-prettier": "ESLINT_PLUGIN_PRETTIER_VERSION",
+        "globals": "GLOBALS_VERSION",
         "jiti": "JITI_VERSION",
       },
     },
@@ -9567,7 +9588,6 @@ exports[`generator - angular monolith-session-skipUserManagement(true)-withAdmin
   "clientTestDir": "src/test/javascript/",
   "clientTestFramework": "vitest",
   "clientTestFrameworkAny": true,
-  "clientTestFrameworkJest": false,
   "clientTestFrameworkName": "Vitest",
   "clientTestFrameworkVitest": true,
   "clientTestFrameworks": undefined,
@@ -10517,6 +10537,7 @@ exports[`generator - angular monolith-session-skipUserManagement(true)-withAdmin
       "devDependencies": {
         "eslint-config-prettier": "ESLINT_CONFIG_PRETTIER_VERSION",
         "eslint-plugin-prettier": "ESLINT_PLUGIN_PRETTIER_VERSION",
+        "globals": "GLOBALS_VERSION",
         "jiti": "JITI_VERSION",
       },
     },

@@ -108,12 +108,8 @@ export const files = asWriteFilesSection({
       templates: ['webpack/webpack.microfrontend.js'],
     }),
     clientApplicationTemplatesBlock({
-      condition: data => data.microfrontend && data.applicationTypeGateway,
-      templates: ['core/microfrontend/index.ts'],
-    }),
-    clientApplicationTemplatesBlock({
-      condition: data => data.microfrontend && data.applicationTypeMicroservice,
-      templates: ['entities/entity-navbar-items.ts'],
+      condition: data => data.microfrontend,
+      templates: ['core/microfrontend/index.ts', 'entities/entity-navbar-items.ts'],
     }),
   ],
   angularMain: [
@@ -472,7 +468,7 @@ export const files = asWriteFilesSection({
   ],
 });
 
-export const writeFiles = asWritingTask<AngularEntity, AngularApplication<AngularEntity>>(async function writeFiles({ application }) {
+export const writeFiles = asWritingTask<AngularEntity, AngularApplication>(async function writeFiles({ application }) {
   if (!application.clientFrameworkAngular) return;
 
   await this.writeFiles({

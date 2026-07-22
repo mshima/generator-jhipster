@@ -22,7 +22,7 @@ import { rm } from 'node:fs/promises';
 import path, { relative } from 'node:path';
 
 import chalk from 'chalk';
-import { execaCommandSync } from 'execa';
+import { execaSync } from 'execa';
 import { union } from 'lodash-es';
 import semver, { lt as semverLessThan } from 'semver';
 import type { PackageJson } from 'type-fest';
@@ -107,7 +107,7 @@ export default class BaseGenerator<
       }
 
       try {
-        // Fallback to the original generator if the file does not exists in the blueprint.
+        // Fallback to the original generator if the file does not exist in the blueprint.
         const blueprintedTemplatePath = this.jhipsterTemplatePath();
         if (!this.jhipsterTemplatesFolders.includes(blueprintedTemplatePath)) {
           this.jhipsterTemplatesFolders.push(blueprintedTemplatePath);
@@ -211,8 +211,8 @@ export default class BaseGenerator<
           },
           get environmentHasDockerCompose(): boolean {
             if (environmentHasDockerCompose === undefined) {
-              const commandReturn = execaCommandSync('docker compose version', { reject: false, stdio: 'pipe' });
-              environmentHasDockerCompose = !commandReturn?.failed; // TODO looks to be a bug on ARM MaCs and execaCommandSync, does not return anything, assuming mac users are smart and install docker.
+              const commandReturn = execaSync({ reject: false, stdio: 'pipe' })`docker compose version`;
+              environmentHasDockerCompose = !commandReturn?.failed; // TODO looks to be a bug on ARM MaCs and execaSync, does not return anything, assuming mac users are smart and install docker.
             }
             return environmentHasDockerCompose;
           },
@@ -291,7 +291,7 @@ export default class BaseGenerator<
     // Use started counter or use stored creationTimestamp if creationTimestamp option is passed
     const creationTimestamp = this.options.creationTimestamp ? this.config.get('creationTimestamp') : undefined;
     let now = new Date();
-    // Milliseconds is ignored for changelogDate.
+    // Milliseconds are ignored for changelogDate.
     now.setMilliseconds(0);
     // Run reproducible timestamp when regenerating the project with reproducible option or a specific timestamp.
     if (reproducible || creationTimestamp) {
@@ -531,7 +531,7 @@ export default class BaseGenerator<
   /**
    * Priority API stub for blueprints.
    *
-   * Default priority should used as misc customizations.
+   * Default priority should be used as misc customizations.
    */
   get default() {
     return {};
@@ -549,7 +549,7 @@ export default class BaseGenerator<
   /**
    * Priority API stub for blueprints.
    *
-   * Writing priority should used to write files.
+   * Writing priority should be used to write files.
    */
   get writing() {
     return {};
@@ -567,7 +567,7 @@ export default class BaseGenerator<
   /**
    * Priority API stub for blueprints.
    *
-   * PostWriting priority should used to customize files.
+   * PostWriting priority should be used to customize files.
    */
   get postWriting() {
     return {};
@@ -585,7 +585,7 @@ export default class BaseGenerator<
   /**
    * Priority API stub for blueprints.
    *
-   * Install priority should used to prepare the project.
+   * Install priority should be used to prepare the project.
    */
   get install() {
     return {};
@@ -603,7 +603,7 @@ export default class BaseGenerator<
   /**
    * Priority API stub for blueprints.
    *
-   * PostWriting priority should used to customize files.
+   * PostWriting priority should be used to customize files.
    */
   get postInstall() {
     return {};
@@ -621,7 +621,7 @@ export default class BaseGenerator<
   /**
    * Priority API stub for blueprints.
    *
-   * End priority should used to say good bye and print instructions.
+   * End priority should be used to say good bye and print instructions.
    */
   get end() {
     return {};
@@ -670,7 +670,7 @@ export default class BaseGenerator<
           // If sbsBlueprint, add templatePath to the original generator templatesFolder.
           this.jhipsterTemplatesFolders.unshift(blueprintGenerator.templatePath());
         } else {
-          // If the blueprints does not sets sbsBlueprint property, ignore normal workflow.
+          // If the blueprints do not set sbsBlueprint property, ignore normal workflow.
           this.delegateToBlueprint = true;
           this.#checkBlueprintImplementsPriorities(blueprintGenerator);
         }

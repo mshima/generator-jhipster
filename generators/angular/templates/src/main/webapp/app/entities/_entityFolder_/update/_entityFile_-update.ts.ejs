@@ -21,7 +21,7 @@
       .map(relationships => relationships.filter(rel => rel.persistableRelationship && !rel.otherEntity.embedded))
       .filter(relationships => relationships.length > 0);
 _%>
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit<%- anyFieldHasImageContentType ? ', ElementRef' : '' %> } from '@angular/core';
+import { Component, inject, signal, OnInit<%- anyFieldHasImageContentType ? ', ElementRef' : '' %> } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { finalize<%- relationships.some(rel => rel.persistableRelationship) ? ', map' : '' %>, Observable } from 'rxjs';
@@ -62,7 +62,6 @@ import { <%- importedType %> } from '<%- importedPath %>';
 <%_ } _%>
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.OnPush,
     selector: '<%- jhiPrefixDashed %>-<%- entityFileName %>-update',
     templateUrl: './<%- entityFileName %>-update.html',
     imports: [
@@ -177,14 +176,20 @@ export class <%- entityAngularName %>Update implements OnInit {
     save(): void {
         this.isSaving.set(true);
         const <%- entityInstance %> = this.<%- entityInstance %>FormService.get<%- entityAngularName %>(this.editForm);
-<%_ if (updatableEntity) { _%>
+<%_ if (primaryKey.autoGenerate) { _%>
+  <%_ if (updatableEntity) { _%>
         if (<%- entityInstance %>.<%- primaryKey.name %> === null) {
-<%_ } _%>
             this.subscribeToSaveResponse(this.<%- entityInstance %>Service.create(<%- entityInstance %>));
-<%_ if (updatableEntity) { _%>
         } else {
             this.subscribeToSaveResponse(this.<%- entityInstance %>Service.update(<%- entityInstance %>));
         }
+  <%_ } else { _%>
+        this.subscribeToSaveResponse(this.<%- entityInstance %>Service.create(<%- entityInstance %>));
+  <%_ } _%>
+<%_ } else if (updatableEntity) { _%>
+        this.subscribeToSaveResponse(this.<%- entityInstance %>Service.update(<%- entityInstance %> as I<%- entityAngularName %>));
+<%_ } else { _%>
+        this.subscribeToSaveResponse(this.<%- entityInstance %>Service.create(<%- entityInstance %>));
 <%_ } _%>
     }
 

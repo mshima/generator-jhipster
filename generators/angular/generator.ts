@@ -16,6 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import path from 'node:path';
+
 import chalk from 'chalk';
 import { isFileStateModified } from 'mem-fs-editor/state';
 
@@ -53,7 +55,7 @@ const { ANGULAR } = clientFrameworkTypes;
 
 export class AngularApplicationGenerator extends BaseApplicationGenerator<
   AngularEntity,
-  AngularApplication<AngularEntity>,
+  AngularApplication,
   AngularConfig,
   AngularOptions,
   AngularSource
@@ -386,9 +388,7 @@ export default class AngularGenerator extends AngularApplicationGenerator {
     return this.asPostWritingTaskGroup({
       addPrettierConfig({ application, source }) {
         source.mergePrettierConfig?.({
-          overrides: [
-            { files: `${this.relativeDir(application.clientRootDir, application.clientSrcDir)}**/*.html`, options: { parser: 'angular' } },
-          ],
+          overrides: [{ files: path.posix.join(application.clientSrcDir, '**/*.html'), options: { parser: 'angular' } }],
         });
       },
       clientBundler({ application, source }) {
@@ -422,6 +422,17 @@ export default class AngularGenerator extends AngularApplicationGenerator {
             overrides: {
               'browser-sync': nodeDependencies['browser-sync'],
               webpack: nodeDependencies.webpack,
+            },
+          });
+        }
+      },
+      addMicrofrontendDependencies({ application, source }) {
+        const { clientBundlerWebpack, microfrontend } = application;
+        if (!microfrontend) return;
+        if (clientBundlerWebpack) {
+          source.mergeClientPackageJson!({
+            devDependencies: {
+              '@module-federation/enhanced': null,
             },
           });
         }
