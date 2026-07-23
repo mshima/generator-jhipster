@@ -42,7 +42,7 @@ export default class BootstrapGenerator extends AngularApplicationGenerator {
     return this.asPreparingTaskGroup({
       defaults({ applicationDefaults }) {
         applicationDefaults({
-          // TODO always expose microfrontend when exposed entities with dates if fixed.
+          // TODO always expose microfrontend when exposed entities with date property is fixed.
           exposeMicrofrontend: ctx => ctx.applicationTypeMicroservice,
           clientBundler: ctx => (ctx.microfrontend || ctx.applicationTypeMicroservice ? 'webpack' : 'esbuild'),
           devServerPort: (_, { data }) => 4200 + (data.applicationIndex ?? 0),
