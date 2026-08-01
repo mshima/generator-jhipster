@@ -106,6 +106,13 @@ jobs:
           JHIPSTER_DEPENDENCIES_VERSION: ${{ matrix.jhipster-bom-cicd-version }}
           JHI_JWT_SECRET_KEY: ${{ matrix.jwt-secret-key }}
           JHI_JDL: ${{ matrix.jdl-base || matrix.jdl }}
+      - run: |
+          ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
+          cd ${{ github.workspace }}/base/app
+          ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
+          cd ${{ github.workspace }}/app
+          diff --color=always --side-by-side --width=180 dependencies.txt ${{ github.workspace }}/base/app/dependencies.txt || true
+        if: steps.compare.outputs.has-backend-changes == 'true'
       #----------------------------------------------------------------------
       # Launch tests
       #----------------------------------------------------------------------
@@ -121,18 +128,36 @@ jobs:
         if: matrix.build-jhipster-bom && steps.compare.outputs.has-backend-changes == 'true'
         with:
           jhipster-bom-ref: ${{ matrix.jhipster-bom-branch }}
-      - run: npm run native-package
+      - run: npm run native-package -- --quiet --console=plain 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | awk -v s="$PWD/" '{gsub(s, "PWD/"); print}' | tee native-package.log
         if: steps.compare.outputs.has-backend-changes == 'true'
         id: packaging
         timeout-minutes: 20
       - run: npm run services:up
         if: steps.compare.outputs.has-backend-changes == 'true'
+        timeout-minutes: 3
       - run: npm run native-e2e --if-present
         id: e2e
         if: steps.compare.outputs.has-backend-changes == 'true'
+        timeout-minutes: 4
         env:
           CYPRESS_video: >-
             ${{ contains(github.event.pull_request.labels.*.name, 'ci: cypress-video') && 'true' || 'false' }}
+      - run: npm run native-package -- --quiet --console=plain 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | awk -v s="$PWD/" '{gsub(s, "PWD/"); print}' | tee native-package.log
+        # if: always() && steps.e2e.outcome == 'failure'
+        working-directory: ${{ github.workspace }}/base/app
+        timeout-minutes: 20
+      - name: Generate Log Comparison Summary
+        # if: always() && steps.e2e.outcome == 'failure'
+        run: |
+          echo "### 📋 Server Log Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "<details><summary>Click to view side-by-side differences</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+
+          diff --color=always --side-by-side --width=180 native-package.log ${{ github.workspace }}/base/app/native-package.log >> $GITHUB_STEP_SUMMARY || true
+
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
       - name: Store the application
         uses: actions/upload-artifact@v7
         if: steps.compare.outputs.has-backend-changes == 'true' && always() && (steps.e2e.outcome == 'failure' || steps.packaging.outcome == 'failure')
