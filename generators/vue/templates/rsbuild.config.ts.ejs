@@ -61,6 +61,7 @@ export default defineConfig({
     },
   },
   output: {
+    module: true,
 <%_ if (microfrontend) { _%>
   <%_ if (applicationTypeMicroservice) { _%>
     assetPrefix: 'auto',
