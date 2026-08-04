@@ -146,7 +146,7 @@ jobs:
         id: e2e-non-native
         if: always() && steps.e2e.outcome == 'failure'
         run: |
-          run: npm run ci:e2e:package
+          npm run ci:e2e:package
           npm run ci:e2e:run --if-present
         timeout-minutes: 15
         env:
