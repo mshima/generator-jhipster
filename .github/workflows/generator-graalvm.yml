@@ -111,7 +111,7 @@ jobs:
           cd ${{ github.workspace }}/base/app
           ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
           cd ${{ github.workspace }}/app
-          diff --color=always --side-by-side --width=180 dependencies.txt ${{ github.workspace }}/base/app/dependencies.txt || true
+          diff --color=always --side-by-side --width=180 --suppress-common-lines dependencies.txt ${{ github.workspace }}/base/app/dependencies.txt || true
         if: steps.compare.outputs.has-backend-changes == 'true'
       #----------------------------------------------------------------------
       # Launch tests
@@ -154,7 +154,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```diff' >> $GITHUB_STEP_SUMMARY
 
-          diff --color=always --side-by-side --width=180 native-package.log ${{ github.workspace }}/base/app/native-package.log >> $GITHUB_STEP_SUMMARY || true
+          diff --color=always --side-by-side --width=180 --suppress-common-lines native-package.log ${{ github.workspace }}/base/app/native-package.log >> $GITHUB_STEP_SUMMARY || true
 
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "</details>" >> $GITHUB_STEP_SUMMARY
