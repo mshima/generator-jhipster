@@ -10,7 +10,6 @@ graalvmNative {
       //}
       buildArgs.add("-Duser.language=<%- nativeLanguageDefinition.languageTag %>")
       buildArgs.add("-H:IncludeLocales=<%- languagesDefinition?.map(def => def.languageTag)?.join(',') ?? nativeLanguageDefinition.languageTag %>")
-      buildArgs.add("-H:IncludeResources=^static/.*")
     }
   }
   binaries.all {
