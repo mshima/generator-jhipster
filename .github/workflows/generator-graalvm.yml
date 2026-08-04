@@ -142,6 +142,14 @@ jobs:
         env:
           CYPRESS_video: >-
             ${{ contains(github.event.pull_request.labels.*.name, 'ci: cypress-video') && 'true' || 'false' }}
+      - name: 'E2E: Run'
+        id: e2e-non-native
+        if: always() && steps.e2e.outcome == 'failure'
+        run: npm run ci:e2e:run --if-present
+        timeout-minutes: 15
+        env:
+          CYPRESS_video: >-
+            ${{ contains(github.event.pull_request.labels.*.name, 'ci: cypress-video') && 'true' || 'false' }}
       - run: npm run native-package -- --quiet --console=plain 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | awk -v s="$PWD/" '{gsub(s, "PWD/"); print}' | tee native-package.log
         # if: always() && steps.e2e.outcome == 'failure'
         working-directory: ${{ github.workspace }}/base/app
