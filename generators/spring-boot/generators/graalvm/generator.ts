@@ -114,13 +114,7 @@ export default class GraalvmGenerator extends SpringBootApplicationGenerator {
             ),
         );
       },
-      nativeHints({ application, source }) {
-        if (!application.skipClient) {
-          source.addNativeHint?.({
-            resourcesFolders: ['static'],
-          });
-        }
-
+      nativeHints({ source }) {
         source.addNativeHint?.({
           // Thymeleaf template
           publicMethods: ['java.util.Locale.class', 'java.util.Calendar[].class'],
