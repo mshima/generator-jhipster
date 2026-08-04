@@ -147,7 +147,8 @@ jobs:
         if: always() && steps.e2e.outcome == 'failure'
         run: |
           npm run ci:e2e:package
-          npm run ci:e2e:run --if-present
+          npm run ci:e2e:prepare
+          npm run ci:e2e:run
         timeout-minutes: 15
         env:
           CYPRESS_video: >-
