@@ -106,13 +106,6 @@ jobs:
           JHIPSTER_DEPENDENCIES_VERSION: ${{ matrix.jhipster-bom-cicd-version }}
           JHI_JWT_SECRET_KEY: ${{ matrix.jwt-secret-key }}
           JHI_JDL: ${{ matrix.jdl-base || matrix.jdl }}
-      - run: |
-          ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
-          cd ${{ github.workspace }}/base/app
-          ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
-          cd ${{ github.workspace }}/app
-          diff --color=always --side-by-side --width=180 --suppress-common-lines dependencies.txt ${{ github.workspace }}/base/app/dependencies.txt || true
-        if: steps.compare.outputs.has-backend-changes == 'true'
       #----------------------------------------------------------------------
       # Launch tests
       #----------------------------------------------------------------------
@@ -142,38 +135,6 @@ jobs:
         env:
           CYPRESS_video: >-
             ${{ contains(github.event.pull_request.labels.*.name, 'ci: cypress-video') && 'true' || 'false' }}
-      - name: 'E2E: Run'
-        id: e2e-non-native
-        if: always() && steps.e2e.outcome == 'failure'
-        run: |
-          npm run ci:e2e:package
-          npm run ci:e2e:run
-        timeout-minutes: 10
-        env:
-          CYPRESS_video: >-
-            ${{ contains(github.event.pull_request.labels.*.name, 'ci: cypress-video') && 'true' || 'false' }}
-      - name: 'E2E: Run'
-        if: always() && steps.e2e.outcome == 'failure'
-        run: |
-          ls -la
-          ls -la build
-          ls -la build/libs
-      - run: npm run native-package 2>&1 | awk -v s="$PWD/" '{gsub(s, "PWD/"); print}' | tee native-package.log
-        if: always() && steps.e2e.outcome == 'failure'
-        working-directory: ${{ github.workspace }}/base/app
-        timeout-minutes: 20
-      - name: Generate Log Comparison Summary
-        if: always() && steps.e2e.outcome == 'failure'
-        run: |
-          echo "### 📋 Server Log Comparison" >> $GITHUB_STEP_SUMMARY
-          echo "<details><summary>Click to view side-by-side differences</summary>" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```diff' >> $GITHUB_STEP_SUMMARY
-
-          diff --color=always --side-by-side --width=180 --suppress-common-lines <(cat native-package.log | sed 's/\x1b\[[0-9;]*m//g') <(cat ${{ github.workspace }}/base/app/native-package.log | sed 's/\x1b\[[0-9;]*m//g') >> $GITHUB_STEP_SUMMARY || true
-
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "</details>" >> $GITHUB_STEP_SUMMARY
       - name: Store the application
         uses: actions/upload-artifact@v7
         if: steps.compare.outputs.has-backend-changes == 'true' && always() && (steps.e2e.outcome == 'failure' || steps.packaging.outcome == 'failure')
@@ -200,6 +161,39 @@ jobs:
       - name: Dump docker logs
         if: steps.compare.outputs.has-backend-changes == 'true' && always() && contains(matrix.os, 'ubuntu')
         uses: jwalton/gh-docker-logs@v2
+      - run: |
+          ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
+          cd ${{ github.workspace }}/base/app
+          ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
+          cd ${{ github.workspace }}/app
+          diff --color=always --side-by-side --width=180 --suppress-common-lines dependencies.txt ${{ github.workspace }}/base/app/dependencies.txt || true
+        if: steps.compare.outputs.has-backend-changes == 'true'
+      - name: 'E2E: Non-Native Run'
+        id: e2e-non-native
+        if: always() && steps.e2e.outcome == 'failure'
+        run: |
+          npm run ci:e2e:package
+          npm run ci:e2e:run
+        timeout-minutes: 10
+        env:
+          CYPRESS_video: >-
+            ${{ contains(github.event.pull_request.labels.*.name, 'ci: cypress-video') && 'true' || 'false' }}
+      - run: npm run native-package 2>&1 | awk -v s="$PWD/" '{gsub(s, "PWD/"); print}' | tee native-package.log
+        if: always() && steps.e2e.outcome == 'failure'
+        working-directory: ${{ github.workspace }}/base/app
+        timeout-minutes: 20
+      - name: Generate Log Comparison Summary
+        if: always() && steps.e2e.outcome == 'failure'
+        run: |
+          echo "### 📋 Server Log Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "<details><summary>Click to view side-by-side differences</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+
+          diff --color=always --side-by-side --width=180 --suppress-common-lines <(cat native-package.log | sed 's/\x1b\[[0-9;]*m//g') <(cat ${{ github.workspace }}/base/app/native-package.log | sed 's/\x1b\[[0-9;]*m//g') >> $GITHUB_STEP_SUMMARY || true
+
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
 
   check-graalvm:
     permissions:
