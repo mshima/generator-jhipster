@@ -65,7 +65,7 @@ export default class ServerGenerator extends JavaApplicationGenerator {
           });
         } else if (buildTool === 'gradle') {
           const excludeWebapp = application.skipClient ? '' : '-x webapp -x webapp_test';
-          e2ePackage = 'e2e';
+          e2ePackage = 'build/libs/e2e';
           scriptsStorage.set({
             'app:start': './gradlew',
             'backend:info': './gradlew -v',
