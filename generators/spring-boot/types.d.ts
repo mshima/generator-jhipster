@@ -180,6 +180,7 @@ export type Application<E extends BaseApplicationEntity = Entity> = Command['App
     springBootDependencies: Record<string, string>;
 
     addSpringMilestoneRepository: boolean;
+    addSpringSnapshotRepository: boolean;
 
     enableSwaggerCodegen: boolean;
     skipFakeData: boolean;

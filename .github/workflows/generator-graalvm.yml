@@ -50,6 +50,7 @@ jobs:
   applications:
     name: ${{ matrix.job-name }}
     runs-on: ${{ matrix.os }}
+
     defaults:
       run:
         working-directory: ${{ github.workspace }}/app
@@ -166,8 +167,8 @@ jobs:
           cd ${{ github.workspace }}/base/app
           ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
           cd ${{ github.workspace }}/app
-          diff --color=always --side-by-side --width=180 --suppress-common-lines dependencies.txt ${{ github.workspace }}/base/app/dependencies.txt || true
-        if: steps.compare.outputs.has-backend-changes == 'true'
+          diff --color=always -U 1 dependencies.txt ${{ github.workspace }}/base/app/dependencies.txt || true
+        if: always() && steps.e2e.outcome == 'failure'
       - name: 'E2E: Non-Native Run'
         id: e2e-non-native
         if: always() && steps.e2e.outcome == 'failure'
@@ -190,7 +191,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```diff' >> $GITHUB_STEP_SUMMARY
 
-          diff --color=always --side-by-side --width=180 --suppress-common-lines <(cat native-package.log | sed 's/\x1b\[[0-9;]*m//g') <(cat ${{ github.workspace }}/base/app/native-package.log | sed 's/\x1b\[[0-9;]*m//g') >> $GITHUB_STEP_SUMMARY || true
+          diff --color=always -U 1 <(cat native-package.log | sed 's/\x1b\[[0-9;]*m//g') <(cat ${{ github.workspace }}/base/app/native-package.log | sed 's/\x1b\[[0-9;]*m//g') >> $GITHUB_STEP_SUMMARY || true
 
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "</details>" >> $GITHUB_STEP_SUMMARY
