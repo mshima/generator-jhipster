@@ -121,16 +121,18 @@ jobs:
         if: matrix.build-jhipster-bom && steps.compare.outputs.has-backend-changes == 'true'
         with:
           jhipster-bom-ref: ${{ matrix.jhipster-bom-branch }}
-      - run: npm run native-package
+      - run: npm run native-package 2>&1 | awk -v s="$PWD/" '{gsub(s, "PWD/"); print}' | tee native-package.log
         if: steps.compare.outputs.has-backend-changes == 'true'
         id: packaging
         timeout-minutes: 20
       - run: npm run services:up
         if: steps.compare.outputs.has-backend-changes == 'true'
+        timeout-minutes: 3
       - run: npm run native-e2e --if-present
         id: e2e
         if: steps.compare.outputs.has-backend-changes == 'true'
         continue-on-error: ${{ matrix.ignore-e2e-failures == 'true' }}
+        timeout-minutes: 10
         env:
           CYPRESS_video: >-
             ${{ contains(github.event.pull_request.labels.*.name, 'ci: cypress-video') && 'true' || 'false' }}
@@ -160,6 +162,39 @@ jobs:
       - name: Dump docker logs
         if: steps.compare.outputs.has-backend-changes == 'true' && always() && contains(matrix.os, 'ubuntu')
         uses: jwalton/gh-docker-logs@v2
+      - run: |
+          ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
+          cd ${{ github.workspace }}/base/app
+          ./gradlew dependencyInsight --configuration runtimeClasspath --dependency : --quiet --console=plain 2>/dev/null | grep -Eo '[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+' | sort -u >> dependencies.txt || true
+          cd ${{ github.workspace }}/app
+          diff --color=always -U 1 ${{ github.workspace }}/base/app/dependencies.txt dependencies.txt || true
+        if: always() && steps.e2e.outcome == 'failure'
+      - name: 'E2E: Non-Native Run'
+        id: e2e-non-native
+        if: always() && steps.e2e.outcome == 'failure'
+        run: |
+          npm run ci:e2e:package
+          npm run ci:e2e:run
+        timeout-minutes: 10
+        env:
+          CYPRESS_video: >-
+            ${{ contains(github.event.pull_request.labels.*.name, 'ci: cypress-video') && 'true' || 'false' }}
+      - run: npm run native-package 2>&1 | awk -v s="$PWD/" '{gsub(s, "PWD/"); print}' | tee native-package.log
+        if: always() && steps.e2e.outcome == 'failure'
+        working-directory: ${{ github.workspace }}/base/app
+        timeout-minutes: 20
+      - name: Generate Log Comparison Summary
+        if: always() && steps.e2e.outcome == 'failure'
+        run: |
+          echo "### 📋 Server Log Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "<details><summary>Click to view side-by-side differences</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+
+          diff -U 1 <(sed 's/\x1b\[[0-9;]*m//g' ${{ github.workspace }}/base/app/native-package.log) <(sed 's/\x1b\[[0-9;]*m//g' native-package.log) >> $GITHUB_STEP_SUMMARY || true
+
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
 
   check-graalvm:
     permissions:
