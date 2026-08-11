@@ -4,6 +4,14 @@ exports[`generator - spring-boot:graalvm with defaults options should call sourc
 {
   "addNativeHint": [
     {
+      "resourceTests": [
+        "static/resource.txt",
+      ],
+      "resources": [
+        "static",
+      ],
+    },
+    {
       "publicMethods": [
         "java.util.Locale.class",
         "java.util.Calendar[].class",
