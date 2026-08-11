@@ -125,6 +125,7 @@ export type Source = JavaSource &
       advanced?: string[];
       declaredConstructors?: string[];
       resources?: string[];
+      resourceTests?: string[];
       publicConstructors?: string[];
       publicMethods?: string[];
     }): void;

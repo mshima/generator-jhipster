@@ -512,6 +512,7 @@ ${classProperties
           publicConstructors = [],
           publicMethods = [],
           resources = [],
+          resourceTests = [],
         }) => {
           this.editFile(
             `${application.javaPackageSrcDir}config/NativeConfiguration.java`,
@@ -520,6 +521,7 @@ ${classProperties
               contentToAdd: [
                 ...advanced,
                 ...resources.map(resource => `hints.resources().registerPattern("${resource}");`),
+                ...resourceTests.map(resourceTest => `hints.resources().registerPattern("${resourceTest}");`),
                 ...publicConstructors.map(
                   classPath =>
                     `hints.reflection().registerType(${classPath}, (hint) -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));`,
@@ -534,6 +536,16 @@ ${classProperties
                 ),
               ],
               needle: 'add-native-hints',
+              ignoreWhitespaces: true,
+            }),
+          );
+          this.editFile(
+            `${application.javaPackageTestDir}config/NativeConfigurationTest.java`,
+            createNeedleCallback({
+              contentToAdd: [
+                ...resourceTests.map(resourceTest => `assertThat(resource().forResource("${resourceTest}").test(hints)).isTrue();`),
+              ],
+              needle: 'add-native-hints-test',
               ignoreWhitespaces: true,
             }),
           );

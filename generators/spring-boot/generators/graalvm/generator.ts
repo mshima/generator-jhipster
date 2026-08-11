@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { javaMainPackageTemplatesBlock } from '../../../java/support/files.ts';
+import { javaMainPackageTemplatesBlock, javaTestPackageTemplatesBlock } from '../../../java/support/files.ts';
 import { SpringBootApplicationGenerator } from '../../generator.ts';
 
 export default class GraalvmGenerator extends SpringBootApplicationGenerator {
@@ -50,6 +50,9 @@ export default class GraalvmGenerator extends SpringBootApplicationGenerator {
             config: [
               javaMainPackageTemplatesBlock({
                 templates: ['config/NativeConfiguration.java'],
+              }),
+              javaTestPackageTemplatesBlock({
+                templates: ['config/NativeConfigurationTest.java'],
               }),
             ],
           },
@@ -116,6 +119,7 @@ export default class GraalvmGenerator extends SpringBootApplicationGenerator {
           // Thymeleaf template
           publicMethods: ['java.util.Locale.class', 'java.util.Calendar[].class'],
           resources: ['i18n/**'],
+          resourceTests: ['i18n/resource.txt'],
         });
       },
     });

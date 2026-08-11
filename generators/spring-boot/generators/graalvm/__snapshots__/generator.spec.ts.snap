@@ -8,6 +8,9 @@ exports[`generator - spring-boot:graalvm with defaults options should call sourc
         "java.util.Locale.class",
         "java.util.Calendar[].class",
       ],
+      "resourceTests": [
+        "i18n/resource.txt",
+      ],
       "resources": [
         "i18n/**",
       ],
@@ -48,6 +51,9 @@ exports[`generator - spring-boot:graalvm with defaults options should match file
     "stateCleared": "modified",
   },
   "src/main/java/com/mycompany/myapp/config/NativeConfiguration.java": {
+    "stateCleared": "modified",
+  },
+  "src/test/java/com/mycompany/myapp/config/NativeConfigurationTest.java": {
     "stateCleared": "modified",
   },
 }
