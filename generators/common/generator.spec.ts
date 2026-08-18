@@ -28,7 +28,7 @@ import { basicHelpers, defaultHelpers as helpers, runResult } from '#testing';
 
 const generator = basename(import.meta.dirname);
 
-const mockedGenerators = ['jhipster:git'];
+const mockedGenerators = ['jhipster:git', 'jhipster:ci-cd'];
 
 describe(`generator - ${generator}`, () => {
   shouldSupportFeatures(Generator);
@@ -123,6 +123,26 @@ describe(`generator - ${generator}`, () => {
           authenticationType: 'oauth2',
           skipServer: true,
         });
+      });
+    });
+
+    describe('--ci-cd option', () => {
+      before(async () => {
+        await helpers
+          .runJHipster(generator)
+          .withOptions({ ciCd: ['github'] })
+          .withJHipsterConfig()
+          .withMockedGenerators(mockedGenerators)
+          .withSkipWritingPriorities();
+      });
+
+      it('should store ci-cd', () => {
+        runResult.assertJHipsterConfigContent({
+          ciCd: ['github'],
+        });
+      });
+      it('should compose with ci-cd', () => {
+        runResult.assertGeneratorComposedOnce('jhipster:ci-cd');
       });
     });
 

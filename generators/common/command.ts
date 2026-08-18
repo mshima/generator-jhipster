@@ -20,9 +20,18 @@ import chalk from 'chalk';
 
 import type { JHipsterCommandDefinition } from '../../lib/command/index.ts';
 import { applicationTypesChoices } from '../../lib/core/application-types.ts';
+import { ciCdChoices } from '../ci-cd/support/providers.ts';
 
 const command = {
   configs: {
+    ciCd: {
+      description: 'Generate ci-cd',
+      cli: {
+        type: Array,
+      },
+      choices: ciCdChoices,
+      scope: 'storage',
+    },
     defaultEnvironment: {
       description: 'Default environment for the application',
       cli: {

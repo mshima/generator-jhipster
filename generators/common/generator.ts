@@ -82,6 +82,9 @@ export default class CommonGenerator extends BaseApplicationGenerator<
         if (!this.jhipsterConfig.skipCommitHook) {
           await this.composeWithJHipster('jhipster:javascript-simple-application:husky');
         }
+        if (this.jhipsterConfig.ciCd?.length) {
+          await this.composeWithJHipster('ci-cd');
+        }
       },
     });
   }

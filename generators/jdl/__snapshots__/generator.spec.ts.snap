@@ -191,6 +191,7 @@ Options:
   --skip-jhipster-dependencies             Don't write jhipster dependencies to package.json. (env: JHI_SKIP_JHIPSTER_DEPENDENCIES)
   --base-name <value>                      Application base name
   --jdl-store <value>                      JDL store
+  --ci-cd <value...>                       Generate ci-cd (choices: "github", "jenkins", "gitlab", "azure", "travis", "circle")
   --skip-client                            Skip the client-side application generation
   --skip-server                            Skip the server-side application generation
   --auth <value>                           Provide authentication type for the application when skipping server side generation (choices: "jwt", "oauth2", "session")
