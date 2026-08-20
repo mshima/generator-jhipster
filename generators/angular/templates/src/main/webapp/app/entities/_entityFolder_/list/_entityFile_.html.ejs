@@ -16,6 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
+<%_ const relationships = locals.relationships.filter(rel => !(builtInUserManagement && rel.otherEntityName === 'Authority')); /* authorities are plain strings for builtInUserManagement */ _%>
 <div>
     <h2 id="page-heading" data-cy="<%- entityNameCapitalized %>Heading">
         <span>__jhiTranslateTag__('<%- i18nKeyPrefix %>.home.title')</span>

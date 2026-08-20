@@ -16,6 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
+<%_ const relationships = locals.relationships.filter(rel => !(builtInUserManagement && rel.otherEntityName === 'Authority')); /* authorities are plain strings for builtInUserManagement */ _%>
 <%_ const formDefaultProperties = [
       ...fields.filter(field => field.fieldTypeTimed || field.fieldTypeBoolean || field.id).map(field => field.fieldName),
       ...relationships.filter(relationship => relationship.collection && relationship.persistableRelationship).map(relationship => relationship.propertyName),
@@ -73,6 +74,9 @@ type <%- entityAngularName %>FormGroupContent = {
 <%_ for (const relationship of relationships.filter(relationship => relationship.persistableRelationship)) { _%>
   <%_ const { propertyName } = relationship; _%>
   <%- propertyName %>: FormControl<<%- entityFormName %>['<%- propertyName %>']>;
+<%_ } _%>
+<%_ if (builtInUserManagement) { _%>
+  authorities: FormControl<<%- entityFormName %>['authorities']>;
 <%_ } _%>
 };
 
@@ -151,6 +155,9 @@ export class <%- entityAngularName %>FormService {
         }
   <%_ } _%>
       ),
+<%_ } _%>
+<%_ if (builtInUserManagement) { _%>
+      authorities: new FormControl(<%- entityInstance %>RawValue.authorities ?? []),
 <%_ } _%>
     });
   }

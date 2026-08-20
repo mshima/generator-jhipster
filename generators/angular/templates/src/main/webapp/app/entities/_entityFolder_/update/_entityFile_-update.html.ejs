@@ -16,6 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
+<%_ const relationships = locals.relationships.filter(rel => !(builtInUserManagement && rel.otherEntityName === 'Authority')); /* authorities are plain strings for builtInUserManagement */ _%>
 <div class="d-flex justify-content-center">
     <div class="col-8">
         <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
@@ -23,7 +24,7 @@
 
             <div>
                 <<%- jhiPrefixDashed %>-alert-error />
-<%_ for (const field of fields.filter(field => !field.hidden)) { _%>
+<%_ for (const field of fields.filter(field => !field.hidden && !(builtInUserManagement && field.readonly))) { _%>
   <%_ const { fieldName, fieldNameHumanized, fieldType, fieldTypeBlobContent, readonly } = field;
       const readonlyAttr = readonly ? ' [readonly]="true"' : '';
   _%>
@@ -188,6 +189,17 @@
                 </div>
             }
   <%_ } _%>
+<%_ } _%>
+<%_ if (builtInUserManagement) { _%>
+
+                <div class="mb-3">
+                    <label class="form-label" for="field_authority">__jhiTranslateTag__('<%- i18nKeyPrefix %>.profiles')</label>
+                    <select class="form-control" id="field_authority" multiple name="authority" formControlName="authorities">
+                    @for (authority of authorities(); track $index) {
+                        <option [value]="authority">{{ authority }}</option>
+                    }
+                    </select>
+                </div>
 <%_ } _%>
             </div>
 

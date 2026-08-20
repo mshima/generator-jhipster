@@ -16,6 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
+<%_ const relationships = locals.relationships.filter(rel => !(builtInUserManagement && rel.otherEntityName === 'Authority')); /* authorities are plain strings for builtInUserManagement */ _%>
 <div class="d-flex justify-content-center">
   <div class="col-8">
   @if (<%- entityInstance %>(); as <%- entityInstance %>Ref) {
@@ -95,6 +96,19 @@
     <%_ } _%>
         </dd>
   <%_ } _%>
+<%_ } _%>
+<%_ if (builtInUserManagement) { _%>
+
+        <dt><span>__jhiTranslateTag__('<%- i18nKeyPrefix %>.profiles')</span></dt>
+        <dd>
+            <ul class="list-unstyled">
+            @for (authority of <%- entityInstance %>Ref.authorities; track $index) {
+                <li>
+                    <span class="badge bg-info">{{ authority }}</span>
+                </li>
+            }
+            </ul>
+        </dd>
 <%_ } _%>
       </dl>
 
