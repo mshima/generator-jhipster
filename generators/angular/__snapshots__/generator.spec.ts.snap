@@ -1761,7 +1761,6 @@ type UserManagementFormGroupContent = {
   createdDate: FormControl<UserManagementFormRawValue["createdDate"]>;
   lastModifiedBy: FormControl<UserManagementFormRawValue["lastModifiedBy"]>;
   lastModifiedDate: FormControl<UserManagementFormRawValue["lastModifiedDate"]>;
-  authorities: FormControl<UserManagementFormRawValue["authorities"]>;
 };
 
 export type UserManagementFormGroup = FormGroup<UserManagementFormGroupContent>;
@@ -1818,7 +1817,6 @@ export class UserManagementFormService {
       lastModifiedDate: new FormControl(
         userManagementRawValue.lastModifiedDate,
       ),
-      authorities: new FormControl(userManagementRawValue.authorities ?? []),
     });
   }
 
