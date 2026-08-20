@@ -16,7 +16,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-<%_ const relationships = locals.relationships.filter(rel => !(builtInUserManagement && rel.otherEntityName === 'Authority')); /* authorities are plain strings for builtInUserManagement */ _%>
 <div class="d-flex justify-content-center">
     <div class="col-8">
         <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
