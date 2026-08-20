@@ -153,7 +153,7 @@ export class <%- entityAngularName %>Update implements OnInit {
                 this.updateForm(<%- entityInstance %>);
             }
 
-<%_ if (relationships.filter(rel => rel.persistableRelationship && !rel.otherEntity.embedded).length > 0) { _%>
+<%_ if (allRelationshipsByEntityNeedingOptions.length > 0) { _%>
             this.loadRelationshipsOptions();
 <%_ } _%>
         });
@@ -265,7 +265,7 @@ export class <%- entityAngularName %>Update implements OnInit {
 <%_ } _%>
     }
 
-<%_ if (relationships.filter(rel => rel.persistableRelationship && !rel.otherEntity.embedded).length > 0) { _%>
+<%_ if (allRelationshipsByEntityNeedingOptions.length > 0) { _%>
     protected loadRelationshipsOptions(): void {
   <%_ for (const relationshipsByEntityNeedingOptions of allRelationshipsByEntityNeedingOptions) { _%>
     <%_ const relationshipsWithCustomUniqueOptions = relationshipsByEntityNeedingOptions.filter(rel => rel.relationshipOneToOne && rel.otherRelationship); %>
