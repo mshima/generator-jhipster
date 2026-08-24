@@ -100,6 +100,13 @@ source tree; when in doubt, re-verify — file paths are the anchors.
 
 ## Debugging CI failures
 
+- Vite dev-server e2e flakiness (`devserver.yml`): a dependency first imported by a lazily loaded
+  module (the i18n bundle imports `deepmerge`) is discovered at runtime, Vite re-optimizes and
+  reloads the page seconds later on slow runners, killing the Cypress test in progress (typically
+  the login modal: `[data-cy="username"]` never found, several retries). Look for
+  `dependency optimized:` in the `[frontend]` log lines. Fix: `optimizeDeps.entries` covering all
+  app sources in `vite.config.ts` so everything is pre-bundled at startup.
+
 - Daily builds and PR app jobs surface generated-app compile errors; reproduce locally by generating
   the failing sample (see above) and running its own `npm run webapp:build:dev` / `./gradlew` —
   faster and more precise than reading CI logs.
