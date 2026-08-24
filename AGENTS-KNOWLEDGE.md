@@ -52,6 +52,20 @@ source tree; when in doubt, re-verify — file paths are the anchors.
   `client/generators/i18n/.../index_vite.js` (needs `deepmerge`) for both monoliths and
   microfrontends. To verify: generate a monolith plus a gateway/microservice pair from a JDL,
   `npm install`, then `npm run webapp:build:dev` and `npm test` in each app.
+- `@module-federation/vite` cannot share app-local modules (`app/config/store`, …): it only
+  proxies a shared module to the host when it can detect named exports from an installed npm
+  package, otherwise the generated `__loadShare__` module always uses the remote's own copy (and
+  Vite's `resolve.alias` runs before any plugin anyway, so `app/*` share keys never match). Do not
+  add `app/*` entries to `shared`; only npm dependencies are shared. Remotes must get host state
+  from React context (`useStore()` from the shared `react-redux`, see `entities/routes.tsx.ejs`),
+  never from module singletons like `getStore()`. Symptom when this breaks: the remote injects its
+  reducers into its own store and selectors throw `Cannot read properties of undefined` for the
+  microservice key. Vue has the same constraint but is unaffected because it passes services via
+  `provide`/`inject`.
+- Runtime repro without Docker: build gateway + microservice, run a tiny Node server that serves
+  the gateway `target/classes/static`, maps `/services/<ms>/*` to the microservice static dir and
+  stubs `/api/authenticate`, `/api/account`, `/management/info` and the entity API, then run a
+  Cypress spec in the gateway (`cy.login`, open the entity menu, visit the remote entity page).
 
 ## Server-side user caches
 
