@@ -43,6 +43,15 @@ source tree; when in doubt, re-verify — file paths are the anchors.
 - Update pages must navigate back via a `useEffect` on `updateSuccess` (redux state), never directly
   after dispatching the save: navigating while the PUT is in flight lets follow-up requests (e.g.
   cypress `afterEach` cleanup) race the save on the server.
+- Since 9.2.1 React is Vite-only (`generators/react/templates/vite.config.ts.ejs`, needle
+  `jhipster-needle-add-vite-config`); `clientBundler: webpack` is dropped from `.yo-rc.json` and
+  `devServerPort` is reset to `9000 + applicationIndex` in the react `configuring` phase. Old
+  `webpack/*` files are removed by `generators/react/cleanup.ts`. Microfrontends use
+  `@module-federation/vite` with `module-federation.config.ts`; the gateway registers remotes via
+  `registerRemotes` in `index.tsx` and loads them with `loadRemote`. Translations are bundled by
+  `client/generators/i18n/.../index_vite.js` (needs `deepmerge`) for both monoliths and
+  microfrontends. To verify: generate a monolith plus a gateway/microservice pair from a JDL,
+  `npm install`, then `npm run webapp:build:dev` and `npm test` in each app.
 
 ## Server-side user caches
 
