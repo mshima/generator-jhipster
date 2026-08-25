@@ -79,6 +79,42 @@ source tree; when in doubt, re-verify — file paths are the anchors.
   `client/generators/i18n/.../index_vite.js` (needs `deepmerge`) for both monoliths and
   microfrontends. To verify: generate a monolith plus a gateway/microservice pair from a JDL,
   `npm install`, then `npm run webapp:build:dev` and `npm test` in each app.
+- `@module-federation/vite` only proxies a shared module to the host when it can resolve it: for
+  app-local modules (`app/config/store`, …) the `shared` entry needs `import: './src/main/webapp/<key>'`
+  (see `shareMappings` in `module-federation.config.ts.ejs`); without it the remote silently uses its
+  own copy. Even so, remotes must get host state from React context (`useStore()` from the shared
+  `react-redux`, see `entities/routes.tsx.ejs`), never from module singletons like `getStore()`.
+  Symptom when this breaks: the remote injects its reducers into its own store and selectors throw
+  `Cannot read properties of undefined` for the microservice key.
+- Microfrontend translations: each remote registers its own `i18n/<locale>/<locale>.js` into the
+  shared `TranslatorContext` from a top-level `await registerTranslations()` in its exposed
+  `entities/menu.tsx` and `entities/routes.tsx` (`app/shared/reducers/locale.ts.ejs`). The loader
+  must memoize the pending _promise_ per locale, not a "done" flag: the menu and routes modules load
+  concurrently, and a flag lets the second caller resolve before the i18n chunk arrives, so the
+  page renders `translation-not-found[...]` and never re-renders (react-jhipster's `Translate` is
+  a class component that only re-renders with its parent). This only shows up with CI-like latency;
+  reproduce it by delaying the remote's `assets/en-*.js` response a few seconds in the stub server.
+- Runtime repro without Docker: build gateway + microservices (Gradle output is
+  `build/generated/webapp`), serve them with a stub backend mapping `/services/<ms>/*` to the
+  microservice static dir, and run a Cypress spec on the gateway (navbar entity items from the
+  remote, `/blog/blog`, headings translated).
+
+## React client
+
+- User-management lives in `…/app/modules/administration/user-management/` (plain templates), not in
+  the entity templates. React and Vue set `skipClient: true` on the built-in user entities.
+- Update pages must navigate back via a `useEffect` on `updateSuccess` (redux state), never directly
+  after dispatching the save: navigating while the PUT is in flight lets follow-up requests (e.g.
+  cypress `afterEach` cleanup) race the save on the server.
+- Since 9.2.1 React is Vite-only (`generators/react/templates/vite.config.ts.ejs`, needle
+  `jhipster-needle-add-vite-config`); `clientBundler: webpack` is dropped from `.yo-rc.json` and
+  `devServerPort` is reset to `9000 + applicationIndex` in the react `configuring` phase. Old
+  `webpack/*` files are removed by `generators/react/cleanup.ts`. Microfrontends use
+  `@module-federation/vite` with `module-federation.config.ts`; the gateway registers remotes via
+  `registerRemotes` in `index.tsx` and loads them with `loadRemote`. Translations are bundled by
+  `client/generators/i18n/.../index_vite.js` (needs `deepmerge`) for both monoliths and
+  microfrontends. To verify: generate a monolith plus a gateway/microservice pair from a JDL,
+  `npm install`, then `npm run webapp:build:dev` and `npm test` in each app.
 - `@module-federation/vite` cannot share app-local modules (`app/config/store`, …): it only
   proxies a shared module to the host when it can detect named exports from an installed npm
   package, otherwise the generated `__loadShare__` module always uses the remote's own copy (and
