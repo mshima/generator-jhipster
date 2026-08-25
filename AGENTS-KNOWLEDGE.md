@@ -36,6 +36,33 @@ source tree; when in doubt, re-verify — file paths are the anchors.
   a string key, which fails Angular strict builds with `TS7015`. Only use the enum macros for keys
   that actually have generated translations.
 
+## Angular client
+
+- Microfrontends use esbuild + `@angular-architects/native-federation` (`clientBundler: esbuild`,
+  webpack module federation only remains for `clientBundler: webpack`). Pieces:
+  `federation.config.mjs` (shares npm deps via `shareAll`, Angular locales via
+  `shareAngularLocales`, app singletons via `sharedMappings`), `tsconfig.federation.json` (exposed
+  entries), and `build-plugins` as a local builder package (`./build-plugins:native-federation`)
+  wrapping `runBuilder` to inject the esbuild plugins — native federation runs Angular's
+  application builder itself, so `@angular-builders/custom-esbuild` plugins would be bypassed.
+  `es-module-shims` must be in the `polyfills` list and in `dependencies`; the gateway needs
+  `entryPoints` set because it exposes nothing (NF's fallback is `src/main.ts`).
+- Native federation only shares **barrel** specifiers (no dot in the last segment) listed in
+  tsconfig `paths`; deep imports under a mapped directory are externalized but never published
+  ("Unable to resolve specifier ..."). Hence `app/config`, `app/core/auth`, `app/core/util`,
+  `app/core/request`, `app/shared/alert`, `app/shared/auth`, `app/shared/date`,
+  `app/shared/language`, `app/shared/pagination`, `app/shared/sort` are barrels with explicit
+  `paths` entries and all templates import them as barrels. Shared mapping bundles are compiled
+  standalone: type augmentations (dayjs plugins) and `define`s (`SERVER_API_URL`, `__VERSION__`)
+  must come from the module itself / the esbuild plugins, not from `angular.json` `define`.
+- The `@angular/build:unit-test` builder uses the build target options only (no custom plugins):
+  `vitest-base.config.ts` resolves the virtual `i18n/<lang>.json` modules, and `SERVER_API_URL`
+  must also stay in the `angular.json` `define` for the tests.
+- Runtime repro without Docker: build gateway + microservices (Gradle output is
+  `build/generated/webapp`), serve them with a stub backend mapping `/services/<ms>/*` to the
+  microservice static dir, and run a Cypress spec on the gateway (navbar entity items from the
+  remote, `/blog/blog`, headings translated).
+
 ## React client
 
 - User-management lives in `…/app/modules/administration/user-management/` (plain templates), not in
