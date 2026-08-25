@@ -63,6 +63,24 @@ source tree; when in doubt, re-verify — file paths are the anchors.
   microservice static dir, and run a Cypress spec on the gateway (navbar entity items from the
   remote, `/blog/blog`, headings translated).
 
+## Angular client — module federation
+
+- Webpack module federation (`webpack/webpack.microfrontend.js.ejs`) shares app-local barrels
+  (`app/config`, `app/core/auth`, `app/core/util`, `app/shared/*`, …) with `shareMappings`. A share
+  key only matches an import of exactly that specifier, so it only takes effect for directories
+  with an `index.ts` barrel. A module that is part of a shared barrel's import graph must never
+  import that barrel itself (e.g. `app/login/login.service.ts` is reached through
+  `core/auth/user-route-access.service.ts`, so it must import `app/core/auth/account.service`,
+  not `app/core/auth`): the provider's `get()` then waits for the "consume" chunk of its own key
+  and the app hangs at bootstrap with a blank page and no console error. Symptom in CI: every
+  Cypress spec of a `microfrontend: true` webpack sample fails on `[data-cy="navbar"]`.
+- Repro/bisect recipe: generate the sample client-only (`skipServer: true`), `npm run
+webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that answers
+  `/api/account` with 401 and `/management/info`, and run a one-test Cypress spec that visits `/`
+  and checks the navbar; bisect by trimming the `shareMappings(...)` list. The built `main.*.js`
+  shows the cycle: the provider entry for the key lists
+  `default-webpack_sharing_consume_default_<key>` among its chunk dependencies.
+
 ## React client
 
 - User-management lives in `…/app/modules/administration/user-management/` (plain templates), not in
