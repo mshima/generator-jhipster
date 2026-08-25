@@ -75,11 +75,14 @@ includeSecondaries: false } })` helper so the entry point is inferred by node re
   (`app/config`, `app/core/auth`, `app/core/util`, `app/shared/*`, …) with `shareMappings`. A share
   key only matches an import of exactly that specifier, so it only takes effect for directories
   with an `index.ts` barrel. A module that is part of a shared barrel's import graph must never
-  import that barrel itself (e.g. `app/login/login.service.ts` is reached through
-  `core/auth/user-route-access.service.ts`, so it must import `app/core/auth/account.service`,
-  not `app/core/auth`): the provider's `get()` then waits for the "consume" chunk of its own key
-  and the app hangs at bootstrap with a blank page and no console error. Symptom in CI: every
-  Cypress spec of a `microfrontend: true` webpack sample fails on `[data-cy="navbar"]`.
+  import that barrel itself: the provider's `get()` then waits for the "consume" chunk of its own
+  key and the app hangs at bootstrap with a blank page and no console error (every Cypress spec of
+  a `microfrontend: true` webpack sample fails on `[data-cy="navbar"]`). Example: for oauth2,
+  `core/auth/user-route-access.service.ts` used `LoginService` (`app/login/login.service.ts`), which
+  imports `app/core/auth` — fixed by redirecting to `oauth2/authorization/oidc` directly in the
+  guard. Do **not** fix such cycles by importing concrete files (`app/core/auth/account.service`):
+  native federation only publishes the barrel specifier and fails at runtime with
+  "Unable to resolve specifier 'app/core/auth/account.service'". Both bundlers must be checked.
 - Repro/bisect recipe: generate the sample client-only (`skipServer: true`), `npm run
 webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that answers
   `/api/account` with 401 and `/management/info`, and run a one-test Cypress spec that visits `/`
