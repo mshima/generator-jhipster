@@ -35,9 +35,6 @@ source tree; when in doubt, re-verify — file paths are the anchors.
   replacements emit `JSON.stringify(translation)[value]` as inline fallback — indexing a string with
   a string key, which fails Angular strict builds with `TS7015`. Only use the enum macros for keys
   that actually have generated translations.
-
-## Angular client
-
 - Microfrontends use esbuild + `@angular-architects/native-federation` (`clientBundler: esbuild`,
   webpack module federation only remains for `clientBundler: webpack`). Pieces:
   `federation.config.mjs` (shares npm deps via `shareAll`, Angular locales via
@@ -62,6 +59,15 @@ source tree; when in doubt, re-verify — file paths are the anchors.
   `build/generated/webapp`), serve them with a stub backend mapping `/services/<ms>/*` to the
   microservice static dir, and run a Cypress spec on the gateway (navbar entity items from the
   remote, `/blog/blog`, headings translated).
+- Native federation's `shareAngularLocales()` hardcodes a cwd-relative
+  `node_modules/@angular/common/locales/<locale>.js` entry point, which breaks in npm workspaces
+  (hoisted `node_modules`, used by the `ms-*`/`mf-*` CI samples): "Could not resolve
+  node_modules/@angular/common/locales/en.js". `federation.config.mjs.ejs` therefore shares the
+  locales with a plain `share({ '@angular/common/locales/<locale>': { requiredVersion: 'auto',
+includeSecondaries: false } })` helper so the entry point is inferred by node resolution.
+- `login.service.ts.ejs` needs `AuthServerProvider` for oauth2 too (from `auth-session.service`,
+  since `authenticationUsesCsrf` covers `oauth2` and `session`); dropping that import broke every
+  oauth2/session sample with `TS2304`.
 
 ## Angular client — module federation
 
@@ -116,37 +122,26 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   `build/generated/webapp`), serve them with a stub backend mapping `/services/<ms>/*` to the
   microservice static dir, and run a Cypress spec on the gateway (navbar entity items from the
   remote, `/blog/blog`, headings translated).
+- The development ribbon (`shared/layout/header/header.scss.ejs`) must stay below react-toastify's
+  container (`--toastify-z-index: 9999`): with a higher z-index the translucent ribbon paints over
+  the top-left toasts and hides the second line of the message (e.g. the entity id of
+  "A Blog is updated with identifier …"). react-toastify 11 renders the message as a bare text node
+  inside the flex toast (no `.Toastify__toast-body`), so two-line wrapping at 320px is normal.
+- Stub-server details that matter for entity Cypress specs: infinite-scroll lists need a `Link`
+  header (`<…>; rel="last",<…>; rel="first"`) or the reducer throws reading `length`; success toasts
+  come from `x-<app>app-alert` (translation key) + `x-<app>app-params` (id) response headers.
 
-## React client
+## Spring Boot server
 
-- User-management lives in `…/app/modules/administration/user-management/` (plain templates), not in
-  the entity templates. React and Vue set `skipClient: true` on the built-in user entities.
-- Update pages must navigate back via a `useEffect` on `updateSuccess` (redux state), never directly
-  after dispatching the save: navigating while the PUT is in flight lets follow-up requests (e.g.
-  cypress `afterEach` cleanup) race the save on the server.
-- Since 9.2.1 React is Vite-only (`generators/react/templates/vite.config.ts.ejs`, needle
-  `jhipster-needle-add-vite-config`); `clientBundler: webpack` is dropped from `.yo-rc.json` and
-  `devServerPort` is reset to `9000 + applicationIndex` in the react `configuring` phase. Old
-  `webpack/*` files are removed by `generators/react/cleanup.ts`. Microfrontends use
-  `@module-federation/vite` with `module-federation.config.ts`; the gateway registers remotes via
-  `registerRemotes` in `index.tsx` and loads them with `loadRemote`. Translations are bundled by
-  `client/generators/i18n/.../index_vite.js` (needs `deepmerge`) for both monoliths and
-  microfrontends. To verify: generate a monolith plus a gateway/microservice pair from a JDL,
-  `npm install`, then `npm run webapp:build:dev` and `npm test` in each app.
-- `@module-federation/vite` cannot share app-local modules (`app/config/store`, …): it only
-  proxies a shared module to the host when it can detect named exports from an installed npm
-  package, otherwise the generated `__loadShare__` module always uses the remote's own copy (and
-  Vite's `resolve.alias` runs before any plugin anyway, so `app/*` share keys never match). Do not
-  add `app/*` entries to `shared`; only npm dependencies are shared. Remotes must get host state
-  from React context (`useStore()` from the shared `react-redux`, see `entities/routes.tsx.ejs`),
-  never from module singletons like `getStore()`. Symptom when this breaks: the remote injects its
-  reducers into its own store and selectors throw `Cannot read properties of undefined` for the
-  microservice key. Vue has the same constraint but is unaffected because it passes services via
-  `provide`/`inject`.
-- Runtime repro without Docker: build gateway + microservice, run a tiny Node server that serves
-  the gateway `target/classes/static`, maps `/services/<ms>/*` to the microservice static dir and
-  stubs `/api/authenticate`, `/api/account`, `/management/info` and the entity API, then run a
-  Cypress spec in the gateway (`cy.login`, open the entity menu, visit the remote entity page).
+- `LoggingAspect.java.ejs` is shared by imperative and reactive apps. For reactive apps the around
+  advice logs `Mono`/`Flux` on termination (`doOnSuccess`/`doOnComplete`/`doOnError`) and also
+  handles synchronous throws itself: an `@AfterThrowing` advice needs
+  `ExposeInvocationInterceptor.currentInvocation()`, which is not set when the reactive
+  `@Transactional` interceptor invokes the target lazily at subscribe time, so it fails with
+  "No MethodInvocation found" and turns a `BadRequestAlertException` into a 500 (visible in
+  `*ResourceIT` create/update-with-invalid-id tests). Validate aspect changes by generating a reactive
+  app, removing `@Profile(dev)` from `LoggingAspectConfiguration` and raising the package log level
+  to DEBUG in `src/test/resources/config/application.yml`, then running one `*ResourceIT`.
 
 ## Server-side user caches
 
