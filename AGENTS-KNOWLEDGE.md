@@ -100,13 +100,18 @@ source tree; when in doubt, re-verify — file paths are the anchors.
 
 ## Debugging CI failures
 
-- Vite dev-server e2e flakiness (`devserver.yml`): a dependency first imported by a lazily loaded
-  module (the i18n bundle imports `deepmerge`) is discovered at runtime, Vite re-optimizes and
-  reloads the page seconds later on slow runners, killing the Cypress test in progress (typically
-  the login modal: `[data-cy="username"]` never found, several retries). Look for
-  `dependency optimized:` in the `[frontend]` log lines. Fix: `optimizeDeps.entries` covering all
-  app sources in `vite.config.ts` so everything is pre-bundled at startup.
-
+- Vite dev-server e2e flakiness (`devserver.yml`, Vue): two dev-only effects hit the Cypress login
+  tests. (1) A dependency first imported by a lazily loaded module (`deepmerge` from the i18n
+  bundle) is discovered at runtime, Vite re-optimizes and reloads the page — fixed with
+  `optimizeDeps.entries` covering the app sources. (2) `router.beforeResolve` calls `hideLogin()`;
+  in dev mode the initial navigation resolves late (lazy route component loading), after Cypress
+  opened the login modal, so the modal is closed under the test (`[data-cy="username"]` never
+  found, retries pass once modules are cached) — fixed by skipping `hideLogin()` when
+  `from === START_LOCATION`. Debug recipe: download the run's `screenshots-*` artifact
+  (`gh run download <id> -R jhipster/generator-jhipster`) and check the order of the app init
+  requests (`/management/info`, `/api/account`) versus the test clicks in the Cypress log; delay
+  the route import in a generated sample (`() => new Promise(r => setTimeout(r, 3000)).then(() =>
+import(...))`) to reproduce init races locally.
 - Daily builds and PR app jobs surface generated-app compile errors; reproduce locally by generating
   the failing sample (see above) and running its own `npm run webapp:build:dev` / `./gradlew` —
   faster and more precise than reading CI logs.
