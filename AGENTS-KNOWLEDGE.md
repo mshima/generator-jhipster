@@ -44,6 +44,13 @@ source tree; when in doubt, re-verify — file paths are the anchors.
   application builder itself, so `@angular-builders/custom-esbuild` plugins would be bypassed.
   `es-module-shims` must be in the `polyfills` list and in `dependencies`; the gateway needs
   `entryPoints` set because it exposes nothing (NF's fallback is `src/main.ts`).
+- `build-plugins/` is all TypeScript, including the local Architect builder
+  (`native-federation.ts`, referenced from `builders.json`): Architect `import()`s it and Node's
+  native type stripping (required Node ≥ 22.18) handles the `.ts`. The package is
+  `"type": "module"`, so the esbuild plugins must be ESM-clean — `import.meta.dirname` instead of
+  `__dirname`, `createRequire(import.meta.url)` instead of a bare `require` — otherwise the builder
+  path fails with "__dirname is not defined in ES module scope" while `@angular-builders/custom-esbuild`
+  (non-microfrontend apps, own loader) keeps working and hides the problem.
 - `federation.config.ts` is TypeScript without any loader: native federation `import()`s the
   config path itself (`federationConfigPath` builder option) and generated apps require the Node
   version in `generators/init/resources/.node-version` (≥ 22.18), which strips type annotations
