@@ -44,13 +44,12 @@ source tree; when in doubt, re-verify — file paths are the anchors.
   application builder itself, so `@angular-builders/custom-esbuild` plugins would be bypassed.
   `es-module-shims` must be in the `polyfills` list and in `dependencies`; the gateway needs
   `entryPoints` set because it exposes nothing (NF's fallback is `src/main.ts`).
-- `federation.config.ts` is TypeScript: native federation `import()`s the config path
-  (`federationConfigPath` builder option), so the local builder registers
-  `build-plugins/typescript-loader.mjs` via `node:module` `register()` — a `load` hook that
-  transpiles project `.ts` files (not `node_modules`) with `typescript`'s `transpileModule`. Do not
-  use `jiti/register` for this: its process-wide hooks also rewrite `.json` imports and the Angular
-  CLI fails with "@babel/compat-data/data/native-modules.json … is not valid JSON". Relying on
-  Node's native type stripping would tie generated apps to Node ≥ 22.18.
+- `federation.config.mjs` stays JavaScript on purpose: native federation `import()`s the config
+  path itself (`federationConfigPath` builder option). A TypeScript config would need a process
+  loader — `jiti/register` breaks the Angular CLI (its hooks also rewrite `.json` imports:
+  "@babel/compat-data/data/native-modules.json … is not valid JSON"), a custom `node:module`
+  `register()` hook works but was judged not worth the extra moving part, and Node's native type
+  stripping would require Node ≥ 22.18.
 - Native federation only shares **barrel** specifiers (no dot in the last segment) listed in
   tsconfig `paths`; deep imports under a mapped directory are externalized but never published
   ("Unable to resolve specifier ..."). Hence `app/config`, `app/core/auth`, `app/core/util`,
