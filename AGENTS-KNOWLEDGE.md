@@ -23,6 +23,25 @@ source tree; when in doubt, re-verify — file paths are the anchors.
 
 ## Angular client
 
+- Without an Authority entity (Cassandra/no database) the Angular `UserManagement` gets a built-in
+  `authorities` **field** (`fieldType: 'Authority'`, `fieldValues: 'ROLE_ADMIN,ROLE_USER'`, `collection: true`,
+  `clientConstantsAsValues: true`, `skipServer: true`) appended in `createUserManagementEntity`; `langKey` is
+  also `clientConstantsAsValues`. Such fields are enum-like but produce **no** enum model file and **no** i18n
+  enum entries (`addEnumerationFiles`, `generateEntityClientEnumImports` and the client i18n generator skip
+  them). `collection` fields are typed `X[]`, default to `[]` in the form service, render as a `multiple`
+  select (update) and as badges (list/detail), are not sortable (`fieldSupportsSortBy`), and get array
+  samples (`authorities: ['ROLE_USER']`, Cypress `select(['ROLE_USER'])`).
+- The Angular generator maps constant-backed field types to their client constants in
+  `angularClientConstants` (`generators/angular/generator.ts`): `Languages` → `LANGUAGES` from `app/config`
+  (`tsType` `(typeof LANGUAGES)[number]`), `Authority` → `Authority` from `app/shared/jhipster/constants`
+  (`tsType` `string`, values `Object.values(Authority)`). The result is exposed as
+  `field.angularFieldClientConstant`; `field.angularFieldNameSingular` names loop items (`authority`).
+  New Angular-only types/properties must carry an `Angular`/`angular` prefix.
+- Refactoring rule: generated code must stay byte-identical unless a real output bug is being fixed.
+  Verify with a baseline: `git stash`, generate a sample into the scratchpad from a JDL, `git stash pop`,
+  generate again into a sibling directory and `diff -r -q` the trees (ignore `.yo-rc.json`, jwt secrets,
+  keystore, `application.yml`). Faker-sequence shifts caused by a genuinely new field are expected.
+
 - User-management pages are generated from the **shared entity templates**
   (`generators/angular/templates/src/main/webapp/app/entities/_entityFolder_/…`) with the entity
   flag `builtInUserManagement`; remaining hand-written pages live under
