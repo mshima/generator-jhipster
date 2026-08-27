@@ -104,6 +104,19 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   shows the cycle: the provider entry for the key lists
   `default-webpack_sharing_consume_default_<key>` among its chunk dependencies.
 
+### Horizontal scroll hunting in generated Angular apps
+
+- Electron/Cypress and macOS browsers use overlay scrollbars, so `documentElement.scrollWidth > clientWidth` is
+  the reliable check; measure many pages, widths (320–1920) and states (modals, open dropdowns, collapsed navbar,
+  short viewports that force a vertical scrollbar) and list elements whose `getBoundingClientRect().right`
+  exceeds `clientWidth` to find the culprit.
+- `class="table table-responsive d-table"` cancels itself: `d-table` overrides the `display: block` that makes
+  `.table-responsive` scroll, so long unbreakable cell content widens the page instead. The `/admin/configuration`
+  page did this with long Spring property keys below ~640px; the fix was the `break` class (`word-break: break-all`
+  from `global.scss`) on the prefix and property-key cells rather than a wrapper.
+- The entity list tables are wrapped in `div.table-responsive`, so a wide table only scrolls inside its wrapper;
+  that is not a page-level horizontal scroll.
+
 ## React client
 
 - User-management lives in `…/app/modules/administration/user-management/` (plain templates), not in
