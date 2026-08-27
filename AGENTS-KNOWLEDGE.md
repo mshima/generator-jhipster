@@ -123,6 +123,20 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   shows the cycle: the provider entry for the key lists
   `default-webpack_sharing_consume_default_<key>` among its chunk dependencies.
 
+- Native federation (`@angular-architects/native-federation`, esbuild bundler): when an application exposes
+  itself (`exposeMicrofrontend`, the gateway is its own `self` microfrontend and routes/navbar go through
+  `loadEntityRoutes('<name>')`/`loadNavbarItems('<name>')`), `initFederation(remotes, { hostRemoteEntry })`
+  must set `hostRemoteEntry.name` to the module federation name. Without it the orchestrator registers the host
+  as `__NF-HOST__` and `loadRemoteModule('gateway', …)` throws `NFError: Remote 'gateway' is not initialized`;
+  the router then retries the lazy route endlessly, the tab freezes, Cypress prints nothing and the CI
+  "E2E: Run" step times out after 15 minutes (locally the Electron renderer crashes after ~4 min).
+- Repro without Docker: download the `app-<sample>` CI artifact (it contains the generated apps), `npm install`
+  at the workspace root, `npm run webapp:build:prod` in `gateway` and `blog`, serve `gateway/target/classes/static`
+  at `/` and `blog/target/classes/static` under `/services/blog/*` with a tiny Node stub answering
+  `/api/authenticate`, `/api/account`, `/management/info`, `/services/blog/api/*`, then run the blog
+  `entity/blog.cy.ts` spec from `blog/` (baseUrl `http://localhost:8080/`) with a watchdog; Playwright WebKit
+  with console capture shows the underlying `[NF]` errors. macOS has no `timeout`: use a background job + kill.
+
 ### Horizontal scroll hunting in generated Angular apps
 
 - Electron/Cypress and macOS browsers use overlay scrollbars, so `documentElement.scrollWidth > clientWidth` is
