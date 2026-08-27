@@ -116,6 +116,14 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   from `global.scss`) on the prefix and property-key cells rather than a wrapper.
 - The entity list tables are wrapped in `div.table-responsive`, so a wide table only scrolls inside its wrapper;
   that is not a page-level horizontal scroll.
+- Safari only (WebKit, not reproducible in Chromium, Firefox or Playwright's WebKit build): an ng-bootstrap
+  `ngbDropdown` with `display="dynamic"` inside a `position: relative` navbar `li` makes the page horizontally
+  scrollable once opened, and the value sticks after closing. Popper writes the menu position as inline styles,
+  WebKit's "positioned movement only" layout then records the menu's scrollable overflow at
+  `2 × containingBlockLeft + menuWidth` and never recomputes it. The fix in `navbar.html.ejs` is
+  `display="static"` on the navbar dropdowns (pure Bootstrap CSS positioning, identical placement) plus
+  `dropdown-menu-end` on the right-aligned account and language menus. Real Safari can be driven with
+  `selenium-webdriver` once "Develop → Allow Remote Automation" is enabled; `safaridriver --enable` needs sudo.
 
 ## React client
 
