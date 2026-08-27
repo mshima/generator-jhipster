@@ -144,6 +144,18 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   `dropdown-menu-end` on the right-aligned account and language menus. Real Safari can be driven with
   `selenium-webdriver` once "Develop → Allow Remote Automation" is enabled; `safaridriver --enable` needs sudo.
 
+## Vue client
+
+- `@content` is used only by the rsbuild bundler variant: `global.scss.ejs` and `jhi-navbar.vue.ejs` emit
+  `url("<%- clientBundlerRsbuild ? '@' : '/' %>content/images/…")`, so a grep for `'@content/` finds nothing
+  while `rsbuild.config.ts` still needs the `@content` alias (Vite uses absolute `/content/…` URLs). Grep for
+  every quoting/EJS form before declaring an alias unused.
+- With `resolve.tsconfigPaths: true` in `vite.config.ts`, tsconfig `paths` only reach Vite's own resolver. The
+  `@module-federation/vite` plugin resolves `shared` keys itself, so application modules shared by key
+  (`@/shared/jhipster/constants`, …) fail with "Rolldown failed to resolve import … from virtual:mf:…loadShare…"
+  unless `shareMappings` adds `import: './src/main/webapp/app/…'` (as the React template does). Reproduce with a
+  monolith `microfrontend: true, exposeMicrofrontend: true, clientBundler: vite` and `npm run webapp:build:prod`.
+
 ## React client
 
 - User-management lives in `…/app/modules/administration/user-management/` (plain templates), not in
