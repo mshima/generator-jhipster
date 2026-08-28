@@ -252,6 +252,22 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   app, removing `@Profile(dev)` from `LoggingAspectConfiguration` and raising the package log level
   to DEBUG in `src/test/resources/config/application.yml`, then running one `*ResourceIT`.
 
+- Cassandra schema is managed by Liquibase since 9.2.1 (`databaseMigration` defaults to `liquibase` for
+  Cassandra): `data-cassandra` composes `jhipster:spring-boot:liquibase`; the initial schema
+  (`liquibase/templates/.../initial_schema_cassandra.xml.ejs`) and the per-entity changelogs
+  (`data-cassandra/templates/.../config/liquibase/changelog/added_entity.xml.ejs`, registered through
+  `source.addLiquibaseChangelog`) wrap the former CQL in `<sql splitStatements="true" endDelimiter=";">` changeSets
+  — Liquibase's `liquibase-cassandra` extension only swaps the runner, the physical model (`user`, `user_by_*`
+  lookup tables, `authorities set<text>`, entity tables with CQL types) is unchanged. `LiquibaseConfiguration`
+  builds a `SimpleDriverDataSource` on `com.ing.data.cassandra.jdbc.CassandraDriver` (transitive from
+  `liquibase-cassandra`) from `CassandraConnectionDetails` + `spring.cassandra.keyspace-name`, so Testcontainers'
+  `@ServiceConnection` works without a `spring.liquibase.url`. Liquibase runs synchronously and the Cassandra
+  `UserRepository`/entity repositories are `@DependsOn("liquibase")` because they prepare statements at startup.
+  The keyspace itself is still created outside Liquibase (`config/cql/create-keyspace*.cql` via the docker
+  `cassandra-migration` service, `CassandraTestContainer.createKeyspace` in tests); `config/cql/changelog/*` and the
+  `ResourceKeyspacePopulator` are gone (`control.cleanupFiles` `'9.2.1'`). No Docker on the dev box: validation was
+  generator specs plus reading the generated app.
+
 ## Server-side user caches
 
 - Cache names: `usersByLogin` / `usersByEmail` (constants on `UserRepository`).
