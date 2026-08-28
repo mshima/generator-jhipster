@@ -20,6 +20,7 @@ package <%- entityAbsolutePackage %>.repository;
 
 import <%- entityAbsolutePackage %>.domain.<%- persistClass %>;
 
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.cassandra.repository.<%- reactive ? 'Reactive' : '' %>CassandraRepository;
 import org.springframework.stereotype.Repository;
 <%_ if (primaryKey.typeUUID) { _%>
@@ -31,5 +32,6 @@ import java.util.UUID;
  * <%- springDataDescription %> repository for the <%- persistClass %> entity.
  */
 @Repository
+@DependsOn("liquibase")
 public interface <%- entityClass %>Repository extends <%- reactive ? 'Reactive' : '' %>CassandraRepository<<%- persistClass %>, <%- primaryKey.type %>> {
 }

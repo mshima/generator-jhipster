@@ -57,6 +57,18 @@ export default class CassandraGenerator extends SpringBootApplicationGenerator {
     return this.delegateTasksToBlueprint(() => this.configuringEachEntity);
   }
 
+  get composing() {
+    return this.asComposingTaskGroup({
+      async liquibase() {
+        await this.composeWithJHipster('jhipster:spring-boot:liquibase');
+      },
+    });
+  }
+
+  get [SpringBootApplicationGenerator.COMPOSING]() {
+    return this.delegateTasksToBlueprint(() => this.composing);
+  }
+
   get writing() {
     return this.asWritingTaskGroup({
       async cleanup({ application, control }) {
@@ -65,6 +77,10 @@ export default class CassandraGenerator extends SpringBootApplicationGenerator {
             `${application.javaPackageTestDir}config/CassandraTestContainersSpringContextCustomizerFactory.java`,
             `${application.javaPackageTestDir}config/EmbeddedCassandra.java`,
             `${application.srcTestResources}META-INF/spring.factories`,
+            // The custom cql migration was replaced with liquibase
+            `${application.srcMainResources}config/cql/changelog/README.md`,
+            `${application.srcMainResources}config/cql/changelog/00000000000000_create-tables.cql`,
+            `${application.srcMainResources}config/cql/changelog/00000000000001_insert_default_users.cql`,
           ],
         });
       },
@@ -88,8 +104,25 @@ export default class CassandraGenerator extends SpringBootApplicationGenerator {
     return this.delegateTasksToBlueprint(() => this.writingEntities);
   }
 
+  get postWritingEntities() {
+    return this.asPostWritingEntitiesTaskGroup({
+      addLiquibaseChangelogs({ entities, source }) {
+        for (const entity of entities.filter(entity => !entity.skipServer && !entity.builtIn && !entity.skipDbChangelog)) {
+          source.addLiquibaseChangelog?.({ changelogName: `${entity.changelogDate}_added_entity_${entity.entityClass}`, section: 'base' });
+        }
+      },
+    });
+  }
+
+  get [SpringBootApplicationGenerator.POST_WRITING_ENTITIES]() {
+    return this.delegateTasksToBlueprint(() => this.postWritingEntities);
+  }
+
   get postWriting() {
     return this.asPostWritingTaskGroup({
+      addLog({ source }) {
+        source.addMainLog?.({ name: 'com.datastax.oss.driver', level: 'INFO' });
+      },
       addDependencies({ application, source }) {
         const { reactive, javaDependencies } = application;
 

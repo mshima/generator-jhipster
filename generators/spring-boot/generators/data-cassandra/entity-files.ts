@@ -43,8 +43,8 @@ export const entityFiles = asWriteFilesSection({
       path: SERVER_MAIN_RES_DIR,
       templates: [
         {
-          file: 'config/cql/changelog/added_entity.cql',
-          renameTo: ctx => `config/cql/changelog/${ctx.changelogDate}_added_entity_${ctx.entityClass}.cql`,
+          file: 'config/liquibase/changelog/added_entity.xml',
+          renameTo: ctx => `config/liquibase/changelog/${ctx.changelogDate}_added_entity_${ctx.entityClass}.xml`,
         },
       ],
     },
@@ -53,7 +53,14 @@ export const entityFiles = asWriteFilesSection({
   repositoryFiles,
 });
 
-export function cleanupCassandraEntityFilesTask() {}
+export const cleanupCassandraEntityFilesTask = asWritingEntitiesTask(async function ({ application, entities, control }) {
+  for (const entity of entities.filter(entity => !entity.skipServer && !entity.builtIn)) {
+    await control.cleanupFiles({
+      // The custom cql migration was replaced with liquibase
+      '9.2.1': [`${application.srcMainResources}config/cql/changelog/${entity.changelogDate}_added_entity_${entity.entityClass}.cql`],
+    });
+  }
+});
 
 export default asWritingEntitiesTask(async function writeEntityCassandraFiles({ application, entities }) {
   for (const entity of entities.filter(entity => !entity.skipServer)) {

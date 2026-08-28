@@ -101,6 +101,7 @@ import org.springframework.stereotype.Repository;
   <%_ if (!reactive) { _%>
 import org.springframework.boot.cassandra.autoconfigure.CassandraProperties;
   <%_ } _%>
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.util.StringUtils;
 <%_ } _%>
 <%_ if (reactive) { _%>
@@ -428,6 +429,7 @@ class UserRepositoryInternalImpl implements UserRepositoryInternal {
 }
 <%_ } else if (databaseTypeCassandra) { _%>
 @Repository
+@DependsOn("liquibase")
 public class UserRepository {
   <%_ if (cacheProviderAny) { _%>
 

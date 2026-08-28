@@ -19,9 +19,16 @@
 package <%- packageName %>.config;
 
 import tech.jhipster.config.JHipsterConstants;
-<%_ if (databaseTypeNeo4j || reactive) { _%>
+<%_ if (databaseTypeNeo4j || databaseTypeCassandra || reactive) { _%>
 import java.util.Optional;
+<%_ } _%>
+<%_ if (databaseTypeNeo4j || reactive) { _%>
 import tech.jhipster.config.liquibase.AsyncSpringLiquibase;
+<%_ } else if (databaseTypeCassandra) { _%>
+import com.ing.data.cassandra.jdbc.CassandraDriver;
+import org.springframework.boot.cassandra.autoconfigure.CassandraConnectionDetails;
+import org.springframework.boot.cassandra.autoconfigure.CassandraProperties;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 <%_ } else { _%>
 import tech.jhipster.config.liquibase.SpringLiquibaseUtil;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
@@ -39,12 +46,16 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 <%_ } _%>
 
 import javax.sql.DataSource;
+<%_ if (!databaseTypeCassandra) { _%>
 import java.util.concurrent.Executor;
+<%_ } _%>
 
 import liquibase.integration.spring.SpringLiquibase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+<%_ if (!databaseTypeCassandra) { _%>
 import org.springframework.beans.factory.annotation.Qualifier;
+<%_ } _%>
 import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,10 +76,15 @@ public class LiquibaseConfiguration {
 
     @Bean
     public SpringLiquibase liquibase(
+<%_ if (!databaseTypeCassandra) { _%>
         @Qualifier("taskExecutor") Executor executor,
+<%_ } _%>
         LiquibaseProperties liquibaseProperties,
 <%_ if (databaseTypeNeo4j) { _%>
         Neo4jProperties dataSourceProperties
+<%_ } else if (databaseTypeCassandra) { _%>
+        CassandraConnectionDetails connectionDetails,
+        CassandraProperties cassandraProperties
 <%_ } else if (reactive) { _%>
         R2dbcProperties dataSourceProperties
 <%_ } else { _%>
@@ -82,6 +98,10 @@ public class LiquibaseConfiguration {
 <%_ if (databaseTypeNeo4j || reactive) { _%>
         SpringLiquibase liquibase = new AsyncSpringLiquibase(executor, env);
         liquibase.setDataSource(createLiquibaseDataSource(liquibaseProperties, dataSourceProperties));
+<%_ } else if (databaseTypeCassandra) { _%>
+        // Repositories depend on the liquibase bean: the schema must exist before they are created, so liquibase runs synchronously.
+        SpringLiquibase liquibase = new SpringLiquibase();
+        liquibase.setDataSource(createLiquibaseDataSource(liquibaseProperties, connectionDetails, cassandraProperties));
 <%_ } else { _%>
         SpringLiquibase liquibase;
         if (Boolean.TRUE.equals(applicationProperties.getLiquibase().getAsyncStart())) {
@@ -123,8 +143,32 @@ public class LiquibaseConfiguration {
 
         return new SimpleDriverDataSource(new Neo4jDriver(), url, user, password);
     }
-<%_ } _%>
-<%_ if (databaseTypeSql && reactive) { _%>
+<%_ } else if (databaseTypeCassandra) { _%>
+
+    public DataSource createLiquibaseDataSource(
+        LiquibaseProperties liquibaseProperties,
+        CassandraConnectionDetails connectionDetails,
+        CassandraProperties cassandraProperties
+    ) {
+        String url = Optional.ofNullable(liquibaseProperties.getUrl()).orElseGet(() -> {
+            CassandraConnectionDetails.Node contactPoint = connectionDetails.getContactPoints().get(0);
+            return (
+                "jdbc:cassandra://" +
+                contactPoint.host() +
+                ":" +
+                contactPoint.port() +
+                "/" +
+                cassandraProperties.getKeyspaceName() +
+                "?localdatacenter=" +
+                connectionDetails.getLocalDatacenter()
+            );
+        });
+        String user = Optional.ofNullable(liquibaseProperties.getUser()).orElseGet(connectionDetails::getUsername);
+        String password = Optional.ofNullable(liquibaseProperties.getPassword()).orElseGet(connectionDetails::getPassword);
+
+        return new SimpleDriverDataSource(new CassandraDriver(), url, user, password);
+    }
+<%_ } else if (databaseTypeSql && reactive) { _%>
 
     private static DataSource createLiquibaseDataSource(LiquibaseProperties liquibaseProperties, R2dbcProperties dataSourceProperties) {
         String user = Optional.ofNullable(liquibaseProperties.getUser()).orElse(dataSourceProperties.getUsername());
