@@ -137,6 +137,14 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   `entity/blog.cy.ts` spec from `blog/` (baseUrl `http://localhost:8080/`) with a watchdog; Playwright WebKit
   with console capture shows the underlying `[NF]` errors. macOS has no `timeout`: use a background job + kill.
 
+- Native federation translations: the esbuild `translatePartialLoader` only loads the application's own
+  `loadLocale(lang)`. Remote dictionaries are merged after login by
+  `app/core/microfrontend/microfrontend-translation.service.ts` (`loadTranslation(remote, lang)` from the
+  remote's exposed `./i18n`, then `translateService.setTranslation(lang, translations, true)`); the navbar's
+  account effect calls `load(currentLang)` and waits for it before setting the remote navbar items, and the
+  service re-merges on `onLangChange` once enabled. Anonymous users therefore never fetch remote i18n chunks.
+  The webpack bundler still lists every remote in `provideTranslateHttpLoader` resources at startup.
+
 ### Horizontal scroll hunting in generated Angular apps
 
 - Electron/Cypress and macOS browsers use overlay scrollbars, so `documentElement.scrollWidth > clientWidth` is
