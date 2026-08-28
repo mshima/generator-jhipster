@@ -138,12 +138,20 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   with console capture shows the underlying `[NF]` errors. macOS has no `timeout`: use a background job + kill.
 
 - Native federation translations: the esbuild `translatePartialLoader` only loads the application's own
-  `loadLocale(lang)`. Remote dictionaries are merged after login by
-  `app/core/microfrontend/microfrontend-translation.service.ts` (`loadTranslation(remote, lang)` from the
-  remote's exposed `./i18n`, then `translateService.setTranslation(lang, translations, true)`); the navbar's
-  account effect calls `load(currentLang)` and waits for it before setting the remote navbar items, and the
-  service re-merges on `onLangChange` once enabled. Anonymous users therefore never fetch remote i18n chunks.
-  The webpack bundler still lists every remote in `provideTranslateHttpLoader` resources at startup.
+  `loadLocale(lang)`. For microfrontend apps `app/core/microfrontend/microfrontend-translation.loader.ts`
+  provides `MicrofrontendTranslationLoader` (a `TranslateLoader` that also merges each remote's exposed `./i18n`
+  when its `loadMicrofrontends` signal is on) and `provideMicrofrontendTranslation()`: it overrides
+  `TranslateLoader` and an app initializer `effect` flips the signal from `accountService.account()` and calls
+  `translateService.reloadLang(lang).subscribe()`, so remote dictionaries are fetched only after login (and again
+  on every language switch while logged in). The loader owns its own signal because `AccountService` injects
+  `TranslateService` (a loader injecting `AccountService` would be a DI cycle).
+- `provideMicrofrontendTranslation()` must be registered from `app.config.ts`, never from
+  `app/shared/language/translation.provider.ts`: `app/shared/language` is a federation _shared mapping_ built as its
+  own package, so anything it imports (the loader, `app/core/microfrontend`, the federation runtime) is bundled a
+  second time into `app_shared_language-*.js` with an uninitialised runtime copy — `loadRemoteModule` from there
+  never settles (no `[NF]` log at all). Symptom: `reloadLang` resets the dictionary and the menu shows raw keys.
+  Check with `grep -l loadMicrofrontends target/classes/static/*.js`: it must be in `bootstrap-*.js`/`main`, not
+  in an `app_shared_*` chunk. The webpack bundler still lists every remote in `provideTranslateHttpLoader`.
 
 ### Horizontal scroll hunting in generated Angular apps
 
