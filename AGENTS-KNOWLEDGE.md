@@ -102,6 +102,16 @@ includeSecondaries: false } })` helper so the entry point is inferred by node re
   since `authenticationUsesCsrf` covers `oauth2` and `session`); dropping that import broke every
   oauth2/session sample with `TS2304`.
 
+- Angular is esbuild-only since 9.2.1: `clientBundler` `webpack`/`experimentalEsbuild` is deleted from
+  `.yo-rc.json` by the `migrateToEsbuild` configuring task, `angular.json.ejs` is the former esbuild variant, the
+  `webpack/` templates, `source.addWebpackConfig` (Angular), `@angular-builders/custom-webpack`,
+  `@module-federation/enhanced`, `browser-sync` and `@ngx-translate/http-loader` are gone, and old `webpack/*`
+  files are removed through `control.cleanupFiles` `'9.2.1'`. Cypress' Angular webpack coverage path
+  (`cypressCoverageWebpack`, `webapp:instrumenter`) was removed with it; `angularSchematic` is now simply
+  `clientFrameworkAngular`. Server templates keep their `clientBundlerWebpack` branches for Vue only.
+  Renaming CI jobs (the `-webpack` suffixes) reshuffles the build matrix node/java indexes — that is by design
+  (`randomEnvironment`), refresh the `.blueprint/github-build-matrix` snapshot.
+
 ## Angular client — module federation
 
 - Webpack module federation (`webpack/webpack.microfrontend.js.ejs`) shares app-local barrels
