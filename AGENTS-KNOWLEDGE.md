@@ -180,6 +180,19 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `TranslateService` (a loader injecting `AccountService` would be a DI cycle). Do not gate features on
   `microfrontends.some(remote => !remote.self)`; provide an empty array/noop instead.
 
+- `ng e2e` cannot drive the native federation dev server: `@cypress/schematic` schedules the `devServerTarget` with
+  `watch: false` and waits for an output carrying `baseUrl`, but the native federation builder (`runBuilder` in
+  `@angular-architects/native-federation`) skips the initial dev-server output (`if (first || !watch) continue;`) and
+  only yields on rebuilds, so `ng e2e --configuration coverage|run` hangs until the job times out (the dev-server
+  workflow's `ng-default-module-federation` job ran 40 min). The `serve` target also needs `configurations`
+  (`development`/`production` overriding `target` to `serve-original:<config>`), otherwise Cypress' `coverage`
+  configuration fails with "Configuration 'development' for target 'serve' … is not set". For microfrontend Angular
+  apps the cypress generator therefore emits the generic script (`concurrently … npm:start "wait-on … && npm run
+  e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because the Angular dev server binds
+  `localhost` only (`[::1]` on macOS — `127.0.0.1` never answers; Vite uses `host: true`, so Vue/React keep
+  `127.0.0.1`). Local check: stub backend on 8080, `npm start`, `npx wait-on http-get://localhost:4200`, then a
+  one-test navbar Cypress spec with `-c baseUrl=http://localhost:4200`.
+
 ### Horizontal scroll hunting in generated Angular apps
 
 - Electron/Cypress and macOS browsers use overlay scrollbars, so `documentElement.scrollWidth > clientWidth` is
