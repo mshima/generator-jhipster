@@ -40,12 +40,22 @@ const repositoryFiles = [
 export const entityFiles = asWriteFilesSection({
   dbChangelog: [
     {
-      condition: ctx => !ctx.skipDbChangelog,
+      condition: ctx => !ctx.skipDbChangelog && ctx.databaseMigrationLiquibase,
       path: SERVER_MAIN_RES_DIR,
       templates: [
         {
           file: 'config/liquibase/changelog/added_entity.xml',
           renameTo: ctx => `config/liquibase/changelog/${ctx.changelogDate}_added_entity_${ctx.entityClass}.xml`,
+        },
+      ],
+    },
+    {
+      condition: ctx => !ctx.skipDbChangelog && ctx.databaseMigrationLoader,
+      path: SERVER_MAIN_RES_DIR,
+      templates: [
+        {
+          file: 'config/cql/changelog/added_entity.cql',
+          renameTo: ctx => `config/cql/changelog/${ctx.changelogDate}_added_entity_${ctx.entityClass}.cql`,
         },
       ],
     },
@@ -59,6 +69,7 @@ export const cleanupCassandraEntityFilesTask = asWritingEntitiesTask<SpringBootE
   entities,
   control,
 }) {
+  if (!application.databaseMigrationLiquibase) return;
   for (const entity of entities.filter(entity => !entity.skipServer && !entity.builtIn)) {
     await control.cleanupFiles({
       // The custom cql migration was replaced with liquibase

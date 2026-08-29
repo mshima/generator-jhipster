@@ -34,6 +34,23 @@ export const cassandraFiles = asWriteFilesSection<JavaApplication>({
       path: SERVER_MAIN_RES_DIR,
       templates: ['config/cql/create-keyspace-prod.cql', 'config/cql/create-keyspace.cql', 'config/cql/drop-keyspace.cql'],
     },
+    {
+      condition: generator => generator.databaseMigrationLoader,
+      path: SERVER_MAIN_RES_DIR,
+      templates: ['config/cql/changelog/README.md'],
+    },
+    {
+      condition: generator =>
+        generator.databaseMigrationLoader && !generator.applicationTypeMicroservice && generator.generateBuiltInUserEntity,
+      path: SERVER_MAIN_RES_DIR,
+      templates: [
+        { file: 'config/cql/changelog/create-tables.cql', renameTo: () => 'config/cql/changelog/00000000000000_create-tables.cql' },
+        {
+          file: 'config/cql/changelog/insert_default_users.cql',
+          renameTo: () => 'config/cql/changelog/00000000000001_insert_default_users.cql',
+        },
+      ],
+    },
   ],
   serverTestFw: [
     {

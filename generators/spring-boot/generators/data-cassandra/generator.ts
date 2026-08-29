@@ -38,6 +38,23 @@ export default class CassandraGenerator extends SpringBootApplicationGenerator {
     }
   }
 
+  get configuring() {
+    return this.asConfiguringTaskGroup({
+      configMigration({ control }) {
+        // Cassandra switched from the custom CQL loader to liquibase, keep the loader for existing applications.
+        // Cassandra ignored databaseMigration before, so any stored value other than an explicit liquibase
+        // opt-in means the application still relies on the CQL scripts.
+        if (control.isJhipsterVersionLessThan('9.2.1') && this.jhipsterConfig.databaseMigration !== 'liquibase') {
+          this.jhipsterConfig.databaseMigration = 'loader';
+        }
+      },
+    });
+  }
+
+  get [SpringBootApplicationGenerator.CONFIGURING]() {
+    return this.delegateTasksToBlueprint(() => this.configuring);
+  }
+
   get configuringEachEntity() {
     return this.asConfiguringEachEntityTaskGroup({
       checkEntities({ entityName, entityConfig }) {
@@ -61,7 +78,9 @@ export default class CassandraGenerator extends SpringBootApplicationGenerator {
   get composing() {
     return this.asComposingTaskGroup({
       async liquibase() {
-        await this.composeWithJHipster('jhipster:spring-boot:liquibase');
+        if (this.jhipsterConfigWithDefaults.databaseMigration === 'liquibase') {
+          await this.composeWithJHipster('jhipster:spring-boot:liquibase');
+        }
       },
     });
   }
@@ -78,10 +97,13 @@ export default class CassandraGenerator extends SpringBootApplicationGenerator {
             `${application.javaPackageTestDir}config/CassandraTestContainersSpringContextCustomizerFactory.java`,
             `${application.javaPackageTestDir}config/EmbeddedCassandra.java`,
             `${application.srcTestResources}META-INF/spring.factories`,
-            // The custom cql migration was replaced with liquibase
-            `${application.srcMainResources}config/cql/changelog/README.md`,
-            `${application.srcMainResources}config/cql/changelog/00000000000000_create-tables.cql`,
-            `${application.srcMainResources}config/cql/changelog/00000000000001_insert_default_users.cql`,
+            // The custom cql migration was replaced with liquibase, the files are kept by the loader migration
+            [
+              application.databaseMigrationLiquibase,
+              `${application.srcMainResources}config/cql/changelog/README.md`,
+              `${application.srcMainResources}config/cql/changelog/00000000000000_create-tables.cql`,
+              `${application.srcMainResources}config/cql/changelog/00000000000001_insert_default_users.cql`,
+            ],
           ],
         });
       },
@@ -107,7 +129,8 @@ export default class CassandraGenerator extends SpringBootApplicationGenerator {
 
   get postWritingEntities() {
     return this.asPostWritingEntitiesTaskGroup({
-      addLiquibaseChangelogs({ entities, source }) {
+      addLiquibaseChangelogs({ application, entities, source }) {
+        if (!application.databaseMigrationLiquibase) return;
         for (const entity of entities.filter(entity => !entity.skipServer && !entity.builtIn && !entity.skipDbChangelog)) {
           (source as LiquibaseSource).addLiquibaseChangelog?.({
             changelogName: `${entity.changelogDate}_added_entity_${entity.entityClass}`,
