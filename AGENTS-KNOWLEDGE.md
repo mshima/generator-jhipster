@@ -1,7 +1,34 @@
 # Implementation knowledge base for AI agents
 
 Deep-dive notes complementing [`AGENTS.md`](./AGENTS.md). Facts below were verified against the
-source tree; when in doubt, re-verify — file paths are the anchors.
+source tree when written; when in doubt, re-verify — file paths are the anchors. Sections:
+[conventions](#templates-and-generator-conventions), [built-in entities](#built-in-user-entities),
+[Angular](#angular-client), [Vue](#vue-client), [React](#react-client), [Spring Boot](#spring-boot-server),
+[user caches](#server-side-user-caches), [testing and samples](#testing-and-samples),
+[debugging CI](#debugging-ci-failures).
+
+## Templates and generator conventions
+
+- Refactoring rule: generated code must stay byte-identical unless a real output bug is being fixed.
+  Verify with a baseline: `git stash`, generate a sample into the scratchpad from a JDL, `git stash pop`,
+  generate again into a sibling directory and `diff -r -q` the trees (ignore `.yo-rc.json`, jwt secrets,
+  keystore, `application.yml`). Faker-sequence shifts caused by a genuinely new field are expected.
+- Removed or renamed generated files are declared with `control.cleanupFiles({ '<version>': [...] })` in a
+  cleanup task inside the generator's own `generator.ts`, not in the legacy `cleanup.ts` files.
+- Types and derived properties added to the Angular generator carry an `angular`/`Angular` prefix
+  (`AngularFieldClientConstant`, `angularFieldNameSingular`, …); genuinely generic properties belong to
+  base-application/client instead.
+- `ejs-templates/indent` (repo eslint, run by `check-npm-test`) checks standalone `<%_ … _%>` tags by brace depth
+  only: `depth × 2` spaces from column 0, independent of the surrounding XML/Java indentation. Output lines keep
+  their own indentation, so re-indenting the tags never changes the generated file.
+- Translation macros (`__jhiTranslateTag__`, `__jhiTranslateTagEnum__`, `__jhiTranslatePipe__`, …) are replaced by
+  `generators/angular/support/translate-angular.ts`. Pitfall: when a key has no translation,
+  `getWebappTranslation(key)` falls back to a plain string, and the `TagEnum`/`PipeEnum` replacements emit
+  `JSON.stringify(translation)[value]` as inline fallback — indexing a string with a string key, which fails Angular
+  strict builds with `TS7015`. Only use the enum macros for keys that actually have generated translations.
+- Grep every quoting/EJS form before declaring something unused: `@content` looked unused in the Vue templates
+  because `global.scss.ejs` and `jhi-navbar.vue.ejs` emit `url("<%- clientBundlerRsbuild ? '@' : '/' %>content/…")`,
+  while `rsbuild.config.ts` still needs the alias (Vite uses absolute `/content/…` URLs).
 
 ## Built-in user entities
 
@@ -14,93 +41,46 @@ source tree; when in doubt, re-verify — file paths are the anchors.
 - `application.generateBuiltInAuthorityEntity` is `generateBuiltInUserEntity && databaseType !== 'cassandra'`
   (`generators/base-application/application.ts`). Without it, UserManagement gets **no** `Authority`
   relationship — but the server DTO still exposes `authorities` as `Set<String>`, so clients must
-  keep an `authorities?: string[]` property (special-cased in the Angular model template).
+  keep an `authorities?: string[]` property (Angular gets it as a built-in field, see below).
 - With translation enabled, `langKey` becomes a **synthetic** enum field (`fieldType: 'Languages'`,
-  `fieldValues` from `application.languages`, `skipServer: true`). It exists to type the field and
-  drive the update-form select. There are **no i18n entries** for a `Languages` enum — templates
-  must not run it through the enum-translation macros (render it as plain text; the Angular model
-  types it as `(typeof LANGUAGES)[number]` from `app/config/language.constants`).
+  `fieldValues` from `application.languages`, `clientConstantsAsValues: true`, `defaultValue` = native language,
+  `skipServer: true`). It exists to type the field and drive the update-form select. There are **no i18n entries**
+  for a `Languages` enum — templates must not run it through the enum-translation macros (render it as plain
+  text; the Angular model types it as `(typeof LANGUAGES)[number]` from `app/config/language.constants`).
+- Field modifiers used by the built-in entities: `collection: true` (array-valued field),
+  `clientConstantsAsValues: true` (select options come from a client constant instead of an enum), and the
+  relationship modifier `relationshipSerializePrimaryKeyOnly: true` (UserManagement → Authority is serialized as
+  the other entity's primary keys, typed `string[]` on the Angular side).
+- React and Vue set `skipClient: true` on the built-in user entities; their user-management lives in plain
+  templates (`…/app/modules/administration/user-management/` for React).
 
 ## Angular client
 
+### User management and constants
+
+- User-management pages are generated from the **shared entity templates**
+  (`generators/angular/templates/src/main/webapp/app/entities/_entityFolder_/…`) with the entity flag
+  `builtInUserManagement`; remaining hand-written pages live under `…/app/entities/admin/user-management/`. Grep
+  for `builtInUserManagement` in templates to find the existing special cases (langKey typing/rendering,
+  Authority relationship inclusion) before adding behavior.
 - Without an Authority entity (Cassandra/no database) the Angular `UserManagement` gets a built-in
   `authorities` **field** (`fieldType: 'Authority'`, `fieldValues: 'ROLE_ADMIN,ROLE_USER'`, `collection: true`,
   `clientConstantsAsValues: true`, `skipServer: true`) appended in `createUserManagementEntity`; `langKey` is
-  also `clientConstantsAsValues`. Such fields are enum-like but produce **no** enum model file and **no** i18n
-  enum entries (`addEnumerationFiles`, `generateEntityClientEnumImports` and the client i18n generator skip
-  them). `collection` fields are typed `X[]`, default to `[]` in the form service, render as a `multiple`
-  select (update) and as badges (list/detail), are not sortable (`fieldSupportsSortBy`), and get array
-  samples (`authorities: ['ROLE_USER']`, Cypress `select(['ROLE_USER'])`).
+  handled the same way through `Languages`.
 - The Angular generator maps constant-backed field types to their client constants in
   `angularClientConstants` (`generators/angular/generator.ts`): `Languages` → `LANGUAGES` from `app/config`
-  (`tsType` `(typeof LANGUAGES)[number]`), `Authority` → `Authority` from `app/shared/jhipster/constants`
-  (`tsType` `string`, values `Object.values(Authority)`). The result is exposed as
-  `field.angularFieldClientConstant`; `field.angularFieldNameSingular` names loop items (`authority`).
-  New Angular-only types/properties must carry an `Angular`/`angular` prefix.
-- Refactoring rule: generated code must stay byte-identical unless a real output bug is being fixed.
-  Verify with a baseline: `git stash`, generate a sample into the scratchpad from a JDL, `git stash pop`,
-  generate again into a sibling directory and `diff -r -q` the trees (ignore `.yo-rc.json`, jwt secrets,
-  keystore, `application.yml`). Faker-sequence shifts caused by a genuinely new field are expected.
+  (label pipe `findLanguageFromKey`), `Authority` → `Authority` from `app/shared/jhipster/constants` (ts type
+  `string`). `prepareField` sets `field.angularFieldClientConstant` (`angularConstantName`,
+  `angularConstantImportPath`, `angularConstantTsType`, `angularConstantValues`, `angularConstantLabelPipe`) and
+  `angularFieldNameSingular`; the shared templates render `<option [value]="x">{{ x | pipe }}` selects,
+  multi-selects and badge lists from it.
+- The form service never disables a non-auto-generated id (`login` stays editable); only `resetForm` marks the
+  primary key.
+- `login.service.ts.ejs` needs `AuthServerProvider` for oauth2 too (from `auth-session.service`, since
+  `authenticationUsesCsrf` covers `oauth2` and `session`); dropping that import broke every oauth2/session sample
+  with `TS2304`.
 
-- User-management pages are generated from the **shared entity templates**
-  (`generators/angular/templates/src/main/webapp/app/entities/_entityFolder_/…`) with the entity
-  flag `builtInUserManagement`; remaining hand-written pages live under
-  `…/app/entities/admin/user-management/`. Grep for `builtInUserManagement` in templates to find the
-  existing special cases (langKey typing/rendering, Authority relationship inclusion) before adding
-  behavior.
-- Translation macros (`__jhiTranslateTag__`, `__jhiTranslateTagEnum__`, `__jhiTranslatePipe__`, …)
-  are replaced by `generators/angular/support/translate-angular.ts`. Pitfall: when a key has no
-  translation, `getWebappTranslation(key)` falls back to a plain string, and the `TagEnum`/`PipeEnum`
-  replacements emit `JSON.stringify(translation)[value]` as inline fallback — indexing a string with
-  a string key, which fails Angular strict builds with `TS7015`. Only use the enum macros for keys
-  that actually have generated translations.
-- Microfrontends use esbuild + `@angular-architects/native-federation` (`clientBundler: esbuild`,
-  webpack module federation only remains for `clientBundler: webpack`). Pieces:
-  `federation.config.mjs` (shares npm deps via `shareAll`, Angular locales via
-  `shareAngularLocales`, app singletons via `sharedMappings`), `tsconfig.federation.json` (exposed
-  entries), and `build-plugins` as a local builder package (`./build-plugins:native-federation`)
-  wrapping `runBuilder` to inject the esbuild plugins — native federation runs Angular's
-  application builder itself, so `@angular-builders/custom-esbuild` plugins would be bypassed.
-  `es-module-shims` must be in the `polyfills` list and in `dependencies`; the gateway needs
-  `entryPoints` set because it exposes nothing (NF's fallback is `src/main.ts`).
-- `build-plugins/` is all TypeScript, including the local Architect builder
-  (`native-federation.ts`, referenced from `builders.json`): Architect `import()`s it and Node's
-  native type stripping (required Node ≥ 22.18) handles the `.ts`. The package is
-  `"type": "module"`, so the esbuild plugins must be ESM-clean — `import.meta.dirname` instead of
-  `__dirname`, `createRequire(import.meta.url)` instead of a bare `require` — otherwise the builder
-  path fails with "__dirname is not defined in ES module scope" while `@angular-builders/custom-esbuild`
-  (non-microfrontend apps, own loader) keeps working and hides the problem.
-- `federation.config.ts` is TypeScript without any loader: native federation `import()`s the
-  config path itself (`federationConfigPath` builder option) and generated apps require the Node
-  version in `generators/init/resources/.node-version` (≥ 22.18), which strips type annotations
-  natively. Keep the file to erasable syntax only (annotations, `import type`; no enums, namespaces
-  or parameter properties). Do not reach for `jiti/register`: its process-wide hooks also rewrite
-  `.json` imports and the Angular CLI fails with "@babel/compat-data/data/native-modules.json … is
-  not valid JSON".
-- Native federation only shares **barrel** specifiers (no dot in the last segment) listed in
-  tsconfig `paths`; deep imports under a mapped directory are externalized but never published
-  ("Unable to resolve specifier ..."). Hence `app/config`, `app/core/auth`, `app/core/util`,
-  `app/core/request`, `app/shared/alert`, `app/shared/auth`, `app/shared/date`,
-  `app/shared/language`, `app/shared/pagination`, `app/shared/sort` are barrels with explicit
-  `paths` entries and all templates import them as barrels. Shared mapping bundles are compiled
-  standalone: type augmentations (dayjs plugins) and `define`s (`SERVER_API_URL`, `__VERSION__`)
-  must come from the module itself / the esbuild plugins, not from `angular.json` `define`.
-- The `@angular/build:unit-test` builder uses the build target options only (no custom plugins):
-  `vitest-base.config.ts` resolves the virtual `i18n/<lang>.json` modules, and `SERVER_API_URL`
-  must also stay in the `angular.json` `define` for the tests.
-- Runtime repro without Docker: build gateway + microservices (Gradle output is
-  `build/generated/webapp`), serve them with a stub backend mapping `/services/<ms>/*` to the
-  microservice static dir, and run a Cypress spec on the gateway (navbar entity items from the
-  remote, `/blog/blog`, headings translated).
-- Native federation's `shareAngularLocales()` hardcodes a cwd-relative
-  `node_modules/@angular/common/locales/<locale>.js` entry point, which breaks in npm workspaces
-  (hoisted `node_modules`, used by the `ms-*`/`mf-*` CI samples): "Could not resolve
-  node_modules/@angular/common/locales/en.js". `federation.config.mjs.ejs` therefore shares the
-  locales with a plain `share({ '@angular/common/locales/<locale>': { requiredVersion: 'auto',
-includeSecondaries: false } })` helper so the entry point is inferred by node resolution.
-- `login.service.ts.ejs` needs `AuthServerProvider` for oauth2 too (from `auth-session.service`,
-  since `authenticationUsesCsrf` covers `oauth2` and `session`); dropping that import broke every
-  oauth2/session sample with `TS2304`.
+### Build: esbuild only, native federation
 
 - Angular is esbuild-only since 9.2.1: `clientBundler` `webpack`/`experimentalEsbuild` is deleted from
   `.yo-rc.json` by the `migrateToEsbuild` configuring task, `angular.json.ejs` is the former esbuild variant, the
@@ -108,71 +88,89 @@ includeSecondaries: false } })` helper so the entry point is inferred by node re
   `@module-federation/enhanced`, `browser-sync` and `@ngx-translate/http-loader` are gone, and old `webpack/*`
   files are removed through `control.cleanupFiles` `'9.2.1'`. Cypress' Angular webpack coverage path
   (`cypressCoverageWebpack`, `webapp:instrumenter`) was removed with it; `angularSchematic` is now simply
-  `clientFrameworkAngular`. Server templates keep their `clientBundlerWebpack` branches for Vue only.
-  Renaming CI jobs (the `-webpack` suffixes) reshuffles the build matrix node/java indexes — that is by design
+  `clientFrameworkAngular`. Server templates keep their `clientBundlerWebpack` branches for Vue only. Renaming CI
+  jobs (the `-webpack` suffixes) reshuffles the build matrix node/java indexes — that is by design
   (`randomEnvironment`), refresh the `.blueprint/github-build-matrix` snapshot.
+- Microfrontends use `@angular-architects/native-federation`. Pieces: `federation.config.ts` (shares npm deps via
+  `shareAll`, dayjs entry points via `shareDayjs`, Angular locales via `shareAngularLocales`, app singletons via
+  `sharedMappings`), `tsconfig.federation.json` (exposed entries), and `build-plugins` as a local builder package
+  (`./build-plugins:native-federation`) wrapping `runBuilder` to inject the esbuild plugins — native federation
+  runs Angular's application builder itself, so `@angular-builders/custom-esbuild` plugins would be bypassed.
+  `es-module-shims` must be in the `polyfills` list and in `dependencies`; the gateway needs `entryPoints` set
+  because it exposes nothing (NF's fallback is `src/main.ts`).
+- `build-plugins/` is all TypeScript, including the local Architect builder (`native-federation.ts`, referenced
+  from `builders.json`): Architect `import()`s it and Node's native type stripping (required Node ≥ 22.18) handles
+  the `.ts`. The package is `"type": "module"`, so the esbuild plugins must be ESM-clean — `import.meta.dirname`
+  instead of `__dirname`, `createRequire(import.meta.url)` instead of a bare `require` — otherwise the builder path
+  fails with "\_\_dirname is not defined in ES module scope" while `@angular-builders/custom-esbuild`
+  (non-microfrontend apps, own loader) keeps working and hides the problem.
+- `federation.config.ts` is TypeScript without any loader: native federation `import()`s the config path itself
+  (`federationConfigPath` builder option) and generated apps require the Node version in
+  `generators/init/resources/.node-version` (≥ 22.18), which strips type annotations natively. Keep the file to
+  erasable syntax only (annotations, `import type`; no enums, namespaces or parameter properties). Do not reach for
+  `jiti/register`: its process-wide hooks also rewrite `.json` imports and the Angular CLI fails with
+  "@babel/compat-data/data/native-modules.json … is not valid JSON".
+- The `@angular/build:unit-test` builder uses the build target options only (no custom plugins):
+  `vitest-base.config.ts` resolves the virtual `i18n/<lang>.json` modules, and `SERVER_API_URL` must also stay in
+  the `angular.json` `define` for the tests.
 
-## Angular client — module federation
+### Native federation sharing rules
 
-- Webpack module federation (`webpack/webpack.microfrontend.js.ejs`) shares app-local barrels
-  (`app/config`, `app/core/auth`, `app/core/util`, `app/shared/*`, …) with `shareMappings`. A share
-  key only matches an import of exactly that specifier, so it only takes effect for directories
-  with an `index.ts` barrel. A module that is part of a shared barrel's import graph must never
-  import that barrel itself: the provider's `get()` then waits for the "consume" chunk of its own
-  key and the app hangs at bootstrap with a blank page and no console error (every Cypress spec of
-  a `microfrontend: true` webpack sample fails on `[data-cy="navbar"]`). Example: for oauth2,
-  `core/auth/user-route-access.service.ts` used `LoginService` (`app/login/login.service.ts`), which
-  imports `app/core/auth` — fixed by redirecting to `oauth2/authorization/oidc` directly in the
-  guard. Do **not** fix such cycles by importing concrete files (`app/core/auth/account.service`):
-  native federation only publishes the barrel specifier and fails at runtime with
-  "Unable to resolve specifier 'app/core/auth/account.service'". Both bundlers must be checked.
-- Repro/bisect recipe: generate the sample client-only (`skipServer: true`), `npm run
-webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that answers
-  `/api/account` with 401 and `/management/info`, and run a one-test Cypress spec that visits `/`
-  and checks the navbar; bisect by trimming the `shareMappings(...)` list. The built `main.*.js`
-  shows the cycle: the provider entry for the key lists
-  `default-webpack_sharing_consume_default_<key>` among its chunk dependencies.
+- Native federation only shares **barrel** specifiers (no dot in the last segment) listed in tsconfig `paths`;
+  deep imports under a mapped directory are externalized but never published ("Unable to resolve specifier ...").
+  Hence `app/config`, `app/core/auth`, `app/core/util`, `app/core/request`, `app/shared/alert`, `app/shared/auth`,
+  `app/shared/date`, `app/shared/language`, `app/shared/pagination`, `app/shared/sort` are barrels with explicit
+  `paths` entries and all templates import them as barrels. Shared mapping bundles are compiled standalone: type
+  augmentations (dayjs plugins) and `define`s (`SERVER_API_URL`, `__VERSION__`) must come from the module itself /
+  the esbuild plugins, not from `angular.json` `define`.
+- A module that is part of a shared barrel's import graph must never import that barrel itself (lesson from the
+  former webpack module federation, still valid): the app hangs at bootstrap with a blank page and no console
+  error (every Cypress spec of a `microfrontend: true` sample fails on `[data-cy="navbar"]`). Example: for oauth2,
+  `core/auth/user-route-access.service.ts` used `LoginService` (`app/login/login.service.ts`), which imports
+  `app/core/auth` — fixed by redirecting to `oauth2/authorization/oidc` directly in the guard. Do **not** fix such
+  cycles by importing concrete files (`app/core/auth/account.service`): only the barrel specifier is published.
+  Bisect by trimming the shared mappings list and rebuilding.
+- Shared mappings are built as separate packages, so anything a mapping imports is bundled a second time into
+  `app_shared_*-*.js`. Consequences:
+  - `provideMicrofrontendTranslation()` must be registered from `app.config.ts`, never from
+    `app/shared/language/translation.provider.ts`: from the mapping, the loader, `app/core/microfrontend` and the
+    federation runtime get an uninitialised runtime copy and `loadRemoteModule` never settles (no `[NF]` log at
+    all). Symptom: `reloadLang` resets the dictionary and the menu shows raw keys. Check with
+    `grep -l loadMicrofrontends target/classes/static/*.js`: it must be in `bootstrap-*.js`/`main`, not in an
+    `app_shared_*` chunk.
+  - `shareAll` shares only the package names of `package.json`, and the unused-dependency scan records the
+    _imported specifier_ — `import dayjs from 'dayjs/esm'` never matches the `dayjs` key, so every mapping bundle
+    (`app/shared/date`, `app/shared/language`, …) got a private dayjs copy without the plugins/locales registered
+    by `app/config/dayjs` (`TypeError: a.duration is not a function` in `app_shared_date-*.js`).
+    `federation.config.ts.ejs` therefore shares `dayjs/esm`, its plugins and `dayjs/esm/locale/<dayjsLocale>`
+    explicitly (`shareDayjs`). Check with `grep -l '$isDayjsObject' build/generated/webapp/*.js` after
+    `npm run webapp:prod` — it must list a single file. The mapping bundles only appear when the app has entities
+    (the unused-deps scan starts from the exposed entity routes), so an entity-less sample does not reproduce it.
+- Native federation's `shareAngularLocales()` hardcodes a cwd-relative
+  `node_modules/@angular/common/locales/<locale>.js` entry point, which breaks in npm workspaces (hoisted
+  `node_modules`, used by the `ms-*`/`mf-*` CI samples): "Could not resolve
+  node_modules/@angular/common/locales/en.js". `federation.config.ts.ejs` therefore shares the locales with a plain
+  `share({ '@angular/common/locales/<locale>': { requiredVersion: 'auto', includeSecondaries: false } })` helper so
+  the entry point is inferred by node resolution.
 
-- Native federation (`@angular-architects/native-federation`, esbuild bundler): when an application exposes
-  itself (`exposeMicrofrontend`, the gateway is its own `self` microfrontend and routes/navbar go through
-  `loadEntityRoutes('<name>')`/`loadNavbarItems('<name>')`), `initFederation(remotes, { hostRemoteEntry })`
-  must set `hostRemoteEntry.name` to the module federation name. Without it the orchestrator registers the host
-  as `__NF-HOST__` and `loadRemoteModule('gateway', …)` throws `NFError: Remote 'gateway' is not initialized`;
-  the router then retries the lazy route endlessly, the tab freezes, Cypress prints nothing and the CI
-  "E2E: Run" step times out after 15 minutes (locally the Electron renderer crashes after ~4 min).
-- Repro without Docker: download the `app-<sample>` CI artifact (it contains the generated apps), `npm install`
-  at the workspace root, `npm run webapp:build:prod` in `gateway` and `blog`, serve `gateway/target/classes/static`
-  at `/` and `blog/target/classes/static` under `/services/blog/*` with a tiny Node stub answering
-  `/api/authenticate`, `/api/account`, `/management/info`, `/services/blog/api/*`, then run the blog
-  `entity/blog.cy.ts` spec from `blog/` (baseUrl `http://localhost:8080/`) with a watchdog; Playwright WebKit
-  with console capture shows the underlying `[NF]` errors. macOS has no `timeout`: use a background job + kill.
+### Native federation runtime
 
-- Native federation translations: the esbuild `translatePartialLoader` only loads the application's own
-  `loadLocale(lang)`. For microfrontend apps `app/core/microfrontend/microfrontend-translation.loader.ts`
-  provides `MicrofrontendTranslationLoader` (a `TranslateLoader` that also merges each remote's exposed `./i18n`
-  when its `loadMicrofrontends` signal is on) and `provideMicrofrontendTranslation()`: it overrides
-  `TranslateLoader` and an app initializer `effect` flips the signal from `accountService.account()` and calls
+- When an application exposes itself (`exposeMicrofrontend`, the gateway is its own `self` microfrontend and
+  routes/navbar go through `loadEntityRoutes('<name>')`/`loadNavbarItems('<name>')`),
+  `initFederation(remotes, { hostRemoteEntry })` must set `hostRemoteEntry.name` to the module federation name.
+  Without it the orchestrator registers the host as `__NF-HOST__` and `loadRemoteModule('gateway', …)` throws
+  `NFError: Remote 'gateway' is not initialized`; the router then retries the lazy route endlessly, the tab
+  freezes, Cypress prints nothing and the CI "E2E: Run" step times out after 15 minutes (locally the Electron
+  renderer crashes after ~4 min).
+- Translations: the esbuild `translatePartialLoader` only loads the application's own `loadLocale(lang)`. For
+  microfrontend apps `app/core/microfrontend/microfrontend-translation.loader.ts` provides
+  `MicrofrontendTranslationLoader` (a `TranslateLoader` that also merges each remote's exposed `./i18n` when its
+  `loadMicrofrontends` signal is on) and `provideMicrofrontendTranslation()`: it overrides `TranslateLoader` and an
+  app initializer `effect` flips the signal from `accountService.account()` and calls
   `translateService.reloadLang(lang).subscribe()`, so remote dictionaries are fetched only after login (and again
   on every language switch while logged in). The loader owns its own signal because `AccountService` injects
-  `TranslateService` (a loader injecting `AccountService` would be a DI cycle).
-- `provideMicrofrontendTranslation()` must be registered from `app.config.ts`, never from
-  `app/shared/language/translation.provider.ts`: `app/shared/language` is a federation _shared mapping_ built as its
-  own package, so anything it imports (the loader, `app/core/microfrontend`, the federation runtime) is bundled a
-  second time into `app_shared_language-*.js` with an uninitialised runtime copy — `loadRemoteModule` from there
-  never settles (no `[NF]` log at all). Symptom: `reloadLang` resets the dictionary and the menu shows raw keys.
-  Check with `grep -l loadMicrofrontends target/classes/static/*.js`: it must be in `bootstrap-*.js`/`main`, not
-  in an `app_shared_*` chunk. The webpack bundler still lists every remote in `provideTranslateHttpLoader`.
-
-- Native federation shares only the package names listed in `shared` (from `shareAll` over `package.json`), and
-  the unused-dependency scan records the _imported specifier_ — so `import dayjs from 'dayjs/esm'` never matches the
-  `dayjs` key. Every shared mapping (`app/shared/date`, `app/shared/language`, … are built as separate bundles when the
-  entity pages use them) then gets its own private dayjs copy without the plugins/locales registered by
-  `app/config/dayjs`, which surfaces in Cypress as `TypeError: a.duration is not a function` in `app_shared_date-*.js`.
-  `federation.config.ts.ejs` therefore shares `dayjs/esm`, its plugins and `dayjs/esm/locale/<dayjsLocale>` explicitly
-  (`shareDayjs`), the same way Angular locales are shared. Check for this class of bug with
-  `grep -l '$isDayjsObject' build/generated/webapp/*.js` (must list a single file) after `npm run webapp:prod`; note the
-  mapping bundles only appear when the app has entities (the scan starts from the exposed entity routes), so an
-  entity-less sample does not reproduce it.
+  `TranslateService` (a loader injecting `AccountService` would be a DI cycle). Do not gate features on
+  `microfrontends.some(remote => !remote.self)`; provide an empty array/noop instead.
 
 ### Horizontal scroll hunting in generated Angular apps
 
@@ -197,202 +195,171 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
 
 ## Vue client
 
-- `@content` is used only by the rsbuild bundler variant: `global.scss.ejs` and `jhi-navbar.vue.ejs` emit
-  `url("<%- clientBundlerRsbuild ? '@' : '/' %>content/images/…")`, so a grep for `'@content/` finds nothing
-  while `rsbuild.config.ts` still needs the `@content` alias (Vite uses absolute `/content/…` URLs). Grep for
-  every quoting/EJS form before declaring an alias unused.
+- `@content` is used only by the rsbuild bundler variant (see the conventions section): `rsbuild.config.ts` needs
+  the alias, Vite uses absolute `/content/…` URLs.
 - With `resolve.tsconfigPaths: true` in `vite.config.ts`, tsconfig `paths` only reach Vite's own resolver. The
   `@module-federation/vite` plugin resolves `shared` keys itself, so application modules shared by key
   (`@/shared/jhipster/constants`, …) fail with "Rolldown failed to resolve import … from virtual:mf:…loadShare…"
   unless `shareMappings` adds `import: './src/main/webapp/app/…'` (as the React template does). Reproduce with a
   monolith `microfrontend: true, exposeMicrofrontend: true, clientBundler: vite` and `npm run webapp:build:prod`.
+- Vite dev-server e2e flakiness (`devserver.yml`): see [Debugging CI failures](#debugging-ci-failures).
 
 ## React client
 
-- User-management lives in `…/app/modules/administration/user-management/` (plain templates), not in
-  the entity templates. React and Vue set `skipClient: true` on the built-in user entities.
-- Update pages must navigate back via a `useEffect` on `updateSuccess` (redux state), never directly
-  after dispatching the save: navigating while the PUT is in flight lets follow-up requests (e.g.
-  cypress `afterEach` cleanup) race the save on the server.
+- Update pages must navigate back via a `useEffect` on `updateSuccess` (redux state), never directly after
+  dispatching the save: navigating while the PUT is in flight lets follow-up requests (e.g. cypress `afterEach`
+  cleanup) race the save on the server.
 - Since 9.2.1 React is Vite-only (`generators/react/templates/vite.config.ts.ejs`, needle
-  `jhipster-needle-add-vite-config`); `clientBundler: webpack` is dropped from `.yo-rc.json` and
-  `devServerPort` is reset to `9000 + applicationIndex` in the react `configuring` phase. Old
-  `webpack/*` files are removed by `generators/react/cleanup.ts`. Microfrontends use
-  `@module-federation/vite` with `module-federation.config.ts`; the gateway registers remotes via
-  `registerRemotes` in `index.tsx` and loads them with `loadRemote`. Translations are bundled by
-  `client/generators/i18n/.../index_vite.js` (needs `deepmerge`) for both monoliths and
-  microfrontends. To verify: generate a monolith plus a gateway/microservice pair from a JDL,
-  `npm install`, then `npm run webapp:build:dev` and `npm test` in each app.
-- `@module-federation/vite` only proxies a shared module to the host when it can resolve it: for
-  app-local modules (`app/config/store`, …) the `shared` entry needs `import: './src/main/webapp/<key>'`
-  (see `shareMappings` in `module-federation.config.ts.ejs`); without it the remote silently uses its
-  own copy. Even so, remotes must get host state from React context (`useStore()` from the shared
-  `react-redux`, see `entities/routes.tsx.ejs`), never from module singletons like `getStore()`.
-  Symptom when this breaks: the remote injects its reducers into its own store and selectors throw
-  `Cannot read properties of undefined` for the microservice key.
-- Microfrontend translations: each remote registers its own `i18n/<locale>/<locale>.js` into the
-  shared `TranslatorContext` from a top-level `await registerTranslations()` in its exposed
-  `entities/menu.tsx` and `entities/routes.tsx` (`app/shared/reducers/locale.ts.ejs`). The loader
-  must memoize the pending _promise_ per locale, not a "done" flag: the menu and routes modules load
-  concurrently, and a flag lets the second caller resolve before the i18n chunk arrives, so the
-  page renders `translation-not-found[...]` and never re-renders (react-jhipster's `Translate` is
-  a class component that only re-renders with its parent). This only shows up with CI-like latency;
-  reproduce it by delaying the remote's `assets/en-*.js` response a few seconds in the stub server.
-- Runtime repro without Docker: build gateway + microservices (Gradle output is
-  `build/generated/webapp`), serve them with a stub backend mapping `/services/<ms>/*` to the
-  microservice static dir, and run a Cypress spec on the gateway (navbar entity items from the
-  remote, `/blog/blog`, headings translated).
-- The development ribbon (`shared/layout/header/header.scss.ejs`) must stay below react-toastify's
-  container (`--toastify-z-index: 9999`): with a higher z-index the translucent ribbon paints over
-  the top-left toasts and hides the second line of the message (e.g. the entity id of
-  "A Blog is updated with identifier …"). react-toastify 11 renders the message as a bare text node
-  inside the flex toast (no `.Toastify__toast-body`), so two-line wrapping at 320px is normal.
-- Stub-server details that matter for entity Cypress specs: infinite-scroll lists need a `Link`
-  header (`<…>; rel="last",<…>; rel="first"`) or the reducer throws reading `length`; success toasts
-  come from `x-<app>app-alert` (translation key) + `x-<app>app-params` (id) response headers.
+  `jhipster-needle-add-vite-config`); `clientBundler: webpack` is dropped from `.yo-rc.json` and `devServerPort` is
+  reset to `9000 + applicationIndex` in the react `configuring` phase. Old `webpack/*` files are removed by
+  `generators/react/cleanup.ts`. Microfrontends use `@module-federation/vite` with `module-federation.config.ts`;
+  the gateway registers remotes via `registerRemotes` in `index.tsx` and loads them with `loadRemote`.
+  Translations are bundled by `client/generators/i18n/.../index_vite.js` (needs `deepmerge`) for both monoliths and
+  microfrontends. To verify: generate a monolith plus a gateway/microservice pair from a JDL, `npm install`, then
+  `npm run webapp:build:dev` and `npm test` in each app.
+- `@module-federation/vite` only proxies a shared module to the host when it can resolve it: for app-local modules
+  (`app/config/store`, …) the `shared` entry needs `import: './src/main/webapp/<key>'` (see `shareMappings` in
+  `module-federation.config.ts.ejs`); without it the remote silently uses its own copy. Even so, remotes must get
+  host state from React context (`useStore()` from the shared `react-redux`, see `entities/routes.tsx.ejs`), never
+  from module singletons like `getStore()`. Symptom when this breaks: the remote injects its reducers into its own
+  store and selectors throw `Cannot read properties of undefined` for the microservice key.
+- Microfrontend translations: each remote registers its own `i18n/<locale>/<locale>.js` into the shared
+  `TranslatorContext` from a top-level `await registerTranslations()` in its exposed `entities/menu.tsx` and
+  `entities/routes.tsx` (`app/shared/reducers/locale.ts.ejs`). The loader must memoize the pending _promise_ per
+  locale, not a "done" flag: the menu and routes modules load concurrently, and a flag lets the second caller
+  resolve before the i18n chunk arrives, so the page renders `translation-not-found[...]` and never re-renders
+  (react-jhipster's `Translate` is a class component that only re-renders with its parent). This only shows up
+  with CI-like latency; reproduce it by delaying the remote's `assets/en-*.js` response a few seconds in the stub
+  server.
+- The development ribbon (`shared/layout/header/header.scss.ejs`) must stay below react-toastify's container
+  (`--toastify-z-index: 9999`): with a higher z-index the translucent ribbon paints over the top-left toasts and
+  hides the second line of the message (e.g. the entity id of "A Blog is updated with identifier …").
+  react-toastify 11 renders the message as a bare text node inside the flex toast (no `.Toastify__toast-body`), so
+  two-line wrapping at 320px is normal.
 
 ## Spring Boot server
 
-- `LoggingAspect.java.ejs` is shared by imperative and reactive apps. For reactive apps the around
-  advice logs `Mono`/`Flux` on termination (`doOnSuccess`/`doOnComplete`/`doOnError`) and also
-  handles synchronous throws itself: an `@AfterThrowing` advice needs
-  `ExposeInvocationInterceptor.currentInvocation()`, which is not set when the reactive
-  `@Transactional` interceptor invokes the target lazily at subscribe time, so it fails with
-  "No MethodInvocation found" and turns a `BadRequestAlertException` into a 500 (visible in
-  `*ResourceIT` create/update-with-invalid-id tests). Validate aspect changes by generating a reactive
-  app, removing `@Profile(dev)` from `LoggingAspectConfiguration` and raising the package log level
-  to DEBUG in `src/test/resources/config/application.yml`, then running one `*ResourceIT`.
+- `LoggingAspect.java.ejs` is shared by imperative and reactive apps. For reactive apps the around advice logs
+  `Mono`/`Flux` on termination (`doOnSuccess`/`doOnComplete`/`doOnError`) and also handles synchronous throws
+  itself: an `@AfterThrowing` advice needs `ExposeInvocationInterceptor.currentInvocation()`, which is not set when
+  the reactive `@Transactional` interceptor invokes the target lazily at subscribe time, so it fails with
+  "No MethodInvocation found" and turns a `BadRequestAlertException` into a 500 (visible in `*ResourceIT`
+  create/update-with-invalid-id tests). Validate aspect changes by generating a reactive app, removing
+  `@Profile(dev)` from `LoggingAspectConfiguration` and raising the package log level to DEBUG in
+  `src/test/resources/config/application.yml`, then running one `*ResourceIT`.
+- Reactive applications cannot enable a cache provider — the cache generator throws
+  (`generators/spring-boot/generators/cache/generator.ts`).
 
-- Cassandra schema is managed by Liquibase since 9.2.1 (`databaseMigration` defaults to `liquibase` for
-  Cassandra): `data-cassandra` composes `jhipster:spring-boot:liquibase`; the initial schema
-  (`liquibase/templates/.../initial_schema_cassandra.xml.ejs`) and the per-entity changelogs
-  (`data-cassandra/templates/.../config/liquibase/changelog/added_entity.xml.ejs`, registered through
-  `source.addLiquibaseChangelog`) wrap the former CQL in `<sql splitStatements="true" endDelimiter=";">` changeSets
-  — Liquibase's `liquibase-cassandra` extension only swaps the runner, the physical model (`user`, `user_by_*`
-  lookup tables, `authorities set<text>`, entity tables with CQL types) is unchanged. `LiquibaseConfiguration`
-  builds a `SimpleDriverDataSource` on `com.ing.data.cassandra.jdbc.CassandraDriver` (transitive from
-  `liquibase-cassandra`) from `CassandraConnectionDetails` + `spring.cassandra.keyspace-name`, so Testcontainers'
-  `@ServiceConnection` works without a `spring.liquibase.url`. Liquibase runs synchronously and the Cassandra
-  `UserRepository`/entity repositories are `@DependsOn("liquibase")` because they prepare statements at startup.
-  The keyspace itself is still created outside Liquibase (`config/cql/create-keyspace*.cql` via the docker
-  `cassandra-migration` service, `CassandraTestContainer.createKeyspace` in tests); `config/cql/changelog/*` and the
-  `ResourceKeyspacePopulator` are gone (`control.cleanupFiles` `'9.2.1'`).
-- Cassandra Liquibase changelog lock: the generated JDBC URL must contain `compliancemode=Liquibase`
+### Cassandra with Liquibase (since 9.2.1)
+
+- Design: `databaseMigration` defaults to `liquibase` for Cassandra; `data-cassandra` composes
+  `jhipster:spring-boot:liquibase`. The initial schema (`liquibase/templates/.../initial_schema_cassandra.xml.ejs`)
+  and the per-entity changelogs (`data-cassandra/templates/.../config/liquibase/changelog/added_entity.xml.ejs`,
+  registered through `source.addLiquibaseChangelog`) wrap the former CQL in
+  `<sql splitStatements="true" endDelimiter=";"><![CDATA[…]]></sql>` changeSets (CDATA because CQL contains
+  `set<text>`/`tuple<…>`). The `liquibase-cassandra` extension only swaps the runner: the physical model (`user`,
+  `user_by_*` lookup tables, `authorities set<text>`, entity tables with CQL types) is unchanged.
+  `LiquibaseConfiguration` builds a `SimpleDriverDataSource` on `com.ing.data.cassandra.jdbc.CassandraDriver`
+  (transitive from `liquibase-cassandra`) from `CassandraConnectionDetails` + `spring.cassandra.keyspace-name`, so
+  Testcontainers' `@ServiceConnection` works without a `spring.liquibase.url`. Liquibase runs synchronously and
+  the Cassandra `UserRepository`/entity repositories are `@DependsOn("liquibase")` because they prepare statements
+  at startup. The keyspace itself is still created outside Liquibase (`config/cql/create-keyspace*.cql` via the
+  docker `cassandra-migration` service, `CassandraTestContainer.createKeyspace` in tests); `config/cql/changelog/*`
+  and the `ResourceKeyspacePopulator` are gone (`control.cleanupFiles` `'9.2.1'`).
+- `prepareSqlApplicationProperties` (`data-relational/support/application-properties.ts`) must run for Cassandra
+  too (it sets `devJdbcDriver`/`prodJdbcDriver` to the wrapper driver and empty credentials), otherwise the Gradle
+  `liquibase.gradle.ejs` rendering throws `ReferenceError: devJdbcDriver`. `cassandraKeyspaceName` is an
+  `applicationDefaults` property (`generators/spring-boot/application.ts`), so every application snapshot lists it
+  (`undefined` outside Cassandra) — refresh e.g. the ci-cd context snapshot when it appears.
+- Changelog lock, part 1 — affected-row count: the generated JDBC URL must contain `compliancemode=Liquibase`
   (`LiquibaseConfiguration.java.ejs` and `prodLiquibaseUrl` in `generators/liquibase/generator.ts`). With the
   `cassandra-jdbc-wrapper` default option set `executeUpdate` returns `0` for the lock's LWT
-  `UPDATE ... IF LOCKED = FALSE`, and `LockServiceCassandra.acquireLock` (5.0.3 and 5.0.4) treats `0` as "another node
-  was faster" although the lock was applied, so every app start loops on `Waiting for changelog lock....` until
-  `Could not acquire change log lock. Currently locked by <own host>` (upstream liquibase/liquibase-cassandra#379,
-  fix PR #492 unreleased). The Liquibase option set returns `-1`, which the extension verifies against `LOCKEDBY`.
-  `prepareSqlApplicationProperties` (`data-relational/support/application-properties.ts`) must run for Cassandra too,
-  otherwise `devJdbcDriver` is undefined and the Gradle `liquibase.gradle.ejs` rendering throws. Verified with a
-  generated Maven app: `./mvnw verify` (Testcontainers `cassandra:6.0`) passes; do not run a second Cassandra container
-  on the same Docker Desktop while the IT runs, the Testcontainers node dies with `Failed to commit memory`.
-  Quick Liquibase-vs-Cassandra experiments: write a plain `main` using the Liquibase API (`LockServiceFactory`,
-  `Executor.queryForList` on `DATABASECHANGELOGLOCK`) on the app's `dependency:build-classpath -Dmdep.includeScope=test`
-  classpath, and remember `failsafe:integration-test` alone does not recompile edited sources — run `compile` first.
-- The Liquibase changelog lock is a lightweight transaction (`UPDATE … IF LOCKED = FALSE`), which needs a quorum of
-  the keyspace replicas: on the single-node docker compose the keyspace must be created with
-  `create-keyspace.cql` (replication factor 1) — the prod script's factor 3 fails with `UnavailableException: Not
-  enough replicas available for query at consistency QUORUM (2 required but only 1 alive)` and the e2e app never
-  starts. `cassandra-cluster.yml` keeps the prod script.
-- `ejs-templates/indent` (repo eslint) checks standalone `<%_ … _%>` tags by brace depth only: `depth × 2` spaces from
-  column 0, independent of the surrounding XML/Java indentation. Output lines keep their own indentation, so
-  re-indenting the tags never changes the generated file.
+  `UPDATE ... IF LOCKED = FALSE`, and `LockServiceCassandra.acquireLock` (5.0.3 and 5.0.4) treats `0` as "another
+  node was faster" although the lock was applied, so every app start loops on `Waiting for changelog lock....`
+  until `Could not acquire change log lock. Currently locked by <own host>` (upstream
+  liquibase/liquibase-cassandra#379, fix PR #492 unreleased). The Liquibase option set returns `-1`, which the
+  extension verifies against `LOCKEDBY`.
+- Changelog lock, part 2 — quorum: the LWT needs a quorum of the keyspace replicas, so the single-node docker
+  compose (`cassandra.yml.ejs`) must create the keyspace with `create-keyspace.cql` (replication factor 1); the
+  prod script's factor 3 fails with `UnavailableException: Not enough replicas available for query at consistency
+  QUORUM (2 required but only 1 alive)` and the e2e app never starts. `cassandra-cluster.yml` keeps the prod
+  script.
+- Verification recipe: generate a Maven Cassandra app and run `./mvnw verify` (Testcontainers `cassandra:6.0`).
+  Do not run a second Cassandra container on the same Docker Desktop while the IT runs — the Testcontainers node
+  dies with `Failed to commit memory`. `failsafe:integration-test` alone does not recompile edited sources; run
+  `compile` first. For quick Liquibase-vs-Cassandra experiments write a plain `main` using the Liquibase API
+  (`LockServiceFactory`, `Executor.queryForList` on `DATABASECHANGELOGLOCK`) on the app's
+  `dependency:build-classpath -Dmdep.includeScope=test` classpath.
 
 ## Server-side user caches
 
 - Cache names: `usersByLogin` / `usersByEmail` (constants on `UserRepository`).
-- Design rule: the plain finders `findOneByLogin` / `findOneByEmailIgnoreCase` are **uncached** and
-  used by uniqueness checks and write flows; caching belongs on the
-  `findOneWithAuthoritiesByLogin` / `findOneWithAuthoritiesByEmailIgnoreCase` variants used by read
-  and authentication paths. Rationale: a `@Cacheable` lookup racing a concurrent eviction (DELETE
-  while an update is in flight) repopulates the cache with a stale user, and later creations fail
-  with `login-already-used` / `email-already-used` even though the database row is gone.
-- Reactive applications cannot enable a cache provider — the cache generator throws
-  (`generators/spring-boot/generators/cache/generator.ts`).
+- Design rule: the plain finders `findOneByLogin` / `findOneByEmailIgnoreCase` are **uncached** and used by
+  uniqueness checks and write flows; caching belongs on the `findOneWithAuthoritiesByLogin` /
+  `findOneWithAuthoritiesByEmailIgnoreCase` variants used by read and authentication paths. Rationale: a
+  `@Cacheable` lookup racing a concurrent eviction (DELETE while an update is in flight) repopulates the cache
+  with a stale user, and later creations fail with `login-already-used` / `email-already-used` even though the
+  database row is gone.
 
 ## Testing and samples
 
-- `lib/testing/helpers.ts`: the `jhipster` preset injects `skipChecks`, `reproducibleTests`,
-  `skipInstall`, `skipGit`, `useVersionPlaceholders`. `defaultHelpers` adds `skipPrettier` +
-  `dryRun`; most specs use it. `withJHipsterGenerators()` wires real generators, mocks via
-  `withMockedJHipsterGenerators`.
-- Per-test environment lookup is cheap (~10 ms); module import of `cli/environment-builder.ts`
-  (~1 s) happens once per mocha worker.
-- Sample apps for manual testing: `bin/jhipster.cjs generate-sample <name>` (JIT dev blueprint).
-  Workflow samples come from `.blueprint/generate-sample/templates/test-integration/workflow-samples/*.json`;
-  daily-build sample names need the `daily-` prefix. Entity sets per database live in
-  `.blueprint/generate-sample/support/copy-entity-samples.ts` (`entitiesByType`). The daily builds
-  themselves run in `hipster-labs/jhipster-daily-builds`.
-  Quirk: `--sample-yorc-folder` copies the sample `.yo-rc.json` into the **current working
-  directory**, not the `--project-folder` — run it from the target folder, or stage `.yo-rc.json`
-  plus `.jhipster/*.json` manually and run plain `jhipster` there. `CI=true` suppresses prompts.
-- Running generated-app Cypress from a VS Code-spawned shell: `unset ELECTRON_RUN_AS_NODE` first,
-  otherwise the Cypress Electron binary starts in Node mode and dies with `bad option: --no-sandbox`.
-
-## Fork and branch maintenance
-
-- These agent docs live only on the `agents-knowledge` branch of the fork (`origin` =
-  `mshima/generator-jhipster`); they are deliberately absent from `upstream` (`jhipster/generator-jhipster`) so they never
-  ride along in a PR. The branch is doc-only — every commit touches just `AGENTS.md` / `AGENTS-KNOWLEDGE.md` — and its
-  history is linear (no merges), sitting as a stack of `docs:` commits on top of a `main` commit. Keep it updated and
-  pushed to `origin` as new knowledge is verified.
-
-- The branch is periodically rebased onto current `main` and force-pushed, so the remote tip's SHAs change even when
-  the prose does not. Always `git fetch origin agents-knowledge` immediately before adding a note, and build on the
-  fetched tip; a push prepared against a stale tip is rejected as non-fast-forward. Recovering is just
-  `git reset --hard origin/agents-knowledge` followed by `git cherry-pick` of the new note — the doc content survives
-  the rebase untouched, so it applies cleanly.
-
-- Upstream squash-merges every PR, so `git branch --merged upstream/main` under-reports badly: it only sees branches that
-  are literal ancestors. To find squash-merged branches, replay each branch's tree as a single commit on its merge-base and
-  ask whether that patch is already upstream:
-
-  ```sh
-  mb=$(git merge-base upstream/main "$b")
-  cmt=$(git commit-tree "$b^{tree}" -p "$mb" -m _)
-  git cherry upstream/main "$cmt" | grep -q '^+' || echo "squash-merged: $b"
-  ```
-
-  `git cherry -v upstream/main "$b"` then confirms per-commit: a leading `-` means that patch already exists upstream, `+`
-  means it does not. Do not judge by `git diff upstream/main "$b"` — an old branch shows tens of thousands of changed lines
-  purely because it is behind, which says nothing about whether its own change landed.
-
-## Working in git worktrees
-
-- A worktree of this repository must live in a directory named `generator-jhipster` (for example
-  `<scratch>/wt/generator-jhipster`): yeoman derives the generator namespace from the package folder name, so in a
-  worktree called anything else every spec that boots the CLI/environment fails with `You don't seem to have a
-  generator with the name "generator-jhipster" installed` (`cli/environment-builder.ts` even says "make sure your
-  folder is called generator-jhipster"). `npm ci --ignore-scripts` is enough to run the esmocha specs there — no build
-  is needed. Always check `git branch --show-current` before trusting a "passes locally": the main checkout may be on
-  another branch than the PR being fixed.
+- `lib/testing/helpers.ts`: the `jhipster` preset injects `skipChecks`, `reproducibleTests`, `skipInstall`,
+  `skipGit`, `useVersionPlaceholders`. `defaultHelpers` adds `skipPrettier` + `dryRun`; most specs use it.
+  `withJHipsterGenerators()` wires real generators, mocks via `withMockedJHipsterGenerators`. Per-test environment
+  lookup is cheap (~10 ms); module import of `cli/environment-builder.ts` (~1 s) happens once per mocha worker.
+- Specs are run with esmocha (`npm test` = `esmocha test generators cli .blueprint lib --forbid-only`, update
+  snapshots with `--update-snapshot`), not vitest. `test/api.spec.ts` needs `dist/` (`npm run build`).
+- Git worktrees must live in a directory named `generator-jhipster` (for example `<scratch>/wt/generator-jhipster`):
+  yeoman derives the generator namespace from the package folder name, so in a worktree called anything else every
+  spec that boots the CLI/environment fails with `You don't seem to have a generator with the name
+"generator-jhipster" installed` (`cli/environment-builder.ts` even says "make sure your folder is called
+  generator-jhipster"). `npm ci --ignore-scripts` is enough to run the esmocha specs there. Always check
+  `git branch --show-current` before trusting a "passes locally": the main checkout may be on another branch than
+  the PR being fixed.
+- Sample apps for manual testing: `bin/jhipster.cjs generate-sample <name>` (JIT dev blueprint). Workflow samples
+  come from `.blueprint/generate-sample/templates/test-integration/workflow-samples/*.json` (`app-sample` points
+  to `…/samples/<name>/.yo-rc.json`, `entity` to the entity sets in
+  `.blueprint/generate-sample/support/copy-entity-samples.ts` `entitiesByType`, the JSON entities live in
+  `…/samples/.jhipster/`); daily-build sample names need the `daily-` prefix and the daily builds themselves run in
+  `hipster-labs/jhipster-daily-builds`. Quirk: `--sample-yorc-folder` copies the sample `.yo-rc.json` into the
+  **current working directory**, not the `--project-folder` — run it from the target folder, or stage
+  `.yo-rc.json` plus `.jhipster/*.json` manually and run plain `jhipster` there (with `.jhipster/` present the app
+  generator regenerates the entities; `jhipster entities` is the explicit form). `CI=true` suppresses prompts.
+- Runtime repro of microfrontends without Docker (Angular and React): build gateway + microservices (Gradle output
+  is `build/generated/webapp`, Maven `target/classes/static`) or download the `app-<sample>` CI artifact (it
+  contains the generated apps) and `npm install` at the workspace root; serve the gateway at `/` and each
+  microservice under `/services/<ms>/*` with a tiny Node stub answering `/api/authenticate` (or 401 for
+  `/api/account`), `/management/info` and `/services/<ms>/api/*`; then run a Cypress spec on the gateway (navbar
+  entity items from the remote, `/blog/blog`, headings translated) with a watchdog — macOS has no `timeout`, use a
+  background job + kill. Playwright WebKit with console capture shows the underlying `[NF]` errors. Stub details
+  that matter for entity specs: infinite-scroll lists need a `Link` header (`<…>; rel="last",<…>; rel="first"`) or
+  the reducer throws reading `length`; success toasts come from `x-<app>app-alert` (translation key) +
+  `x-<app>app-params` (id) response headers.
+- Running generated-app Cypress from a VS Code-spawned shell: `unset ELECTRON_RUN_AS_NODE` first, otherwise the
+  Cypress Electron binary starts in Node mode and dies with `bad option: --no-sandbox`.
 
 ## Debugging CI failures
 
+- `check-angular` (and siblings) are aggregator jobs over the app matrix — the real error is in an application
+  job's log. `gh run view --log-failed` is often empty; download the job log with
+  `gh api repos/<owner>/<repo>/actions/jobs/<id>/logs` and grep it.
+- Daily builds and PR app jobs surface generated-app compile errors; reproduce locally by generating the failing
+  sample (see above) and running its own `npm run webapp:build:dev` / `./gradlew` — faster and more precise than
+  reading CI logs. When a regression window is known, `git log upstream/main --since=… --until=…` plus generating
+  the sample at both ends of the window and diffing the outputs pinpoints the offending commit quickly.
 - `stack-*` / client jobs on Node 22 dying with exit code 134 and `FATAL ERROR: v8::Module::IsGraphAsync must be
   used on an instantiated module` during `jhipster.cjs generate-sample` is the Node 22 `require(esm)` crash. The
   workflows' workaround must be a job-level `env: NODE_OPTIONS: …--no-experimental-require-module`; writing it with
   `echo "NODE_OPTIONS=…" >> $GITHUB_ENV` is silently rejected by the runner (`##[error]Can't store NODE_OPTIONS output
   parameter using '$GITHUB_ENV' command`, step still shows ✓) and the crash then appears nondeterministically.
-
-- Vite dev-server e2e flakiness (`devserver.yml`, Vue): two dev-only effects hit the Cypress login
-  tests. (1) A dependency first imported by a lazily loaded module (`deepmerge` from the i18n
-  bundle) is discovered at runtime, Vite re-optimizes and reloads the page — fixed with
-  `optimizeDeps.entries` covering the app sources. (2) `router.beforeResolve` calls `hideLogin()`;
-  in dev mode the initial navigation resolves late (lazy route component loading), after Cypress
-  opened the login modal, so the modal is closed under the test (`[data-cy="username"]` never
-  found, retries pass once modules are cached) — fixed by skipping `hideLogin()` when
+- Vite dev-server e2e flakiness (`devserver.yml`, Vue): two dev-only effects hit the Cypress login tests. (1) A
+  dependency first imported by a lazily loaded module (`deepmerge` from the i18n bundle) is discovered at runtime,
+  Vite re-optimizes and reloads the page — fixed with `optimizeDeps.entries` covering the app sources.
+  (2) `router.beforeResolve` calls `hideLogin()`; in dev mode the initial navigation resolves late (lazy route
+  component loading), after Cypress opened the login modal, so the modal is closed under the test
+  (`[data-cy="username"]` never found, retries pass once modules are cached) — fixed by skipping `hideLogin()` when
   `from === START_LOCATION`. Debug recipe: download the run's `screenshots-*` artifact
-  (`gh run download <id> -R jhipster/generator-jhipster`) and check the order of the app init
-  requests (`/management/info`, `/api/account`) versus the test clicks in the Cypress log; delay
-  the route import in a generated sample (`() => new Promise(r => setTimeout(r, 3000)).then(() =>
-import(...))`) to reproduce init races locally.
-- Daily builds and PR app jobs surface generated-app compile errors; reproduce locally by generating
-  the failing sample (see above) and running its own `npm run webapp:build:dev` / `./gradlew` —
-  faster and more precise than reading CI logs.
-- `check-angular` (and siblings) are aggregator jobs over the app matrix — the real error is in an
-  application job's log.
-- When a regression window is known, `git log upstream/main --since=… --until=…` plus generating the
-  sample at both ends of the window and diffing the outputs pinpoints the offending commit quickly.
+  (`gh run download <id> -R jhipster/generator-jhipster`) and check the order of the app init requests
+  (`/management/info`, `/api/account`) versus the test clicks in the Cypress log; delay the route import in a
+  generated sample (`() => new Promise(r => setTimeout(r, 3000)).then(() => import(...))`) to reproduce init races
+  locally.
