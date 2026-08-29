@@ -163,6 +163,17 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   Check with `grep -l loadMicrofrontends target/classes/static/*.js`: it must be in `bootstrap-*.js`/`main`, not
   in an `app_shared_*` chunk. The webpack bundler still lists every remote in `provideTranslateHttpLoader`.
 
+- Native federation shares only the package names listed in `shared` (from `shareAll` over `package.json`), and
+  the unused-dependency scan records the *imported specifier* — so `import dayjs from 'dayjs/esm'` never matches the
+  `dayjs` key. Every shared mapping (`app/shared/date`, `app/shared/language`, … are built as separate bundles when the
+  entity pages use them) then gets its own private dayjs copy without the plugins/locales registered by
+  `app/config/dayjs`, which surfaces in Cypress as `TypeError: a.duration is not a function` in `app_shared_date-*.js`.
+  `federation.config.ts.ejs` therefore shares `dayjs/esm`, its plugins and `dayjs/esm/locale/<dayjsLocale>` explicitly
+  (`shareDayjs`), the same way Angular locales are shared. Check for this class of bug with
+  `grep -l '$isDayjsObject' build/generated/webapp/*.js` (must list a single file) after `npm run webapp:prod`; note the
+  mapping bundles only appear when the app has entities (the scan starts from the exposed entity routes), so an
+  entity-less sample does not reproduce it.
+
 ### Horizontal scroll hunting in generated Angular apps
 
 - Electron/Cypress and macOS browsers use overlay scrollbars, so `documentElement.scrollWidth > clientWidth` is
