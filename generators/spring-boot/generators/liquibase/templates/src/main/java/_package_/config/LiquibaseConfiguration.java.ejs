@@ -22,13 +22,13 @@ import tech.jhipster.config.JHipsterConstants;
 <%_ if (databaseTypeNeo4j || databaseTypeCassandra || reactive) { _%>
 import java.util.Optional;
 <%_ } _%>
-<%_ if (databaseTypeNeo4j || reactive) { _%>
-import tech.jhipster.config.liquibase.AsyncSpringLiquibase;
-<%_ } else if (databaseTypeCassandra) { _%>
+<%_ if (databaseTypeCassandra) { _%>
 import com.ing.data.cassandra.jdbc.CassandraDriver;
 import org.springframework.boot.cassandra.autoconfigure.CassandraConnectionDetails;
 import org.springframework.boot.cassandra.autoconfigure.CassandraProperties;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+<%_ } else if (databaseTypeNeo4j || reactive) { _%>
+import tech.jhipster.config.liquibase.AsyncSpringLiquibase;
 <%_ } else { _%>
 import tech.jhipster.config.liquibase.SpringLiquibaseUtil;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
@@ -80,11 +80,11 @@ public class LiquibaseConfiguration {
         @Qualifier("taskExecutor") Executor executor,
 <%_ } _%>
         LiquibaseProperties liquibaseProperties,
-<%_ if (databaseTypeNeo4j) { _%>
-        Neo4jProperties dataSourceProperties
-<%_ } else if (databaseTypeCassandra) { _%>
+<%_ if (databaseTypeCassandra) { _%>
         CassandraConnectionDetails connectionDetails,
         CassandraProperties cassandraProperties
+<%_ } else if (databaseTypeNeo4j) { _%>
+        Neo4jProperties dataSourceProperties
 <%_ } else if (reactive) { _%>
         R2dbcProperties dataSourceProperties
 <%_ } else { _%>
@@ -95,13 +95,13 @@ public class LiquibaseConfiguration {
 <%_ } _%>
     ) {
 
-<%_ if (databaseTypeNeo4j || reactive) { _%>
-        SpringLiquibase liquibase = new AsyncSpringLiquibase(executor, env);
-        liquibase.setDataSource(createLiquibaseDataSource(liquibaseProperties, dataSourceProperties));
-<%_ } else if (databaseTypeCassandra) { _%>
+<%_ if (databaseTypeCassandra) { _%>
         // Repositories depend on the liquibase bean: the schema must exist before they are created, so liquibase runs synchronously.
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(createLiquibaseDataSource(liquibaseProperties, connectionDetails, cassandraProperties));
+<%_ } else if (databaseTypeNeo4j || reactive) { _%>
+        SpringLiquibase liquibase = new AsyncSpringLiquibase(executor, env);
+        liquibase.setDataSource(createLiquibaseDataSource(liquibaseProperties, dataSourceProperties));
 <%_ } else { _%>
         SpringLiquibase liquibase;
         if (Boolean.TRUE.equals(applicationProperties.getLiquibase().getAsyncStart())) {
@@ -159,7 +159,9 @@ public class LiquibaseConfiguration {
                 contactPoint.port() +
                 "/" +
                 cassandraProperties.getKeyspaceName() +
-                "?localdatacenter=" +
+                // The Liquibase compliance mode reports -1 affected rows for the changelog lock LWT update,
+                // otherwise liquibase-cassandra misreads the acquired lock and waits for it forever.
+                "?compliancemode=Liquibase&localdatacenter=" +
                 connectionDetails.getLocalDatacenter()
             );
         });

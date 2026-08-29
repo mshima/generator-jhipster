@@ -28,7 +28,7 @@
         Added the entity <%- entityClass %>.
     -->
     <changeSet id="<%- changelogDate %>-1" author="jhipster">
-        <sql splitStatements="true" endDelimiter=";">
+        <sql splitStatements="true" endDelimiter=";"><![CDATA[
             CREATE TABLE IF NOT EXISTS <%- entityInstance %> (
 <%_ for (const field of fields) { _%>
               <%_ const { fieldName, fieldNameUnderscored } = field; _%>
@@ -69,7 +69,7 @@
 <%_ } _%>
                 PRIMARY KEY(id)
             );
-        </sql>
+]]></sql>
     </changeSet>
 
 </databaseChangeLog>

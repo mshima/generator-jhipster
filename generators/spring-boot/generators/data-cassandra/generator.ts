@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 import { PaginationTypes } from '../../../../lib/jhipster/entity-options.ts';
+import type { Source as LiquibaseSource } from '../../../liquibase/types.d.ts';
 import { SpringBootApplicationGenerator } from '../../generator.ts';
 
 import cleanupCassandraFilesTask from './cleanup.ts';
@@ -108,7 +109,10 @@ export default class CassandraGenerator extends SpringBootApplicationGenerator {
     return this.asPostWritingEntitiesTaskGroup({
       addLiquibaseChangelogs({ entities, source }) {
         for (const entity of entities.filter(entity => !entity.skipServer && !entity.builtIn && !entity.skipDbChangelog)) {
-          source.addLiquibaseChangelog?.({ changelogName: `${entity.changelogDate}_added_entity_${entity.entityClass}`, section: 'base' });
+          (source as LiquibaseSource).addLiquibaseChangelog?.({
+            changelogName: `${entity.changelogDate}_added_entity_${entity.entityClass}`,
+            section: 'base',
+          });
         }
       },
     });

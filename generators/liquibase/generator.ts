@@ -118,7 +118,7 @@ export default class LiquibaseGenerator extends BaseEntityChangesGenerator<
               return 'jdbc:neo4j:bolt://localhost:7687';
             }
             if (data.databaseTypeCassandra) {
-              return `jdbc:cassandra://localhost:9042/${data.cassandraKeyspaceName}?localdatacenter=datacenter1`;
+              return `jdbc:cassandra://localhost:9042/${data.cassandraKeyspaceName}?compliancemode=Liquibase&localdatacenter=datacenter1`;
             }
             return getJdbcUrl(data.prodDatabaseType, {
               databaseName: data.prodDatabaseName,
@@ -571,13 +571,6 @@ export default class LiquibaseGenerator extends BaseEntityChangesGenerator<
             libraryName: 'liquibase-neo4j',
             module: 'org.liquibase.ext:liquibase-neo4j',
             version: application.javaDependencies['liquibase-neo4j'],
-          });
-        }
-        if (application.databaseTypeCassandra) {
-          source.addGradleDependencyCatalogLibrary!({
-            libraryName: 'liquibase-cassandra',
-            module: 'org.liquibase.ext:liquibase-cassandra',
-            version: liquibaseVersion ?? application.javaManagedProperties['liquibase.version'],
           });
         }
       },

@@ -24,7 +24,7 @@
         The initial schema has the '00000000000000' id, so that it is over-written if we re-generate it.
     -->
     <changeSet id="00000000000000" author="jhipster">
-        <sql splitStatements="true" endDelimiter=";">
+        <sql splitStatements="true" endDelimiter=";"><![CDATA[
             CREATE TABLE IF NOT EXISTS user (
                 id text,
                 login text,
@@ -87,7 +87,7 @@
                 persistent_token_series text,
                 PRIMARY KEY(user_id, persistent_token_series)
             );
-        </sql>
+]]></sql>
     </changeSet>
   <%_ if (generateUserManagement) { _%>
 
@@ -95,7 +95,7 @@
         Default users.
     -->
     <changeSet id="00000000000001" author="jhipster">
-        <sql splitStatements="true" endDelimiter=";">
+        <sql splitStatements="true" endDelimiter=";"><![CDATA[
             INSERT INTO user (id,login,password,firstname,lastname,email,activated,lang_key,activation_key,authorities)
             VALUES('1','admin','$2a$10$gSAhZrxMllrbgj/kkK9UceBPpChGWJA7SYIb1Mqo.n5aNLq1/oRrC','Administrator','Administrator','admin@localhost',true,'<%- nativeLanguage %>','',{'ROLE_USER','ROLE_ADMIN'});
 
@@ -113,7 +113,7 @@
 
             INSERT INTO user_by_email (email, id)
             VALUES('user@localhost','2');
-        </sql>
+]]></sql>
     </changeSet>
   <%_ } _%>
 <%_ } _%>

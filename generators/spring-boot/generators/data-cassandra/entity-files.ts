@@ -19,6 +19,7 @@
 import { asWriteFilesBlock, asWriteFilesSection, asWritingEntitiesTask } from '../../../base-application/support/task-type-inference.ts';
 import { SERVER_MAIN_RES_DIR } from '../../../generator-constants.ts';
 import { javaMainPackageTemplatesBlock } from '../../../java/support/index.ts';
+import type { Application as SpringBootApplication, Entity as SpringBootEntity } from '../../types.ts';
 
 const domainFiles = [
   asWriteFilesBlock({
@@ -53,7 +54,11 @@ export const entityFiles = asWriteFilesSection({
   repositoryFiles,
 });
 
-export const cleanupCassandraEntityFilesTask = asWritingEntitiesTask(async function ({ application, entities, control }) {
+export const cleanupCassandraEntityFilesTask = asWritingEntitiesTask<SpringBootEntity, SpringBootApplication>(async function ({
+  application,
+  entities,
+  control,
+}) {
   for (const entity of entities.filter(entity => !entity.skipServer && !entity.builtIn)) {
     await control.cleanupFiles({
       // The custom cql migration was replaced with liquibase
