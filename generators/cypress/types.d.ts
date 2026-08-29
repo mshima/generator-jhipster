@@ -26,4 +26,5 @@ export type Application<E extends Entity = Entity> = JavascriptApplication<E> &
     cypressDir: string;
     cypressTemporaryDir: string;
     cypressBootstrapEntities: boolean;
+    cypressCoverageWebpack: boolean;
   };

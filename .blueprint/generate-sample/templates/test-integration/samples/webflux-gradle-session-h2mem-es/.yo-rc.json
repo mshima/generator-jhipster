@@ -5,6 +5,7 @@
     "baseName": "sampleWebfluxH2mem",
     "buildTool": "gradle",
     "cacheProvider": "no",
+    "clientBundler": "webpack",
     "clientFramework": "angular",
     "clientTestFramework": "vitest",
     "creationTimestamp": 1596513272473,

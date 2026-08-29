@@ -48,16 +48,34 @@ export const files = asWriteFilesSection({
       templates: ['vitest-base.config.ts'],
     }),
   ],
+  webpack: [
+    clientRootTemplatesBlock({
+      condition: ctx => ctx.clientBundlerWebpack,
+      templates: [
+        'angular.json',
+        'webpack/environment.js',
+        'webpack/package.json',
+        'webpack/proxy.conf.js',
+        'webpack/webpack.custom.js',
+        'webpack/logo-jhipster.png',
+      ],
+    }),
+  ],
   esbuild: [
     clientRootTemplatesBlock({
-      templates: ['angular.json', 'proxy.config.mjs', 'build-plugins/define-esbuild.ts'],
+      condition: ctx => ctx.clientBundlerEsbuild,
+      templates: [
+        { sourceFile: 'angular.json.esbuild', destinationFile: 'angular.json' },
+        'proxy.config.mjs',
+        'build-plugins/define-esbuild.ts',
+      ],
     }),
     clientRootTemplatesBlock({
-      condition: ctx => ctx.enableTranslation,
+      condition: ctx => ctx.clientBundlerEsbuild && ctx.enableTranslation,
       templates: ['build-plugins/i18n-esbuild.ts'],
     }),
     clientSrcTemplatesBlock({
-      condition: ctx => ctx.enableTranslation,
+      condition: ctx => ctx.clientBundlerEsbuild && ctx.enableTranslation,
       templates: ['i18n/index.ts'],
     }),
   ],
@@ -85,7 +103,11 @@ export const files = asWriteFilesSection({
   ],
   microfrontend: [
     clientRootTemplatesBlock({
-      condition: generator => generator.microfrontend,
+      condition: generator => generator.clientBundlerWebpack && generator.microfrontend,
+      templates: ['webpack/webpack.microfrontend.js'],
+    }),
+    clientRootTemplatesBlock({
+      condition: generator => generator.clientBundlerEsbuild && generator.microfrontend,
       templates: [
         'federation.config.ts',
         'tsconfig.federation.json',
@@ -99,7 +121,7 @@ export const files = asWriteFilesSection({
       templates: ['core/microfrontend/index.ts', 'entities/entity-navbar-items.ts'],
     }),
     clientApplicationTemplatesBlock({
-      condition: data => data.microfrontend && data.enableTranslation,
+      condition: data => data.microfrontend && data.clientBundlerEsbuild && data.enableTranslation,
       templates: ['core/microfrontend/microfrontend-translation.loader.ts'],
     }),
   ],

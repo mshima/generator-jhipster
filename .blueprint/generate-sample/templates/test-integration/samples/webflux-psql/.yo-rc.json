@@ -5,6 +5,7 @@
     "baseName": "sampleWebfluxPsql",
     "buildTool": "maven",
     "cacheProvider": "no",
+    "clientBundler": "webpack",
     "clientFramework": "angular",
     "clientTestFramework": "vitest",
     "creationTimestamp": 1596513172471,
