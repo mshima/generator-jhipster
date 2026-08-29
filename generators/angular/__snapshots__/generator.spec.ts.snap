@@ -5840,7 +5840,6 @@ exports[`generator - angular microservice-jwt-skipUserManagement(false)-withAdmi
       },
       "devDependencies": {
         "@angular-architects/native-federation": null,
-        "@angular-devkit/architect": null,
       },
     },
     {
@@ -7062,7 +7061,6 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
       },
       "devDependencies": {
         "@angular-architects/native-federation": null,
-        "@angular-devkit/architect": null,
       },
     },
     {

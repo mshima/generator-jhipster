@@ -459,7 +459,6 @@ export default class AngularGenerator extends AngularApplicationGenerator {
           },
           devDependencies: {
             '@angular-architects/native-federation': null,
-            '@angular-devkit/architect': null,
           },
         });
       },

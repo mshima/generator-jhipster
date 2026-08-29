@@ -18,7 +18,6 @@
   "devDependencies": {
     "@angular-architects/native-federation": "22.1.1",
     "@angular-builders/custom-esbuild": "22.0.1",
-    "@angular-devkit/architect": "0.2201.5",
     "@angular/build": "22.1.5",
     "@angular/cli": "22.1.5",
     "@eslint/js": "10.0.1",
