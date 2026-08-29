@@ -291,6 +291,14 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   Quick Liquibase-vs-Cassandra experiments: write a plain `main` using the Liquibase API (`LockServiceFactory`,
   `Executor.queryForList` on `DATABASECHANGELOGLOCK`) on the app's `dependency:build-classpath -Dmdep.includeScope=test`
   classpath, and remember `failsafe:integration-test` alone does not recompile edited sources — run `compile` first.
+- The Liquibase changelog lock is a lightweight transaction (`UPDATE … IF LOCKED = FALSE`), which needs a quorum of
+  the keyspace replicas: on the single-node docker compose the keyspace must be created with
+  `create-keyspace.cql` (replication factor 1) — the prod script's factor 3 fails with `UnavailableException: Not
+  enough replicas available for query at consistency QUORUM (2 required but only 1 alive)` and the e2e app never
+  starts. `cassandra-cluster.yml` keeps the prod script.
+- `ejs-templates/indent` (repo eslint) checks standalone `<%_ … _%>` tags by brace depth only: `depth × 2` spaces from
+  column 0, independent of the surrounding XML/Java indentation. Output lines keep their own indentation, so
+  re-indenting the tags never changes the generated file.
 
 ## Server-side user caches
 
