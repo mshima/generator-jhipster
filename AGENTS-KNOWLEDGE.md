@@ -331,6 +331,34 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
 - Running generated-app Cypress from a VS Code-spawned shell: `unset ELECTRON_RUN_AS_NODE` first,
   otherwise the Cypress Electron binary starts in Node mode and dies with `bad option: --no-sandbox`.
 
+## Fork and branch maintenance
+
+- These agent docs live only on the `agents-knowledge` branch of the fork (`origin` =
+  `mshima/generator-jhipster`); they are deliberately absent from `upstream` (`jhipster/generator-jhipster`) so they never
+  ride along in a PR. The branch is doc-only — every commit touches just `AGENTS.md` / `AGENTS-KNOWLEDGE.md` — and its
+  history is linear (no merges), sitting as a stack of `docs:` commits on top of a `main` commit. Keep it updated and
+  pushed to `origin` as new knowledge is verified.
+
+- The branch is periodically rebased onto current `main` and force-pushed, so the remote tip's SHAs change even when
+  the prose does not. Always `git fetch origin agents-knowledge` immediately before adding a note, and build on the
+  fetched tip; a push prepared against a stale tip is rejected as non-fast-forward. Recovering is just
+  `git reset --hard origin/agents-knowledge` followed by `git cherry-pick` of the new note — the doc content survives
+  the rebase untouched, so it applies cleanly.
+
+- Upstream squash-merges every PR, so `git branch --merged upstream/main` under-reports badly: it only sees branches that
+  are literal ancestors. To find squash-merged branches, replay each branch's tree as a single commit on its merge-base and
+  ask whether that patch is already upstream:
+
+  ```sh
+  mb=$(git merge-base upstream/main "$b")
+  cmt=$(git commit-tree "$b^{tree}" -p "$mb" -m _)
+  git cherry upstream/main "$cmt" | grep -q '^+' || echo "squash-merged: $b"
+  ```
+
+  `git cherry -v upstream/main "$b"` then confirms per-commit: a leading `-` means that patch already exists upstream, `+`
+  means it does not. Do not judge by `git diff upstream/main "$b"` — an old branch shows tens of thousands of changed lines
+  purely because it is behind, which says nothing about whether its own change landed.
+
 ## Working in git worktrees
 
 - A worktree of this repository must live in a directory named `generator-jhipster` (for example
