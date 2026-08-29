@@ -82,9 +82,6 @@ jobs:
       !contains(github.event.pull_request.labels.*.name, 'pr: skip-ci') &&
       fromJson(needs.build-matrix.outputs.matrix).include[0] != null
     timeout-minutes: 50
-    env:
-      # WORKAROUND: Node.js 22 require(esm) V8 crash. NODE_OPTIONS cannot be set through $GITHUB_ENV.
-      NODE_OPTIONS: ${{ startsWith(matrix.node-version, '22') && '--no-experimental-require-module' || '' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
