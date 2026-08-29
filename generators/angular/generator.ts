@@ -450,12 +450,14 @@ export default class AngularGenerator extends AngularApplicationGenerator {
             '@angular/build': null,
             tinyglobby: null,
             ...(enableTranslation ? { '@types/folder-hash': null, 'folder-hash': null, deepmerge: null } : {}),
-            ...(microfrontend ? {
-              '@angular-architects/native-federation': null,
-              '@angular-devkit/architect': null,
-            } : {
-              '@angular-builders/custom-esbuild': null,
-            }),
+            ...(microfrontend ?
+              {
+                '@angular-architects/native-federation': null,
+                '@angular-devkit/architect': null,
+              }
+            : {
+                '@angular-builders/custom-esbuild': null,
+              }),
           },
         });
       },
