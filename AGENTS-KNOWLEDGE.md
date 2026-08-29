@@ -370,6 +370,26 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
 
 ## Debugging CI failures
 
+- Reading a failed sample job: `gh run view <run-id> -R jhipster/generator-jhipster --job <job-id> --log` gives the full
+  step output, and `gh run download <run-id> -R jhipster/generator-jhipster -n log-<sample-name>` fetches the
+  "BACKEND: Store failure logs" artifact (surefire/gradle `test-results/*.xml`, which carry the server-side response body
+  that the console log omits when the run sets `-Dlogging.level.ROOT=OFF`). Both need an authenticated `gh`; the plain
+  REST API returns 401/403 for logs and artifacts even on this public repo. `check-<framework>` (e.g. `check-react`) is
+  only an aggregate gate that re-exports the matrix result — it never carries an independent failure, so ignore it and
+  find the real job.
+- A workspaces sample such as `ms-react-consul-jwt-cassandra-redis` builds several applications (`gateway`, `blog`,
+  `store`, `notification`) and `TESTS: backend` runs `npm run ci:backend:test --workspaces`, which visits them in
+  `package.json` order and **does not stop at the first failure**. More than one application can therefore fail in a
+  single job — always scan the whole log for every `BUILD FAILED`/`BUILD FAILURE`, not just the last one.
+- Before blaming a PR for a sample failure, generate the sample from the PR head and from its merge-base and
+  `diff -rq` the two trees (`jhipster jdl <sample>.jdl --skip-install --skip-git --monorepository --workspaces`). An
+  application that comes out byte-identical cannot have been broken by the PR, which usually means a Testcontainers or
+  runner problem. Typical symptoms: `ContainerLaunchException ... RetryCountExceededException` with
+  `DriverTimeoutException: Query timed out after PT2S` (the container never passed its readiness probe), or a 500 whose
+  body reads `Cannot connect to localhost/<unresolved>:<mapped-port>` (the container died or was reaped mid-run).
+  Cross-check `gh run list -w <workflow>.yml -b main` — a consistently green main means the sample is not routinely flaky
+  and the run itself was degraded.
+
 - `check-angular` (and siblings) are aggregator jobs over the app matrix — the real error is in an application
   job's log. `gh run view --log-failed` is often empty; download the job log with
   `gh api repos/<owner>/<repo>/actions/jobs/<id>/logs` and grep it.
