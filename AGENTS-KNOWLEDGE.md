@@ -331,6 +331,16 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
 - Running generated-app Cypress from a VS Code-spawned shell: `unset ELECTRON_RUN_AS_NODE` first,
   otherwise the Cypress Electron binary starts in Node mode and dies with `bad option: --no-sandbox`.
 
+## Working in git worktrees
+
+- A worktree of this repository must live in a directory named `generator-jhipster` (for example
+  `<scratch>/wt/generator-jhipster`): yeoman derives the generator namespace from the package folder name, so in a
+  worktree called anything else every spec that boots the CLI/environment fails with `You don't seem to have a
+  generator with the name "generator-jhipster" installed` (`cli/environment-builder.ts` even says "make sure your
+  folder is called generator-jhipster"). `npm ci --ignore-scripts` is enough to run the esmocha specs there — no build
+  is needed. Always check `git branch --show-current` before trusting a "passes locally": the main checkout may be on
+  another branch than the PR being fixed.
+
 ## Debugging CI failures
 
 - Vite dev-server e2e flakiness (`devserver.yml`, Vue): two dev-only effects hit the Cypress login
