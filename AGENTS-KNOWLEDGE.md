@@ -258,7 +258,7 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
 - Reactive applications cannot enable a cache provider — the cache generator throws
   (`generators/spring-boot/generators/cache/generator.ts`).
 
-### Cassandra with Liquibase (since 9.2.1)
+### Cassandra migrations: Liquibase (default) and the CQL loader
 
 - Design: `databaseMigration` defaults to `liquibase` for Cassandra; `data-cassandra` composes
   `jhipster:spring-boot:liquibase`. The initial schema (`liquibase/templates/.../initial_schema_cassandra.xml.ejs`)
@@ -272,8 +272,30 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   Testcontainers' `@ServiceConnection` works without a `spring.liquibase.url`. Liquibase runs synchronously and
   the Cassandra `UserRepository`/entity repositories are `@DependsOn("liquibase")` because they prepare statements
   at startup. The keyspace itself is still created outside Liquibase (`config/cql/create-keyspace*.cql` via the
-  docker `cassandra-migration` service, `CassandraTestContainer.createKeyspace` in tests); `config/cql/changelog/*`
-  and the `ResourceKeyspacePopulator` are gone (`control.cleanupFiles` `'9.2.1'`).
+  docker `cassandra-migration` service, `CassandraTestContainer.createKeyspace` in tests).
+- The legacy CQL migration is still selectable as `databaseMigration: 'loader'`, mirroring how Neo4j picks between
+  `neo4j-migrations` and Liquibase through the same option. `loader` restores `config/cql/changelog/*` (README,
+  `00000000000000_create-tables.cql`, `00000000000001_insert_default_users.cql`, per-entity `added_entity.cql`),
+  the `ResourceKeyspacePopulator` in `CassandraTestContainer`, and the prod keyspace script in `cassandra.yml.ejs`;
+  it also drops the `@DependsOn("liquibase")` on the repositories, since no such bean exists. Every liquibase-only
+  branch is therefore gated on `databaseMigrationLiquibase`, and the `'9.2.1'` `control.cleanupFiles` entry for the
+  CQL changelogs uses the `[condition, ...files]` array form so the files survive under `loader`.
+- Existing applications keep the loader: `data-cassandra`'s `configuring` runs a `configMigration` task that sets
+  `jhipsterConfig.databaseMigration = 'loader'` when `control.isJhipsterVersionLessThan('9.2.1')` and the stored
+  value is not an explicit `liquibase`. Cassandra ignored `databaseMigration` before 9.2.1, so a stored `'no'` also
+  means "still on the CQL scripts". This is the same shape as Vue's `clientBundler` pin in `generators/vue/generator.ts`;
+  test it with `.withJHipsterConfig({ jhipsterVersion: '9.2.0' }).commitFiles()`, because `control.jhipsterOldVersion`
+  reads `jhipsterVersion` from the `.yo-rc.json` **on disk**.
+- Adding a value to a command's `choices` array is never a local change: `getCommandDerivedPropertyMutations`
+  (`lib/command/mutations.ts`) explodes choices into `<option><Value>` booleans, so a new choice adds a key to every
+  application/context snapshot (`databaseMigrationLoader: false` appeared in the angular, react, vue, app, jdl, ci-cd
+  and bootstrap snapshots) and changes the CLI help text. Run `npm run update-snapshots` and confirm the diff contains
+  nothing but the new key.
+- Recipe to prove a config value faithfully restores older behaviour: temporarily add it to the spec's `commonConfig`,
+  run `npm run update-snapshot -- <spec>`, then `diff <(git show upstream/main:<snap>) <snap>`. For `loader` the only
+  difference was the echoed `"databaseMigration": "loader"` in the samples matrix — every generated file path matched
+  upstream. Note `getStateSnapshot()` records paths and state, not contents, so pair it with a throwaway spec that
+  greps the rendered files when the change is inside a template.
 - `prepareSqlApplicationProperties` (`data-relational/support/application-properties.ts`) must run for Cassandra
   too (it sets `devJdbcDriver`/`prodJdbcDriver` to the wrapper driver and empty credentials), otherwise the Gradle
   `liquibase.gradle.ejs` rendering throws `ReferenceError: devJdbcDriver`. `cassandraKeyspaceName` is an
