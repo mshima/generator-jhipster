@@ -143,9 +143,17 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
     (`app/shared/date`, `app/shared/language`, …) got a private dayjs copy without the plugins/locales registered
     by `app/config/dayjs` (`TypeError: a.duration is not a function` in `app_shared_date-*.js`).
     `federation.config.ts.ejs` therefore shares `dayjs/esm`, its plugins and `dayjs/esm/locale/<dayjsLocale>`
-    explicitly (`shareDayjs`). Check with `grep -l '$isDayjsObject' build/generated/webapp/*.js` after
-    `npm run webapp:prod` — it must list a single file. The mapping bundles only appear when the app has entities
-    (the unused-deps scan starts from the exposed entity routes), so an entity-less sample does not reproduce it.
+    explicitly (`shareDayjs`). The plugin/locale entries must carry `includeSecondaries: { keepAll: true }`: the
+    unused-dependency scan starts from the _exposed_ modules (entity routes/navbar), which never import
+    `customParseFormat` or the locales, so without the opt-out (`removeUnusedDeps` keeps an entry only when
+    `includeSecondaries` is truthy — the same trick `@angular/core` uses) those entries are dropped from the import
+    map while `bootstrap-*.js` still imports them bare, and the app dies at startup with `Unable to resolve
+    specifier 'dayjs/esm/plugin/customParseFormat'` (every Cypress spec fails on `[data-cy="navbar"]`). Verify
+    both halves after `npm run webapp:prod`: `remoteEntry.json` lists all six `dayjs/esm…` entries with existing
+    files, `grep -l '$isDayjsObject' build/generated/webapp/*.js` lists a single file, **and** the app bootstraps —
+    serve `build/generated/webapp` with a stub (401 `/api/account`, `/management/info`) and run a one-test Cypress
+    spec asserting `[data-cy="navbar"]` (a `TypeError`-free build can still fail to start). The mapping bundles
+    only appear when the app has entities, so an entity-less sample does not reproduce it.
 - Native federation's `shareAngularLocales()` hardcodes a cwd-relative
   `node_modules/@angular/common/locales/<locale>.js` entry point, which breaks in npm workspaces (hoisted
   `node_modules`, used by the `ms-*`/`mf-*` CI samples): "Could not resolve
