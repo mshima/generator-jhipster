@@ -343,6 +343,12 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
 
 ## Debugging CI failures
 
+- `stack-*` / client jobs on Node 22 dying with exit code 134 and `FATAL ERROR: v8::Module::IsGraphAsync must be
+  used on an instantiated module` during `jhipster.cjs generate-sample` is the Node 22 `require(esm)` crash. The
+  workflows' workaround must be a job-level `env: NODE_OPTIONS: …--no-experimental-require-module`; writing it with
+  `echo "NODE_OPTIONS=…" >> $GITHUB_ENV` is silently rejected by the runner (`##[error]Can't store NODE_OPTIONS output
+  parameter using '$GITHUB_ENV' command`, step still shows ✓) and the crash then appears nondeterministically.
+
 - Vite dev-server e2e flakiness (`devserver.yml`, Vue): two dev-only effects hit the Cypress login
   tests. (1) A dependency first imported by a lazily loaded module (`deepmerge` from the i18n
   bundle) is discovered at runtime, Vite re-optimizes and reloads the page — fixed with
