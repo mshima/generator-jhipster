@@ -265,8 +265,21 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   `UserRepository`/entity repositories are `@DependsOn("liquibase")` because they prepare statements at startup.
   The keyspace itself is still created outside Liquibase (`config/cql/create-keyspace*.cql` via the docker
   `cassandra-migration` service, `CassandraTestContainer.createKeyspace` in tests); `config/cql/changelog/*` and the
-  `ResourceKeyspacePopulator` are gone (`control.cleanupFiles` `'9.2.1'`). No Docker on the dev box: validation was
-  generator specs plus reading the generated app.
+  `ResourceKeyspacePopulator` are gone (`control.cleanupFiles` `'9.2.1'`).
+- Cassandra Liquibase changelog lock: the generated JDBC URL must contain `compliancemode=Liquibase`
+  (`LiquibaseConfiguration.java.ejs` and `prodLiquibaseUrl` in `generators/liquibase/generator.ts`). With the
+  `cassandra-jdbc-wrapper` default option set `executeUpdate` returns `0` for the lock's LWT
+  `UPDATE ... IF LOCKED = FALSE`, and `LockServiceCassandra.acquireLock` (5.0.3 and 5.0.4) treats `0` as "another node
+  was faster" although the lock was applied, so every app start loops on `Waiting for changelog lock....` until
+  `Could not acquire change log lock. Currently locked by <own host>` (upstream liquibase/liquibase-cassandra#379,
+  fix PR #492 unreleased). The Liquibase option set returns `-1`, which the extension verifies against `LOCKEDBY`.
+  `prepareSqlApplicationProperties` (`data-relational/support/application-properties.ts`) must run for Cassandra too,
+  otherwise `devJdbcDriver` is undefined and the Gradle `liquibase.gradle.ejs` rendering throws. Verified with a
+  generated Maven app: `./mvnw verify` (Testcontainers `cassandra:6.0`) passes; do not run a second Cassandra container
+  on the same Docker Desktop while the IT runs, the Testcontainers node dies with `Failed to commit memory`.
+  Quick Liquibase-vs-Cassandra experiments: write a plain `main` using the Liquibase API (`LockServiceFactory`,
+  `Executor.queryForList` on `DATABASECHANGELOGLOCK`) on the app's `dependency:build-classpath -Dmdep.includeScope=test`
+  classpath, and remember `failsafe:integration-test` alone does not recompile edited sources — run `compile` first.
 
 ## Server-side user caches
 
