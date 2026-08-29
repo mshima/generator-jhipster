@@ -31,41 +31,41 @@
         <sql splitStatements="true" endDelimiter=";"><![CDATA[
             CREATE TABLE IF NOT EXISTS <%- entityInstance %> (
 <%_ for (const field of fields) { _%>
-              <%_ const { fieldName, fieldNameUnderscored } = field; _%>
-              <%_ if (field.fieldTypeUUID) { _%>
+  <%_ const { fieldName, fieldNameUnderscored } = field; _%>
+  <%_ if (field.fieldTypeUUID) { _%>
                 <%- fieldName %> uuid,
-              <%_ } else if (field.fieldTypeString || field.fieldIsEnum) { _%>
+  <%_ } else if (field.fieldTypeString || field.fieldIsEnum) { _%>
                 <%- fieldName %> text,
-              <%_ } else if (field.fieldTypeInteger) { _%>
+  <%_ } else if (field.fieldTypeInteger) { _%>
                 <%- fieldName %> int,
-              <%_ } else if (field.fieldTypeLong) { _%>
+  <%_ } else if (field.fieldTypeLong) { _%>
                 <%- fieldName %> bigint,
-              <%_ } else if (field.fieldTypeFloat) { _%>
+  <%_ } else if (field.fieldTypeFloat) { _%>
                 <%- fieldName %> float,
-              <%_ } else if (field.fieldTypeDouble) { _%>
+  <%_ } else if (field.fieldTypeDouble) { _%>
                 <%- fieldName %> double,
-              <%_ } else if (field.fieldTypeBigDecimal) { _%>
+  <%_ } else if (field.fieldTypeBigDecimal) { _%>
                 <%- fieldName %> decimal,
-              <%_ } else if (field.fieldTypeLocalDate) { _%>
+  <%_ } else if (field.fieldTypeLocalDate) { _%>
                 <%- fieldName %> date,
-              <%_ } else if (field.fieldTypeInstant) { _%>
+  <%_ } else if (field.fieldTypeInstant) { _%>
                 <%- fieldName %> timestamp,
-              <%_ } else if (field.fieldTypeDuration) { _%>
+  <%_ } else if (field.fieldTypeDuration) { _%>
                 <%- fieldName %> text,
-              <%_ } else if (field.fieldTypeZonedDateTime) { _%>
+  <%_ } else if (field.fieldTypeZonedDateTime) { _%>
                 <%- fieldName %> tuple<timestamp,varchar>,
-              <%_ } else if (field.fieldTypeLocalTime) { _%>
+  <%_ } else if (field.fieldTypeLocalTime) { _%>
                 <%- fieldName %> time,
-              <%_ } else if (field.fieldTypeBoolean) { _%>
+  <%_ } else if (field.fieldTypeBoolean) { _%>
                 <%- fieldName %> boolean,
-              <%_ } else if (field.fieldTypeByteBuffer) { _%>
-                <%_ if (!field.blobContentTypeText) { _%>
+  <%_ } else if (field.fieldTypeByteBuffer) { _%>
+    <%_ if (!field.blobContentTypeText) { _%>
                 <%- fieldName %> blob,
                 <%- fieldNameUnderscored %>_content_type text,
-                <%_ } else { _%>
+    <%_ } else { _%>
                 <%- fieldName %> text,
-                <%_ } _%>
-              <%_ } _%>
+    <%_ } _%>
+  <%_ } _%>
 <%_ } _%>
                 PRIMARY KEY(id)
             );
