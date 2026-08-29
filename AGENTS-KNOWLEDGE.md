@@ -164,7 +164,7 @@ webapp:build:prod`, serve `build/generated/webapp` with a tiny Node server that 
   in an `app_shared_*` chunk. The webpack bundler still lists every remote in `provideTranslateHttpLoader`.
 
 - Native federation shares only the package names listed in `shared` (from `shareAll` over `package.json`), and
-  the unused-dependency scan records the *imported specifier* — so `import dayjs from 'dayjs/esm'` never matches the
+  the unused-dependency scan records the _imported specifier_ — so `import dayjs from 'dayjs/esm'` never matches the
   `dayjs` key. Every shared mapping (`app/shared/date`, `app/shared/language`, … are built as separate bundles when the
   entity pages use them) then gets its own private dayjs copy without the plugins/locales registered by
   `app/config/dayjs`, which surfaces in Cypress as `TypeError: a.duration is not a function` in `app_shared_date-*.js`.
