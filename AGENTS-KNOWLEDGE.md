@@ -327,6 +327,22 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   prod script's factor 3 fails with `UnavailableException: Not enough replicas available for query at consistency
   QUORUM (2 required but only 1 alive)` and the e2e app never starts. `cassandra-cluster.yml` keeps the prod
   script.
+- The 2s default request timeout bites twice, and both are schema changes needing schema agreement, which does not
+  fit in 2s on a loaded CI runner. (1) `CassandraTestContainer.createKeyspace` runs `CREATE KEYSPACE` from
+  `containerIsStarted`; a `DriverTimeoutException` there makes testcontainers retry until the limit and surface the
+  misleading `ContainerLaunchException: Container startup failed for image cassandra:6.0`, so give that `CqlSession`
+  a `DriverConfigLoader` with `DefaultDriverOption.REQUEST_TIMEOUT`. (2) Liquibase's own connection goes through the
+  `cassandra-jdbc-wrapper`, which ignores the driver config and defaults to 2s, failing a changeSet with
+  `DatabaseException: ... Query timed out after PT2S [Failed SQL: (0) CREATE TABLE ...]`; fix it with the
+  `requesttimeout` **url** parameter on both generated jdbc urls (`LiquibaseConfiguration.java.ejs` at runtime and
+  `prodLiquibaseUrl` in `generators/liquibase/generator.ts` for the maven/gradle plugin). A symptom that reads as a
+  container or startup problem is usually this timeout.
+- Confirming an unfamiliar jdbc url parameter without guessing: `javap -p -constants
+  com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lists the real keys
+  (`KEY_REQUEST_TIMEOUT = "requesttimeout"`), and `javap -p -c .../SessionHolder.class` shows the unit —
+  `ChronoUnit.MILLIS` into `DefaultDriverOption.REQUEST_TIMEOUT`, applied only when positive. Prove it end to end by
+  setting the value to `1` in a generated app: the failure becomes `Query timed out after PT0.001S`, which confirms
+  both that the parameter is read and what unit it is in.
 - Verification recipe: generate a Maven Cassandra app and run `./mvnw verify` (Testcontainers `cassandra:6.0`).
   Do not run a second Cassandra container on the same Docker Desktop while the IT runs — the Testcontainers node
   dies with `Failed to commit memory`. `failsafe:integration-test` alone does not recompile edited sources; run
