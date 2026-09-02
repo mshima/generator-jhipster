@@ -270,6 +270,31 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `src/test/resources/config/application.yml`, then running one `*ResourceIT`.
 - Reactive applications cannot enable a cache provider — the cache generator throws
   (`generators/spring-boot/generators/cache/generator.ts`).
+- Reactive SQL persistence (`generators/spring-boot/generators/data-relational`) is plain Spring Data R2DBC. Entities
+  without eager to-one relationships, many-to-many link tables, `*WithEagerRelationships` APIs, JPA-metamodel
+  filtering or maps-id get a bare `R2dbcRepository` interface (`_entityClass_Repository_r2dbc.java.ejs`; decided by
+  `useSimpleR2dbcRepository()` in `entity-files.ts`, overridable per entity with `entityR2dbcRepository`). The others
+  get `<Entity>RepositoryInternal` plus `<Entity>RepositoryInternalImpl extends SimpleR2dbcRepository` (constructor
+  `R2dbcEntityTemplate, R2dbcConverter[, R2dbcDialect]`, picked up as a Spring Data fragment): to-one relationships
+  are populated after the entity query with one `Criteria.where("id").in(ids)` query per relationship, many-to-many
+  link tables are maintained with `DatabaseClient` inserts/deletes in `save`/`deleteById`, filtering turns the
+  JHipster `Filter`s into `Criteria` through the generated `repository/CriteriaBuilder` (entity property names, so the
+  custom converters apply), and sorting by a related property (`relationship.field`) falls back to a hand-written
+  `SELECT e.* … LEFT JOIN … ORDER BY` with `dialect.limit().getLimitOffset()`. The former `EntityManager`,
+  `*SqlHelper`, `rowmapper/*RowMapper`, `ColumnConverter` classes and the `UpdateMapper`/`SqlRenderer` beans are gone
+  (cleanup entries under `9.3.1`); ITs inject `R2dbcEntityTemplate em` and use `em.insert(entity)`,
+  `em.delete(X.class).all()` and `em.getDatabaseClient().sql("DELETE FROM <link table>")`.
+- Known reactive SQL limitations, visible with the `sqlfull` entity set and failing identically before and after the
+  R2DBC rewrite (so not regressions): entities without any field of their own (only an id and nullable to-one
+  relationships) fail on H2 with `INSERT INTO t VALUES (DEFAULT)` (Spring Data R2DBC omits null columns; PostgreSQL
+  accepts the statement) and `UPDATE contains no assignments` (`TestManyToOne`, `TestPagination`, `TestManyToMany`
+  PUT/PATCH, …); maps-id grandchildren fail because the IT creates the parent with `em.insert(createEntity(em))`,
+  bypassing the repository `save` that copies the maps-id id (`NULL not allowed for column "ID"`); entities with a
+  required many-to-many fail in `@AfterEach` because `repository.delete(entity)` runs the base
+  `SimpleR2dbcRepository.deleteById`, not the fragment override that clears the link table (FK violation), and the
+  leftover rows then break the following filter assertions (`Expected: is <1> but: was <2>`); the JPA-filtering IT of
+  an entity with several relationships to the same entity does not compile (duplicate `@Autowired` field, undefined
+  `<rel>Id` variable). CI's reactive sample (`webflux-psql` with the `sql` entity set) hits none of these.
 
 ### Cassandra migrations: Liquibase (default) and the CQL loader
 
@@ -384,6 +409,18 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   **current working directory**, not the `--project-folder` — run it from the target folder, or stage
   `.yo-rc.json` plus `.jhipster/*.json` manually and run plain `jhipster` there (with `.jhipster/` present the app
   generator regenerates the entities; `jhipster entities` is the explicit form). `CI=true` suppresses prompts.
+- Reactive SQL sample without Docker: copy `test-integration/samples/webflux-psql/.yo-rc.json` (h2Disk dev, postgresql
+  prod) plus the `.jhipster/*.json` entities; ITs run with the `testdev` profile against H2
+  (`application-testdev.yml`), the Testcontainers path only kicks in with `testprod`. For a server-only run set
+  `"clientFramework": "no"` and `"enableTranslation": false` in the copied `.yo-rc.json` instead of passing
+  `--skip-client`: with translations enabled `--skip-client` dies in `jhipster:languages#updateLanguages` (`Unable to
+  find …/find-language-from-key.pipe.ts`). `--skip-prompts` is not a CLI flag (`CI=true` plus `--force` is enough).
+  `./mvnw -ntp -o verify -Dskip.installnodenpm -Dskip.npm -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false
+  -Dit.test=AResourceIT,BResourceIT` runs a subset of ITs; per-class reports land in `target/failsafe-reports/*.txt`.
+  For the "identical output" baseline prefer a detached worktree (`git worktree add --detach
+  <scratch>/base/generator-jhipster HEAD`, symlink `node_modules` from the main checkout) over `git stash`: when a
+  long generation is killed by a tool timeout before `git stash pop` runs, the working tree is silently left on the
+  baseline.
 - Runtime repro of microfrontends without Docker (Angular and React): build gateway + microservices (Gradle output
   is `build/generated/webapp`, Maven `target/classes/static`) or download the `app-<sample>` CI artifact (it
   contains the generated apps) and `npm install` at the workspace root; serve the gateway at `/` and each
