@@ -274,16 +274,22 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   without eager to-one relationships, many-to-many link tables, `*WithEagerRelationships` APIs, JPA-metamodel
   filtering or maps-id get a bare `R2dbcRepository` interface (`_entityClass_Repository_r2dbc.java.ejs`; decided by
   `useSimpleR2dbcRepository()` in `entity-files.ts`, overridable per entity with `entityR2dbcRepository`). The others
-  get `<Entity>RepositoryInternal` plus `<Entity>RepositoryInternalImpl extends SimpleR2dbcRepository` (constructor
-  `R2dbcEntityTemplate, R2dbcConverter[, R2dbcDialect]`, picked up as a Spring Data fragment): to-one relationships
-  are populated after the entity query with one `Criteria.where("id").in(ids)` query per relationship, many-to-many
-  link tables are maintained with `DatabaseClient` inserts/deletes in `save`/`deleteById`, filtering turns the
-  JHipster `Filter`s into `Criteria` through the generated `repository/CriteriaBuilder` (entity property names, so the
-  custom converters apply), and sorting by a related property (`relationship.field`) falls back to a hand-written
-  `SELECT e.* … LEFT JOIN … ORDER BY` with `dialect.limit().getLimitOffset()`. The former `EntityManager`,
-  `*SqlHelper`, `rowmapper/*RowMapper`, `ColumnConverter` classes and the `UpdateMapper`/`SqlRenderer` beans are gone
-  (cleanup entries under `9.3.1`); ITs inject `R2dbcEntityTemplate em` and use `em.insert(entity)`,
-  `em.delete(X.class).all()` and `em.getDatabaseClient().sql("DELETE FROM <link table>")`.
+  get `<Entity>RepositoryInternal` plus a thin `<Entity>RepositoryInternalImpl extends AbstractR2dbcRepository`
+  fragment (constructor `R2dbcEntityTemplate, R2dbcConverter, R2dbcDialect`). The generic machinery lives in the
+  once-per-app `repository/AbstractR2dbcRepository` (`AbstractR2dbcRepository_reactive.java.ejs`, written when any
+  entity needs a fragment) which extends `SimpleR2dbcRepository`: `findAll`/`findById`/`findAllBy(Pageable)` run
+  `populateRelationships` after the query, `populate(entities, fkGetter, RelatedType.class, relatedIdGetter, setter)`
+  loads a to-one relationship with one `Criteria.where(id).in(ids)` query, `save`/`deleteById` maintain the
+  `LinkTable` records returned by `linkTables()` through `DatabaseClient`, `findAllBy(Criteria,
+  Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Criteria` from the JHipster `Filter`s
+  with the generated `repository/CriteriaBuilder`, using entity property names so the custom converters apply), and
+  sorting by a related property (`relationship.field`) falls back to the fragment's
+  `selectWithRelationsSql()`/`sortColumns()` constants (`SELECT e.* … LEFT JOIN … ORDER BY` plus
+  `dialect.limit().getLimitOffset()`). The per-entity template therefore only emits those constants,
+  `populateRelationships`, `linkTables()`, the maps-id `save` override and `buildCriteria`. The former
+  `EntityManager`, `*SqlHelper`, `rowmapper/*RowMapper`, `ColumnConverter` classes and the
+  `UpdateMapper`/`SqlRenderer` beans are gone (cleanup entries under `9.3.1`); ITs inject `R2dbcEntityTemplate em` and
+  use `em.insert(entity)`, `em.delete(X.class).all()` and `em.getDatabaseClient().sql("DELETE FROM <link table>")`.
 - Known reactive SQL limitations, visible with the `sqlfull` entity set and failing identically before and after the
   R2DBC rewrite (so not regressions): entities without any field of their own (only an id and nullable to-one
   relationships) fail on H2 with `INSERT INTO t VALUES (DEFAULT)` (Spring Data R2DBC omits null columns; PostgreSQL
