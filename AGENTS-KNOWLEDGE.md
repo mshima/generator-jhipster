@@ -280,13 +280,13 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   entity needs a fragment) which extends `SimpleR2dbcRepository`: `findAll`/`findById`/`findAllBy(Pageable)` run
   `populateRelationships` after the query, `populate(entities, fkGetter, RelatedType.class, relatedIdGetter, setter)`
   loads a to-one relationship with one `Criteria.where(id).in(ids)` query, `save`/`deleteById` maintain the
-  `LinkTable` records returned by `linkTables()` through `DatabaseClient`, `findAllBy(Criteria,
+  `JoinTable` records returned by `joinTables()` through `DatabaseClient`, `findAllBy(Criteria,
   Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Criteria` from the JHipster `Filter`s
   with the generated `repository/CriteriaBuilder`, using entity property names so the custom converters apply), and
   sorting by a related property (`relationship.field`) falls back to the fragment's
   `selectWithRelationsSql()`/`sortColumns()` constants (`SELECT e.* … LEFT JOIN … ORDER BY` plus
   `dialect.limit().getLimitOffset()`). The per-entity template therefore only emits those constants,
-  `populateRelationships`, `linkTables()`, the maps-id `save` override and `buildCriteria`. The former
+  `populateRelationships`, `joinTables()`, the maps-id `save` override and `buildCriteria`. The former
   `EntityManager`, `*SqlHelper`, `rowmapper/*RowMapper`, `ColumnConverter` classes and the
   `UpdateMapper`/`SqlRenderer` beans are gone (cleanup entries under `9.3.1`); ITs inject `R2dbcEntityTemplate em` and
   use `em.insert(entity)`, `em.delete(X.class).all()` and `template.getDatabaseClient().sql("DELETE FROM <link table>")`.
