@@ -148,7 +148,7 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
     `customParseFormat` or the locales, so without the opt-out (`removeUnusedDeps` keeps an entry only when
     `includeSecondaries` is truthy — the same trick `@angular/core` uses) those entries are dropped from the import
     map while `bootstrap-*.js` still imports them bare, and the app dies at startup with `Unable to resolve
-    specifier 'dayjs/esm/plugin/customParseFormat'` (every Cypress spec fails on `[data-cy="navbar"]`). Verify
+specifier 'dayjs/esm/plugin/customParseFormat'` (every Cypress spec fails on `[data-cy="navbar"]`). Verify
     both halves after `npm run webapp:prod`: `remoteEntry.json` lists all six `dayjs/esm…` entries with existing
     files, `grep -l '$isDayjsObject' build/generated/webapp/*.js` lists a single file, **and** the app bootstraps —
     serve `build/generated/webapp` with a stub (401 `/api/account`, `/management/info`) and run a one-test Cypress
@@ -188,7 +188,7 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   (`development`/`production` overriding `target` to `serve-original:<config>`), otherwise Cypress' `coverage`
   configuration fails with "Configuration 'development' for target 'serve' … is not set". For microfrontend Angular
   apps the cypress generator therefore emits the generic script (`concurrently … npm:start "wait-on … && npm run
-  e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because the Angular dev server binds
+e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because the Angular dev server binds
   `localhost` only (`[::1]` on macOS — `127.0.0.1` never answers; Vite uses `host: true`, so Vue/React keep
   `127.0.0.1`). Local check: stub backend on 8080, `npm start`, `npx wait-on http-get://localhost:4200`, then a
   one-test navbar Cypress spec with `-c baseUrl=http://localhost:4200`.
@@ -279,9 +279,14 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   once-per-app `repository/AbstractR2dbcRepository` (`AbstractR2dbcRepository_reactive.java.ejs`, written when any
   entity needs a fragment) which extends `SimpleR2dbcRepository`: `findAll`/`findById`/`findAllBy(Pageable)` run
   `populateRelationships` after the query, `populate(entities, fkGetter, RelatedType.class, relatedIdGetter, setter)`
-  loads a to-one relationship with one `Criteria.where(id).in(ids)` query, `save`/`deleteById` maintain the
+  loads a to-one relationship with one `Criteria.where(id).in(ids)` query, `populate(entities, <REL>_JOIN_TABLE,
+RelatedType.class, relatedIdGetter, setter)` loads an owner-side many-to-many with two queries (join table rows
+  `IN (:entityIds)` via `DatabaseClient`, then the related entities), `reference(entities, fkGetter, Related::new,
+Related::setId, setter)` fills a non-eager to-one with an id-only related entity and no query (the same JSON an
+  imperative app produces for a lazy relationship, thanks to `SERIALIZE_IDENTIFIER_FOR_LAZY_NOT_LOADED_OBJECTS` in
+  `JacksonHibernateConfiguration`), `save`/`deleteById` maintain the
   `JoinTable` records returned by `joinTables()` through `DatabaseClient`, `findAllBy(Criteria,
-  Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Criteria` from the JHipster `Filter`s
+Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Criteria` from the JHipster `Filter`s
   with the generated `repository/CriteriaBuilder`, using entity property names so the custom converters apply), and
   sorting by a related property (`relationship.field`) falls back to the fragment's
   `selectWithRelationsSql()`/`sortColumns()` constants (`SELECT e.* … LEFT JOIN … ORDER BY` plus
@@ -290,6 +295,23 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `EntityManager`, `*SqlHelper`, `rowmapper/*RowMapper`, `ColumnConverter` classes and the
   `UpdateMapper`/`SqlRenderer` beans are gone (cleanup entries under `9.3.1`); ITs inject `R2dbcEntityTemplate em` and
   use `em.insert(entity)`, `em.delete(X.class).all()` and `template.getDatabaseClient().sql("DELETE FROM <link table>")`.
+- Which reactive relationships are loaded is decided by `relationship.relationshipEagerLoad` (`entity.eagerRelations`),
+  exactly like the imperative entity graphs: eager to-one (display field differs from the id, or explicit
+  `relationshipEagerLoad`) is queried, non-eager to-one is referenced by id, owner-side many-to-many (always eager) is
+  populated from the join table. Eager inverse sides (one-to-many, non-owner one-to-one) are still not populated in
+  reactive apps. The former `reactiveEagerRelations`/`regularEagerRelations`/`reactiveRegularEagerRelations` entity
+  properties were removed (unused or misnamed); where the templates need "to-one with the foreign key on this table"
+  (criteria filtering, `SORT_COLUMNS`, `filterTestableRelationships` in `_entityClass_ResourceIT`) they use
+  `relationships.filter(rel => rel.ownerSide && !rel.collection)`. `SELECT_WITH_RELATIONS_SQL` only joins eager
+  to-one tables; a sort by a non-eager `rel.id` maps to `e.<fk column>` without a join. The `sql` entity set has no
+  id-only to-one relationship, so to exercise `reference()` set `"otherEntityField": "id"` on `Operation.bankAccount`
+  in a copied `.jhipster/Operation.json`; a small IT saving an `Operation` with a `BankAccount` and two `Label`s and
+  reading it back through `findById`, `findAllBy(PageRequest.of(0, 10, Sort.by(DESC, "bankAccount.id")))` and
+  `findAll()` verifies the id-only reference, the populated `labels` and the join-free sort.
+- `entityPackage` entities whose ITs reference another package (`User`, other `*ResourceIT.createEntity()`) do not
+  test-compile: `_entityClass_ResourceIT.java.ejs` imports related domain classes and repositories from
+  `entityAbsolutePackage` instead of `otherEntity.entityAbsolutePackage` and never imports other `*ResourceIT`
+  classes. Pre-existing; keep verification samples in a single package unless that is what is being fixed.
 - Known reactive SQL limitations, visible with the `sqlfull` entity set and failing identically before and after the
   R2DBC rewrite (so not regressions): entities without any field of their own (only an id and nullable to-one
   relationships) fail on H2 with `INSERT INTO t VALUES (DEFAULT)` (Spring Data R2DBC omits null columns; PostgreSQL
@@ -356,7 +378,7 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
 - Changelog lock, part 2 — quorum: the LWT needs a quorum of the keyspace replicas, so the single-node docker
   compose (`cassandra.yml.ejs`) must create the keyspace with `create-keyspace.cql` (replication factor 1); the
   prod script's factor 3 fails with `UnavailableException: Not enough replicas available for query at consistency
-  QUORUM (2 required but only 1 alive)` and the e2e app never starts. `cassandra-cluster.yml` keeps the prod
+QUORUM (2 required but only 1 alive)` and the e2e app never starts. `cassandra-cluster.yml` keeps the prod
   script.
 - The 2s default request timeout bites twice, and both are schema changes needing schema agreement, which does not
   fit in 2s on a loaded CI runner. (1) `CassandraTestContainer.createKeyspace` runs `CREATE KEYSPACE` from
@@ -369,7 +391,7 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `prodLiquibaseUrl` in `generators/liquibase/generator.ts` for the maven/gradle plugin). A symptom that reads as a
   container or startup problem is usually this timeout.
 - Confirming an unfamiliar jdbc url parameter without guessing: `javap -p -constants
-  com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lists the real keys
+com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lists the real keys
   (`KEY_REQUEST_TIMEOUT = "requesttimeout"`), and `javap -p -c .../SessionHolder.class` shows the unit —
   `ChronoUnit.MILLIS` into `DefaultDriverOption.REQUEST_TIMEOUT`, applied only when positive. Prove it end to end by
   setting the value to `1` in a generated app: the failure becomes `Query timed out after PT0.001S`, which confirms
@@ -420,11 +442,11 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   (`application-testdev.yml`), the Testcontainers path only kicks in with `testprod`. For a server-only run set
   `"clientFramework": "no"` and `"enableTranslation": false` in the copied `.yo-rc.json` instead of passing
   `--skip-client`: with translations enabled `--skip-client` dies in `jhipster:languages#updateLanguages` (`Unable to
-  find …/find-language-from-key.pipe.ts`). `--skip-prompts` is not a CLI flag (`CI=true` plus `--force` is enough).
+find …/find-language-from-key.pipe.ts`). `--skip-prompts` is not a CLI flag (`CI=true` plus `--force` is enough).
   `./mvnw -ntp -o verify -Dskip.installnodenpm -Dskip.npm -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false
-  -Dit.test=AResourceIT,BResourceIT` runs a subset of ITs; per-class reports land in `target/failsafe-reports/*.txt`.
+-Dit.test=AResourceIT,BResourceIT` runs a subset of ITs; per-class reports land in `target/failsafe-reports/*.txt`.
   For the "identical output" baseline prefer a detached worktree (`git worktree add --detach
-  <scratch>/base/generator-jhipster HEAD`, symlink `node_modules` from the main checkout) over `git stash`: when a
+<scratch>/base/generator-jhipster HEAD`, symlink `node_modules` from the main checkout) over `git stash`: when a
   long generation is killed by a tool timeout before `git stash pop` runs, the working tree is silently left on the
   baseline.
 - Runtime repro of microfrontends without Docker (Angular and React): build gateway + microservices (Gradle output
@@ -470,10 +492,10 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   reading CI logs. When a regression window is known, `git log upstream/main --since=… --until=…` plus generating
   the sample at both ends of the window and diffing the outputs pinpoints the offending commit quickly.
 - `stack-*` / client jobs on Node 22 dying with exit code 134 and `FATAL ERROR: v8::Module::IsGraphAsync must be
-  used on an instantiated module` during `jhipster.cjs generate-sample` is the Node 22 `require(esm)` crash. The
+used on an instantiated module` during `jhipster.cjs generate-sample` is the Node 22 `require(esm)` crash. The
   workflows' workaround must be a job-level `env: NODE_OPTIONS: …--no-experimental-require-module`; writing it with
   `echo "NODE_OPTIONS=…" >> $GITHUB_ENV` is silently rejected by the runner (`##[error]Can't store NODE_OPTIONS output
-  parameter using '$GITHUB_ENV' command`, step still shows ✓) and the crash then appears nondeterministically.
+parameter using '$GITHUB_ENV' command`, step still shows ✓) and the crash then appears nondeterministically.
 - Vite dev-server e2e flakiness (`devserver.yml`, Vue): two dev-only effects hit the Cypress login tests. (1) A
   dependency first imported by a lazily loaded module (`deepmerge` from the i18n bundle) is discovered at runtime,
   Vite re-optimizes and reloads the page — fixed with `optimizeDeps.entries` covering the app sources.
