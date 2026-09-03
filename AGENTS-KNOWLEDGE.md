@@ -343,7 +343,10 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
   (`builder.withKeyspace((CqlIdentifier) null).build()`), runs `CREATE KEYSPACE IF NOT EXISTS … WITH replication =
 <application.cassandra.keyspace-replication>` (a `String` added to `ApplicationProperties` through
   `source.addApplicationPropertiesClass`, default `SimpleStrategy`/factor 1, documented in `application-prod.yml`),
-  then binds the builder back to `spring.cassandra.keyspace-name`. Boot's `cassandraSessionBuilder` applies
+  then binds the builder back to `spring.cassandra.keyspace-name`. The bean is
+  `@ConditionalOnProperty(name = "application.cassandra.create-keyspace", havingValue = "true", matchIfMissing = true)`
+  (a `Boolean createKeyspace = true` in the same `ApplicationProperties.Cassandra` class) so an externally managed
+  keyspace can turn it off. Boot's `cassandraSessionBuilder` applies
   customizers after `withKeyspace`, so the customizer must restore the keyspace. Ordering: user `@Configuration`
   beans are instantiated before auto-configured ones, so the `liquibase` bean would run before `cassandraSession`
   and fail on the missing keyspace — `LiquibaseConfiguration` therefore injects the `CqlSession` and reads the
