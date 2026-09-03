@@ -337,13 +337,30 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
   (transitive from `liquibase-cassandra`) from `CassandraConnectionDetails` + `spring.cassandra.keyspace-name`, so
   Testcontainers' `@ServiceConnection` works without a `spring.liquibase.url`. Liquibase runs synchronously and
   the Cassandra `UserRepository`/entity repositories are `@DependsOn("liquibase")` because they prepare statements
-  at startup. The keyspace itself is still created outside Liquibase (`config/cql/create-keyspace*.cql` via the
-  docker `cassandra-migration` service, `CassandraTestContainer.createKeyspace` in tests).
+  at startup. Liquibase cannot create the keyspace (the jdbc url and the `DATABASECHANGELOG*` tables live inside
+  it), so the application creates it itself: `DatabaseConfiguration.java.ejs` declares a
+  `CqlSessionBuilderCustomizer` bean (`keyspaceCreator`) that opens a keyspace-less session from the same builder
+  (`builder.withKeyspace((CqlIdentifier) null).build()`), runs `CREATE KEYSPACE IF NOT EXISTS … WITH replication =
+  <application.cassandra.keyspace-replication>` (a `String` added to `ApplicationProperties` through
+  `source.addApplicationPropertiesClass`, default `SimpleStrategy`/factor 1, documented in `application-prod.yml`),
+  then binds the builder back to `spring.cassandra.keyspace-name`. Boot's `cassandraSessionBuilder` applies
+  customizers after `withKeyspace`, so the customizer must restore the keyspace. Ordering: user `@Configuration`
+  beans are instantiated before auto-configured ones, so the `liquibase` bean would run before `cassandraSession`
+  and fail on the missing keyspace — `LiquibaseConfiguration` therefore injects the `CqlSession` and reads the
+  keyspace from `session.getKeyspace()` instead of `CassandraProperties`. Consequently the docker
+  `cassandra-migration` service, its `Cassandra-Migration.Dockerfile`/`autoMigrate.sh`/`execute-cql.sh`, the
+  `create-keyspace*.cql`/`drop-keyspace.cql` resources, the `docker-compose` merge of `cassandra-migration.yml` and
+  `CassandraTestContainer.createKeyspace` are all `databaseMigrationLoader`-only; `generators/docker/generator.ts`
+  and `data-cassandra/generator.ts` remove the previously generated files through `'9.2.1'` `control.cleanupFiles`
+  entries gated on `databaseTypeCassandra && databaseMigrationLiquibase`. The Kubernetes generator never created a
+  keyspace, so application-side creation is what makes Liquibase Cassandra apps start there.
 - The legacy CQL migration is still selectable as `databaseMigration: 'loader'`, mirroring how Neo4j picks between
   `neo4j-migrations` and Liquibase through the same option. `loader` restores `config/cql/changelog/*` (README,
   `00000000000000_create-tables.cql`, `00000000000001_insert_default_users.cql`, per-entity `added_entity.cql`),
-  the `ResourceKeyspacePopulator` in `CassandraTestContainer`, and the prod keyspace script in `cassandra.yml.ejs`;
-  it also drops the `@DependsOn("liquibase")` on the repositories, since no such bean exists. Every liquibase-only
+  the `ResourceKeyspacePopulator` and `createKeyspace` in `CassandraTestContainer`, the `config/cql/*keyspace*.cql`
+  scripts and the `cassandra-migration` docker service (with `create-keyspace-prod.cql`) in `cassandra.yml.ejs` and
+  `cassandra-cluster.yml.ejs`; it also drops the `@DependsOn("liquibase")` on the repositories, since no such bean
+  exists. Every liquibase-only
   branch is therefore gated on `databaseMigrationLiquibase`, and the `'9.2.1'` `control.cleanupFiles` entry for the
   CQL changelogs uses the `[condition, ...files]` array form so the files survive under `loader`.
 - Existing applications keep the loader: `data-cassandra`'s `configuring` runs a `configMigration` task that sets
@@ -361,7 +378,11 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
   run `npm run update-snapshot -- <spec>`, then `diff <(git show upstream/main:<snap>) <snap>`. For `loader` the only
   difference was the echoed `"databaseMigration": "loader"` in the samples matrix — every generated file path matched
   upstream. Note `getStateSnapshot()` records paths and state, not contents, so pair it with a throwaway spec that
-  greps the rendered files when the change is inside a template.
+  greps the rendered files when the change is inside a template. To review rendered files by eye, dump
+  `runResult.getSnapshot()` (its entries carry `contents`) to a scratch directory from a throwaway spec; copying
+  `runResult.cwd` yields nothing because `runJHipster` keeps the files in memory unless `.commitFiles()` is used, and
+  a bare `helpers.runJHipster('server')` needs `skipClient: true` or the languages generator fails on missing
+  webapp files.
 - `prepareSqlApplicationProperties` (`data-relational/support/application-properties.ts`) must run for Cassandra
   too (it sets `devJdbcDriver`/`prodJdbcDriver` to the wrapper driver and empty credentials), otherwise the Gradle
   `liquibase.gradle.ejs` rendering throws `ReferenceError: devJdbcDriver`. `cassandraKeyspaceName` is an
@@ -375,16 +396,18 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
   until `Could not acquire change log lock. Currently locked by <own host>` (upstream
   liquibase/liquibase-cassandra#379, fix PR #492 unreleased). The Liquibase option set returns `-1`, which the
   extension verifies against `LOCKEDBY`.
-- Changelog lock, part 2 — quorum: the LWT needs a quorum of the keyspace replicas, so the single-node docker
-  compose (`cassandra.yml.ejs`) must create the keyspace with `create-keyspace.cql` (replication factor 1); the
-  prod script's factor 3 fails with `UnavailableException: Not enough replicas available for query at consistency
-QUORUM (2 required but only 1 alive)` and the e2e app never starts. `cassandra-cluster.yml` keeps the prod
-  script.
+- Changelog lock, part 2 — quorum: the LWT needs a quorum of the keyspace replicas, so on the single-node docker
+  compose the keyspace must have replication factor 1; a factor of 3 fails with `UnavailableException: Not enough
+  replicas available for query at consistency QUORUM (2 required but only 1 alive)` and the e2e app never starts.
+  This is why the application-created keyspace defaults to `{'class': 'SimpleStrategy', 'replication_factor': 1}`
+  and a real cluster is expected to pre-create the keyspace (the `IF NOT EXISTS` is then a no-op) or override
+  `application.cassandra.keyspace-replication`.
 - The 2s default request timeout bites twice, and both are schema changes needing schema agreement, which does not
-  fit in 2s on a loaded CI runner. (1) `CassandraTestContainer.createKeyspace` runs `CREATE KEYSPACE` from
-  `containerIsStarted`; a `DriverTimeoutException` there makes testcontainers retry until the limit and surface the
-  misleading `ContainerLaunchException: Container startup failed for image cassandra:6.0`, so give that `CqlSession`
-  a `DriverConfigLoader` with `DefaultDriverOption.REQUEST_TIMEOUT`. (2) Liquibase's own connection goes through the
+  fit in 2s on a loaded CI runner. (1) `CREATE KEYSPACE`: the application's `keyspaceCreator` customizer uses a
+  `SimpleStatement…setTimeout(Duration.ofSeconds(20))`, and the loader-only `CassandraTestContainer.createKeyspace`
+  (run from `containerIsStarted`, where a `DriverTimeoutException` makes testcontainers retry until the limit and
+  surface the misleading `ContainerLaunchException: Container startup failed for image cassandra:6.0`) gives its
+  `CqlSession` a `DriverConfigLoader` with `DefaultDriverOption.REQUEST_TIMEOUT`. (2) Liquibase's own connection goes through the
   `cassandra-jdbc-wrapper`, which ignores the driver config and defaults to 2s, failing a changeSet with
   `DatabaseException: ... Query timed out after PT2S [Failed SQL: (0) CREATE TABLE ...]`; fix it with the
   `requesttimeout` **url** parameter on both generated jdbc urls (`LiquibaseConfiguration.java.ejs` at runtime and
