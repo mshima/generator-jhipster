@@ -472,6 +472,28 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   (`LockServiceFactory`, `Executor.queryForList` on `DATABASECHANGELOGLOCK`) on the app's
   `dependency:build-classpath -Dmdep.includeScope=test` classpath.
 
+## Blob fields and content types
+
+- Every `Blob`/`AnyBlob`/`ImageBlob` field carries a `<field>ContentType` `String` companion
+  (`field.fieldWithContentType`, `field.contentTypeFieldName` in `base-application/support/prepare-field.ts`).
+  The shared client helper `openFile` in
+  `generators/client/generators/common/templates/src/main/webapp/app/shared/jhipster/data-utils.ts.ejs` (Angular's
+  `DataUtils`, Vue's `data-utils.service.ts` and the React entity pages all delegate to it) builds a `Blob` from the
+  stored bytes and opens it with `globalThis.open(URL.createObjectURL(blob))`. A `blob:` document is same-origin with
+  the page and inherits its CSP, and the generated CSP allows `'unsafe-inline'`, so a stored `text/html` (or SVG/XML)
+  blob was a stored XSS against whoever clicked "open" (advisory GHSA-9ffp-22j7-56r2, present since JHipster 5). The
+  fix on `advisory-fix-1`: `toOpenableContentType` renders only `application/pdf`, `text/plain`, `image/*`, `audio/*`,
+  `video/*` and never a `+xml` type; everything else (including an empty type, which the browser would sniff) becomes
+  `application/octet-stream`, i.e. a download.
+- Server side, `javaContentTypeValidatorsPartial` (`generators/java/application.ts`, `mutateValidatedField`, applied in
+  `java/generators/domain/generator.ts` to every field with `fieldValidate || fieldWithContentType`) renders a
+  `@Pattern` that rejects `text/html`, `application/xhtml+xml`, `image/svg+xml`, `text/xml` and `application/xml`
+  (case-insensitive, with or without parameters) on the domain content type (via the
+  `field<Name>ContentTypeAnnotationSection` fragment of `_persistClass_.java.jhi.jakarta_validation.ejs`) and on the
+  DTO. `anyPropertyHasValidation` is also true for entities that only have blob fields, which is what puts `@Valid` on
+  the REST resource and the `jakarta.validation` import on the domain class. The entity ITs use `image/jpg`/`image/png`,
+  Liquibase fake data `image/png` and Cypress `'unknown'`, all of which pass the deny list.
+
 ## Server-side user caches
 
 - Cache names: `usersByLogin` / `usersByEmail` (constants on `UserRepository`).
