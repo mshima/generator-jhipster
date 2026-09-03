@@ -385,6 +385,21 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
   and `data-cassandra/generator.ts` remove the previously generated files through `'9.2.1'` `control.cleanupFiles`
   entries gated on `databaseTypeCassandra && databaseMigrationLiquibase`. The Kubernetes generator never created a
   keyspace, so application-side creation is what makes Liquibase Cassandra apps start there.
+- Cassandra user lookup tables and the reactive `save`: `user_by_login` and `user_by_email` are declared
+  `PRIMARY KEY(login, id)` / `PRIMARY KEY(email, id)` (both in `create-tables.cql.ejs` and
+  `initial_schema_cassandra.xml.ejs`), so `id` is a clustering column and a login can hold several rows.
+  `UserRepository.findOneFromIndex` reads only the first row (`rs.one()` / `rows().next()`) and resolves it with
+  `findById`, so a stale `(login, oldId)` row whose user no longer exists hides the live one whenever `oldId` sorts
+  first — random UUID ids make that a coin flip. The imperative `save` deletes the old lookup rows before its insert
+  batch, but the reactive `save` built its cleanup as `Flux<ReactiveResultSet> deleteOps = Flux.empty()` followed by
+  `deleteOps.mergeWith(session.execute(...))` whose result was discarded, so no old row was ever deleted (fixed on the
+  `cassandra-liquibase` branch by assigning `deleteOps = deleteOps.mergeWith(...)`). Symptom: in a reactive Cassandra
+  gateway `UserResourceIT.deleteUser` fails with `Expected size: 4 but was: 5` and `johndoe` still listed, in about
+  half of the runs — JUnit's default method order runs `updateUserLogin` (login `johndoe` → `jhipster`) right before
+  `deleteUser`, leaving `(johndoe, oldId)` behind, and the `DELETE /api/admin/users/johndoe` then resolves the stale id,
+  finds no user and answers 204 without deleting. The reactive Cassandra + JWT gateway only entered CI when the
+  `ms-react-consul-jwt-cassandra-redis` JDL switched its gateway from `prodDatabaseType postgresql` to
+  `databaseType cassandra` on that branch, so `gh run list -w react.yml -b main` history of the job is not comparable.
 - The legacy CQL migration is still selectable as `databaseMigration: 'loader'`, mirroring how Neo4j picks between
   `neo4j-migrations` and Liquibase through the same option. `loader` restores `config/cql/changelog/*` (README,
   `00000000000000_create-tables.cql`, `00000000000001_insert_default_users.cql`, per-entity `added_entity.cql`),
@@ -534,7 +549,12 @@ find …/find-language-from-key.pipe.ts`). `--skip-prompts` is not a CLI flag (`
   application that comes out byte-identical cannot have been broken by the PR, which usually means a Testcontainers or
   runner problem. Typical symptoms: `ContainerLaunchException ... RetryCountExceededException` with
   `DriverTimeoutException: Query timed out after PT2S` (the container never passed its readiness probe), or a 500 whose
-  body reads `Cannot connect to localhost/<unresolved>:<mapped-port>` (the container died or was reaped mid-run).
+  body reads `Cannot connect to localhost/<unresolved>:<mapped-port>`. That string is r2dbc-postgresql's
+  `PostgresConnectionException` (no Cassandra driver or Spring Data Cassandra class produces it), so it identifies an
+  R2DBC application whose PostgreSQL container died or was reaped mid-run — it was the recurring
+  `CucumberTest > User management > Retrieve users` failure of the `ms-react-consul-jwt-cassandra-redis` gateway while
+  that gateway was still a PostgreSQL app. The `.yo-rc.json` inside the `app-<sample>` artifact tells which database the
+  failing application was really generated with.
   Cross-check `gh run list -w <workflow>.yml -b main` — a consistently green main means the sample is not routinely flaky
   and the run itself was degraded.
 
