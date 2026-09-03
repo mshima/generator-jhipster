@@ -339,12 +339,17 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
 !reactive`). The `user` columns `password`/`activation_key`/`reset_key`/`reset_date` stay unconditional
   because `User.java.ejs` maps them unconditionally. The per-entity changelogs
   (`data-cassandra/templates/.../config/liquibase/changelog/added_entity.xml.ejs`, registered through
-  `source.addLiquibaseChangelog`) still wrap CQL in `<sql splitStatements="true" endDelimiter=";"><![CDATA[…]]></sql>`
-  because Liquibase's `UUIDType` renders `uuid` as `char(36)` on Cassandra (only `text` has a Cassandra data type
+  `source.addLiquibaseChangelog`) are `<createTable>` changes too, with the CQL type per field type computed in the
+  template. Liquibase's `UUIDType` renders `uuid` as `char(36)` on Cassandra (only `text` has a Cassandra data type
   in `liquibase-cassandra` 5.0.4; unknown names such as `timeuuid`, `set<text>`, `tuple<timestamp,varchar>` pass
-  through as `UnknownType`, known ones render uppercase, which CQL accepts). `createTable ifNotExists="true"` is
-  silently dropped because `Database.supportsCreateIfNotExists` defaults to `false` and `CassandraDatabase` does not
-  override it; no precondition replaces it, the changelog table already records whether the changeSet ran.
+  through as `UnknownType`, known ones render uppercase, which CQL accepts), and a dbms-scoped
+  `<property name="uuidType" value="uuid" dbms="cassandra"/>` does not help because the substituted `uuid` is
+  parsed again into `UUIDType`. Cassandra entities default to a UUID id (`defaultPrimaryKeyType` in
+  `generators/server/support/database.ts`), so the entity changeSet appends
+  `<modifySql><replace replace="char(36)" with="uuid"/></modifySql>` whenever a field is a UUID; the proper fix is a
+  `CassandraUuidDataType` in `liquibase-cassandra`. `createTable ifNotExists="true"` is silently dropped because
+  `Database.supportsCreateIfNotExists` defaults to `false` and `CassandraDatabase` does not override it; no
+  precondition replaces it, the changelog table already records whether the changeSet ran.
   The `liquibase-cassandra` extension only swaps the runner: the physical model (`user`, `user_by_*` lookup tables,
   `authorities set<text>`, entity tables with CQL types) is unchanged.
 - Recipe to see the CQL Liquibase will emit for a changelog without a database: resolve a classpath with a scratch
