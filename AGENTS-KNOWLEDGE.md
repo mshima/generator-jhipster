@@ -328,11 +328,27 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
 
 - Design: `databaseMigration` defaults to `liquibase` for Cassandra; `data-cassandra` composes
   `jhipster:spring-boot:liquibase`. The initial schema (`liquibase/templates/.../initial_schema_cassandra.xml.ejs`)
-  and the per-entity changelogs (`data-cassandra/templates/.../config/liquibase/changelog/added_entity.xml.ejs`,
-  registered through `source.addLiquibaseChangelog`) wrap the former CQL in
-  `<sql splitStatements="true" endDelimiter=";"><![CDATA[…]]></sql>` changeSets (CDATA because CQL contains
-  `set<text>`/`tuple<…>`). The `liquibase-cassandra` extension only swaps the runner: the physical model (`user`,
-  `user_by_*` lookup tables, `authorities set<text>`, entity tables with CQL types) is unchanged.
+  uses regular `<createTable>`/`<insert>` changes (CQL collection types are escaped in the `type` attribute:
+  `set&lt;text&gt;`); the per-entity changelogs
+  (`data-cassandra/templates/.../config/liquibase/changelog/added_entity.xml.ejs`, registered through
+  `source.addLiquibaseChangelog`) still wrap CQL in `<sql splitStatements="true" endDelimiter=";"><![CDATA[…]]></sql>`
+  because Liquibase's `UUIDType` renders `uuid` as `char(36)` on Cassandra (only `text` has a Cassandra data type
+  in `liquibase-cassandra` 5.0.4; unknown names such as `timeuuid`, `set<text>`, `tuple<timestamp,varchar>` pass
+  through as `UnknownType`, known ones render uppercase, which CQL accepts). `createTable ifNotExists="true"` is
+  silently dropped because `Database.supportsCreateIfNotExists` defaults to `false` and `CassandraDatabase` does not
+  override it, so the initial schema changeSet uses a `<preConditions onFail="MARK_RAN"><not><tableExists
+tableName="user"/></not></preConditions>` instead (`TableSnapshotGeneratorCassandra` backs `tableExists`).
+  The `liquibase-cassandra` extension only swaps the runner: the physical model (`user`, `user_by_*` lookup tables,
+  `authorities set<text>`, entity tables with CQL types) is unchanged.
+- Recipe to see the CQL Liquibase will emit for a changelog without a database: resolve a classpath with a scratch
+  pom holding `liquibase-core` + `liquibase-cassandra` (`mvn -o dependency:build-classpath
+-Dmdep.outputFile=cp.txt`, both are in `~/.m2` after a Cassandra sample build), then run a single-file Java
+  program (`java -cp "$(cat cp.txt)" Probe.java changelog.xml`) that opens
+  `DatabaseFactory.getInstance().openDatabase("offline:cassandra", …)` and calls `liquibase.update(contexts, labels,
+writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine` directly with that classpath: the
+  JDK 25 launcher fails with a misleading "JavaFX runtime components are missing" message. Offline mode writes a
+  `databasechangelog.csv` next to the working directory; delete it between runs or the second run fails checksum
+  validation for the edited changeSets. Preconditions are not evaluated offline (the changeSet always renders).
   `LiquibaseConfiguration` builds a `SimpleDriverDataSource` on `com.ing.data.cassandra.jdbc.CassandraDriver`
   (transitive from `liquibase-cassandra`) from `CassandraConnectionDetails` + `spring.cassandra.keyspace-name`, so
   Testcontainers' `@ServiceConnection` works without a `spring.liquibase.url`. Liquibase runs synchronously and
