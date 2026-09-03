@@ -382,7 +382,7 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
   `cassandra-migration` service, its `Cassandra-Migration.Dockerfile`/`autoMigrate.sh`/`execute-cql.sh`, the
   `create-keyspace*.cql`/`drop-keyspace.cql` resources, the `docker-compose` merge of `cassandra-migration.yml` and
   `CassandraTestContainer.createKeyspace` are all `databaseMigrationLoader`-only; `generators/docker/generator.ts`
-  and `data-cassandra/generator.ts` remove the previously generated files through `'9.2.1'` `control.cleanupFiles`
+  and `data-cassandra/generator.ts` remove the previously generated files through `'9.3.1'` `control.cleanupFiles`
   entries gated on `databaseTypeCassandra && databaseMigrationLiquibase`. The Kubernetes generator never created a
   keyspace, so application-side creation is what makes Liquibase Cassandra apps start there.
 - Cassandra user lookup tables and the reactive `save`: `user_by_login` and `user_by_email` are declared
@@ -407,11 +407,11 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
   scripts and the `cassandra-migration` docker service (with `create-keyspace-prod.cql`) in `cassandra.yml.ejs` and
   `cassandra-cluster.yml.ejs`; it also drops the `@DependsOn("liquibase")` on the repositories, since no such bean
   exists. Every liquibase-only
-  branch is therefore gated on `databaseMigrationLiquibase`, and the `'9.2.1'` `control.cleanupFiles` entry for the
+  branch is therefore gated on `databaseMigrationLiquibase`, and the `'9.3.1'` `control.cleanupFiles` entry for the
   CQL changelogs uses the `[condition, ...files]` array form so the files survive under `loader`.
 - Existing applications keep the loader: `data-cassandra`'s `configuring` runs a `configMigration` task that sets
-  `jhipsterConfig.databaseMigration = 'loader'` when `control.isJhipsterVersionLessThan('9.2.1')` and the stored
-  value is not an explicit `liquibase`. Cassandra ignored `databaseMigration` before 9.2.1, so a stored `'no'` also
+  `jhipsterConfig.databaseMigration = 'loader'` when `control.isJhipsterVersionLessThan('9.3.1')` and the stored
+  value is not an explicit `liquibase`. Cassandra ignored `databaseMigration` before 9.3.1, so a stored `'no'` also
   means "still on the CQL scripts". This is the same shape as Vue's `clientBundler` pin in `generators/vue/generator.ts`;
   test it with `.withJHipsterConfig({ jhipsterVersion: '9.2.0' }).commitFiles()`, because `control.jhipsterOldVersion`
   reads `jhipsterVersion` from the `.yo-rc.json` **on disk**.
