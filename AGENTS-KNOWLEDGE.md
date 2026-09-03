@@ -341,7 +341,7 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
   it), so the application creates it itself: `DatabaseConfiguration.java.ejs` declares a
   `CqlSessionBuilderCustomizer` bean (`keyspaceCreator`) that opens a keyspace-less session from the same builder
   (`builder.withKeyspace((CqlIdentifier) null).build()`), runs `CREATE KEYSPACE IF NOT EXISTS … WITH replication =
-  <application.cassandra.keyspace-replication>` (a `String` added to `ApplicationProperties` through
+<application.cassandra.keyspace-replication>` (a `String` added to `ApplicationProperties` through
   `source.addApplicationPropertiesClass`, default `SimpleStrategy`/factor 1, documented in `application-prod.yml`),
   then binds the builder back to `spring.cassandra.keyspace-name`. Boot's `cassandraSessionBuilder` applies
   customizers after `withKeyspace`, so the customizer must restore the keyspace. Ordering: user `@Configuration`
@@ -398,7 +398,7 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
   extension verifies against `LOCKEDBY`.
 - Changelog lock, part 2 — quorum: the LWT needs a quorum of the keyspace replicas, so on the single-node docker
   compose the keyspace must have replication factor 1; a factor of 3 fails with `UnavailableException: Not enough
-  replicas available for query at consistency QUORUM (2 required but only 1 alive)` and the e2e app never starts.
+replicas available for query at consistency QUORUM (2 required but only 1 alive)` and the e2e app never starts.
   This is why the application-created keyspace defaults to `{'class': 'SimpleStrategy', 'replication_factor': 1}`
   and a real cluster is expected to pre-create the keyspace (the `IF NOT EXISTS` is then a no-op) or override
   `application.cassandra.keyspace-replication`.
