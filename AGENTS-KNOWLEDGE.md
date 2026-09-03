@@ -328,16 +328,23 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
 
 - Design: `databaseMigration` defaults to `liquibase` for Cassandra; `data-cassandra` composes
   `jhipster:spring-boot:liquibase`. The initial schema (`liquibase/templates/.../initial_schema_cassandra.xml.ejs`)
-  uses regular `<createTable>`/`<insert>` changes (CQL collection types are escaped in the `type` attribute:
-  `set&lt;text&gt;`); the per-entity changelogs
+  uses regular `<createTable>` changes and `<loadData>` from `config/liquibase/data/user.csv`,
+  `user_by_login.csv`, `user_by_email.csv` (CQL collection types are escaped in the `type` attribute:
+  `set&lt;text&gt;`; the `authorities` set literal is a `type="computed"` column and the loads use
+  `usePreparedStatements="false"` so the statements stay plain CQL). The `user_by_activation_key`,
+  `user_by_reset_key` and `activation_key_by_creation_date` tables are `generateUserManagement`-only — the
+  Cassandra `UserRepository.java.ejs` prepares their statements in its constructor, so its activation/reset key
+  fields, statements, finders and save/delete/deleteAll branches are gated the same way — and `persistent_token*`
+  follow the `PersistentTokenRepository` condition (`generateUserManagement && authenticationTypeSession &&
+!reactive`). The `user` columns `password`/`activation_key`/`reset_key`/`reset_date` stay unconditional
+  because `User.java.ejs` maps them unconditionally. The per-entity changelogs
   (`data-cassandra/templates/.../config/liquibase/changelog/added_entity.xml.ejs`, registered through
   `source.addLiquibaseChangelog`) still wrap CQL in `<sql splitStatements="true" endDelimiter=";"><![CDATA[…]]></sql>`
   because Liquibase's `UUIDType` renders `uuid` as `char(36)` on Cassandra (only `text` has a Cassandra data type
   in `liquibase-cassandra` 5.0.4; unknown names such as `timeuuid`, `set<text>`, `tuple<timestamp,varchar>` pass
   through as `UnknownType`, known ones render uppercase, which CQL accepts). `createTable ifNotExists="true"` is
   silently dropped because `Database.supportsCreateIfNotExists` defaults to `false` and `CassandraDatabase` does not
-  override it, so the initial schema changeSet uses a `<preConditions onFail="MARK_RAN"><not><tableExists
-tableName="user"/></not></preConditions>` instead (`TableSnapshotGeneratorCassandra` backs `tableExists`).
+  override it; no precondition replaces it, the changelog table already records whether the changeSet ran.
   The `liquibase-cassandra` extension only swaps the runner: the physical model (`user`, `user_by_*` lookup tables,
   `authorities set<text>`, entity tables with CQL types) is unchanged.
 - Recipe to see the CQL Liquibase will emit for a changelog without a database: resolve a classpath with a scratch
