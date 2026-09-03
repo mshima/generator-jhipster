@@ -289,7 +289,7 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `populateRelationships`, `linkTables()`, the maps-id `save` override and `buildCriteria`. The former
   `EntityManager`, `*SqlHelper`, `rowmapper/*RowMapper`, `ColumnConverter` classes and the
   `UpdateMapper`/`SqlRenderer` beans are gone (cleanup entries under `9.3.1`); ITs inject `R2dbcEntityTemplate em` and
-  use `em.insert(entity)`, `em.delete(X.class).all()` and `em.getDatabaseClient().sql("DELETE FROM <link table>")`.
+  use `em.insert(entity)`, `em.delete(X.class).all()` and `template.getDatabaseClient().sql("DELETE FROM <link table>")`.
 - Known reactive SQL limitations, visible with the `sqlfull` entity set and failing identically before and after the
   R2DBC rewrite (so not regressions): entities without any field of their own (only an id and nullable to-one
   relationships) fail on H2 with `INSERT INTO t VALUES (DEFAULT)` (Spring Data R2DBC omits null columns; PostgreSQL
