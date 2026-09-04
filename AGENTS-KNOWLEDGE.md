@@ -483,11 +483,15 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   JPA, MongoDB and Neo4j variants and is skipped for Cassandra, Couchbase and reactive SQL in
   `spring-boot/entity-files.ts`. That common template no longer branches on the database for the supertype: it
   renders `application.springBootBaseRepositoryClass` / `springBootBaseRepositoryImport` (optional on the Spring
-  Boot `Application` type, `'unknown'`/`undefined` fallback in `mutateApplicationPreparing`), which every
-  `data-*` generator sets directly in a `preparing` task (`JpaRepository`/`R2dbcRepository`,
-  `[Reactive]MongoRepository`, `[Reactive]Neo4jRepository`, `[Reactive]CassandraRepository`,
-  `JHipsterCouchbaseRepository` with its `<packageName>.repository` import). They must assign, not
-  `applicationDefaults`, because the parent's preparing (and its fallback) runs before the composed child's. Only that class needs
+  Boot `Application` type), which every `data-*` generator sets through `applicationDefaults` in a `preparing`
+  task (`JpaRepository`/`R2dbcRepository`, `[Reactive]MongoRepository`, `[Reactive]Neo4jRepository`,
+  `[Reactive]CassandraRepository`, `JHipsterCouchbaseRepository` with its `<packageName>.repository` import). The
+  `'unknown'` fallback is an `applicationDefaults` in the spring-boot generator's `postPreparing`, not in
+  `mutateApplicationPreparing`: the parent's preparing runs before the composed children's, and
+  `applicationDefaults` never overrides a defined value, so a fallback set in preparing would win. For that,
+  `POST_PREPARING` was added to `PRIORITY_WITH_APPLICATION_DEFAULTS` in `base-simple-application` and
+  `base-application` (`PostPreparingTaskParam` now carries `applicationDefaults`); before, only `loading` and
+  `preparing` tasks received it. Only that class needs
   `@DependsOn("liquibase")`: Spring Data builds repository bean definitions in `RepositoryBeanDefinitionBuilder` and
   never reads `@DependsOn` from a repository interface, and a `CassandraRepository` prepares its statements on first
   use, so the annotation the entity repositories carried was inert and was removed. To drop the bean-name coupling
