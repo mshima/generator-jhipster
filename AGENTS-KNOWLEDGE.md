@@ -476,9 +476,12 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   `writeEntityCassandraFiles` for `entity.builtInUser` next to `domainFiles`), and the reactive SQL one in the
   data-relational generator (`data-relational/templates/.../repository/UserRepository_reactive.java.ejs`, a
   `builtInUser` block in `writeEntitiesTask` next to the `_persistClass_Callback` one; the `_reactive` suffix is
-  stripped on write like the other reactive templates there). The common
-  `spring-boot/templates/.../repository/UserRepository.java.ejs` only holds the Spring Data JPA, MongoDB, Neo4j and
-  Couchbase variants and is skipped for Cassandra and reactive SQL in `spring-boot/entity-files.ts`. Only that class needs
+  stripped on write like the other reactive templates there), and the Couchbase one in the data-couchbase
+  generator (`data-couchbase/templates/.../repository/UserRepository.java.ejs`, a `userFiles` block of its
+  `entityFiles` section gated on `builtInUser && generateBuiltInUserEntity`, since that writer runs for every
+  entity). The common `spring-boot/templates/.../repository/UserRepository.java.ejs` only holds the Spring Data
+  JPA, MongoDB and Neo4j variants and is skipped for Cassandra, Couchbase and reactive SQL in
+  `spring-boot/entity-files.ts`. Only that class needs
   `@DependsOn("liquibase")`: Spring Data builds repository bean definitions in `RepositoryBeanDefinitionBuilder` and
   never reads `@DependsOn` from a repository interface, and a `CassandraRepository` prepares its statements on first
   use, so the annotation the entity repositories carried was inert and was removed. To drop the bean-name coupling
