@@ -491,7 +491,7 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   `applicationDefaults` never overrides a defined value, so a fallback set in preparing would win. For that,
   `POST_PREPARING` was added to `PRIORITY_WITH_APPLICATION_DEFAULTS` in `base-simple-application` and
   `base-application` (`PostPreparingTaskParam` now carries `applicationDefaults`); before, only `loading` and
-  `preparing` tasks received it. Only that class needs
+  `preparing` tasks received it. The common `PersistentTokenRepository.java.ejs` (session auth, JPA/MongoDB/Neo4j interface plus the Cassandra class branch) renders the same two properties for its interface variant. Only that class needs
   `@DependsOn("liquibase")`: Spring Data builds repository bean definitions in `RepositoryBeanDefinitionBuilder` and
   never reads `@DependsOn` from a repository interface, and a `CassandraRepository` prepares its statements on first
   use, so the annotation the entity repositories carried was inert and was removed. To drop the bean-name coupling
