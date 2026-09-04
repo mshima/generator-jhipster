@@ -486,12 +486,14 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   Boot `Application` type), which every `data-*` generator sets through `applicationDefaults` in a `preparing`
   task (`JpaRepository`/`R2dbcRepository`, `[Reactive]MongoRepository`, `[Reactive]Neo4jRepository`,
   `[Reactive]CassandraRepository`, `JHipsterCouchbaseRepository` with its `<packageName>.repository` import). The
-  `'unknown'` fallback is an `applicationDefaults` in the spring-boot generator's `postPreparing`, not in
-  `mutateApplicationPreparing`: the parent's preparing runs before the composed children's, and
-  `applicationDefaults` never overrides a defined value, so a fallback set in preparing would win. For that,
-  `POST_PREPARING` was added to `PRIORITY_WITH_APPLICATION_DEFAULTS` in `base-simple-application` and
-  `base-application` (`PostPreparingTaskParam` now carries `applicationDefaults`); before, only `loading` and
-  `preparing` tasks received it. The common `PersistentTokenRepository.java.ejs` (session auth, JPA/MongoDB/Neo4j interface plus the Cassandra class branch) renders the same two properties for its interface variant. Only that class needs
+  spring-boot `mutateApplicationPreparing` declares them as `undefined` ("populated by the data generators"):
+  the parent's preparing runs before the composed children's and `applicationDefaults` only fills undefined
+  values, so declaring the key with `undefined` both lets the children's defaults apply and keeps the key present
+  in the EJS context (a missing identifier is a `ReferenceError` in EJS, an undefined value is not). The same
+  pattern moved `springDataDescription` ("Spring Data JPA"/"R2DBC"/"MongoDB"/"Neo4j"/"Cassandra"/"Couchbase",
+  plus " reactive" for the non-SQL reactive stores) out of `application.ts` into each `data-*` generator's
+  `applicationDefaults`; a `no`-database application therefore has it undefined instead of "Spring Data
+  Unknown", which no template renders. The common `PersistentTokenRepository.java.ejs` (session auth, JPA/MongoDB/Neo4j interface plus the Cassandra class branch) renders the same two properties for its interface variant. Only that class needs
   `@DependsOn("liquibase")`: Spring Data builds repository bean definitions in `RepositoryBeanDefinitionBuilder` and
   never reads `@DependsOn` from a repository interface, and a `CassandraRepository` prepares its statements on first
   use, so the annotation the entity repositories carried was inert and was removed. To drop the bean-name coupling
