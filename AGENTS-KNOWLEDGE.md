@@ -364,7 +364,7 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
   `LiquibaseConfiguration` builds a `SimpleDriverDataSource` on `com.ing.data.cassandra.jdbc.CassandraDriver`
   (transitive from `liquibase-cassandra`) from `CassandraConnectionDetails` + `spring.cassandra.keyspace-name`, so
   Testcontainers' `@ServiceConnection` works without a `spring.liquibase.url`. Liquibase runs synchronously and
-  the Cassandra `UserRepository`/entity repositories are `@DependsOn("liquibase")` because they prepare statements
+  the Cassandra `UserRepository` is `@DependsOn("liquibase")` because its constructor prepares statements
   at startup. Liquibase cannot create the keyspace (the jdbc url and the `DATABASECHANGELOG*` tables live inside
   it), so the application creates it itself: `DatabaseConfiguration.java.ejs` declares a
   `CqlSessionBuilderCustomizer` bean (`keyspaceCreator`) that opens a keyspace-less session from the same builder
@@ -471,6 +471,17 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   `compile` first. For quick Liquibase-vs-Cassandra experiments write a plain `main` using the Liquibase API
   (`LockServiceFactory`, `Executor.queryForList` on `DATABASECHANGELOGLOCK`) on the app's
   `dependency:build-classpath -Dmdep.includeScope=test` classpath.
+- Cassandra `UserRepository` lives in the data-cassandra generator
+  (`data-cassandra/templates/src/main/java/_package_/_entityPackage_/repository/UserRepository.java.ejs`, written by
+  `writeEntityCassandraFiles` for `entity.builtInUser` next to `domainFiles`); the common
+  `spring-boot/templates/.../repository/UserRepository.java.ejs` only holds the Spring Data (SQL, MongoDB, Neo4j,
+  Couchbase) variants and is skipped for Cassandra in `spring-boot/entity-files.ts`. Only that class needs
+  `@DependsOn("liquibase")`: Spring Data builds repository bean definitions in `RepositoryBeanDefinitionBuilder` and
+  never reads `@DependsOn` from a repository interface, and a `CassandraRepository` prepares its statements on first
+  use, so the annotation the entity repositories carried was inert and was removed. To drop the bean-name coupling
+  from `UserRepository`, Boot's `@DependsOnDatabaseInitialization` would work but requires importing
+  `DatabaseInitializationDependencyConfigurer` explicitly, since `LiquibaseAutoConfiguration` (which imports it) stays
+  inactive without a `DataSource` bean or `spring.liquibase.url`.
 
 ## Blob fields and content types
 
