@@ -493,7 +493,10 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   pattern moved `springDataDescription` ("Spring Data JPA"/"R2DBC"/"MongoDB"/"Neo4j"/"Cassandra"/"Couchbase",
   plus " reactive" for the non-SQL reactive stores) out of `application.ts` into each `data-*` generator's
   `applicationDefaults`; a `no`-database application therefore has it undefined instead of "Spring Data
-  Unknown", which no template renders. The common `PersistentTokenRepository.java.ejs` (session auth, JPA/MongoDB/Neo4j interface plus the Cassandra class branch) renders the same two properties for its interface variant. Only that class needs
+  Unknown", which no template renders. `cassandraKeyspaceName` (`baseName` lower-cased, non `[a-z0-9_]` stripped)
+  followed: it is an `applicationDefaults` of `data-cassandra`'s preparing, and the liquibase generator can still
+  read it in its own preparing (`prodLiquibaseUrl`) because `data-cassandra` composes liquibase in `composing`, so
+  liquibase's preparing is queued after `data-cassandra`'s. The common `PersistentTokenRepository.java.ejs` (session auth, JPA/MongoDB/Neo4j interface plus the Cassandra class branch) renders the same two properties for its interface variant. Only that class needs
   `@DependsOn("liquibase")`: Spring Data builds repository bean definitions in `RepositoryBeanDefinitionBuilder` and
   never reads `@DependsOn` from a repository interface, and a `CassandraRepository` prepares its statements on first
   use, so the annotation the entity repositories carried was inert and was removed. To drop the bean-name coupling
