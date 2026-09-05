@@ -26,6 +26,11 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `getWebappTranslation(key)` falls back to a plain string, and the `TagEnum`/`PipeEnum` replacements emit
   `JSON.stringify(translation)[value]` as inline fallback — indexing a string with a string key, which fails Angular
   strict builds with `TS7015`. Only use the enum macros for keys that actually have generated translations.
+- `delete this.jhipsterConfig.<key>` is a silent no-op: `jhipsterConfig` is yeoman's `Storage.createProxy()`, whose
+  handler has `get`/`set` traps but no `deleteProperty`, so the `delete` lands on the Storage instance and
+  `.yo-rc.json` keeps the value. Remove a stored option with `this.jhipsterConfig.<key> = undefined` (JSON drops the
+  key) and prove it with `.withJHipsterConfig({...}).commitFiles()` + `assertJHipsterConfigContent({ key: undefined })`
+  — the react/angular/client migrations were broken this way until 9.3.1.
 - Grep every quoting/EJS form before declaring something unused: `@content` looked unused in the Vue templates
   because `global.scss.ejs` and `jhi-navbar.vue.ejs` emit `url("<%- clientBundlerRsbuild ? '@' : '/' %>content/…")`,
   while `rsbuild.config.ts` still needs the alias (Vite uses absolute `/content/…` URLs).
@@ -88,7 +93,9 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `@module-federation/enhanced`, `browser-sync` and `@ngx-translate/http-loader` are gone, and old `webpack/*`
   files are removed through `control.cleanupFiles` `'9.3.1'`. Cypress' Angular webpack coverage path
   (`cypressCoverageWebpack`, `webapp:instrumenter`) was removed with it; `angularSchematic` is now simply
-  `clientFrameworkAngular`. Server templates keep their `clientBundlerWebpack` branches for Vue only. Renaming CI
+  `clientFrameworkAngular`. Since Vue dropped webpack as well (9.3.1) no framework produces a webpack build any more;
+  `webpack` stays in the `clientBundler` `choices` on purpose so `clientBundlerWebpack` remains a (false) derived
+  property for blueprints. Renaming CI
   jobs (the `-webpack` suffixes) reshuffles the build matrix node/java indexes — that is by design
   (`randomEnvironment`), refresh the `.blueprint/github-build-matrix` snapshot.
 - Microfrontends use `@angular-architects/native-federation`. Pieces: `federation.config.ts` (shares npm deps via
@@ -224,6 +231,15 @@ e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because
   unless `shareMappings` adds `import: './src/main/webapp/app/…'` (as the React template does). Reproduce with a
   monolith `microfrontend: true, exposeMicrofrontend: true, clientBundler: vite` and `npm run webapp:build:prod`.
 - Vite dev-server e2e flakiness (`devserver.yml`): see [Debugging CI failures](#debugging-ci-failures).
+- Since 9.3.1 Vue is Vite-only for monoliths and Rsbuild-only for microfrontends/microservices
+  (`clientBundler` default in `generators/vue/generators/bootstrap/generator.ts`). Gone with webpack: the
+  `generators/vue/templates/webpack/*` files, `module-federation.config.cjs` (only `module-federation.config.ts`
+  is left, its `exposes` paths are relative to `clientSrcDir`), `source.addWebpackConfig` (Vue), the webpack loaders
+  and plugins in `generators/vue/resources/package.json`, the shared `client/templates/webpack/webpack.microfrontend.js.jhi`
+  and the i18n `index_webpack.js` bundle template, `devServerPortProxy` (webpack's BrowserSync proxy port) and the
+  `[BrowserSync]` README reference. A stored `clientBundler: webpack` plus its `devServerPort` (9060 + index) are
+  reset by the `migrateFromWebpack` configuring task; old files are removed by the `'9.3.1'` `control.cleanupFiles`
+  entry in `generators/vue/generator.ts`.
 
 ## React client
 
@@ -412,8 +428,8 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
 - Existing applications keep the loader: `data-cassandra`'s `configuring` runs a `configMigration` task that sets
   `jhipsterConfig.databaseMigration = 'loader'` when `control.isJhipsterVersionLessThan('9.3.1')` and the stored
   value is not an explicit `liquibase`. Cassandra ignored `databaseMigration` before 9.3.1, so a stored `'no'` also
-  means "still on the CQL scripts". This is the same shape as Vue's `clientBundler` pin in `generators/vue/generator.ts`;
-  test it with `.withJHipsterConfig({ jhipsterVersion: '9.2.0' }).commitFiles()`, because `control.jhipsterOldVersion`
+  means "still on the CQL scripts". This is the same shape as the client bundler migrations (`migrateToVite` in
+  `generators/react/generator.ts`, `migrateFromWebpack` in `generators/vue/generator.ts`); test it with `.withJHipsterConfig({ jhipsterVersion: '9.2.0' }).commitFiles()`, because `control.jhipsterOldVersion`
   reads `jhipsterVersion` from the `.yo-rc.json` **on disk**.
 - Adding a value to a command's `choices` array is never a local change: `getCommandDerivedPropertyMutations`
   (`lib/command/mutations.ts`) explodes choices into `<option><Value>` booleans, so a new choice adds a key to every
@@ -551,6 +567,11 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   generator-jhipster"). `npm ci --ignore-scripts` is enough to run the esmocha specs there. Always check
   `git branch --show-current` before trusting a "passes locally": the main checkout may be on another branch than
   the PR being fixed.
+- Quick before/after baseline from a JDL with the JIT CLI: `bin/jhipster.cjs jdl ../sample.jdl --skip-install
+--skip-git --skip-jhipster-dependencies --force --skip-checks --no-workspaces` run inside an empty scratch
+  directory. Pass the JDL as a relative path and use the `--no-<flag>` form for booleans: an absolute path or
+  `--workspaces false` is taken for another JDL file name and the CLI tries to download `false.jdl` from the
+  jdl-samples repository.
 - Sample apps for manual testing: `bin/jhipster.cjs generate-sample <name>` (JIT dev blueprint). Workflow samples
   come from `.blueprint/generate-sample/templates/test-integration/workflow-samples/*.json` (`app-sample` points
   to `…/samples/<name>/.yo-rc.json`, `entity` to the entity sets in
