@@ -564,20 +564,33 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   still reachable after a file keeps growing the worker heap. Two caches retained every finished generator run
   (with its environment and mem-fs store). The global `mock` tracker from `node:test` (used by `yeoman-test` and
   `lib/testing/helpers.ts`; nothing resets it outside the `node:test` runner and every recorded call keeps `this`,
-  arguments and a captured stack) is reset per spec file by the root `afterAll` in `test/support/mocha-hooks.mjs`;
+  arguments and a captured stack) is reset per spec file by `yeoman-test/mocha-cleanup` since yeoman-test 11.8.2;
   resetting it per `describe` would halve the in-file retention but breaks specs that install mocks in an outer
-  `before`. The same reset landed upstream in `yeoman-test/mocha-cleanup`
-  (yeoman/yeoman-test commit feb3ac7, unreleased as of 11.8.1); drop the local hook once the repo uses a release
-  that includes it. The EJS template cache is keyed by filename only and every cached compiled function keeps the first
-  render's options, including the generator that yeoman-generator passes as `context`, so base-core
-  `renderTemplate` now renders with `cache: false` (measured cost: about 0.3 s on a 15-entity Angular JDL app,
-  the spec suite is not slower). Measuring recipe: a `--require` root hook that runs `global.gc()` in `afterAll`
-  and logs `process.memoryUsage()` per file under `node --expose-gc node_modules/.bin/esmocha --parallel --jobs 2`
-  (the `--jobs 1` form silently falls back to serial and then `require()`s the ESM specs, which fails);
+  `before`. The EJS template cache is keyed by filename only and every cached compiled function keeps the first
+  render's options, including the generator that yeoman-generator passes as `context` (templates do call generator
+  methods through `this`, e.g. `this.getUXConstraintName(...)`), so base-core `renderTemplate` renders with
+  `cache: false` (measured cost: about 0.3 s on a 15-entity Angular JDL app, the spec suite is not slower).
+  Measuring recipe: a `--require` root hook that runs `global.gc()` in `afterAll` and logs
+  `process.memoryUsage()` per file under `node --expose-gc node_modules/.bin/esmocha --parallel --jobs 2` (the
+  `--jobs 1` form silently falls back to serial and then `require()`s the ESM specs, which fails);
   `v8.writeHeapSnapshot()` in the same hook plus a script that walks the snapshot's reverse edges gives the
   retainer path of `MemFsEditor` / `FullEnvironment` objects. A scratch `.mjs` hook outside the repo cannot
   resolve bare specifiers such as `ejs`; import them by absolute path, and note `ejs` ships separate ESM and CJS
   builds with separate caches (`mem-fs-editor` uses the ESM one).
+- Sloppy-mode globals in EJS templates: EJS compiles templates as non-strict functions, so
+  `<%_ for (relationship of relationships) { _%>` without `const` assigns `globalThis.relationship` (31 templates
+  do this). A template that reads a name it never declared (the incremental
+  `updated_entity_constraints.xml.ejs` used `relationship.otherEntity` inside a loop over `relationshipData`) then
+  picks up whatever the last rendered template left behind, which changes with render order and shows up as an
+  order-dependent snapshot flake (`ux_one__another_another_id` vs `ux_one__another_one_id`). When a snapshot only
+  fails in the full parallel run, grep the template for identifiers that are neither locals nor declared.
+- `writeFiles` render order matters: multi-step `.jhi` fragments are merged in the order their files enter the
+  mem-fs store, and `before:render` reseeds entity fake data from `${entityClass}-${sourceBasename}` (basename
+  without the appended `.ejs`). Templates are prefetched in parallel but must be rendered in declaration order
+  (base-core awaits a shared prefetch barrier; awaits on one promise resume in registration order). A change that
+  resumes renders in I/O order or alters the seed basename silently reorders `Authority.java` sections or changes
+  the partial-update fields in every `*ResourceIT.java`; compare two generations of the same JDL against the
+  parent commit (ignoring the JWT secret and keystore) to catch it.
 - Git worktrees must live in a directory named `generator-jhipster` (for example `<scratch>/wt/generator-jhipster`):
   yeoman derives the generator namespace from the package folder name, so in a worktree called anything else every
   spec that boots the CLI/environment fails with `You don't seem to have a generator with the name
