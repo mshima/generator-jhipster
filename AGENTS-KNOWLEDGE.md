@@ -605,6 +605,11 @@ editorMetadata()` in base-core; `generators/base` adds `removeNeedles: true` fro
   `commitSharedFs` read `this.options.removeNeedles` while base-simple-application set the class property, so
   needle removal was silently dead. Needle removal only strips comment-marker lines (`createNeedleRegexp`), the
   JSON menu needles in `i18n/*/global.json` stay, and `liquibase-add-incremental-changelog` is whitelisted.
+- `autoCrlfTransform` reads `git check-attr -z binary eol` (NUL-separated `<path>\0<attr>\0<value>` triples,
+  because paths may contain `: `). Git answers `unset` for `-binary`/`-eol`, `native` for `eol=native` and
+  `unspecified` otherwise; only `eol=crlf`, `eol=lf` and `binary: set` drive the decision, everything else is
+  treated as unspecified (CRLF unless binary). The transform used to throw on `unset`/`native`, which aborted the
+  whole commit; line endings are best effort and must never fail a generation.
 - yeoman-test temporary dirs: `helpers.prepareTemporaryDir()` starts a new run context and deletes the previous
   context's temporary directory, so a spec that needs two directories at once must create the second one with
   `mkdtemp` (and remove it in `after`). `runResult.memFs.get(path).editorMetadata` exposes written-file metadata;
