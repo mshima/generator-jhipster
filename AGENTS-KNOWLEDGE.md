@@ -530,7 +530,13 @@ more than one column, so creating an entity whose fields are all null (a cypress
 without values) fails with `DataAccessException` ("Failure during data access", HTTP 500). H2 and PostgreSQL
 accept it. The generated `DatabaseConfiguration.dialect` bean wraps the resolved `MySqlDialect` with an
 `InsertRenderContext` returning ` () VALUES ()` (mysql/mariadb only, runtime `instanceof` check so the H2 dev
-profile keeps its dialect). This was previously hidden by the cypress `workaroundEntityCannotBeEmpty` entity
+profile keeps its dialect). That bean alone changes nothing: Spring Boot's `DataR2dbcAutoConfiguration`
+(`spring-boot-data-r2dbc`) calls `DialectResolver.getDialect(connectionFactory)` in its constructor and builds
+the `R2dbcEntityTemplate` from that field, ignoring any `R2dbcDialect` bean (the `dialect` bean is only injected
+into JHipster's own `r2dbcCustomConversions` and repositories). `DatabaseConfiguration` therefore also declares
+an `R2dbcEntityTemplate(databaseClient, dialect, converter)` bean for mysql/mariadb; Boot's template bean is
+`@ConditionalOnMissingBean`. The e2e server runs with `logging.level.ROOT=OFF`, so a 500 "Failure during data
+access" never shows its SQL error in CI logs; there is no Docker on this machine, CI is the runtime check. This was previously hidden by the cypress `workaroundEntityCannotBeEmpty` entity
 property, which put one nullable field into the e2e sample for reactive postgresql/mysql/mariadb (#34849
 removed it and the `workaroundInstantReactiveMariaDB` one; the Instant one was no longer needed). Recipe to
 inspect Spring Data rendering without sources: unzip the jars from `~/.m2` and `javap -p -c` the class
