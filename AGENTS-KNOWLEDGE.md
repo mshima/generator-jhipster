@@ -600,11 +600,13 @@ editorMetadata()` in base-core; `generators/base` adds `removeNeedles: true` fro
   `../generator` and copy its `dist/` over `node_modules/yeoman-generator/dist` (keep a backup to restore);
   `npm install ../generator` would resolve a second mem-fs-editor instance from the other checkout. The bootstrap commit pipeline always registers
   `createNeedleTransform({ filter: file => file.editorMetadata?.removeNeedles })` and `autoCrlfTransform` looks
-  up git attributes from `editorMetadata.gitRoot` only, trusted without any check: `simpleGit({ baseDir: gitRoot })
-.raw('check-attr', '-z', ...)` per file inside a try/catch, any failure (not a repository, missing directory)
-  leaves the file untouched. No instance cache: construction spawns nothing, and a root with `gitRoot` that is not
-  a repository only happens when `git init` failed (`--skip-git` and a missing binary register no root). Files without `gitRoot` (Storage-written `.yo-rc.json`/`package.json`,
-  `--skip-git`) are never normalized, there is no parent-directory walk anymore. So bootstrap never needs the
+  up git attributes from `editorMetadata.gitRoot`, trusted without any check: `simpleGit({ baseDir: gitRoot })
+.raw('check-attr', '-z', ...)` per file inside a try/catch. When git cannot answer (no `gitRoot`: Storage-written
+  `.yo-rc.json`/`package.json`, `--skip-git`; failed `git init`; missing directory) it falls back to
+  `isBinaryFile(contents)` and text files get the CRLF default, so with `--skip-git` on Windows `*.sh` files
+  become CRLF too (only `.gitattributes` through git knows they must stay LF; before #34675 the transform threw
+  outside a repository, then it skipped, now it falls back). No git instance cache and no parent-directory walk:
+  construction spawns nothing and one base directory per project makes memoization pointless. So bootstrap never needs the
   project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
   `commitSharedFs` read `this.options.removeNeedles` while base-simple-application set the class property, so
   needle removal was silently dead. Needle removal only strips comment-marker lines (`createNeedleRegexp`), the
