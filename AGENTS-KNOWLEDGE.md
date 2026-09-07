@@ -562,19 +562,20 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   snapshots with `--update-snapshot`), not vitest. `test/api.spec.ts` needs `dist/` (`npm run build`).
 - Mocha worker memory: `.mocharc.cjs` runs in parallel mode, so workers are reused across spec files and anything
   still reachable after a file keeps growing the worker heap. Two caches retained every finished generator run
-  (with its environment and mem-fs store): the global `mock` tracker from `node:test` (used by `yeoman-test`
-  and `lib/testing/helpers.ts`; nothing resets it outside the `node:test` runner and every recorded call keeps
-  `this`, arguments and a captured stack) and the EJS template cache (`renderTemplate` compiles with
-  `cache: true`, and the compiled function keeps the first render's `context`, the generator, as `this`;
-  no template uses `this`). `test/support/mocha-hooks.mjs` resets both in a root `afterAll` (per file in
-  parallel mode); it must be ESM because `ejs` ships separate ESM/CJS builds with separate caches and
-  `mem-fs-editor` uses the ESM one. Resetting the mock tracker per `describe` would halve the in-file retention
-  but breaks specs that install mocks in an outer `before`. Measuring recipe: a `--require` root hook that runs
-  `global.gc()` in `afterAll` and logs `process.memoryUsage()` per file under `node --expose-gc
-node_modules/.bin/esmocha --parallel --jobs 2` (the `--jobs 1` form silently falls back to serial and then
-  `require()`s the ESM specs, which fails); `v8.writeHeapSnapshot()` in the same hook plus a script that walks
-  the snapshot's reverse edges gives the retainer path of `MemFsEditor` / `FullEnvironment` objects. A scratch
-  `.mjs` hook outside the repo cannot resolve bare specifiers such as `ejs`; import them by absolute path.
+  (with its environment and mem-fs store). The global `mock` tracker from `node:test` (used by `yeoman-test` and
+  `lib/testing/helpers.ts`; nothing resets it outside the `node:test` runner and every recorded call keeps `this`,
+  arguments and a captured stack) is reset per spec file by the root `afterAll` in `test/support/mocha-hooks.mjs`;
+  resetting it per `describe` would halve the in-file retention but breaks specs that install mocks in an outer
+  `before`. The EJS template cache is keyed by filename only and every cached compiled function keeps the first
+  render's options, including the generator that yeoman-generator passes as `context`, so base-core
+  `renderTemplate` now renders with `cache: false` (measured cost: about 0.3 s on a 15-entity Angular JDL app,
+  the spec suite is not slower). Measuring recipe: a `--require` root hook that runs `global.gc()` in `afterAll`
+  and logs `process.memoryUsage()` per file under `node --expose-gc node_modules/.bin/esmocha --parallel --jobs 2`
+  (the `--jobs 1` form silently falls back to serial and then `require()`s the ESM specs, which fails);
+  `v8.writeHeapSnapshot()` in the same hook plus a script that walks the snapshot's reverse edges gives the
+  retainer path of `MemFsEditor` / `FullEnvironment` objects. A scratch `.mjs` hook outside the repo cannot
+  resolve bare specifiers such as `ejs`; import them by absolute path, and note `ejs` ships separate ESM and CJS
+  builds with separate caches (`mem-fs-editor` uses the ESM one).
 - Git worktrees must live in a directory named `generator-jhipster` (for example `<scratch>/wt/generator-jhipster`):
   yeoman derives the generator namespace from the package folder name, so in a worktree called anything else every
   spec that boots the CLI/environment fails with `You don't seem to have a generator with the name
