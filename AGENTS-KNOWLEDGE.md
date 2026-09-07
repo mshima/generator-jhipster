@@ -566,7 +566,9 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   `lib/testing/helpers.ts`; nothing resets it outside the `node:test` runner and every recorded call keeps `this`,
   arguments and a captured stack) is reset per spec file by the root `afterAll` in `test/support/mocha-hooks.mjs`;
   resetting it per `describe` would halve the in-file retention but breaks specs that install mocks in an outer
-  `before`. The EJS template cache is keyed by filename only and every cached compiled function keeps the first
+  `before`. The same reset landed upstream in `yeoman-test/mocha-cleanup`
+  (yeoman/yeoman-test commit feb3ac7, unreleased as of 11.8.1); drop the local hook once the repo uses a release
+  that includes it. The EJS template cache is keyed by filename only and every cached compiled function keeps the first
   render's options, including the generator that yeoman-generator passes as `context`, so base-core
   `renderTemplate` now renders with `cache: false` (measured cost: about 0.3 s on a 15-entity Angular JDL app,
   the spec suite is not slower). Measuring recipe: a `--require` root hook that runs `global.gc()` in `afterAll`
