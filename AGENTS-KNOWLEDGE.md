@@ -544,6 +544,25 @@ inspect Spring Data rendering without sources: unzip the jars from `~/.m2` and `
 `gh run view --log` here; download them with `gh api repos/<owner>/<repo>/actions/jobs/<id>/logs` and grep for
 `failing`, the cypress failure block lists the request and the problem+json response.
 
+### User cleanup in generated integration tests
+
+The user ITs (`AccountResourceIT*`, `UserResourceIT`, `PublicUserResourceIT`, `UserServiceIT`, and entity ITs
+with a `User` relationship) clean up per test: they count users in `@BeforeEach`, delete the users the test
+created in `@AfterEach` and assert the count is back (skipped for Cassandra, which has no `count()`). The former
+`requiresDeleteAllUsers` application property (oauth2, neo4j, reactive SQL, imperative mongodb/cassandra) made
+them call `userRepository.deleteAll()` instead, wiping the default `admin`/`user` rows; it is gone, together with
+the reactive `UserRepository.deleteAllUserAuthorities()` query. Gotchas when touching these templates: oauth2
+apps have no `UserService.deleteUser(login)`, so their cleanup goes through
+`userRepository.findOneByLogin(login)` + `delete` (`.flatMap(...).block()` reactive, `.ifPresent(...)` imperative);
+the reactive SQL `UserRepository` custom `delete(user)` (removes `jhi_user_authority` rows first, `DeleteExtended`)
+is now generated for every authentication type; `UPDATED_LOGIN` and the `anotherlogin` tests only exist without
+oauth2, the oauth2 `AccountResourceIT` syncs `jane` (reactive) or `OAuth2TestUtil.TEST_USER_LOGIN` (imperative).
+Verify template changes by generating the ms-mf-react JDL sample (oauth2 reactive gateway + imperative
+microservice) and ng-default, then `./mvnw -ntp -q test-compile -Dskip.installnodenpm -Dskip.npm` in each app
+(online, the Spring Cloud deps are not cached). Generated apps from `generate-sample` pin the released
+jhipster-framework, so main-code features that need a newer framework (`tech.jhipster.service.CriteriaBuilder`
+after #34822) fail to compile locally regardless of the change under test.
+
 ## Blob fields and content types
 
 - Every `Blob`/`AnyBlob`/`ImageBlob` field carries a `<field>ContentType` `String` companion
