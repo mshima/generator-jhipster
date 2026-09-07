@@ -560,6 +560,21 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   lookup is cheap (~10 ms); module import of `cli/environment-builder.ts` (~1 s) happens once per mocha worker.
 - Specs are run with esmocha (`npm test` = `esmocha test generators cli .blueprint lib --forbid-only`, update
   snapshots with `--update-snapshot`), not vitest. `test/api.spec.ts` needs `dist/` (`npm run build`).
+- Mocha worker memory: `.mocharc.cjs` runs in parallel mode, so workers are reused across spec files and anything
+  still reachable after a file keeps growing the worker heap. Two caches retained every finished generator run
+  (with its environment and mem-fs store): the global `mock` tracker from `node:test` (used by `yeoman-test`
+  and `lib/testing/helpers.ts`; nothing resets it outside the `node:test` runner and every recorded call keeps
+  `this`, arguments and a captured stack) and the EJS template cache (`renderTemplate` compiles with
+  `cache: true`, and the compiled function keeps the first render's `context`, the generator, as `this`;
+  no template uses `this`). `test/support/mocha-hooks.mjs` resets both in a root `afterAll` (per file in
+  parallel mode); it must be ESM because `ejs` ships separate ESM/CJS builds with separate caches and
+  `mem-fs-editor` uses the ESM one. Resetting the mock tracker per `describe` would halve the in-file retention
+  but breaks specs that install mocks in an outer `before`. Measuring recipe: a `--require` root hook that runs
+  `global.gc()` in `afterAll` and logs `process.memoryUsage()` per file under `node --expose-gc
+node_modules/.bin/esmocha --parallel --jobs 2` (the `--jobs 1` form silently falls back to serial and then
+  `require()`s the ESM specs, which fails); `v8.writeHeapSnapshot()` in the same hook plus a script that walks
+  the snapshot's reverse edges gives the retainer path of `MemFsEditor` / `FullEnvironment` objects. A scratch
+  `.mjs` hook outside the repo cannot resolve bare specifiers such as `ejs`; import them by absolute path.
 - Git worktrees must live in a directory named `generator-jhipster` (for example `<scratch>/wt/generator-jhipster`):
   yeoman derives the generator namespace from the package folder name, so in a worktree called anything else every
   spec that boots the CLI/environment fails with `You don't seem to have a generator with the name
