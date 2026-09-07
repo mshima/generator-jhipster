@@ -520,6 +520,24 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   `DatabaseInitializationDependencyConfigurer` explicitly, since `LiquibaseAutoConfiguration` (which imports it) stays
   inactive without a `DataSource` bean or `spring.liquibase.url`.
 
+### Reactive SQL: inserting an entity with only null fields
+
+Spring Data R2DBC drops null values from inserts (`R2dbcEntityTemplate.doInsert` keeps only
+`Parameter.hasValue()`), and an insert with no columns is rendered with the dialect's `InsertRenderContext`:
+`InsertRenderContexts.DEFAULT` is ` VALUES (DEFAULT)` (used by the MySQL dialect, which MariaDB resolves to too),
+`MS_SQL_SERVER` is ` DEFAULT VALUES`. MySQL and MariaDB reject `INSERT INTO t VALUES (DEFAULT)` for a table with
+more than one column, so creating an entity whose fields are all null (a cypress `{}` sample, or a JSON body
+without values) fails with `DataAccessException` ("Failure during data access", HTTP 500). H2 and PostgreSQL
+accept it. The generated `DatabaseConfiguration.dialect` bean wraps the resolved `MySqlDialect` with an
+`InsertRenderContext` returning ` () VALUES ()` (mysql/mariadb only, runtime `instanceof` check so the H2 dev
+profile keeps its dialect). This was previously hidden by the cypress `workaroundEntityCannotBeEmpty` entity
+property, which put one nullable field into the e2e sample for reactive postgresql/mysql/mariadb (#34849
+removed it and the `workaroundInstantReactiveMariaDB` one; the Instant one was no longer needed). Recipe to
+inspect Spring Data rendering without sources: unzip the jars from `~/.m2` and `javap -p -c` the class
+(`InsertRenderContexts`, `MySqlDialect`, `DefaultStatementMapper`). CI sample job logs are not readable through
+`gh run view --log` here; download them with `gh api repos/<owner>/<repo>/actions/jobs/<id>/logs` and grep for
+`failing`, the cypress failure block lists the request and the problem+json response.
+
 ## Blob fields and content types
 
 - Every `Blob`/`AnyBlob`/`ImageBlob` field carries a `<field>ContentType` `String` companion
