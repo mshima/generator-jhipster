@@ -584,9 +584,15 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   `initializeGitRepository` runs; without a git generator in the context the metadata is `{}`, and
   `uniqueGlobally` generators such as bootstrap attach nothing. Context data is keyed by `destinationRoot`, so a
   workspaces root git generator is not visible to the app sub-folders (they fall back to the parent walk). The
-  base-core overrides of `writeDestination`, `writeDestinationJSON`, `copyTemplate` and `renderTemplate` attach the
-  metadata to every written file (`editFile` and `writeFiles` go through them); `generators/base` adds
-  `removeNeedles: true` from `jhipsterConfig.removeNeedles`. The bootstrap commit pipeline always registers
+  attachment itself lives in yeoman-generator (checkout at `../generator`, branch work on top of `mem-fs`):
+  `BaseGenerator.editorMetadata` is a getter returning `undefined` by default and the fs mixin merges it into the
+  `metadata` option of `writeDestination`, `writeDestinationJSON`, `copyTemplate`, `copyTemplateAsync`,
+  `copyDestination`, `renderTemplate` and `renderTemplateAsync` (explicit `metadata` wins; `moveDestination` has
+  no metadata support in mem-fs-editor). generator-jhipster only overrides the getter (`override get
+editorMetadata()` in base-core; `generators/base` adds `removeNeedles: true` from
+  `jhipsterConfig.removeNeedles`). To test jhipster against an unreleased yeoman-generator, `npm run build` in
+  `../generator` and copy its `dist/` over `node_modules/yeoman-generator/dist` (keep a backup to restore);
+  `npm install ../generator` would resolve a second mem-fs-editor instance from the other checkout. The bootstrap commit pipeline always registers
   `createNeedleTransform({ filter: file => file.editorMetadata?.removeNeedles })` and `autoCrlfTransform` looks
   up git attributes from `editorMetadata.gitRoot` when it exists on disk (parent-directory walk otherwise), so
   bootstrap never needs the project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
