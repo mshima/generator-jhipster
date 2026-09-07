@@ -624,7 +624,10 @@ editorMetadata()` in base-core; `generators/base` adds `removeNeedles: true` fro
   `isBinaryFile(contents)` for binary detection and `detectCrLf(file.path)` to keep the line endings of a file
   that already exists on disk; new files (and single-line existing files) get the CRLF default, so with
   `--skip-git` on Windows new `*.sh` files become CRLF too (only `.gitattributes` through git knows they must stay
-  LF; before #34675 the transform threw outside a repository, then it skipped, now it falls back). No git instance cache and no parent-directory walk:
+  LF; before #34675 the transform threw outside a repository, then it skipped, now it falls back). Even with attributes, `isBinaryFile` runs whenever the `binary` attribute is
+  `unspecified` (only `set`/`unset` are trusted): a PNG without a `.gitattributes` rule was otherwise
+  CRLF-normalized, and that spec passed locally only by accident, always rerun the autoCrlf spec after touching
+  the transform. No git instance cache and no parent-directory walk:
   construction spawns nothing and one base directory per project makes memoization pointless. So bootstrap never needs the
   project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
   `commitSharedFs` read `this.options.removeNeedles` while base-simple-application set the class property, so
