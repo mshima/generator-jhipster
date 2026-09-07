@@ -577,6 +577,23 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   retainer path of `MemFsEditor` / `FullEnvironment` objects. A scratch `.mjs` hook outside the repo cannot
   resolve bare specifiers such as `ejs`; import them by absolute path, and note `ejs` ships separate ESM and CJS
   builds with separate caches (`mem-fs-editor` uses the ESM one).
+- Per-file editor metadata (mem-fs-editor >= 12.0.9, `file.editorMetadata`): base-core `editorMetadata` getter
+  returns `{ projectRoot: this.destinationPath() }` (undefined for `uniqueGlobally` generators such as bootstrap)
+  and the base-core overrides of `writeDestination`, `writeDestinationJSON`, `copyTemplate` and `renderTemplate`
+  attach it to every written file (`editFile` and `writeFiles` go through them). `generators/base` adds
+  `removeNeedles: true` from `jhipsterConfig.removeNeedles`. The bootstrap commit pipeline always registers
+  `createNeedleTransform({ filter: file => file.editorMetadata?.removeNeedles })` and `autoCrlfTransform` looks
+  up git attributes from `editorMetadata.projectRoot` when it exists on disk (parent-directory walk otherwise),
+  so bootstrap never needs the project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
+  `commitSharedFs` read `this.options.removeNeedles` while base-simple-application set the class property, so
+  needle removal was silently dead. Needle removal only strips comment-marker lines (`createNeedleRegexp`), the
+  JSON menu needles in `i18n/*/global.json` stay, and `liquibase-add-incremental-changelog` is whitelisted.
+- yeoman-test temporary dirs: `helpers.prepareTemporaryDir()` starts a new run context and deletes the previous
+  context's temporary directory, so a spec that needs two directories at once must create the second one with
+  `mkdtemp` (and remove it in `after`). `runResult.memFs.get(path).editorMetadata` exposes written-file metadata;
+  `result.assert*Content` read from mem-fs, so commit-transform results are visible even with the default
+  `dryRun` helpers. `cli/cli-jdl.spec.ts` occasionally dies with `FATAL ERROR: v8::ToLocalChecked Empty
+MaybeLocal` in `node::cjs_lexer::Parse` of the spawned CLI under a full parallel run; it passes alone.
 - Sloppy-mode globals in EJS templates: EJS compiles templates as non-strict functions, so
   `<%_ for (relationship of relationships) { _%>` without `const` assigns `globalThis.relationship` (31 templates
   do this). A template that reads a name it never declared (the incremental
