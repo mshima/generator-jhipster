@@ -580,10 +580,16 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
 - Per-file editor metadata (mem-fs-editor >= 12.0.9, `file.editorMetadata`): base-core `editorMetadata` getter
   returns `{ gitRoot }` where `gitRoot` is read from the context data key `CONTEXT_DATA_GIT_ROOT_KEY`
   (`jhipster:git:root`, `generators/base-core/support/constants.ts`) that the `jhipster:git` generator registers at
-  initializing with its `destinationPath()` when git is not skipped, i.e. the directory where
-  `initializeGitRepository` runs; without a git generator in the context the metadata is `{}`, and
-  `uniqueGlobally` generators such as bootstrap attach nothing. Context data is keyed by `destinationRoot`, so a
-  workspaces root git generator is not visible to the app sub-folders (they fall back to the parent walk). The
+  initializing when git is not skipped: `git rev-parse --show-toplevel` when a repository already exists at or
+  above `destinationPath()` (child applications of a monorepository resolve the root repository, and the value is
+  a realpath), `destinationPath()` otherwise, i.e. the repository `initializeGitRepository` reuses or creates.
+  Without a git generator in the context the metadata is `{}`, and `uniqueGlobally` generators such as bootstrap
+  attach nothing. Context data is keyed by `destinationRoot` and each JDL application runs in its own
+  environment, so the registration happens per application. Files written through Storage (`packageJson`,
+  `.yo-rc.json`) bypass the yeoman-generator helpers and carry no metadata. Verified by generating a two-app
+  monorepository (`jhipster jdl --monorepository --workspaces --auto-crlf`) with a temporary `console.error` of
+  `file.editorMetadata` in `autoCrlfTransform`; revert such traces with `git -C <repo> checkout -- <file>` since
+  the generation `cd`s into the scratch output directory. The
   attachment itself lives in yeoman-generator (checkout at `../generator`, branch work on top of `mem-fs`):
   `BaseGenerator.editorMetadata` is a getter returning `undefined` by default and the fs mixin merges it into the
   `metadata` option of `writeDestination`, `writeDestinationJSON`, `copyTemplate`, `copyTemplateAsync`,
