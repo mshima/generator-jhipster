@@ -600,8 +600,10 @@ editorMetadata()` in base-core; `generators/base` adds `removeNeedles: true` fro
   `../generator` and copy its `dist/` over `node_modules/yeoman-generator/dist` (keep a backup to restore);
   `npm install ../generator` would resolve a second mem-fs-editor instance from the other checkout. The bootstrap commit pipeline always registers
   `createNeedleTransform({ filter: file => file.editorMetadata?.removeNeedles })` and `autoCrlfTransform` looks
-  up git attributes from `editorMetadata.gitRoot` when it exists on disk (parent-directory walk otherwise), so
-  bootstrap never needs the project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
+  up git attributes from `editorMetadata.gitRoot` (trusted as is: one cached `checkIsRepo` per root, any failure
+  such as a missing directory leaves the file untouched; the parent-directory walk only serves files without
+  metadata such as Storage-written `.yo-rc.json`/`package.json`), so bootstrap never needs the project
+  `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
   `commitSharedFs` read `this.options.removeNeedles` while base-simple-application set the class property, so
   needle removal was silently dead. Needle removal only strips comment-marker lines (`createNeedleRegexp`), the
   JSON menu needles in `i18n/*/global.json` stay, and `liquibase-add-incremental-changelog` is whitelisted.
