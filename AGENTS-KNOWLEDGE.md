@@ -600,9 +600,10 @@ editorMetadata()` in base-core; `generators/base` adds `removeNeedles: true` fro
   `../generator` and copy its `dist/` over `node_modules/yeoman-generator/dist` (keep a backup to restore);
   `npm install ../generator` would resolve a second mem-fs-editor instance from the other checkout. The bootstrap commit pipeline always registers
   `createNeedleTransform({ filter: file => file.editorMetadata?.removeNeedles })` and `autoCrlfTransform` looks
-  up git attributes from `editorMetadata.gitRoot` only, trusted without any check: one simple-git instance per
-  root, and a failing `check-attr` (not a repository, missing directory) marks the root as "not a repository" so
-  its files are left untouched. Files without `gitRoot` (Storage-written `.yo-rc.json`/`package.json`,
+  up git attributes from `editorMetadata.gitRoot` only, trusted without any check: `simpleGit({ baseDir: gitRoot })
+.raw('check-attr', '-z', ...)` per file inside a try/catch, any failure (not a repository, missing directory)
+  leaves the file untouched. No instance cache: construction spawns nothing, and a root with `gitRoot` that is not
+  a repository only happens when `git init` failed (`--skip-git` and a missing binary register no root). Files without `gitRoot` (Storage-written `.yo-rc.json`/`package.json`,
   `--skip-git`) are never normalized, there is no parent-directory walk anymore. So bootstrap never needs the
   project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
   `commitSharedFs` read `this.options.removeNeedles` while base-simple-application set the class property, so
