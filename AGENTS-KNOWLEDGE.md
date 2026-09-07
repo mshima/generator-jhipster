@@ -578,12 +578,12 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   resolve bare specifiers such as `ejs`; import them by absolute path, and note `ejs` ships separate ESM and CJS
   builds with separate caches (`mem-fs-editor` uses the ESM one).
 - Per-file editor metadata (mem-fs-editor >= 12.0.9, `file.editorMetadata`): base-core `editorMetadata` getter
-  returns `{ projectRoot: this.destinationPath() }` (undefined for `uniqueGlobally` generators such as bootstrap)
+  returns `{ gitRoot: this.destinationPath() }` (undefined for `uniqueGlobally` generators such as bootstrap)
   and the base-core overrides of `writeDestination`, `writeDestinationJSON`, `copyTemplate` and `renderTemplate`
   attach it to every written file (`editFile` and `writeFiles` go through them). `generators/base` adds
   `removeNeedles: true` from `jhipsterConfig.removeNeedles`. The bootstrap commit pipeline always registers
   `createNeedleTransform({ filter: file => file.editorMetadata?.removeNeedles })` and `autoCrlfTransform` looks
-  up git attributes from `editorMetadata.projectRoot` when it exists on disk (parent-directory walk otherwise),
+  up git attributes from `editorMetadata.gitRoot` when it exists on disk (parent-directory walk otherwise),
   so bootstrap never needs the project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
   `commitSharedFs` read `this.options.removeNeedles` while base-simple-application set the class property, so
   needle removal was silently dead. Needle removal only strips comment-marker lines (`createNeedleRegexp`), the
