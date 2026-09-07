@@ -644,6 +644,15 @@ editorMetadata()` in base-core; `generators/base` adds `removeNeedles: true` fro
   `result.assert*Content` read from mem-fs, so commit-transform results are visible even with the default
   `dryRun` helpers. `cli/cli-jdl.spec.ts` occasionally dies with `FATAL ERROR: v8::ToLocalChecked Empty
 MaybeLocal` in `node::cjs_lexer::Parse` of the spawned CLI under a full parallel run; it passes alone.
+- Fake data for `pattern` validations comes from `RandexpWithFaker` (`generators/base-application/support/faker.ts`,
+  `randexp` seeded through `faker.number.int`, `max = 5` repetitions). A pattern that accepts an empty value
+  (`^[a-zA-Z0-9]*$` in the FieldTest* sample entities) generates one about one time in six, which surfaced as
+  `WARNING! Error generating fake data for field Entity.field` (31 times in the ng-default sample) and an empty
+  CSV cell. `generateFakeDataFromPattern` (`prepare-field.ts`) retries up to ten times on an empty value;
+  the retries consume random numbers, so the remaining fake values of that row shift, which is the accepted kind
+  of faker change. Reproduce with `CI=true bin/jhipster.cjs generate-sample ng-default --skip-install --skip-git
+--skip-checks --force --skip-prettier` from an empty scratch directory (the sample lands in the cwd) and grep
+  the output for `Error generating fake data`; without `CI=true` the dev blueprint prompts for the folder.
 - Sloppy-mode globals in EJS templates: EJS compiles templates as non-strict functions, so
   `<%_ for (relationship of relationships) { _%>` without `const` assigns `globalThis.relationship` (31 templates
   do this). A template that reads a name it never declared (the incremental
