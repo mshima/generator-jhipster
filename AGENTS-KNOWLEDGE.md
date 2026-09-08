@@ -793,6 +793,24 @@ find …/find-language-from-key.pipe.ts`). `--skip-prompts` is not a CLI flag (`
 - Running generated-app Cypress from a VS Code-spawned shell: `unset ELECTRON_RUN_AS_NODE` first, otherwise the
   Cypress Electron binary starts in Node mode and dies with `bad option: --no-sandbox`.
 
+### Dev Server workflow: Cypress plugin process out of memory
+
+`e2e:devserver` runs Cypress against the Angular dev server with `CYPRESS_COVERAGE=true`; the plugin file
+(`generators/cypress/templates/.../plugins/index.ts.ejs`) collects v8 coverage over CDP and caches it per spec with
+`monocart-coverage-reports`, then merges everything at `after:run`. That work runs in the Cypress plugin child
+process ("Cypress: Config Manager", plain node heap limit, 2-4 GB), so the failure signature is a `[e2e]`
+"JavaScript heap out of memory" right after the last spec summary, or a job that hangs until the 40 minute timeout
+(the other processes keep running). The native federation dev server serves each shared dependency as its own
+script (`_angular_core.<hash>-dev.js`) and Cypress injects `__cypress/runner/*` and `__/assets/*`; they must be
+excluded with `entryFilter`, otherwise each spec caches ~126 MB of sources for ~6 MB of application code and one
+more entity/spec tips the merge over the limit. Reproduce locally with
+`jhipster generate-sample samples/ng-default --auth jwt --sample-yorc-folder --entities-sample sqllight --microfrontend`
+(run with `CI=true` from the target directory, worktree folder must be named `generator-jhipster`), `npm install`,
+`unset ELECTRON_RUN_AS_NODE` (set in VS Code terminals, it breaks the Cypress binary with "bad option: --no-sandbox"),
+then `npm run e2e:devserver` while sampling `ps -Ao rss,command`; the cache under
+`target/cypress-coverage-reports/.cache` shows which entries dominate. PR workflows run on the merge of the PR and
+main, so a template that only exists on main must be merged into the branch to fix it there.
+
 ## Debugging CI failures
 
 - Reading a failed sample job: `gh run view <run-id> -R jhipster/generator-jhipster --job <job-id> --log` gives the full
