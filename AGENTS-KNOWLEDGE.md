@@ -45,6 +45,13 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   prompt-only configs such as `clientTestFrameworks`/`serverTestFrameworks` keep `scope: 'storage'`, are merged
   into `testFrameworks` and removed in a configuring task, and their derived `*Any`/`*Cypress` keys legitimately
   appear in application snapshots.
+  A checkbox that fans out into several configs (spring-boot `serverSideOptions`, values like
+  `messageBroker:kafka`) uses `scope: 'generator'`: the answer lands on the generator instance instead of
+  `.yo-rc.json` or the application context, and the config's `configure` hook (configuring queue) reads
+  `gen.serverSideOptions` and assigns the real keys to `jhipsterConfig`. Prompts of the same batch are not yet
+  stored when the `prompt` factory runs, so dynamic `choices`/`when` must read `answers.<key> ?? config.<key>`.
+  Command prompts are skipped for existing projects unless `--ask-answered`, so a spec exercising them must not
+  seed `.yo-rc.json` with `withJHipsterConfig`.
 - Grep every quoting/EJS form before declaring something unused: `@content` looked unused in the Vue templates
   because `global.scss.ejs` and `jhi-navbar.vue.ejs` emit `url("<%- clientBundlerRsbuild ? '@' : '/' %>content/…")`,
   while `rsbuild.config.ts` still needs the alias (Vite uses absolute `/content/…` URLs).
