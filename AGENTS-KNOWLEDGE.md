@@ -24,8 +24,8 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
 - Translation macros (`__jhiTranslateTag__`, `__jhiTranslateTagEnum__`, `__jhiTranslatePipe__`, …) are replaced by
   `generators/angular/support/translate-angular.ts`. Pitfall: when a key has no translation,
   `getWebappTranslation(key)` falls back to a plain string, and the `TagEnum`/`PipeEnum` replacements emit
-  `JSON.stringify(translation)[value]` as inline fallback — indexing a string with a string key, which fails Angular
-  strict builds with `TS7015`. Only use the enum macros for keys that actually have generated translations.
+  `JSON.stringify(translation)[value]` as an inline fallback — indexing a string with a string key, which fails
+  Angular strict builds with `TS7015`. Only use the enum macros for keys that actually have generated translations.
 - `delete this.jhipsterConfig.<key>` is a silent no-op: `jhipsterConfig` is yeoman's `Storage.createProxy()`, whose
   handler has `get`/`set` traps but no `deleteProperty`, so the `delete` lands on the Storage instance and
   `.yo-rc.json` keeps the value. Remove a stored option with `this.jhipsterConfig.<key> = undefined` (JSON drops the
@@ -89,7 +89,7 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `builtInUserManagement`; remaining hand-written pages live under `…/app/entities/admin/user-management/`. Grep
   for `builtInUserManagement` in templates to find the existing special cases (langKey typing/rendering,
   Authority relationship inclusion) before adding behavior.
-- Without an Authority entity (Cassandra/no database) the Angular `UserManagement` gets a built-in
+- Without an Authority entity (Cassandra/no database), the Angular `UserManagement` gets a built-in
   `authorities` **field** (`fieldType: 'Authority'`, `fieldValues: 'ROLE_ADMIN,ROLE_USER'`, `collection: true`,
   `clientConstantsAsValues: true`, `skipServer: true`) appended in `createUserManagementEntity`; `langKey` is
   handled the same way through `Languages`.
@@ -114,11 +114,10 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `@module-federation/enhanced`, `browser-sync` and `@ngx-translate/http-loader` are gone, and old `webpack/*`
   files are removed through `control.cleanupFiles` `'9.3.1'`. Cypress' Angular webpack coverage path
   (`cypressCoverageWebpack`, `webapp:instrumenter`) was removed with it; `angularSchematic` is now simply
-  `clientFrameworkAngular`. Since Vue dropped webpack as well (9.3.1) no framework produces a webpack build any more;
-  `webpack` stays in the `clientBundler` `choices` on purpose so `clientBundlerWebpack` remains a (false) derived
-  property for blueprints. Renaming CI
-  jobs (the `-webpack` suffixes) reshuffles the build matrix node/java indexes — that is by design
-  (`randomEnvironment`), refresh the `.blueprint/github-build-matrix` snapshot.
+  `clientFrameworkAngular`. Since Vue dropped webpack as well (9.3.1), no framework produces a webpack build any
+  more; `webpack` stays in the `clientBundler` `choices` on purpose so `clientBundlerWebpack` remains a (false)
+  derived property for blueprints. Renaming CI jobs (the `-webpack` suffixes) reshuffles the build matrix node/java
+  indexes — that is by design (`randomEnvironment`); refresh the `.blueprint/github-build-matrix` snapshot.
 - Microfrontends use `@angular-architects/native-federation`. Pieces: `federation.config.ts` (shares npm deps via
   `shareAll`, dayjs entry points via `shareDayjs`, Angular locales via `shareAngularLocales`, app singletons via
   `sharedMappings`), `tsconfig.federation.json` (exposed entries), and `build-plugins` as a local builder package
@@ -162,7 +161,7 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `app_shared_*-*.js`. Consequences:
   - `provideMicrofrontendTranslation()` must be registered from `app.config.ts`, never from
     `app/shared/language/translation.provider.ts`: from the mapping, the loader, `app/core/microfrontend` and the
-    federation runtime get an uninitialised runtime copy and `loadRemoteModule` never settles (no `[NF]` log at
+    federation runtime get an uninitialized runtime copy and `loadRemoteModule` never settles (no `[NF]` log at
     all). Symptom: `reloadLang` resets the dictionary and the menu shows raw keys. Check with
     `grep -l loadMicrofrontends target/classes/static/*.js`: it must be in `bootstrap-*.js`/`main`, not in an
     `app_shared_*` chunk.
@@ -194,7 +193,7 @@ specifier 'dayjs/esm/plugin/customParseFormat'` (every Cypress spec fails on `[d
 - When an application exposes itself (`exposeMicrofrontend`, the gateway is its own `self` microfrontend and
   routes/navbar go through `loadEntityRoutes('<name>')`/`loadNavbarItems('<name>')`),
   `initFederation(remotes, { hostRemoteEntry })` must set `hostRemoteEntry.name` to the module federation name.
-  Without it the orchestrator registers the host as `__NF-HOST__` and `loadRemoteModule('gateway', …)` throws
+  Without it, the orchestrator registers the host as `__NF-HOST__` and `loadRemoteModule('gateway', …)` throws
   `NFError: Remote 'gateway' is not initialized`; the router then retries the lazy route endlessly, the tab
   freezes, Cypress prints nothing and the CI "E2E: Run" step times out after 15 minutes (locally the Electron
   renderer crashes after ~4 min).
@@ -213,7 +212,7 @@ specifier 'dayjs/esm/plugin/customParseFormat'` (every Cypress spec fails on `[d
   `@angular-architects/native-federation`) skips the initial dev-server output (`if (first || !watch) continue;`) and
   only yields on rebuilds, so `ng e2e --configuration coverage|run` hangs until the job times out (the dev-server
   workflow's `ng-default-module-federation` job ran 40 min). The `serve` target also needs `configurations`
-  (`development`/`production` overriding `target` to `serve-original:<config>`), otherwise Cypress' `coverage`
+  (`development`/`production` overriding `target` to `serve-original:<config>`); otherwise Cypress' `coverage`
   configuration fails with "Configuration 'development' for target 'serve' … is not set". For microfrontend Angular
   apps the cypress generator therefore emits the generic script (`concurrently … npm:start "wait-on … && npm run
 e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because the Angular dev server binds
@@ -235,7 +234,7 @@ e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because
   that is not a page-level horizontal scroll.
 - Safari only (WebKit, not reproducible in Chromium, Firefox or Playwright's WebKit build): an ng-bootstrap
   `ngbDropdown` with `display="dynamic"` inside a `position: relative` navbar `li` makes the page horizontally
-  scrollable once opened, and the value sticks after closing. Popper writes the menu position as inline styles,
+  scrollable once opened, and the value sticks after closing. Popper writes the menu position as inline styles;
   WebKit's "positioned movement only" layout then records the menu's scrollable overflow at
   `2 × containingBlockLeft + menuWidth` and never recomputes it. The fix in `navbar.html.ejs` is
   `display="static"` on the navbar dropdowns (pure Bootstrap CSS positioning, identical placement) plus
@@ -245,7 +244,7 @@ e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because
 ## Vue client
 
 - `@content` is used only by the rsbuild bundler variant (see the conventions section): `rsbuild.config.ts` needs
-  the alias, Vite uses absolute `/content/…` URLs.
+  the alias; Vite uses absolute `/content/…` URLs.
 - With `resolve.tsconfigPaths: true` in `vite.config.ts`, tsconfig `paths` only reach Vite's own resolver. The
   `@module-federation/vite` plugin resolves `shared` keys itself, so application modules shared by key
   (`@/shared/jhipster/constants`, …) fail with "Rolldown failed to resolve import … from virtual:mf:…loadShare…"
@@ -255,10 +254,10 @@ e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because
 - Since 9.3.1 Vue is Vite-only for monoliths and Rsbuild-only for microfrontends/microservices
   (`clientBundler` default in `generators/vue/generators/bootstrap/generator.ts`). Gone with webpack: the
   `generators/vue/templates/webpack/*` files, `module-federation.config.cjs` (only `module-federation.config.ts`
-  is left, its `exposes` paths are relative to `clientSrcDir`), `source.addWebpackConfig` (Vue), the webpack loaders
+  is left; its `exposes` paths are relative to `clientSrcDir`), `source.addWebpackConfig` (Vue), the webpack loaders
   and plugins in `generators/vue/resources/package.json`, the shared `client/templates/webpack/webpack.microfrontend.js.jhi`
   and the i18n `index_webpack.js` bundle template, `devServerPortProxy` (webpack's BrowserSync proxy port) and the
-  `[BrowserSync]` README reference. A stored `clientBundler: webpack` plus its `devServerPort` (9060 + index) are
+  `[BrowserSync]` README reference. A stored `clientBundler: webpack` and its `devServerPort` (9060 + index) are
   reset by the `migrateFromWebpack` configuring task; old files are removed by the `'9.3.1'` `control.cleanupFiles`
   entry in `generators/vue/generator.ts`.
 
@@ -277,7 +276,7 @@ e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because
   `npm run webapp:build:dev` and `npm test` in each app.
 - `@module-federation/vite` only proxies a shared module to the host when it can resolve it: for app-local modules
   (`app/config/store`, …) the `shared` entry needs `import: './src/main/webapp/<key>'` (see `shareMappings` in
-  `module-federation.config.ts.ejs`); without it the remote silently uses its own copy. Even so, remotes must get
+  `module-federation.config.ts.ejs`); without it, the remote silently uses its own copy. Even so, remotes must get
   host state from React context (`useStore()` from the shared `react-redux`, see `entities/routes.tsx.ejs`), never
   from module singletons like `getStore()`. Symptom when this breaks: the remote injects its reducers into its own
   store and selectors throw `Cannot read properties of undefined` for the microservice key.
@@ -297,7 +296,7 @@ e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because
 
 ## Spring Boot server
 
-- `LoggingAspect.java.ejs` is shared by imperative and reactive apps. For reactive apps the around advice logs
+- `LoggingAspect.java.ejs` is shared by imperative and reactive apps. For reactive apps, the around advice logs
   `Mono`/`Flux` on termination (`doOnSuccess`/`doOnComplete`/`doOnError`) and also handles synchronous throws
   itself: an `@AfterThrowing` advice needs `ExposeInvocationInterceptor.currentInvocation()`, which is not set when
   the reactive `@Transactional` interceptor invokes the target lazily at subscribe time, so it fails with
@@ -314,7 +313,7 @@ e2e:headless -- -c baseUrl=…"`), probing `http-get://localhost:<port>` because
   get `<Entity>RepositoryInternal` plus a thin `<Entity>RepositoryInternalImpl extends AbstractR2dbcRepository`
   fragment (constructor `R2dbcEntityTemplate, R2dbcConverter, R2dbcDialect`). The generic machinery lives in the
   once-per-app `repository/AbstractR2dbcRepository` (`AbstractR2dbcRepository_reactive.java.ejs`, written when any
-  entity needs a fragment) which extends `SimpleR2dbcRepository`: `findAll`/`findById`/`findAllBy(Pageable)` run
+  entity needs a fragment), which extends `SimpleR2dbcRepository`: `findAll`/`findById`/`findAllBy(Pageable)` run
   `populateRelationships` after the query, `populate(entities, fkGetter, RelatedType.class, relatedIdGetter, setter)`
   loads a to-one relationship with one `Criteria.where(id).in(ids)` query, `populate(entities, <REL>_JOIN_TABLE,
 RelatedType.class, relatedIdGetter, setter)` loads an owner-side many-to-many with two queries (join table rows
@@ -341,7 +340,7 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
   (criteria filtering, `SORT_COLUMNS`, `filterTestableRelationships` in `_entityClass_ResourceIT`) they use
   `relationships.filter(rel => rel.ownerSide && !rel.collection)`. `SELECT_WITH_RELATIONS_SQL` only joins eager
   to-one tables; a sort by a non-eager `rel.id` maps to `e.<fk column>` without a join. The `sql` entity set has no
-  id-only to-one relationship, so to exercise `reference()` set `"otherEntityField": "id"` on `Operation.bankAccount`
+  id-only to-one relationship, so to exercise `reference()`, set `"otherEntityField": "id"` on `Operation.bankAccount`
   in a copied `.jhipster/Operation.json`; a small IT saving an `Operation` with a `BankAccount` and two `Label`s and
   reading it back through `findById`, `findAllBy(PageRequest.of(0, 10, Sort.by(DESC, "bankAccount.id")))` and
   `findAll()` verifies the id-only reference, the populated `labels` and the join-free sort.
@@ -379,14 +378,14 @@ Pageable)`/`countBy(Criteria)` back the filtering (the fragment builds the `Crit
   `source.addLiquibaseChangelog`) are `<createTable>` changes too, with the CQL type per field type computed in the
   template. Liquibase's `UUIDType` renders `uuid` as `char(36)` on Cassandra (only `text` has a Cassandra data type
   in `liquibase-cassandra` 5.0.4; unknown names such as `timeuuid`, `set<text>`, `tuple<timestamp,varchar>` pass
-  through as `UnknownType`, known ones render uppercase, which CQL accepts), and a dbms-scoped
+  through as `UnknownType`, while known ones render uppercase, which CQL accepts), and a dbms-scoped
   `<property name="uuidType" value="uuid" dbms="cassandra"/>` does not help because the substituted `uuid` is
   parsed again into `UUIDType`. Cassandra entities default to a UUID id (`defaultPrimaryKeyType` in
   `generators/server/support/database.ts`), so the entity changeSet appends
   `<modifySql><replace replace="char(36)" with="uuid"/></modifySql>` whenever a field is a UUID; the proper fix is a
   `CassandraUuidDataType` in `liquibase-cassandra`. `createTable ifNotExists="true"` is silently dropped because
   `Database.supportsCreateIfNotExists` defaults to `false` and `CassandraDatabase` does not override it; no
-  precondition replaces it, the changelog table already records whether the changeSet ran.
+  precondition replaces it: the changelog table already records whether the changeSet ran.
   The `liquibase-cassandra` extension only swaps the runner: the physical model (`user`, `user_by_*` lookup tables,
   `authorities set<text>`, entity tables with CQL types) is unchanged.
 - Recipe to see the CQL Liquibase will emit for a changelog without a database: resolve a classpath with a scratch
@@ -415,7 +414,7 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
   customizers after `withKeyspace`, so the customizer must restore the keyspace. Ordering: user `@Configuration`
   beans are instantiated before auto-configured ones, so the `liquibase` bean would run before `cassandraSession`
   and fail on the missing keyspace — `LiquibaseConfiguration` therefore injects the `CqlSession` and reads the
-  keyspace from `session.getKeyspace()` instead of `CassandraProperties`. Consequently the docker
+  keyspace from `session.getKeyspace()` instead of `CassandraProperties`. Consequently, the docker
   `cassandra-migration` service, its `Cassandra-Migration.Dockerfile`/`autoMigrate.sh`/`execute-cql.sh`, the
   `create-keyspace*.cql`/`drop-keyspace.cql` resources, the `docker-compose` merge of `cassandra-migration.yml` and
   `CassandraTestContainer.createKeyspace` are all `databaseMigrationLoader`-only; `generators/docker/generator.ts`
@@ -429,14 +428,15 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
   `findById`, so a stale `(login, oldId)` row whose user no longer exists hides the live one whenever `oldId` sorts
   first — random UUID ids make that a coin flip. The imperative `save` deletes the old lookup rows before its insert
   batch, but the reactive `save` built its cleanup as `Flux<ReactiveResultSet> deleteOps = Flux.empty()` followed by
-  `deleteOps.mergeWith(session.execute(...))` whose result was discarded, so no old row was ever deleted (fixed on the
+  `deleteOps.mergeWith(session.execute(...))`, whose result was discarded, so no old row was ever deleted (fixed on the
   `cassandra-liquibase` branch by assigning `deleteOps = deleteOps.mergeWith(...)`). Symptom: in a reactive Cassandra
   gateway `UserResourceIT.deleteUser` fails with `Expected size: 4 but was: 5` and `johndoe` still listed, in about
   half of the runs — JUnit's default method order runs `updateUserLogin` (login `johndoe` → `jhipster`) right before
   `deleteUser`, leaving `(johndoe, oldId)` behind, and the `DELETE /api/admin/users/johndoe` then resolves the stale id,
   finds no user and answers 204 without deleting. The reactive Cassandra + JWT gateway only entered CI when the
   `ms-react-consul-jwt-cassandra-redis` JDL switched its gateway from `prodDatabaseType postgresql` to
-  `databaseType cassandra` on that branch, so `gh run list -w react.yml -b main` history of the job is not comparable.
+  `databaseType cassandra` on that branch, so the `gh run list -w react.yml -b main` history of the job is not
+  comparable.
 - The legacy CQL migration is still selectable as `databaseMigration: 'loader'`, mirroring how Neo4j picks between
   `neo4j-migrations` and Liquibase through the same option. `loader` restores `config/cql/changelog/*` (README,
   `00000000000000_create-tables.cql`, `00000000000001_insert_default_users.cql`, per-entity `added_entity.cql`),
@@ -457,7 +457,7 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
   application/context snapshot (`databaseMigrationLoader: false` appeared in the angular, react, vue, app, jdl, ci-cd
   and bootstrap snapshots) and changes the CLI help text. Run `npm run update-snapshots` and confirm the diff contains
   nothing but the new key.
-- Recipe to prove a config value faithfully restores older behaviour: temporarily add it to the spec's `commonConfig`,
+- Recipe to prove a config value faithfully restores older behavior: temporarily add it to the spec's `commonConfig`,
   run `npm run update-snapshot -- <spec>`, then `diff <(git show upstream/main:<snap>) <snap>`. For `loader` the only
   difference was the echoed `"databaseMigration": "loader"` in the samples matrix — every generated file path matched
   upstream. Note `getStateSnapshot()` records paths and state, not contents, so pair it with a throwaway spec that
@@ -467,13 +467,13 @@ writer)`. Do not launch `liquibase.integration.commandline.LiquibaseCommandLine`
   a bare `helpers.runJHipster('server')` needs `skipClient: true` or the languages generator fails on missing
   webapp files.
 - `prepareSqlApplicationProperties` (`data-relational/support/application-properties.ts`) must run for Cassandra
-  too (it sets `devJdbcDriver`/`prodJdbcDriver` to the wrapper driver and empty credentials), otherwise the Gradle
+  too (it sets `devJdbcDriver`/`prodJdbcDriver` to the wrapper driver and empty credentials); otherwise the Gradle
   `liquibase.gradle.ejs` rendering throws `ReferenceError: devJdbcDriver`. `cassandraKeyspaceName` is an
   `applicationDefaults` property (`generators/spring-boot/application.ts`), so every application snapshot lists it
   (`undefined` outside Cassandra) — refresh e.g. the ci-cd context snapshot when it appears.
 - Changelog lock, part 1 — affected-row count: the generated JDBC URL must contain `compliancemode=Liquibase`
   (`LiquibaseConfiguration.java.ejs` and `prodLiquibaseUrl` in `generators/liquibase/generator.ts`). With the
-  `cassandra-jdbc-wrapper` default option set `executeUpdate` returns `0` for the lock's LWT
+  `cassandra-jdbc-wrapper` default option set, `executeUpdate` returns `0` for the lock's LWT
   `UPDATE ... IF LOCKED = FALSE`, and `LockServiceCassandra.acquireLock` (5.0.3 and 5.0.4) treats `0` as "another
   node was faster" although the lock was applied, so every app start loops on `Waiting for changelog lock....`
   until `Could not acquire change log lock. Currently locked by <own host>` (upstream
@@ -485,8 +485,8 @@ replicas available for query at consistency QUORUM (2 required but only 1 alive)
   This is why the application-created keyspace defaults to `{'class': 'SimpleStrategy', 'replication_factor': 1}`
   and a real cluster is expected to pre-create the keyspace (the `IF NOT EXISTS` is then a no-op) or override
   `application.cassandra.keyspace-replication`.
-- The 2s default request timeout bites twice, and both are schema changes needing schema agreement, which does not
-  fit in 2s on a loaded CI runner. (1) `CREATE KEYSPACE`: the application's `keyspaceCreator` customizer uses a
+- The 2s default request timeout bites twice, and both cases are schema changes needing schema agreement, which
+  does not fit in 2s on a loaded CI runner. (1) `CREATE KEYSPACE`: the application's `keyspaceCreator` customizer uses a
   `SimpleStatement…setTimeout(Duration.ofSeconds(20))`, and the loader-only `CassandraTestContainer.createKeyspace`
   (run from `containerIsStarted`, where a `DriverTimeoutException` makes testcontainers retry until the limit and
   surface the misleading `ContainerLaunchException: Container startup failed for image cassandra:6.0`) gives its
@@ -508,9 +508,9 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   `compile` first. For quick Liquibase-vs-Cassandra experiments write a plain `main` using the Liquibase API
   (`LockServiceFactory`, `Executor.queryForList` on `DATABASECHANGELOGLOCK`) on the app's
   `dependency:build-classpath -Dmdep.includeScope=test` classpath.
-- Cassandra `UserRepository` lives in the data-cassandra generator
+- The Cassandra `UserRepository` lives in the data-cassandra generator
   (`data-cassandra/templates/src/main/java/_package_/_entityPackage_/repository/UserRepository.java.ejs`, written by
-  `writeEntityCassandraFiles` for `entity.builtInUser` next to `domainFiles`), and the reactive SQL one in the
+  `writeEntityCassandraFiles` for `entity.builtInUser` next to `domainFiles`), the reactive SQL one in the
   data-relational generator (`data-relational/templates/.../repository/UserRepository_reactive.java.ejs`, a
   `builtInUser` block in `writeEntitiesTask` next to the `_persistClass_Callback` one; the `_reactive` suffix is
   stripped on write like the other reactive templates there), and the Couchbase one in the data-couchbase
@@ -526,7 +526,7 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
   spring-boot `mutateApplicationPreparing` declares them as `undefined` ("populated by the data generators"):
   the parent's preparing runs before the composed children's and `applicationDefaults` only fills undefined
   values, so declaring the key with `undefined` both lets the children's defaults apply and keeps the key present
-  in the EJS context (a missing identifier is a `ReferenceError` in EJS, an undefined value is not). The same
+  in the EJS context (a missing identifier is a `ReferenceError` in EJS; an undefined value is not). The same
   pattern moved `springDataDescription` ("Spring Data JPA"/"R2DBC"/"MongoDB"/"Neo4j"/"Cassandra"/"Couchbase",
   plus " reactive" for the non-SQL reactive stores) out of `application.ts` into each `data-*` generator's
   `applicationDefaults`; a `no`-database application therefore has it undefined instead of "Spring Data
@@ -545,25 +545,26 @@ com/ing/data/cassandra/jdbc/utils/JdbcUrlUtil.class` from the jar in `~/.m2` lis
 
 Spring Data R2DBC drops null values from inserts (`R2dbcEntityTemplate.doInsert` keeps only
 `Parameter.hasValue()`), and an insert with no columns is rendered with the dialect's `InsertRenderContext`:
-`InsertRenderContexts.DEFAULT` is ` VALUES (DEFAULT)` (used by the MySQL dialect, which MariaDB resolves to too),
+`InsertRenderContexts.DEFAULT` is ` VALUES (DEFAULT)` (used by the MySQL dialect, which MariaDB resolves to too), and
 `MS_SQL_SERVER` is ` DEFAULT VALUES`. MySQL and MariaDB reject `INSERT INTO t VALUES (DEFAULT)` for a table with
 more than one column, so creating an entity whose fields are all null (a cypress `{}` sample, or a JSON body
 without values) fails with `DataAccessException` ("Failure during data access", HTTP 500). H2 and PostgreSQL
 accept it. The generated `DatabaseConfiguration.dialect` bean wraps the resolved `MySqlDialect` with an
-`InsertRenderContext` returning ` () VALUES ()` (mysql/mariadb only, runtime `instanceof` check so the H2 dev
+`InsertRenderContext` returning ` () VALUES ()` (mysql/mariadb only, with a runtime `instanceof` check so the H2 dev
 profile keeps its dialect). That bean alone changes nothing: Spring Boot's `DataR2dbcAutoConfiguration`
 (`spring-boot-data-r2dbc`) calls `DialectResolver.getDialect(connectionFactory)` in its constructor and builds
 the `R2dbcEntityTemplate` from that field, ignoring any `R2dbcDialect` bean (the `dialect` bean is only injected
 into JHipster's own `r2dbcCustomConversions` and repositories). `DatabaseConfiguration` therefore also declares
 an `R2dbcEntityTemplate(databaseClient, dialect, converter)` bean for mysql/mariadb; Boot's template bean is
 `@ConditionalOnMissingBean`. The e2e server runs with `logging.level.ROOT=OFF`, so a 500 "Failure during data
-access" never shows its SQL error in CI logs; there is no Docker on this machine, CI is the runtime check. This was previously hidden by the cypress `workaroundEntityCannotBeEmpty` entity
-property, which put one nullable field into the e2e sample for reactive postgresql/mysql/mariadb (#34849
-removed it and the `workaroundInstantReactiveMariaDB` one; the Instant one was no longer needed). Recipe to
+access" never shows its SQL error in CI logs; there is no Docker on this machine, so CI is the runtime check. This
+was previously hidden by the cypress `workaroundEntityCannotBeEmpty` entity property, which put one nullable field
+into the e2e sample for reactive postgresql/mysql/mariadb (#34849 removed it and the
+`workaroundInstantReactiveMariaDB` one; the Instant one was no longer needed). Recipe to
 inspect Spring Data rendering without sources: unzip the jars from `~/.m2` and `javap -p -c` the class
 (`InsertRenderContexts`, `MySqlDialect`, `DefaultStatementMapper`). CI sample job logs are not readable through
 `gh run view --log` here; download them with `gh api repos/<owner>/<repo>/actions/jobs/<id>/logs` and grep for
-`failing`, the cypress failure block lists the request and the problem+json response.
+`failing`; the cypress failure block lists the request and the problem+json response.
 
 ### User cleanup in generated integration tests
 
@@ -577,10 +578,10 @@ apps have no `UserService.deleteUser(login)`, so their cleanup goes through
 `userRepository.findOneByLogin(login)` + `delete` (`.flatMap(...).block()` reactive, `.ifPresent(...)` imperative);
 the reactive SQL `UserRepository` custom `delete(user)` (removes `jhi_user_authority` rows first, `DeleteExtended`)
 is now generated for every authentication type; `UPDATED_LOGIN` and the `anotherlogin` tests only exist without
-oauth2, the oauth2 `AccountResourceIT` syncs `jane` (reactive) or `OAuth2TestUtil.TEST_USER_LOGIN` (imperative).
+oauth2; the oauth2 `AccountResourceIT` syncs `jane` (reactive) or `OAuth2TestUtil.TEST_USER_LOGIN` (imperative).
 Verify template changes by generating the ms-mf-react JDL sample (oauth2 reactive gateway + imperative
 microservice) and ng-default, then `./mvnw -ntp -q test-compile -Dskip.installnodenpm -Dskip.npm` in each app
-(online, the Spring Cloud deps are not cached). Generated apps from `generate-sample` pin the released
+(online — the Spring Cloud deps are not cached). Generated apps from `generate-sample` pin the released
 jhipster-framework, so main-code features that need a newer framework (`tech.jhipster.service.CriteriaBuilder`
 after #34822) fail to compile locally regardless of the change under test.
 
@@ -594,7 +595,7 @@ candidates for the owner form; no generated client calls it). Now: unidirectiona
 back reference; `entity.oneToOneNullFilters` (computed in `server/support/relationship.ts`
 `addEntitiesOneToOneNullFilters`, items `{ filterName, methodSuffix, description, descriptionCapitalized,
 relationship?, ownerRelationship, ownerEntity }` with lazy name getters) drives the Service/ServiceImpl/Resource
-templates: bidirectional ones keep `order-is-null` / in-memory `getOrder() == null` (identical output),
+templates: bidirectional ones keep `order-is-null` / in-memory `getOrder() == null` (identical output);
 unidirectional ones (SQL only) are named `order-recipient-is-null` / `findAllWhereOrderRecipientIsNull` and use a
 repository query on the owner table: JPQL `where not exists (select o from Order o where o.recipient = member)`
 (Hibernate accepts `order` as alias), R2DBC `not in (select recipient_id from jhi_order where recipient_id is not
@@ -602,7 +603,7 @@ null)`. The old reactive query selected `<backReference>_id` (`order_id`) from t
 not exist; it now uses `ownerRelationship.joinColumnNames[0]`. `fieldsContainNoOwnerOneToOne` stays computed but
 deprecated. The R2DBC repository template (`_entityClass_Repository_r2dbc`, used when `useSimpleR2dbcRepository`)
 has an `emptyRepository` guard that must count the unidirectional filters. Generated ITs against PostgreSQL use
-Testcontainers by default (`-Pprod` → `test,testprod`); without Docker run `./mvnw -Pdev test -Dtest=XResourceIT`
+Testcontainers by default (`-Pprod` → `test,testprod`); without Docker, run `./mvnw -Pdev test -Dtest=XResourceIT`
 so the `testdev` profile uses H2, which still validates JPQL at repository initialization.
 
 ### syncUserWithIdp without a database
@@ -654,7 +655,7 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
 
 - `lib/testing/helpers.ts`: the `jhipster` preset injects `skipChecks`, `reproducibleTests`, `skipInstall`,
   `skipGit`, `useVersionPlaceholders`. `defaultHelpers` adds `skipPrettier` + `dryRun`; most specs use it.
-  `withJHipsterGenerators()` wires real generators, mocks via `withMockedJHipsterGenerators`. Per-test environment
+  `withJHipsterGenerators()` wires real generators; mocks come via `withMockedJHipsterGenerators`. Per-test environment
   lookup is cheap (~10 ms); module import of `cli/environment-builder.ts` (~1 s) happens once per mocha worker.
 - Specs are run with esmocha (`npm test` = `esmocha test generators cli .blueprint lib --forbid-only`, update
   snapshots with `--update-snapshot`), not vitest. `test/api.spec.ts` needs `dist/` (`npm run build`).
@@ -667,21 +668,21 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   `before`. The EJS template cache is keyed by filename only and every cached compiled function keeps the first
   render's options, including the generator that yeoman-generator passes as `context` (templates do call generator
   methods through `this`, e.g. `this.getUXConstraintName(...)`), so base-core `renderTemplate` renders with
-  `cache: false` (measured cost: about 0.3 s on a 15-entity Angular JDL app, the spec suite is not slower).
+  `cache: false` (measured cost: about 0.3 s on a 15-entity Angular JDL app; the spec suite is not slower).
   Measuring recipe: a `--require` root hook that runs `global.gc()` in `afterAll` and logs
   `process.memoryUsage()` per file under `node --expose-gc node_modules/.bin/esmocha --parallel --jobs 2` (the
   `--jobs 1` form silently falls back to serial and then `require()`s the ESM specs, which fails);
   `v8.writeHeapSnapshot()` in the same hook plus a script that walks the snapshot's reverse edges gives the
   retainer path of `MemFsEditor` / `FullEnvironment` objects. A scratch `.mjs` hook outside the repo cannot
-  resolve bare specifiers such as `ejs`; import them by absolute path, and note `ejs` ships separate ESM and CJS
+  resolve bare specifiers such as `ejs`; import them by absolute path, and note that `ejs` ships separate ESM and CJS
   builds with separate caches (`mem-fs-editor` uses the ESM one).
-- Per-file editor metadata (mem-fs-editor >= 12.0.9, `file.editorMetadata`): base-core `editorMetadata` getter
+- Per-file editor metadata (mem-fs-editor >= 12.0.9, `file.editorMetadata`): the base-core `editorMetadata` getter
   returns `{ gitRoot }` where `gitRoot` is read from the context data key `CONTEXT_DATA_GIT_ROOT_KEY`
   (`jhipster:git:root`, `generators/base-core/support/constants.ts`) that the `jhipster:git` generator registers at
   initializing when git is not skipped: `git rev-parse --show-toplevel` when a repository already exists at or
   above `destinationPath()` (child applications of a monorepository resolve the root repository, and the value is
   a realpath), `destinationPath()` otherwise, i.e. the repository `initializeGitRepository` reuses or creates.
-  Without a git generator in the context the metadata is `{}`, and `uniqueGlobally` generators such as bootstrap
+  Without a git generator in the context, the metadata is `{}`, and `uniqueGlobally` generators such as bootstrap
   attach nothing. Context data is keyed by `destinationRoot` and each JDL application runs in its own
   environment, so the registration happens per application. Files written through Storage (`packageJson`,
   `.yo-rc.json`) bypass the yeoman-generator helpers and carry no metadata. Verified by generating a two-app
@@ -700,22 +701,22 @@ editorMetadata()` in base-core; `generators/base` adds `removeNeedles: true` fro
   `createNeedleTransform({ filter: file => file.editorMetadata?.removeNeedles })` and `autoCrlfTransform` looks
   up git attributes from `editorMetadata.gitRoot`, trusted without any check: `simpleGit({ baseDir: gitRoot })
 .raw('check-attr', '-z', ...)` per file inside a try/catch. When git cannot answer (no `gitRoot`: Storage-written
-  `.yo-rc.json`/`package.json`, `--skip-git`; failed `git init`; missing directory) it falls back to
+  `.yo-rc.json`/`package.json`, `--skip-git`; failed `git init`; missing directory), it falls back to
   `isBinaryFile(contents)` for binary detection and `detectCrLf(file.path)` to keep the line endings of a file
   that already exists on disk; new files (and single-line existing files) get the CRLF default, so with
   `--skip-git` on Windows new `*.sh` files become CRLF too (only `.gitattributes` through git knows they must stay
-  LF; before #34675 the transform threw outside a repository, then it skipped, now it falls back). Even with attributes, `isBinaryFile` runs whenever the `binary` attribute is
-  `unspecified` (only `set`/`unset` are trusted): a PNG without a `.gitattributes` rule was otherwise
-  CRLF-normalized, and that spec passed locally only by accident, always rerun the autoCrlf spec after touching
-  the transform. No git instance cache and no parent-directory walk:
-  construction spawns nothing and one base directory per project makes memoization pointless. So bootstrap never needs the
-  project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
+  LF; before #34675 the transform threw outside a repository, then it skipped, and now it falls back). Even with
+  attributes, `isBinaryFile` runs whenever the `binary` attribute is `unspecified` (only `set`/`unset` are trusted):
+  a PNG without a `.gitattributes` rule was otherwise CRLF-normalized, and that spec passed locally only by
+  accident; always rerun the autoCrlf spec after touching the transform. No git instance cache and no
+  parent-directory walk: construction spawns nothing and one base directory per project makes memoization
+  pointless. So bootstrap never needs the project `jhipsterConfig` (jhipster/generator-jhipster#34309). Before this,
   `commitSharedFs` read `this.options.removeNeedles` while base-simple-application set the class property, so
   needle removal was silently dead. Needle removal only strips comment-marker lines (`createNeedleRegexp`), the
   JSON menu needles in `i18n/*/global.json` stay, and `liquibase-add-incremental-changelog` is whitelisted.
 - `autoCrlfTransform` reads `git check-attr -z binary eol` (NUL-separated `<path>\0<attr>\0<value>` triples,
   because paths may contain `: `). Git answers `unset` for `-binary`/`-eol`, `native` for `eol=native` and
-  `unspecified` otherwise; only `eol=crlf`, `eol=lf` and `binary: set` drive the decision, everything else is
+  `unspecified` otherwise; only `eol=crlf`, `eol=lf` and `binary: set` drive the decision; everything else is
   treated as unspecified (CRLF unless binary). The transform used to throw on `unset`/`native`, which aborted the
   whole commit; line endings are best effort and must never fail a generation.
 - yeoman-test temporary dirs: `helpers.prepareTemporaryDir()` starts a new run context and deletes the previous
@@ -748,11 +749,11 @@ MaybeLocal` in `node::cjs_lexer::Parse` of the spawned CLI under a full parallel
   the partial-update fields in every `*ResourceIT.java`; compare two generations of the same JDL against the
   parent commit (ignoring the JWT secret and keystore) to catch it.
 - Git worktrees must live in a directory named `generator-jhipster` (for example `<scratch>/wt/generator-jhipster`):
-  yeoman derives the generator namespace from the package folder name, so in a worktree called anything else every
+  yeoman derives the generator namespace from the package folder name, so in a worktree called anything else, every
   spec that boots the CLI/environment fails with `You don't seem to have a generator with the name
 "generator-jhipster" installed` (`cli/environment-builder.ts` even says "make sure your folder is called
   generator-jhipster"). `npm ci --ignore-scripts` is enough to run the esmocha specs there. Always check
-  `git branch --show-current` before trusting a "passes locally": the main checkout may be on another branch than
+  `git branch --show-current` before trusting a "passes locally": the main checkout may be on a different branch than
   the PR being fixed.
 - Quick before/after baseline from a JDL with the JIT CLI: `bin/jhipster.cjs jdl ../sample.jdl --skip-install
 --skip-git --skip-jhipster-dependencies --force --skip-checks --no-workspaces` run inside an empty scratch
@@ -762,7 +763,7 @@ MaybeLocal` in `node::cjs_lexer::Parse` of the spawned CLI under a full parallel
 - Sample apps for manual testing: `bin/jhipster.cjs generate-sample <name>` (JIT dev blueprint). Workflow samples
   come from `.blueprint/generate-sample/templates/test-integration/workflow-samples/*.json` (`app-sample` points
   to `…/samples/<name>/.yo-rc.json`, `entity` to the entity sets in
-  `.blueprint/generate-sample/support/copy-entity-samples.ts` `entitiesByType`, the JSON entities live in
+  `.blueprint/generate-sample/support/copy-entity-samples.ts` `entitiesByType`; the JSON entities live in
   `…/samples/.jhipster/`); daily-build sample names need the `daily-` prefix and the daily builds themselves run in
   `hipster-labs/jhipster-daily-builds`. Quirk: `--sample-yorc-folder` copies the sample `.yo-rc.json` into the
   **current working directory**, not the `--project-folder` — run it from the target folder, or stage
@@ -770,13 +771,13 @@ MaybeLocal` in `node::cjs_lexer::Parse` of the spawned CLI under a full parallel
   generator regenerates the entities; `jhipster entities` is the explicit form). `CI=true` suppresses prompts.
 - Reactive SQL sample without Docker: copy `test-integration/samples/webflux-psql/.yo-rc.json` (h2Disk dev, postgresql
   prod) plus the `.jhipster/*.json` entities; ITs run with the `testdev` profile against H2
-  (`application-testdev.yml`), the Testcontainers path only kicks in with `testprod`. For a server-only run set
+  (`application-testdev.yml`); the Testcontainers path only kicks in with `testprod`. For a server-only run, set
   `"clientFramework": "no"` and `"enableTranslation": false` in the copied `.yo-rc.json` instead of passing
   `--skip-client`: with translations enabled `--skip-client` dies in `jhipster:languages#updateLanguages` (`Unable to
 find …/find-language-from-key.pipe.ts`). `--skip-prompts` is not a CLI flag (`CI=true` plus `--force` is enough).
   `./mvnw -ntp -o verify -Dskip.installnodenpm -Dskip.npm -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false
 -Dit.test=AResourceIT,BResourceIT` runs a subset of ITs; per-class reports land in `target/failsafe-reports/*.txt`.
-  For the "identical output" baseline prefer a detached worktree (`git worktree add --detach
+  For the "identical output" baseline, prefer a detached worktree (`git worktree add --detach
 <scratch>/base/generator-jhipster HEAD`, symlink `node_modules` from the main checkout) over `git stash`: when a
   long generation is killed by a tool timeout before `git stash pop` runs, the working tree is silently left on the
   baseline.
@@ -785,7 +786,7 @@ find …/find-language-from-key.pipe.ts`). `--skip-prompts` is not a CLI flag (`
   contains the generated apps) and `npm install` at the workspace root; serve the gateway at `/` and each
   microservice under `/services/<ms>/*` with a tiny Node stub answering `/api/authenticate` (or 401 for
   `/api/account`), `/management/info` and `/services/<ms>/api/*`; then run a Cypress spec on the gateway (navbar
-  entity items from the remote, `/blog/blog`, headings translated) with a watchdog — macOS has no `timeout`, use a
+  entity items from the remote, `/blog/blog`, headings translated) with a watchdog — macOS has no `timeout`; use a
   background job + kill. Playwright WebKit with console capture shows the underlying `[NF]` errors. Stub details
   that matter for entity specs: infinite-scroll lists need a `Link` header (`<…>; rel="last",<…>; rel="first"`) or
   the reducer throws reading `length`; success toasts come from `x-<app>app-alert` (translation key) +
@@ -799,14 +800,14 @@ find …/find-language-from-key.pipe.ts`). `--skip-prompts` is not a CLI flag (`
 (`generators/cypress/templates/.../plugins/index.ts.ejs`) collects v8 coverage over CDP and caches it per spec with
 `monocart-coverage-reports`, then merges everything at `after:run`. That work runs in the Cypress plugin child
 process ("Cypress: Config Manager", plain node heap limit, 2-4 GB), so the failure signature is a `[e2e]`
-"JavaScript heap out of memory" right after the last spec summary, or a job that hangs until the 40 minute timeout
+"JavaScript heap out of memory" right after the last spec summary, or a job that hangs until the 40-minute timeout
 (the other processes keep running). The native federation dev server serves each shared dependency as its own
 script (`_angular_core.<hash>-dev.js`) and Cypress injects `__cypress/runner/*` and `__/assets/*`; they must be
-excluded with `entryFilter`, otherwise each spec caches ~126 MB of sources for ~6 MB of application code and one
+excluded with `entryFilter`; otherwise each spec caches ~126 MB of sources for ~6 MB of application code and one
 more entity/spec tips the merge over the limit. Reproduce locally with
 `jhipster generate-sample samples/ng-default --auth jwt --sample-yorc-folder --entities-sample sqllight --microfrontend`
-(run with `CI=true` from the target directory, worktree folder must be named `generator-jhipster`), `npm install`,
-`unset ELECTRON_RUN_AS_NODE` (set in VS Code terminals, it breaks the Cypress binary with "bad option: --no-sandbox"),
+(run with `CI=true` from the target directory; the worktree folder must be named `generator-jhipster`), `npm install`,
+`unset ELECTRON_RUN_AS_NODE` (set in VS Code terminals; it breaks the Cypress binary with "bad option: --no-sandbox"),
 then `npm run e2e:devserver` while sampling `ps -Ao rss,command`; the cache under
 `target/cypress-coverage-reports/.cache` shows which entries dominate. PR workflows run on the merge of the PR and
 main, so a template that only exists on main must be merged into the branch to fix it there.
@@ -849,9 +850,9 @@ main, so a template that only exists on main must be merged into the branch to f
 used on an instantiated module` during `jhipster.cjs generate-sample` is the Node 22 `require(esm)` crash. The
   workflows' workaround must be a job-level `env: NODE_OPTIONS: …--no-experimental-require-module`; writing it with
   `echo "NODE_OPTIONS=…" >> $GITHUB_ENV` is silently rejected by the runner (`##[error]Can't store NODE_OPTIONS output
-parameter using '$GITHUB_ENV' command`, step still shows ✓) and the crash then appears nondeterministically.
+parameter using '$GITHUB_ENV' command`; the step still shows ✓) and the crash then appears nondeterministically.
 - Vite dev-server e2e flakiness (`devserver.yml`, Vue): two dev-only effects hit the Cypress login tests. (1) A
-  dependency first imported by a lazily loaded module (`deepmerge` from the i18n bundle) is discovered at runtime,
+  dependency first imported by a lazily loaded module (`deepmerge` from the i18n bundle) is discovered at runtime;
   Vite re-optimizes and reloads the page — fixed with `optimizeDeps.entries` covering the app sources.
   (2) `router.beforeResolve` calls `hideLogin()`; in dev mode the initial navigation resolves late (lazy route
   component loading), after Cypress opened the login modal, so the modal is closed under the test
