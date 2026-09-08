@@ -31,6 +31,20 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   `.yo-rc.json` keeps the value. Remove a stored option with `this.jhipsterConfig.<key> = undefined` (JSON drops the
   key) and prove it with `.withJHipsterConfig({...}).commitFiles()` + `assertJHipsterConfigContent({ key: undefined })`
   — the react/angular/client migrations were broken this way until 9.3.1.
+- Command-based prompts (`command.ts` `configs.<key>.prompt`) are asked by the generator that owns the command,
+  in config key order, before the legacy `prompting` task group; `generators/app/generator.spec.ts` pins the
+  full question order with inline snapshots of `result.askedQuestions`. A `prompt` may declare its own `choices`
+  (static or `answers => [...]`) to show named/dynamic options while the config `choices` stay the plain value
+  list used for derived properties and `--help`. Ownership pitfall: a `<ns>:bootstrap` generator loads
+  defaults and derived properties (`databaseTypeSql`, …) only from its own command plus the parent `<ns>`
+  command (`preparingCurrentCommand`); configs from `import`ed commands are applied by a later
+  `preparingImportedCommand` task, after the bootstrap's own `preparing` tasks. So a config consumed by
+  `server:bootstrap` preparing (the database types feeding `prepareSqlApplicationProperties`) must stay defined in
+  `generators/server/command.ts`; to prompt it elsewhere, spread the definition and add the prompt
+  (`databaseType: { ...serverCommand.configs.databaseType, prompt: … }` in the spring-boot command). Temporary
+  prompt-only configs such as `clientTestFrameworks`/`serverTestFrameworks` keep `scope: 'storage'`, are merged
+  into `testFrameworks` and removed in a configuring task, and their derived `*Any`/`*Cypress` keys legitimately
+  appear in application snapshots.
 - Grep every quoting/EJS form before declaring something unused: `@content` looked unused in the Vue templates
   because `global.scss.ejs` and `jhi-navbar.vue.ejs` emit `url("<%- clientBundlerRsbuild ? '@' : '/' %>content/…")`,
   while `rsbuild.config.ts` still needs the alias (Vite uses absolute `/content/…` URLs).
@@ -587,7 +601,7 @@ so the `testdev` profile uses H2, which still validates JPQL at repository initi
 ### syncUserWithIdp without a database
 
 `syncUserWithIdp` (spring-boot command, prompt "Do you want to allow relationships with User entity?") is asked
-before the `databaseType` prompt (server command), so `databaseType no` could be chosen afterwards. Its default
+before the `databaseType` prompt (defined in the server command, asked by the spring-boot command), so `databaseType no` could be chosen afterwards. Its default
 (`base-application/application.ts`) already excludes `databaseType === 'no'`, but a stored `true` won the
 derivation: `generateBuiltInUserEntity` became true, the built-in `Authority` entity files (`AuthorityResource`,
 `AuthorityResourceIT`) were generated while `AuthorityRepository` needs a database, and the app did not compile
