@@ -563,6 +563,27 @@ microservice) and ng-default, then `./mvnw -ntp -q test-compile -Dskip.installno
 jhipster-framework, so main-code features that need a newer framework (`tech.jhipster.service.CriteriaBuilder`
 after #34822) fail to compile locally regardless of the change under test.
 
+### One-to-one relationships and the `filter=<x>-is-null` endpoint
+
+Until #33264 the server generator injected a back reference into the target of every one-to-one relationship
+on SQL (`addEntitiesOtherRelationships`, "required due to filtering"), so `Order{recipient} to Member` and
+`Order{publisher} to Member` both injected `Member.order` and failed with "duplicate properties". The only
+consumer of the back reference was the entity list `filter=order-is-null` endpoint (`findAllWhereOrderIsNull`,
+candidates for the owner form; no generated client calls it). Now: unidirectional one-to-one relationships get no
+back reference; `entity.oneToOneNullFilters` (computed in `server/support/relationship.ts`
+`addEntitiesOneToOneNullFilters`, items `{ filterName, methodSuffix, description, descriptionCapitalized,
+relationship?, ownerRelationship, ownerEntity }` with lazy name getters) drives the Service/ServiceImpl/Resource
+templates: bidirectional ones keep `order-is-null` / in-memory `getOrder() == null` (identical output),
+unidirectional ones (SQL only) are named `order-recipient-is-null` / `findAllWhereOrderRecipientIsNull` and use a
+repository query on the owner table: JPQL `where not exists (select o from Order o where o.recipient = member)`
+(Hibernate accepts `order` as alias), R2DBC `not in (select recipient_id from jhi_order where recipient_id is not
+null)`. The old reactive query selected `<backReference>_id` (`order_id`) from the owner table, a column that does
+not exist; it now uses `ownerRelationship.joinColumnNames[0]`. `fieldsContainNoOwnerOneToOne` stays computed but
+deprecated. The R2DBC repository template (`_entityClass_Repository_r2dbc`, used when `useSimpleR2dbcRepository`)
+has an `emptyRepository` guard that must count the unidirectional filters. Generated ITs against PostgreSQL use
+Testcontainers by default (`-Pprod` → `test,testprod`); without Docker run `./mvnw -Pdev test -Dtest=XResourceIT`
+so the `testdev` profile uses H2, which still validates JPQL at repository initialization.
+
 ## Blob fields and content types
 
 - Every `Blob`/`AnyBlob`/`ImageBlob` field carries a `<field>ContentType` `String` companion
