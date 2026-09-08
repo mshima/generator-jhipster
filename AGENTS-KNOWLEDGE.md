@@ -584,6 +584,19 @@ has an `emptyRepository` guard that must count the unidirectional filters. Gener
 Testcontainers by default (`-Pprod` → `test,testprod`); without Docker run `./mvnw -Pdev test -Dtest=XResourceIT`
 so the `testdev` profile uses H2, which still validates JPQL at repository initialization.
 
+### syncUserWithIdp without a database
+
+`syncUserWithIdp` (spring-boot command, prompt "Do you want to allow relationships with User entity?") is asked
+before the `databaseType` prompt (server command), so `databaseType no` could be chosen afterwards. Its default
+(`base-application/application.ts`) already excludes `databaseType === 'no'`, but a stored `true` won the
+derivation: `generateBuiltInUserEntity` became true, the built-in `Authority` entity files (`AuthorityResource`,
+`AuthorityResourceIT`) were generated while `AuthorityRepository` needs a database, and the app did not compile
+(#29354). Command `configure` hooks run at the configuring queue after every prompt, so the hook now warns and
+sets `jhipsterConfig.syncUserWithIdp = false` when `jhipsterConfigWithDefaults.databaseType === 'no'`, and the
+prompt is skipped when the database type is already known to be `no`. Reproduce no-database server issues with
+`"clientFramework": "no"`, `"skipClient": true`, `"enableTranslation": false` in `.yo-rc.json` (the `--skip-client`
+flag dies in `jhipster:languages#updateLanguages` when translations are enabled).
+
 ## Blob fields and content types
 
 - Every `Blob`/`AnyBlob`/`ImageBlob` field carries a `<field>ContentType` `String` companion
