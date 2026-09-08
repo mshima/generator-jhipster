@@ -52,6 +52,10 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
   stored when the `prompt` factory runs, so dynamic `choices`/`when` must read `answers.<key> ?? config.<key>`.
   Command prompts are skipped for existing projects unless `--ask-answered`, so a spec exercising them must not
   seed `.yo-rc.json` with `withJHipsterConfig`.
+- When working on a PR, review the grammar of every code comment it adds, whoever wrote it (line comments,
+  Javadoc/TSDoc blocks, EJS template comments), and fix typos, agreement, comma splices and acronym capitalisation
+  in a dedicated commit without being asked. List them with
+  `git diff upstream/main...HEAD | grep '^+' | grep -E '//|\*|<%#'`.
 - Grep every quoting/EJS form before declaring something unused: `@content` looked unused in the Vue templates
   because `global.scss.ejs` and `jhi-navbar.vue.ejs` emit `url("<%- clientBundlerRsbuild ? '@' : '/' %>content/…")`,
   while `rsbuild.config.ts` still needs the alias (Vite uses absolute `/content/…` URLs).
