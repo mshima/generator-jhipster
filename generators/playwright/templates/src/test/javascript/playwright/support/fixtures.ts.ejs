@@ -38,10 +38,15 @@ export interface AuthenticatedRequest {
  * command registry, so the same surface is exposed through fixtures and the specs stay a line-by-line port.
  */
 export class JHipster {
-  constructor(
-    readonly page: Page,
-    readonly request: APIRequestContext,
-  ) {}
+  constructor(readonly page: Page) {}
+
+  /**
+   * `cy.request` shares the browser's cookie jar. The standalone `request` fixture does not: it is an isolated
+   * context, so session and oauth2 applications would answer 401. `page.request` is the sharing equivalent.
+   */
+  get request(): APIRequestContext {
+    return this.page.request;
+  }
 
   readonly navbar = new Navbar(this.page);
   readonly entity = new EntityHelper(this.page);
@@ -118,8 +123,8 @@ export class JHipster {
 }
 
 export const test = base.extend<{ jhi: JHipster }>({
-  jhi: async ({ page, request }, use) => {
-    await use(new JHipster(page, request));
+  jhi: async ({ page }, use) => {
+    await use(new JHipster(page));
   },
 });
 
