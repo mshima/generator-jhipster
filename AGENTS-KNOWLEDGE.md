@@ -816,6 +816,49 @@ then `npm run e2e:devserver` while sampling `ps -Ao rss,command`; the cache unde
 `target/cypress-coverage-reports/.cache` shows which entries dominate. PR workflows run on the merge of the PR and
 main, so a template that only exists on main must be merged into the branch to fix it there.
 
+## Adding an e2e test framework generator (Playwright): what the Cypress generator does
+
+The Cypress generator (`generators/cypress`) is the reference to mirror spec by spec. Verified facts:
+
+- Wiring: `testFrameworks` (`lib/jhipster/test-framework-types.ts`, stored in `.yo-rc.json`, `clientTestFrameworks`
+  prompt in `generators/client/command.ts`) drives `generators/client/generator.ts` `composing`, which composes
+  `jhipster:cypress` when the list contains `cypress`. The generator extends `BaseApplicationGenerator`, depends on
+  `client` bootstrap and `javascript-simple-application`, and loads the `jhipster:server` command
+  (`loadCommand`) to see the server options. Its command only declares `cypressCoverage` and `cypressAudit`.
+- Preparing: `applicationDefaults` sets `cypressDir` (`${clientTestDir}cypress/`), `cypressTemporaryDir` and
+  `cypressBootstrapEntities`; the npm scripts are the contract used by CI: client `e2e`, `e2e:headless`,
+  `e2e:cypress[:headed|:record]`, root `ci:e2e:run` (packaged app, `concurrently -k -s first` with
+  `npm:ci:e2e:server:start`, used by every `*.yml` sample workflow as `npm run ci:e2e:run --if-present`),
+  `ci:e2e:dev`, `e2e:dev`, and `e2e:devserver` (backend plus dev server, `ng e2e` for Angular without
+  microfrontends, `wait-on` + `e2e:headless -- -c baseUrl=...` otherwise; the Dev Server workflow). `pree2e:headless`
+  waits for the backend (`ci:server:await`). With a `clientRootDir`, forwarding scripts are added to the root.
+- Writing (`files.ts`): `README.md.jhi.cypress`, `cypress.config.ts` and `eslint.config.ts.jhi.cypress` at the client
+  root; under `cypressDir`: `tsconfig.json`, `plugins/index.ts`, `support/{index,commands,navbar,entity,management}.ts`,
+  `fixtures/integration-test.png`, `e2e/administration/administration.cy.ts`, `e2e/account/logout.cy.ts` (not for
+  microservices), `login-page.cy.ts` (not oauth2), `register/settings/password/reset-password-page.cy.ts` plus
+  `support/account.ts` (`generateUserManagement`), `support/oauth2.ts` (oauth2), coverage and audit files behind
+  their flags. Entities: one `e2e/entity/<entityFileName>.cy.ts` per entity with `generateEntityCypress`
+  (`!skipClient || builtInUserManagement`), skipping embedded, built-in user and client-model-only entities; the
+  context is `{ ...application, ...entity }` plus a faker seeded with `stringHashCode(baseName)` so sample data is
+  stable; `generateTestEntity(fields)` (client support) builds the API payloads.
+- Selectors: all three clients render `data-cy` attributes (63 template files), the support commands select
+  `[data-cy="..."]` only, so a Playwright port can keep the same locators and the same test names. The custom
+  commands to port: `getAccount`, `saveAccount`, `getEntityHeading`, `getEntityCreateUpdateHeading`,
+  `getEntityDetailsHeading`, `getEntityDeleteDialogHeading`, `setFieldImageAsBytesOfEntity`,
+  `setFieldSelectToLastOfEntity`, `authenticatedRequest`, `login`, `credentials`, `getOauth2Data`, `oauthLogin`,
+  `keycloakLogin`, `auth0Login`, `oktaLogin`, `oauthLogout`, `getManagementInfo`, `clickOn{Login,Logout,Register,
+  Settings,Password,AdminMenu,EntityMenu}Item`.
+- Entity spec template (`e2e/entity/_entity_.cy.ts.ejs`): creates required related entities through the API in
+  `beforeEach`, intercepts the entity API calls, tests list, detail, edit, delete and create; the create test is
+  skipped (`it.skip` with a reason) when required relationships cannot be bootstrapped, and types every field that
+  is not hidden or read-only, including a user provided id (`!field.autoGenerate`).
+- Post-writing: client `package.json` devDependencies from `generators/cypress/resources/package.json`
+  (`cypress`, `cypress-terminal-report`, `eslint-plugin-cypress`, optional `lighthouse`, `cypress-audit`,
+  `monocart-coverage-reports`), root `allowScripts`, the Angular `angular.json` `e2e` builder
+  (`@cypress/schematic`), and a Maven `e2e` profile through `addMavenProfile`.
+- Specs: `generators/cypress/generator.spec.ts` runs the framework matrix and asserts generated spec contents;
+  application snapshots of angular/react/vue list the cypress files, so new files change those snapshots.
+
 ## Debugging CI failures
 
 - Reading a failed sample job: `gh run view <run-id> -R jhipster/generator-jhipster --job <job-id> --log` gives the full
