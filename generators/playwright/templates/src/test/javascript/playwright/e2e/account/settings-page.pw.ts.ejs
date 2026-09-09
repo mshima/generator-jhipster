@@ -87,13 +87,17 @@ test.describe('/account/settings', () => {
     const testAdminEmail = 'admin@localhost.fr';
     let originalAdminAccount: Account;
 
-    test.beforeEach(async ({ jhi }) => {
+    // Cypress ran this once in a `before`, so it happened before the outer hook opened the settings page.
+    // A playwright beforeEach runs after the outer one and login navigates away, so the page is reopened here.
+    test.beforeEach(async ({ page, jhi }) => {
       const { adminUsername, adminPassword, username, password } = jhi.credentials();
       await jhi.login(adminUsername, adminPassword);
       originalAdminAccount = await getAccount(jhi);
       // need to modify email because default email does not match regex in some frameworks
       expect((await saveAccount(jhi, { ...originalAdminAccount, email: testAdminEmail })).status()).toBe(200);
       await jhi.login(username, password);
+      await page.goto('/account/settings');
+      await expect(page.locator(emailSettingsSelector)).toHaveValue(testUserEmail);
     });
 
     test.afterEach(async ({ jhi }) => {

@@ -234,7 +234,11 @@ test.describe('<%- entityNameCapitalized %> e2e test', () => {
           { times: 1 },
         );
 
+        // Cypress waited on the stubbed request (cy.wait('@entitiesRequestInternal')); without it the test
+        // can act before the row is rendered.
+        const stubbedRequest = entitiesRequest(page);
         await page.goto(<%- entityInstance %>PageUrl);
+        await stubbedRequest;
       });
   <%_ if (skipCreateTest) { _%>
        */
