@@ -76,6 +76,9 @@ exports[`generator - playwright oauth2-angular-withAdminUi(false) should match g
   ".yo-rc.json": {
     "stateCleared": "modified",
   },
+  "angular.json": {
+    "stateCleared": "modified",
+  },
   "package.json": {
     "stateCleared": "modified",
   },
@@ -156,6 +159,9 @@ exports[`generator - playwright session-angular-withAdminUi(false)-clientRoot/ s
     "stateCleared": "modified",
   },
   ".yo-rc.json": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/angular.json": {
     "stateCleared": "modified",
   },
   "clientRoot/package.json": {

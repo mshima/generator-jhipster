@@ -36,7 +36,7 @@ const GENERATOR_APP = 'app';
 const { H2_DISK, MYSQL, SQL } = databaseTypes;
 const { EHCACHE } = cacheTypes;
 const { JWT } = authenticationTypes;
-const { CYPRESS } = testFrameworkTypes;
+const { CYPRESS, PLAYWRIGHT } = testFrameworkTypes;
 const { ANGULAR } = clientFrameworkTypes;
 const { MAVEN } = buildToolTypes;
 
@@ -70,8 +70,9 @@ describe('generator - client - prompts', () => {
           .withMockedGenerators(mockedComposedGenerators);
       });
 
-      it('should write testFrameworks with cypress value to .yo-rc.json', () => {
-        runResult.assertJsonFileContent('.yo-rc.json', { 'generator-jhipster': { testFrameworks: [CYPRESS] } });
+      // While cypress is temporarily mapped to playwright, the answer is stored as playwright.
+      it('should write testFrameworks with playwright value to .yo-rc.json', () => {
+        runResult.assertJsonFileContent('.yo-rc.json', { 'generator-jhipster': { testFrameworks: [PLAYWRIGHT] } });
       });
     });
   });

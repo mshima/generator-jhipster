@@ -112,7 +112,7 @@ export default class ClientGenerator extends ClientApplicationGenerator {
             PLAYWRIGHT,
           ];
         }
-      }
+      },
     });
   }
 

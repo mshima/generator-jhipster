@@ -380,7 +380,6 @@ exports[`generator - ci-cd cli with multiples values should match context snapsh
   "packageName": "com.mycompany.myapp",
   "pageOrFlux": "Page",
   "pkType": undefined,
-  "playwrightSchematic": undefined,
   "prettierExtensions": [
     "md",
     "json",

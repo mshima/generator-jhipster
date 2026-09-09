@@ -19,15 +19,7 @@
 import type { JHipsterCommandDefinition } from '../../lib/command/index.ts';
 
 const command = {
-  configs: {
-    playwrightSchematic: {
-      description: 'Register the Playwright builder in angular.json',
-      cli: {
-        type: Boolean,
-      },
-      scope: 'storage',
-    },
-  },
+  configs: {},
 } as const satisfies JHipsterCommandDefinition;
 
 export default command;

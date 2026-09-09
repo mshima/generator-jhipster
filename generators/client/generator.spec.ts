@@ -36,7 +36,7 @@ describe(`generator - ${generator}`, () => {
   checkEnforcements({ client: true }, generator);
 
   describe('composing', () => {
-    const mockedComposedGenerators = ['jhipster:common', 'jhipster:languages', 'jhipster:cypress'];
+    const mockedComposedGenerators = ['jhipster:common', 'jhipster:languages', 'jhipster:cypress', 'jhipster:playwright'];
 
     describe('with translation disabled', () => {
       const options = { enableTranslation: false };
@@ -115,8 +115,9 @@ describe(`generator - ${generator}`, () => {
       it('should compose with jhipster:languages', () => {
         runResult.assertGeneratorComposedOnce('jhipster:languages');
       });
-      it('should compose with jhipster:cypress', () => {
-        runResult.assertGeneratorComposedOnce('jhipster:cypress');
+      // While cypress is temporarily mapped to playwright, selecting cypress composes the playwright generator.
+      it('should compose with jhipster:playwright', () => {
+        runResult.assertGeneratorComposedOnce('jhipster:playwright');
       });
     });
   });

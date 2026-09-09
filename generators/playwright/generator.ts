@@ -17,12 +17,10 @@
  * limitations under the License.
  */
 
-import { clientFrameworkTypes } from '../../lib/jhipster/index.ts';
 import { mutateData, stringHashCode } from '../../lib/utils/index.ts';
 import BaseApplicationGenerator from '../base-application/index.ts';
 import { createFaker } from '../base-application/support/index.ts';
 import { generateTestEntity } from '../client/support/index.ts';
-import type { Source as ClientSource } from '../client/types.ts';
 import type { Source as JavaSource } from '../java/types.d.ts';
 
 import { playwrightEntityFiles, playwrightFiles } from './files.ts';
@@ -34,8 +32,6 @@ import type {
   Field as PlaywrightField,
   Options as PlaywrightOptions,
 } from './types.ts';
-
-const { ANGULAR } = clientFrameworkTypes;
 
 const WAIT_TIMEOUT = 3 * 60000;
 
@@ -57,29 +53,6 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
     }
   }
 
-  get prompting() {
-    return this.asPromptingTaskGroup({
-      async askForPlaywrightOptions({ control }) {
-        if (control.existingProject && !this.options.askAnswered) return;
-        await this.prompt(
-          [
-            {
-              when: (this.jhipsterConfig as any).clientFramework === ANGULAR,
-              type: 'confirm',
-              name: 'playwrightSchematic',
-              message: 'Would you like to register the Playwright builder in angular.json?',
-            },
-          ],
-          this.config,
-        );
-      },
-    });
-  }
-
-  get [BaseApplicationGenerator.PROMPTING]() {
-    return this.delegateTasksToBlueprint(() => this.prompting);
-  }
-
   get preparing() {
     return this.asPreparingTaskGroup({
       loadPackageJson({ application }) {
@@ -90,7 +63,6 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
       },
       prepareForTemplates({ applicationDefaults }) {
         applicationDefaults({
-          playwrightSchematic: false,
           playwrightDir: ({ clientTestDir }) => (clientTestDir ? `${clientTestDir}playwright/` : 'playwright/'),
           playwrightTemporaryDir: ({ temporaryDir }) => (temporaryDir ? `${temporaryDir}playwright/` : '.playwright/'),
           playwrightBootstrapEntities: true,
@@ -98,10 +70,12 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
       },
       npmScripts({ application }) {
         const { devServerPort, devServerPortProxy: devServerPortE2e = devServerPort } = application;
-        // The Angular schematic is opt-in, so the dev server is always started explicitly and waited for.
-        this.angularSchematic = Boolean(application.clientFrameworkAngular) && Boolean(application.playwrightSchematic);
+        this.angularSchematic = Boolean(application.clientFrameworkAngular);
+        // The native federation dev server never reports its url to `ng e2e` (the builder only yields on rebuilds),
+        // so microfrontend applications start the dev server concurrently and wait for its port instead.
+        const ngE2e = this.angularSchematic && !application.microfrontend;
         // The Angular dev server listens on localhost only (which may resolve to ::1), Vite listens on every address.
-        const devServerHost = application.clientFrameworkAngular ? 'localhost' : '127.0.0.1';
+        const devServerHost = this.angularSchematic ? 'localhost' : '127.0.0.1';
 
         Object.assign(application.clientPackageJsonScripts, {
           playwright: 'playwright test --ui',
@@ -116,7 +90,10 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
           'ci:e2e:run': 'concurrently -k -s first -n application,e2e -c red,blue npm:ci:e2e:server:start npm:e2e:headless',
           'ci:e2e:dev': `concurrently -k -s first -n application,e2e -c red,blue npm:app:start npm:e2e:headless`,
           'e2e:dev': `concurrently -k -s first -n application,e2e -c red,blue npm:app:start npm:e2e`,
-          'e2e:devserver': `concurrently -k -s first -n backend,frontend,e2e -c red,yellow,blue npm:backend:start npm:start "wait-on -t ${WAIT_TIMEOUT} http-get://${devServerHost}:${devServerPortE2e} && npm run e2e:headless -- --base-url=http://localhost:${devServerPortE2e}"`,
+          'e2e:devserver':
+            ngE2e ?
+              `concurrently -k -s first -n backend,e2e -c red,blue npm:backend:start "npm run ci:server:await --if-present && ng e2e --configuration run"`
+            : `concurrently -k -s first -n backend,frontend,e2e -c red,yellow,blue npm:backend:start npm:start "wait-on -t ${WAIT_TIMEOUT} http-get://${devServerHost}:${devServerPortE2e} && E2E_BASE_URL=http://localhost:${devServerPortE2e} npm run e2e:headless"`,
         });
 
         Object.assign(application.packageJsonScripts, {
@@ -197,6 +174,7 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
           devDependencies: {
             '@playwright/test': application.nodeDependencies['@playwright/test'],
             'eslint-plugin-playwright': application.nodeDependencies['eslint-plugin-playwright'],
+            ...(this.angularSchematic ? { 'playwright-ng-schematics': application.nodeDependencies['playwright-ng-schematics'] } : {}),
           },
         });
         this.packageJson.merge({
@@ -205,32 +183,26 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
           },
         });
       },
-      playwrightSchematics({ application, source }) {
-        const { applicationTypeMicroservice, dasherizedBaseName, clientRootDir, gatewayServerPort, serverPort } = application;
+      playwrightSchematics({ application }) {
+        const { dasherizedBaseName, clientRootDir } = application;
         if (!this.angularSchematic) return;
 
-        (source as ClientSource).mergeClientPackageJson?.({
-          devDependencies: {
-            'playwright-ng-schematics': null,
-          },
-        });
+        // The builder only accepts the options declared in its schema: it has no baseUrl, the packaged application
+        // is targeted through the baseURL of playwright.config.ts (E2E_BASE_URL) instead.
         this.mergeDestinationJson(`${clientRootDir}angular.json`, {
           projects: {
             [dasherizedBaseName]: {
               architect: {
                 e2e: {
                   builder: 'playwright-ng-schematics:playwright',
-                  options: {
-                    devServerTarget: `${dasherizedBaseName}:serve`,
-                  },
+                  options: { devServerTarget: `${dasherizedBaseName}:serve` },
                   configurations: {
-                    production: {
-                      devServerTarget: `${dasherizedBaseName}:serve:production`,
-                    },
-                    baseHref: {
-                      baseUrl: `http://localhost:${applicationTypeMicroservice ? gatewayServerPort : serverPort}`,
-                    },
+                    open: { ui: true, devServerTarget: `${dasherizedBaseName}:serve` },
+                    openProduction: { ui: true, devServerTarget: `${dasherizedBaseName}:serve:production` },
+                    run: { devServerTarget: `${dasherizedBaseName}:serve` },
+                    runProduction: { devServerTarget: `${dasherizedBaseName}:serve:production` },
                   },
+                  defaultConfiguration: 'open',
                 },
               },
             },
