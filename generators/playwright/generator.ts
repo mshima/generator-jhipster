@@ -78,6 +78,10 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
         const devServerHost = this.angularSchematic ? 'localhost' : '127.0.0.1';
 
         Object.assign(application.clientPackageJsonScripts, {
+          // Cypress downloads its binary from its own npm postinstall; playwright needs the browsers to be
+          // fetched explicitly. The download is cached, so running it before every e2e run is cheap.
+          'playwright:install': 'playwright install chromium',
+          'pree2e:playwright': 'npm run playwright:install',
           playwright: 'playwright test --ui',
           e2e: 'npm run e2e:playwright:headed --',
           'e2e:playwright': 'playwright test --project=chromium',
@@ -92,7 +96,7 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
           'e2e:dev': `concurrently -k -s first -n application,e2e -c red,blue npm:app:start npm:e2e`,
           'e2e:devserver':
             ngE2e ?
-              `concurrently -k -s first -n backend,e2e -c red,blue npm:backend:start "npm run ci:server:await --if-present && ng e2e --configuration run"`
+              `concurrently -k -s first -n backend,e2e -c red,blue npm:backend:start "npm run playwright:install && npm run ci:server:await --if-present && ng e2e --configuration run"`
             : `concurrently -k -s first -n backend,frontend,e2e -c red,yellow,blue npm:backend:start npm:start "wait-on -t ${WAIT_TIMEOUT} http-get://${devServerHost}:${devServerPortE2e} && E2E_BASE_URL=http://localhost:${devServerPortE2e} npm run e2e:headless"`,
         });
 

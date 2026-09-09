@@ -134,10 +134,11 @@ describe(`generator - ${generator}`, () => {
           .withMockedJHipsterGenerators();
       });
 
+      // While cypress is temporarily mapped to playwright, the merged value is playwright.
       it('should merge clientTestFrameworks into testFrameworks', () => {
         runResult.assertJHipsterConfigContent({
           clientTestFrameworks: undefined,
-          testFrameworks: ['cypress'],
+          testFrameworks: ['playwright'],
         });
       });
     });
