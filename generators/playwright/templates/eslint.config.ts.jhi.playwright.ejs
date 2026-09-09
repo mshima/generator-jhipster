@@ -30,6 +30,13 @@ import tseslint from 'typescript-eslint';
       },
     },
     rules: {
+      // The suite mirrors the cypress one: it branches on the api response and splits setup across
+      // several hooks, which these rules flag by design.
+      'playwright/no-conditional-in-test': 'off',
+      'playwright/no-conditional-expect': 'off',
+      'playwright/no-duplicate-hooks': 'off',
+      // Entity specs skip the create test when the required relationships cannot be bootstrapped.
+      'playwright/no-skipped-test': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

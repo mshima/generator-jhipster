@@ -54,6 +54,12 @@ import { test, expect } from '../../support/fixtures';
     const reason = 'cannot create a required entity with relationship with required relationships.';
 
     const sampleFields = fields.filter(f => !f.autoGenerate && !f.nullable);
+
+    // Only the image fields use the jhi fixture in the create test; destructuring it otherwise
+    // leaves an unused parameter, which is an error in the generated application's eslint config.
+    const createTestFields = fields.filter(field => (!field.id || !field.autoGenerate) && !field.hidden && !field.readonly);
+    const createTestBinaryFields = createTestFields.filter(field => field.fieldTypeBinary && !field.blobContentTypeText);
+    const createTestUsesFixture = createTestBinaryFields.some(field => (entityFakeData ? entityFakeData[field.fieldName] : field.generateFakeData('cypress')) !== undefined);
 _%>
 
 const <%- entityInstance %>PageUrl = '/<%- entityPage %>';
@@ -301,7 +307,7 @@ test.describe('<%- entityNameCapitalized %> e2e test', () => {
     });
 
     <% if (skipCreateTest) { %>// Reason: <%- reason %><% } %>
-    test<%- skipCreateTest %>('should create an instance of <%- entityNameCapitalized %>', async ({ page, jhi }) => {
+    test<%- skipCreateTest %>('should create an instance of <%- entityNameCapitalized %>', async ({ page<%- createTestUsesFixture ? ', jhi' : '' %> }) => {
   <%_ for (const field of fields.filter(field => (!field.id || !field.autoGenerate) && !field.hidden && !field.readonly)) { _%>
     <%_ const { fieldName, fieldIsEnum } = field;
         let fieldValue = entityFakeData ? entityFakeData[field.fieldName] : field.generateFakeData('cypress');

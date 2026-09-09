@@ -45,15 +45,13 @@ test.describe('/account/settings', () => {
     await expect(page.locator(emailSettingsSelector)).toHaveValue(testUserEmail);
   });
 
+  // Cypress restores the test account between tests and the original one at the end. Restoring the original
+  // one after every test reaches the same final state without a worker scoped fixture, and beforeEach puts the
+  // test email back before each test.
   test.afterEach(async ({ jhi }) => {
     const { username, password } = jhi.credentials();
     await jhi.login(username, password);
-    expect((await saveAccount(jhi, testUserAccount)).status()).toBe(200);
-  });
-
-  test.afterAll(async () => {
-    // The original account is restored by the last afterEach; keeping the reference documents the intent.
-    originalUserAccount = undefined as unknown as Account;
+    expect((await saveAccount(jhi, originalUserAccount)).status()).toBe(200);
   });
 
   test('should be accessible through menu', async ({ page, jhi }) => {
