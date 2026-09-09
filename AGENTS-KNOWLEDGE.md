@@ -759,6 +759,19 @@ MaybeLocal` in `node::cjs_lexer::Parse` of the spawned CLI under a full parallel
   generator-jhipster"). `npm ci --ignore-scripts` is enough to run the esmocha specs there. Always check
   `git branch --show-current` before trusting a "passes locally": the main checkout may be on a different branch than
   the PR being fixed.
+- Upstream squash-merges pull requests, so `git branch --merged upstream/main` under-reports badly when cleaning up
+  local branches: it only recognises branches that are literal ancestors. To find the squash-merged ones, replay each
+  branch's tree as a single commit on its merge-base and ask whether that patch is already upstream:
+
+  ```sh
+  mb=$(git merge-base upstream/main "$b")
+  cmt=$(git commit-tree "$b^{tree}" -p "$mb" -m _)
+  git cherry upstream/main "$cmt" | grep -q '^+' || echo "squash-merged: $b"
+  ```
+
+  `git cherry -v upstream/main "$b"` then confirms per commit: a leading `-` means the patch already exists upstream,
+  `+` means it does not. Never judge by `git diff upstream/main "$b"` — an old branch shows tens of thousands of
+  changed lines purely because it is behind, which says nothing about whether its own change landed.
 - Quick before/after baseline from a JDL with the JIT CLI: `bin/jhipster.cjs jdl ../sample.jdl --skip-install
 --skip-git --skip-jhipster-dependencies --force --skip-checks --no-workspaces` run inside an empty scratch
   directory. Pass the JDL as a relative path and use the `--no-<flag>` form for booleans: an absolute path or
