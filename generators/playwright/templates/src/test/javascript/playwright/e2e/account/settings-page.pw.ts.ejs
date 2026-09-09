@@ -57,7 +57,7 @@ test.describe('/account/settings', () => {
   test('should be accessible through menu', async ({ page, jhi }) => {
     await page.goto('');
     await jhi.navbar.clickOnSettingsItem();
-    expect(new URL(page.url()).pathname).toBe('/account/settings');
+    await expect(page).toHaveURL(url => url.pathname === '/account/settings');
   });
 
   test("should be able to change 'user' firstname settings", async ({ page }) => {

@@ -66,7 +66,8 @@ export class EntityHelper {
   /** Ports `setFieldImageAsBytesOfEntity`: Playwright sets the file on the input directly. */
   async setFieldImageAsBytesOfEntity(fieldName: string, fileName: string, mimeType: string): Promise<void> {
     const buffer = await readFile(join(fixturesDir, fileName));
-    await this.page.locator(`[data-cy="${fieldName}"]`).setInputFiles({ name: fileName, mimeType, buffer });
+    // The blob widget renders more than one element with the field's data-cy; the cypress command used el[0].
+    await this.page.locator(`[data-cy="${fieldName}"]`).first().setInputFiles({ name: fileName, mimeType, buffer });
   }
 
   /**
@@ -74,7 +75,7 @@ export class EntityHelper {
    * the keyboard, which is what the Cypress command does for comboboxes that populate asynchronously.
    */
   async setFieldSelectToLastOfEntity(fieldName: string): Promise<void> {
-    const select = this.page.locator(`[data-cy="${fieldName}"]`);
+    const select = this.page.locator(`[data-cy="${fieldName}"]`).first();
     const optionCount = await select.locator('option').count();
     if (optionCount > 0) {
       await select.selectOption({ index: optionCount - 1 });

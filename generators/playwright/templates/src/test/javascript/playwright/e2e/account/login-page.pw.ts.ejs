@@ -96,6 +96,6 @@ test.describe('login page', () => {
     await page.locator(passwordLoginSelector).fill(password);
     await page.locator(submitLoginSelector).click();
     expect((await response).status()).toBe(200);
-    expect(new URL(page.url()).hash).toBe('');
+    await expect(page).toHaveURL(url => url.hash === '');
   });
 });

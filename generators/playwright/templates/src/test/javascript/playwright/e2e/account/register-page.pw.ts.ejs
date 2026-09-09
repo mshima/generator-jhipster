@@ -36,7 +36,7 @@ test.describe('<%- registerPage %>', () => {
   test('should be accessible through menu', async ({ page, jhi }) => {
     await page.goto('');
     await jhi.navbar.clickOnRegisterItem();
-    expect(new URL(page.url()).pathname).toBe('<%- registerPage %>');
+    await expect(page).toHaveURL(url => url.pathname === '<%- registerPage %>');
   });
 
   test('should load the register page', async ({ page }) => {
