@@ -79,6 +79,8 @@ test.describe('/admin', () => {
       // Swagger UI renders the definition asynchronously. Cypress retried each of these through `should`;
       // a count() read is a single sample, so assert on the locators instead.
       const swagger = page.frameLocator(swaggerFrameSelector);
+      // Cypress waited for the iframe body to stop being empty before looking inside it.
+      await expect(swagger.locator('body')).not.toBeEmpty({ timeout: SWAGGER_TIMEOUT });
       await expect(swagger.locator(swaggerPageSelector)).toBeVisible({ timeout: SWAGGER_TIMEOUT });
       await expect(swagger.locator('[id="select"] > option').first()).toBeAttached({ timeout: SWAGGER_TIMEOUT });
       await expect(swagger.locator(`${swaggerPageSelector} .information-container`).first()).toBeVisible({
