@@ -14,31 +14,31 @@ exports[`generator - playwright jwt-vue-withAdminUi(true)- should match generate
   "playwright.config.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/account/login-page.spec.ts": {
+  "src/test/javascript/playwright/e2e/account/login-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/account/logout.spec.ts": {
+  "src/test/javascript/playwright/e2e/account/logout.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/account/password-page.spec.ts": {
+  "src/test/javascript/playwright/e2e/account/password-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/account/register-page.spec.ts": {
+  "src/test/javascript/playwright/e2e/account/register-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/account/reset-password-page.spec.ts": {
+  "src/test/javascript/playwright/e2e/account/reset-password-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/account/settings-page.spec.ts": {
+  "src/test/javascript/playwright/e2e/account/settings-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/administration/administration.spec.ts": {
+  "src/test/javascript/playwright/e2e/administration/administration.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/entity/entity-a.spec.ts": {
+  "src/test/javascript/playwright/e2e/entity/entity-a.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/entity/user-management.spec.ts": {
+  "src/test/javascript/playwright/e2e/entity/user-management.pw.ts": {
     "stateCleared": "modified",
   },
   "src/test/javascript/playwright/fixtures/integration-test.png": {
@@ -85,13 +85,13 @@ exports[`generator - playwright oauth2-angular-withAdminUi(false) should match g
   "playwright.config.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/account/logout.spec.ts": {
+  "src/test/javascript/playwright/e2e/account/logout.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/administration/administration.spec.ts": {
+  "src/test/javascript/playwright/e2e/administration/administration.pw.ts": {
     "stateCleared": "modified",
   },
-  "src/test/javascript/playwright/e2e/entity/entity-a.spec.ts": {
+  "src/test/javascript/playwright/e2e/entity/entity-a.pw.ts": {
     "stateCleared": "modified",
   },
   "src/test/javascript/playwright/fixtures/integration-test.png": {
@@ -170,34 +170,34 @@ exports[`generator - playwright session-angular-withAdminUi(false)-clientRoot/ s
   "clientRoot/playwright.config.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/account/login-page.spec.ts": {
+  "clientRoot/test/playwright/e2e/account/login-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/account/logout.spec.ts": {
+  "clientRoot/test/playwright/e2e/account/logout.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/account/password-page.spec.ts": {
+  "clientRoot/test/playwright/e2e/account/password-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/account/register-page.spec.ts": {
+  "clientRoot/test/playwright/e2e/account/register-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/account/reset-password-page.spec.ts": {
+  "clientRoot/test/playwright/e2e/account/reset-password-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/account/settings-page.spec.ts": {
+  "clientRoot/test/playwright/e2e/account/settings-page.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/administration/administration.spec.ts": {
+  "clientRoot/test/playwright/e2e/administration/administration.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/entity/authority.spec.ts": {
+  "clientRoot/test/playwright/e2e/entity/authority.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/entity/entity-a.spec.ts": {
+  "clientRoot/test/playwright/e2e/entity/entity-a.pw.ts": {
     "stateCleared": "modified",
   },
-  "clientRoot/test/playwright/e2e/entity/user-management.spec.ts": {
+  "clientRoot/test/playwright/e2e/entity/user-management.pw.ts": {
     "stateCleared": "modified",
   },
   "clientRoot/test/playwright/fixtures/integration-test.png": {

@@ -22,7 +22,8 @@ const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:<%- gatewayServerP
 
 export default defineConfig({
   testDir: './<%- this.relativeDir(clientRootDir, playwrightDir) %>e2e',
-  testMatch: '**/*.spec.ts',
+  // Not *.spec.ts: the client unit test runner (vitest) globs that by default and would try to run the e2e specs.
+  testMatch: '**/*.pw.ts',
   outputDir: '<%- this.relativeDir(clientRootDir, playwrightTemporaryDir) %>results',
   // The Cypress suite retries twice; keep the same tolerance for a fair parity comparison.
   retries: 2,

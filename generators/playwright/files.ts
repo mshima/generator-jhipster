@@ -40,7 +40,7 @@ export const playwrightFiles = asWriteFilesSection({
       renameTo: (ctx, file) => `${ctx.playwrightDir}${file}`,
       templates: [
         'fixtures/integration-test.png',
-        'e2e/administration/administration.spec.ts',
+        'e2e/administration/administration.pw.ts',
         'support/commands.ts',
         'support/navbar.ts',
         'support/entity.ts',
@@ -53,23 +53,23 @@ export const playwrightFiles = asWriteFilesSection({
       condition: generator => !generator.applicationTypeMicroservice,
       path: PLAYWRIGHT_TEMPLATE_SOURCE_DIR,
       renameTo: (ctx, file) => `${ctx.playwrightDir}${file}`,
-      templates: ['e2e/account/logout.spec.ts'],
+      templates: ['e2e/account/logout.pw.ts'],
     },
     {
       condition: generator => !generator.authenticationTypeOauth2,
       path: PLAYWRIGHT_TEMPLATE_SOURCE_DIR,
       renameTo: (ctx, file) => `${ctx.playwrightDir}${file}`,
-      templates: ['e2e/account/login-page.spec.ts'],
+      templates: ['e2e/account/login-page.pw.ts'],
     },
     {
       condition: generator => generator.generateUserManagement,
       path: PLAYWRIGHT_TEMPLATE_SOURCE_DIR,
       renameTo: (ctx, file) => `${ctx.playwrightDir}${file}`,
       templates: [
-        'e2e/account/register-page.spec.ts',
-        'e2e/account/settings-page.spec.ts',
-        'e2e/account/password-page.spec.ts',
-        'e2e/account/reset-password-page.spec.ts',
+        'e2e/account/register-page.pw.ts',
+        'e2e/account/settings-page.pw.ts',
+        'e2e/account/password-page.pw.ts',
+        'e2e/account/reset-password-page.pw.ts',
         'support/account.ts',
       ],
     },
@@ -86,8 +86,8 @@ export const playwrightEntityFiles = asWriteFilesSection({
   testsPlaywright: [
     {
       path: PLAYWRIGHT_TEMPLATE_SOURCE_DIR,
-      renameTo: ctx => `${ctx.playwrightDir}e2e/entity/${ctx.entityFileName}.spec.ts`,
-      templates: ['e2e/entity/_entity_.spec.ts'],
+      renameTo: ctx => `${ctx.playwrightDir}e2e/entity/${ctx.entityFileName}.pw.ts`,
+      templates: ['e2e/entity/_entity_.pw.ts'],
     },
   ],
 });

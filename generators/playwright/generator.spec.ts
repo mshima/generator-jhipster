@@ -80,7 +80,7 @@ describe(`generator - ${generator}`, () => {
       it('should generate the entity spec', () => {
         const { clientRootDir = '' } = sampleConfig;
         const playwrightRoot = clientRootDir ? `${clientRootDir}test/` : 'src/test/javascript/';
-        runResult.assertFileContent(`${playwrightRoot}playwright/e2e/entity/entity-a.spec.ts`, "test.describe('EntityA e2e test'");
+        runResult.assertFileContent(`${playwrightRoot}playwright/e2e/entity/entity-a.pw.ts`, "test.describe('EntityA e2e test'");
       });
 
       describe('withAdminUi', () => {
@@ -95,7 +95,7 @@ describe(`generator - ${generator}`, () => {
               generateAdminUi ? runResult.assertFileContent(...args) : runResult.assertNoFileContent(...args);
 
             assertion(
-              `${playwrightAdminRoot}playwright/e2e/administration/administration.spec.ts`,
+              `${playwrightAdminRoot}playwright/e2e/administration/administration.pw.ts`,
               '  metricsPageHeadingSelector,\n' +
                 '  healthPageHeadingSelector,\n' +
                 '  logsPageHeadingSelector,\n' +
@@ -103,7 +103,7 @@ describe(`generator - ${generator}`, () => {
             );
 
             assertion(
-              `${playwrightAdminRoot}playwright/e2e/administration/administration.spec.ts`,
+              `${playwrightAdminRoot}playwright/e2e/administration/administration.pw.ts`,
               "  test.describe('/metrics', () => {\n" +
                 "    test('should load the page', async ({ page, jhi }) => {\n" +
                 "      await jhi.navbar.clickOnAdminMenuItem('admin/metrics');\n" +
