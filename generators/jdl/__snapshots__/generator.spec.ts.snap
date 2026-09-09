@@ -232,6 +232,7 @@ Options:
   --client-root-dir <value>                Client root
   --cypress-coverage                       Enable Cypress code coverage report generation
   --cypress-audit                          Enable cypress-audit/lighthouse report generation
+  --playwright-schematic                   Register the Playwright builder in angular.json
   --enable-translation                     Enable translation
   -l, --language <value...>                Language to be added to application (existing languages are not removed)
   -n, --native-language [value]            Set application native language

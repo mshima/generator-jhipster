@@ -16,12 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type { JHipsterCommandDefinition } from '../../lib/command/index.ts';
 
-const testFrameworkTypes = {
-  CYPRESS: 'cypress',
-  PLAYWRIGHT: 'playwright',
-  CUCUMBER: 'cucumber',
-  GATLING: 'gatling',
-  NO: 'no',
-} as const;
-export default testFrameworkTypes;
+const command = {
+  configs: {
+    playwrightSchematic: {
+      description: 'Register the Playwright builder in angular.json',
+      cli: {
+        type: Boolean,
+      },
+      scope: 'storage',
+    },
+  },
+} as const satisfies JHipsterCommandDefinition;
+
+export default command;
