@@ -918,6 +918,29 @@ Verify parity by diffing the test titles of a Playwright run against a Cypress r
 upstream worktree, on the default sample and on a full entity sample — identical title lists prove nothing was
 dropped in the port.
 
+## Which CI sample covers which e2e feature
+
+Two constraints bind any change to how the samples select an e2e framework, and neither is visible
+from the sample files alone:
+
+- **`samples/ng-default` drives both angular jobs of the dev server workflow**
+  (`.blueprint/github-build-matrix/samples/dev-server.ts`, the `esbuild` and `module-federation`
+  entries), and `e2e:devserver` is the only script that runs `ng e2e`. So the framework that
+  `ng-default` declares decides whether the angular builder path - and with playwright the whole
+  `playwright-ng-schematics` integration - is exercised anywhere in CI at all.
+- **`cypressAudit` and `cypressCoverage` are cypress-only.** They pull in `cypress-audit`,
+  `lighthouse` and `monocart-coverage-reports`; playwright has no equivalent and the flags become
+  inert if the sample that carries them stops generating cypress. Only one sample sets them at a
+  time, so moving that sample to another framework silently drops lighthouse auditing and e2e
+  coverage from the whole build.
+
+`jhipster describe-samples --json` (dev blueprint, merged in `main`) enumerates every sample with its
+resolved `.yo-rc.json` config, workflow and job name, which is the quickest way to check the feature
+matrix before moving samples between frameworks. It only reports `config` for `.yo-rc.json` samples;
+jdl samples keep their configuration inside the `application { config { ... } }` blocks of the
+`.jdl` file, and `microfrontend` in particular is declared per application there, so it cannot be
+read from the first block alone.
+
 ## Debugging CI failures
 
 - Reading a failed sample job: `gh run view <run-id> -R jhipster/generator-jhipster --job <job-id> --log` gives the full
