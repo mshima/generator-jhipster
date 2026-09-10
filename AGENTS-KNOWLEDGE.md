@@ -872,6 +872,52 @@ The Cypress generator (`generators/cypress`) is the reference to mirror spec by 
 - Specs: `generators/cypress/generator.spec.ts` runs the framework matrix and asserts generated spec contents;
   application snapshots of angular/react/vue list the cypress files, so new files change those snapshots.
 
+## Porting the Cypress suite to Playwright: the differences that actually break tests
+
+Mapping the Cypress specs one-to-one onto Playwright is mostly mechanical, but a handful of semantic
+differences each caused a full CI failure before being found. All of these were verified against a running
+generated application, not inferred.
+
+- **`ng e2e` reports the dev server url through `PLAYWRIGHT_TEST_BASE_URL`.** The
+  `playwright-ng-schematics:playwright` builder starts the target named by `devServerTarget` and sets that
+  environment variable for the `playwright test` child process; it has no `baseUrl` option of its own. A
+  `playwright.config.ts` that reads only a project-specific variable falls back to the backend port, which
+  serves no frontend while the dev server is the one hosting it, so every test loads a blank page and times
+  out. The other devserver jobs (react, vue, and the microfrontend Angular one, which starts the dev server
+  concurrently instead) pass the base url explicitly and are unaffected, so this shows up as a single failing
+  Angular job. Note the builder writes the variable with `Object.assign({PLAYWRIGHT_TEST_BASE_URL}, process.env)`,
+  so an already-set value in the environment wins over the dev server's.
+- **Only `expect(locator)` and `expect(page)` retry.** Every Cypress `should()` retries; in Playwright a plain
+  `expect(someValue)` is sampled once. `expect(new URL(page.url()).pathname).toBe(...)` and
+  `expect(await locator.count())` are the two shapes that look correct and fail intermittently — use
+  `await expect(page).toHaveURL(url => ...)` and retrying locator assertions instead. This class of mistake
+  recurred three times during the port; a final sweep for single-sample assertions is worth doing.
+- **`page.request`, not the `request` fixture.** `cy.request` shares the browser's cookie jar. Playwright's
+  standalone `request` fixture is an isolated context, so a session-cookie login through it is not visible to
+  the page and the endpoint answers 401. Use `page.request` so the browser's cookies apply, and send
+  `X-XSRF-TOKEN` after warming the jar with a GET, which is what `cy.authenticatedRequest` did implicitly.
+- **Locators are strict.** `cy.get()` happily matches several elements and acts on the first; a Playwright
+  locator matching more than one element throws. Per-row entity tables and two-element blob fields need
+  `.first()`.
+- **Do not name the specs `*.spec.ts`.** Vitest's default `include` glob is `**/*.{test,spec}.?(c|m)[jt]s?(x)`
+  and the Angular/React/Vue configs do not narrow it, so the client unit-test run would try to execute the e2e
+  specs. Name them `*.pw.ts` and set a matching `testMatch`.
+- **Browsers are not installed by `npm install`.** Cypress downloads its binary from its own postinstall hook;
+  Playwright does not, so a `playwright install chromium` step has to run before any e2e script — including the
+  `ng e2e` devserver path, which does not go through a `pree2e:*` hook.
+- **Cypress strips CSP headers, Playwright does not.** Two application-side bugs were invisible under Cypress
+  and real under Playwright: Angular native federation loads remotes by `import()`ing a `blob:` URL, which needs
+  `blob:` in `script-src`, and the reactive `SecurityConfiguration` set `frameOptions` to `Mode.DENY`, which
+  blocks the Swagger `/docs` iframe that the imperative configuration allows with `sameOrigin`.
+- **`{ force: true }` is not the Cypress equivalent of a click.** It skips the actionability wait as well as the
+  overlap check, so it races client hydration rather than working around a disabled control. When a click seems
+  to need it, probe the running application first — in the React reset-password form the button was fully
+  actionable and `force` was the cause of the flakiness, not the cure.
+
+Verify parity by diffing the test titles of a Playwright run against a Cypress run generated from a clean
+upstream worktree, on the default sample and on a full entity sample — identical title lists prove nothing was
+dropped in the port.
+
 ## Debugging CI failures
 
 - Reading a failed sample job: `gh run view <run-id> -R jhipster/generator-jhipster --job <job-id> --log` gives the full
