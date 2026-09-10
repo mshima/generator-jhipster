@@ -2,14 +2,12 @@
   "generator-jhipster": {
     "applicationType": "monolith",
     "authenticationType": "jwt",
-    "baseName": "jhipsterSampleApplication",
+    "baseName": "jhipsterSamplePlaywright",
     "buildTool": "maven",
     "cacheProvider": "ehcache",
     "clientFramework": "angular",
     "clientTheme": "none",
     "creationTimestamp": 1596513172471,
-    "cypressAudit": true,
-    "cypressCoverage": true,
     "databaseType": "sql",
     "devDatabaseType": "h2Disk",
     "dtoSuffix": "",
@@ -75,6 +73,6 @@
     "searchEngine": "no",
     "serverPort": "8080",
     "serviceDiscoveryType": "no",
-    "testFrameworks": ["gatling", "cypress"]
+    "testFrameworks": ["gatling", "playwright"]
   }
 }
