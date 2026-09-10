@@ -105,14 +105,6 @@ export default class ClientGenerator extends ClientApplicationGenerator {
         const { applicationIndex, devServerPort } = this.jhipsterConfigWithDefaults;
         this.jhipsterConfig.devServerPort = devServerPort! + applicationIndex!;
       },
-      playwrightTest() {
-        if (this.jhipsterConfig.testFrameworks?.includes(CYPRESS)) {
-          this.jhipsterConfig.testFrameworks = [
-            ...this.jhipsterConfig.testFrameworks.filter(framework => framework !== CYPRESS),
-            PLAYWRIGHT,
-          ];
-        }
-      },
     });
   }
 

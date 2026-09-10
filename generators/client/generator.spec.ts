@@ -115,9 +115,8 @@ describe(`generator - ${generator}`, () => {
       it('should compose with jhipster:languages', () => {
         runResult.assertGeneratorComposedOnce('jhipster:languages');
       });
-      // While cypress is temporarily mapped to playwright, selecting cypress composes the playwright generator.
-      it('should compose with jhipster:playwright', () => {
-        runResult.assertGeneratorComposedOnce('jhipster:playwright');
+      it('should compose with jhipster:cypress', () => {
+        runResult.assertGeneratorComposedOnce('jhipster:cypress');
       });
     });
   });
@@ -134,11 +133,10 @@ describe(`generator - ${generator}`, () => {
           .withMockedJHipsterGenerators();
       });
 
-      // While cypress is temporarily mapped to playwright, the merged value is playwright.
       it('should merge clientTestFrameworks into testFrameworks', () => {
         runResult.assertJHipsterConfigContent({
           clientTestFrameworks: undefined,
-          testFrameworks: ['playwright'],
+          testFrameworks: ['cypress'],
         });
       });
     });

@@ -9,6 +9,8 @@
     "clientRootDir": "src/main/webapp/",
     "clientTheme": "none",
     "creationTimestamp": 1596513172471,
+    "cypressAudit": true,
+    "cypressCoverage": true,
     "databaseType": "sql",
     "devDatabaseType": "h2Memory",
     "dtoSuffix": "DTO",
