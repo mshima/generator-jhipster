@@ -191,8 +191,8 @@ export default class PlaywrightGenerator extends BaseApplicationGenerator<Playwr
         const { dasherizedBaseName, clientRootDir } = application;
         if (!this.angularSchematic) return;
 
-        // The builder only accepts the options declared in its schema: it has no baseUrl, the packaged application
-        // is targeted through the baseURL of playwright.config.ts (E2E_BASE_URL) instead.
+        // The builder only accepts the options declared in its schema: it has no baseUrl. It starts the dev server
+        // named by devServerTarget and hands its url to playwright.config.ts through PLAYWRIGHT_TEST_BASE_URL.
         this.mergeDestinationJson(`${clientRootDir}angular.json`, {
           projects: {
             [dasherizedBaseName]: {
