@@ -78,6 +78,29 @@
         ],
         "sbs": false
       },
+      "cypress": {
+        "command": false,
+        "priorities": [
+          "initializing",
+          "prompting",
+          "configuring",
+          "composing",
+          "loading",
+          "preparing",
+          "preparingEachEntity",
+          "preparingEachEntityField",
+          "preparingEachEntityRelationship",
+          "postPreparingEachEntity",
+          "default",
+          "writing",
+          "writingEntities",
+          "postWriting",
+          "postWritingEntities",
+          "install",
+          "end"
+        ],
+        "sbs": false
+      },
       "jdl": {
         "command": true,
         "priorities": [
@@ -199,6 +222,6 @@
     "localBlueprint": false,
     "prettierDefaultIndent": 2,
     "projectName": "CiTest",
-    "subGenerators": ["client", "common", "playwright", "server", "jdl", "spring-data-relational", "languages", "angular"]
+    "subGenerators": ["client", "common", "cypress", "playwright", "server", "jdl", "spring-data-relational", "languages", "angular"]
   }
 }
