@@ -199,15 +199,6 @@
     "localBlueprint": false,
     "prettierDefaultIndent": 2,
     "projectName": "CiTest",
-    "subGenerators": [
-      "client",
-      "common",
-      "playwright",
-      "server",
-      "jdl",
-      "spring-data-relational",
-      "languages",
-      "angular"
-    ]
+    "subGenerators": ["client", "common", "playwright", "server", "jdl", "spring-data-relational", "languages", "angular"]
   }
 }
