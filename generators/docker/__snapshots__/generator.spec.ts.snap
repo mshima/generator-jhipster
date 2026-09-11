@@ -430,10 +430,6 @@ services:
     extends:
       file: ./consul.yml
       service: consul
-  consul-config-loader:
-    extends:
-      file: ./consul.yml
-      service: consul-config-loader
 ",
     "stateCleared": "modified",
   },
@@ -449,15 +445,6 @@ exports[`generator - docker gateway-oauth2-reactive(true)-gradle-enableTranslati
     "stateCleared": "modified",
   },
   "src/main/docker/app.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/README.md": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/application.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/config/git2consul.json": {
     "stateCleared": "modified",
   },
   "src/main/docker/config/mariadb/my.cnf": {
@@ -640,10 +627,6 @@ services:
     extends:
       file: ./consul.yml
       service: consul
-  consul-config-loader:
-    extends:
-      file: ./consul.yml
-      service: consul-config-loader
   kafka:
     extends:
       file: ./kafka.yml
@@ -663,15 +646,6 @@ exports[`generator - docker microservice-jwt-reactive(true)-gradle-enableTransla
     "stateCleared": "modified",
   },
   "src/main/docker/app.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/README.md": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/application.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/config/git2consul.json": {
     "stateCleared": "modified",
   },
   "src/main/docker/consul.yml": {
@@ -885,10 +859,6 @@ services:
     extends:
       file: ./consul.yml
       service: consul
-  consul-config-loader:
-    extends:
-      file: ./consul.yml
-      service: consul-config-loader
 ",
     "stateCleared": "modified",
   },
@@ -910,15 +880,6 @@ exports[`generator - docker microservice-oauth2-reactive(true)-gradle-enableTran
     "stateCleared": "modified",
   },
   "src/main/docker/cassandra.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/README.md": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/application.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/config/git2consul.json": {
     "stateCleared": "modified",
   },
   "src/main/docker/consul.yml": {
@@ -1112,10 +1073,6 @@ services:
     extends:
       file: ./consul.yml
       service: consul
-  consul-config-loader:
-    extends:
-      file: ./consul.yml
-      service: consul-config-loader
   kafka:
     extends:
       file: ./kafka.yml
@@ -1135,15 +1092,6 @@ exports[`generator - docker monolith-jwt-reactive(true)-gradle-enableTranslation
     "stateCleared": "modified",
   },
   "src/main/docker/app.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/README.md": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/application.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/config/git2consul.json": {
     "stateCleared": "modified",
   },
   "src/main/docker/consul.yml": {
@@ -1358,10 +1306,6 @@ services:
     extends:
       file: ./consul.yml
       service: consul
-  consul-config-loader:
-    extends:
-      file: ./consul.yml
-      service: consul-config-loader
 ",
     "stateCleared": "modified",
   },
@@ -1377,15 +1321,6 @@ exports[`generator - docker monolith-oauth2-reactive(true)-gradle-enableTranslat
     "stateCleared": "modified",
   },
   "src/main/docker/app.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/README.md": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/application.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/config/git2consul.json": {
     "stateCleared": "modified",
   },
   "src/main/docker/consul.yml": {
@@ -1606,10 +1541,6 @@ services:
     extends:
       file: ./consul.yml
       service: consul
-  consul-config-loader:
-    extends:
-      file: ./consul.yml
-      service: consul-config-loader
 ",
     "stateCleared": "modified",
   },
@@ -1625,15 +1556,6 @@ exports[`generator - docker monolith-session-reactive(true)-gradle-enableTransla
     "stateCleared": "modified",
   },
   "src/main/docker/app.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/README.md": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/central-server-config/application.yml": {
-    "stateCleared": "modified",
-  },
-  "src/main/docker/config/git2consul.json": {
     "stateCleared": "modified",
   },
   "src/main/docker/consul.yml": {

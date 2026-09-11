@@ -25,11 +25,7 @@ const GENERATOR_KUBERNETES = 'kubernetes';
 
 const expectedFiles = {
   eurekaregistry: ['./kubernetes/registry-k8s/jhipster-registry.yml', './kubernetes/registry-k8s/application-configmap.yml'],
-  consulregistry: [
-    './kubernetes/registry-k8s/consul.yml',
-    './kubernetes/registry-k8s/consul-config-loader.yml',
-    './kubernetes/registry-k8s/application-configmap.yml',
-  ],
+  consulregistry: ['./kubernetes/registry-k8s/consul.yml'],
   jhgate: [
     './kubernetes/jhgate-k8s/jhgate-deployment.yml',
     './kubernetes/jhgate-k8s/jhgate-mysql.yml',

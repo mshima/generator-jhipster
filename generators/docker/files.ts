@@ -24,8 +24,7 @@ import type { Application as SpringBootApplication } from '../spring-boot/types.
 
 import type { Application as DockerApplication } from './types.ts';
 
-const renameTo = (ctx: DockerApplication, filepath: string) =>
-  `${ctx.dockerServicesDir}${filepath}`.replace('/_eureka_', '').replace('/_consul_', '');
+const renameTo = (ctx: DockerApplication, filepath: string) => `${ctx.dockerServicesDir}${filepath}`.replace('/_eureka_', '');
 
 export const dockerFiles = asWriteFilesSection<DockerApplication & Partial<Pick<SpringBootApplication, 'databaseMigrationLoader'>>>({
   commonFiles: [
@@ -127,7 +126,7 @@ export const dockerFiles = asWriteFilesSection<DockerApplication & Partial<Pick<
   ],
   searchDiscoveryFiles: [
     {
-      condition: ctx => ctx.serviceDiscoveryAny,
+      condition: ctx => ctx.dockerServices.includes('eureka'),
       path: TEMPLATES_DOCKER_DIR,
       renameTo,
       templates: ['central-server-config/README.md'],
@@ -136,7 +135,7 @@ export const dockerFiles = asWriteFilesSection<DockerApplication & Partial<Pick<
       condition: ctx => ctx.dockerServices.includes('consul'),
       path: TEMPLATES_DOCKER_DIR,
       renameTo,
-      templates: ['consul.yml', 'config/git2consul.json', 'central-server-config/_consul_/application.yml'],
+      templates: ['consul.yml'],
     },
     {
       condition: ctx => ctx.dockerServices.includes('eureka'),

@@ -126,64 +126,6 @@ dependencies:
 ",
     "stateCleared": "modified",
   },
-  "knative/csvc-knative/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
-",
-    "stateCleared": "modified",
-  },
   "knative/csvc-knative/templates/consul.yml": {
     "contents": "# Consul HA cluster
 #
@@ -666,6 +608,18 @@ mysql customisation
 ",
     "stateCleared": "modified",
   },
+  "knative/msmysql-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/msmysql-knative/templates/msmysql-destination-rule.yml": {
     "contents": "apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -737,6 +691,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -861,6 +820,18 @@ postgresql customisation
 {{- define "postgresql.fullname" -}}
 {{- default "mspsql-postgresql" -}}
 {{- end -}}
+",
+    "stateCleared": "modified",
+  },
+  "knative/mspsql-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -1009,6 +980,11 @@ spec:
               value: mspsql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: mspsql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
             - name: SPRING_DATASOURCE_USERNAME
@@ -1203,64 +1179,6 @@ dependencies:
   },
   "knative/csvc-knative/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -1857,6 +1775,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -1918,6 +1841,18 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+",
+    "stateCleared": "modified",
+  },
+  "knative/jhgate-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -2059,64 +1994,6 @@ dependencies:
   },
   "knative/csvc-knative/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -2726,6 +2603,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -2790,6 +2672,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "knative/jhgate-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/jhgate-knative/values.yml": {
     "contents": "mysql:
   enabled: true
@@ -2850,6 +2744,18 @@ mysql customisation
 {{- define "mysql.fullname" -}}
 {{- default "msmysql-mysql" -}}
 {{- end -}}
+",
+    "stateCleared": "modified",
+  },
+  "knative/msmysql-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -2924,6 +2830,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -3108,64 +3019,6 @@ dependencies:
   },
   "knative/csvc-knative/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -3762,6 +3615,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -3823,6 +3681,18 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+",
+    "stateCleared": "modified",
+  },
+  "knative/jhgate-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -4017,64 +3887,6 @@ dependencies:
   },
   "knative/csvc-knative/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -4723,6 +4535,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -4787,6 +4604,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "knative/jhgate-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/jhgate-knative/values.yml": {
     "contents": "mysql:
   enabled: true
@@ -4847,6 +4676,18 @@ mariadb customisation
 {{- define "mariadb.fullname" -}}
 {{- default "msmariadb-mariadb" -}}
 {{- end -}}
+",
+    "stateCleared": "modified",
+  },
+  "knative/msmariadb-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -4921,6 +4762,11 @@ spec:
               value: msmariadb
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmariadb
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mariadb://msmariadb-mariadb.default.svc.cluster.local:3306/msmariadb?useLegacyDatetimeCode=false
             - name: SPRING_DATASOURCE_PASSWORD
@@ -5056,6 +4902,18 @@ mongodb customisation
 ",
     "stateCleared": "modified",
   },
+  "knative/msmongodb-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/msmongodb-knative/templates/msmongodb-destination-rule.yml": {
     "contents": "apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -5127,6 +4985,11 @@ spec:
               value: msmongodb
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmongodb
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_MONGODB_URI
               value: "mongodb://msmongodb-mongodb-0.msmongodb-mongodb.default:27017/msmongodb"
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -5251,6 +5114,18 @@ mysql customisation
 ",
     "stateCleared": "modified",
   },
+  "knative/msmysql-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/msmysql-knative/templates/msmysql-destination-rule.yml": {
     "contents": "apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -5322,6 +5197,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -5446,6 +5326,18 @@ postgresql customisation
 {{- define "postgresql.fullname" -}}
 {{- default "mspsql-postgresql" -}}
 {{- end -}}
+",
+    "stateCleared": "modified",
+  },
+  "knative/mspsql-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -5594,6 +5486,11 @@ spec:
               value: mspsql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: mspsql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
             - name: SPRING_DATASOURCE_USERNAME
@@ -5839,64 +5736,6 @@ prometheus/grafana customisation
 {{- define "grafana.fullname" -}}
 {{- default "jhipster-grafana" -}}
 {{- end -}}
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: mynamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: mynamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.mynamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -8715,6 +8554,18 @@ mysql customisation
 ",
     "stateCleared": "modified",
   },
+  "knative/msmysql-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: mynamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/msmysql-knative/templates/msmysql-destination-rule.yml": {
     "contents": "apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -8786,6 +8637,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.mynamespace.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED
@@ -8981,64 +8837,6 @@ dependencies:
   },
   "knative/csvc-knative/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: mynamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: mynamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.mynamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -9512,6 +9310,18 @@ mysql customisation
 ",
     "stateCleared": "modified",
   },
+  "knative/msmysql-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: mynamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/msmysql-knative/templates/msmysql-destination-rule.yml": {
     "contents": "apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -9583,6 +9393,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.mynamespace.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -9775,64 +9590,6 @@ dependencies:
   },
   "knative/csvc-knative/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: jhipsternamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/csvc-knative/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: jhipsternamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.jhipsternamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -10430,6 +10187,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.jhipsternamespace.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -10491,6 +10253,18 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+",
+    "stateCleared": "modified",
+  },
+  "knative/jhgate-knative/templates/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: jhipsternamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -10768,6 +10542,18 @@ logSummary
 ",
     "stateCleared": "modified",
   },
+  "knative/msmysql-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/msmysql-knative/msmysql-destination-rule.yml": {
     "contents": "apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -10899,6 +10685,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -10960,6 +10751,18 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+",
+    "stateCleared": "modified",
+  },
+  "knative/mspsql-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -11178,6 +10981,11 @@ spec:
               value: mspsql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: mspsql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
             - name: SPRING_DATASOURCE_USERNAME
@@ -11248,64 +11056,6 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -11928,6 +11678,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -11992,6 +11747,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "knative/jhgate-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/kubectl-knative-apply.sh": {
     "contents": "#!/bin/bash
 # Files are ordered in proper order with needed wait for the dependent custom resource definitions to get initialized.
@@ -12016,64 +11783,6 @@ kubectl apply -f jhgate-\${suffix}/
 kubectl apply -f istio-\${suffix}/
 
 logSummary
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -12714,6 +12423,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -12778,6 +12492,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "knative/jhgate-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/kubectl-knative-apply.sh": {
     "contents": "#!/bin/bash
 # Files are ordered in proper order with needed wait for the dependent custom resource definitions to get initialized.
@@ -12803,6 +12529,18 @@ kubectl apply -f msmysql-\${suffix}/
 kubectl apply -f istio-\${suffix}/
 
 logSummary
+",
+    "stateCleared": "modified",
+  },
+  "knative/msmysql-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -12937,6 +12675,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -12998,64 +12741,6 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -13678,6 +13363,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -13742,6 +13432,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "knative/jhgate-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/kubectl-knative-apply.sh": {
     "contents": "#!/bin/bash
 # Files are ordered in proper order with needed wait for the dependent custom resource definitions to get initialized.
@@ -13766,64 +13468,6 @@ kubectl apply -f jhgate-\${suffix}/
 kubectl apply -f istio-\${suffix}/
 
 logSummary
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -14535,6 +14179,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -14599,6 +14248,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "knative/jhgate-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/kubectl-knative-apply.sh": {
     "contents": "#!/bin/bash
 # Files are ordered in proper order with needed wait for the dependent custom resource definitions to get initialized.
@@ -14628,6 +14289,18 @@ kubectl apply -f msmssqldb-\${suffix}/
 kubectl apply -f istio-\${suffix}/
 
 logSummary
+",
+    "stateCleared": "modified",
+  },
+  "knative/msmariadb-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -14777,6 +14450,11 @@ spec:
               value: msmariadb
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmariadb
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mariadb://msmariadb-mariadb.default.svc.cluster.local:3306/msmariadb?useLegacyDatetimeCode=false
             - name: SPRING_DATASOURCE_PASSWORD
@@ -14843,6 +14521,18 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+",
+    "stateCleared": "modified",
+  },
+  "knative/msmongodb-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -15239,6 +14929,11 @@ spec:
               value: msmongodb
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmongodb
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_MONGODB_URI
               value: "mongodb://msmongodb-mongodb-0.msmongodb-mongodb.default:27017/msmongodb"
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -15300,6 +14995,18 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+",
+    "stateCleared": "modified",
+  },
+  "knative/msmssqldb-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -15453,6 +15160,11 @@ spec:
               value: msmssqldb
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmssqldb
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
               value: "x-request-id,x-ot-span-context"
             - name: JAVA_OPTS
@@ -15512,6 +15224,18 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+",
+    "stateCleared": "modified",
+  },
+  "knative/msmysql-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -15646,6 +15370,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -15707,6 +15436,18 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
+",
+    "stateCleared": "modified",
+  },
+  "knative/mspsql-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -15925,6 +15666,11 @@ spec:
               value: mspsql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: mspsql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
             - name: SPRING_DATASOURCE_USERNAME
@@ -15995,64 +15741,6 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -19190,6 +18878,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "knative/msmysql-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: mynamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/msmysql-knative/msmysql-destination-rule.yml": {
     "contents": "apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -19339,6 +19039,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.mynamespace.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED
@@ -19410,64 +19115,6 @@ spec:
 kind: Namespace
 metadata:
   name: mynamespace
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: mynamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: mynamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.mynamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -19934,6 +19581,18 @@ logSummary
 ",
     "stateCleared": "modified",
   },
+  "knative/msmysql-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: mynamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/msmysql-knative/msmysql-destination-rule.yml": {
     "contents": "apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -20065,6 +19724,11 @@ spec:
               value: msmysql
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: msmysql
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://msmysql-mysql.mynamespace.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -20134,64 +19798,6 @@ spec:
 kind: Namespace
 metadata:
   name: mynamespace
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: mynamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: mynamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.mynamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -20814,6 +20420,11 @@ spec:
               value: jhgate
             - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
               value: jhgate
+            - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://jhgate-mysql.jhipsternamespace.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
             - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -20878,6 +20489,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "knative/jhgate-knative/jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: jhipsternamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "knative/kubectl-knative-apply.sh": {
     "contents": "#!/bin/bash
 # Files are ordered in proper order with needed wait for the dependent custom resource definitions to get initialized.
@@ -20911,64 +20534,6 @@ logSummary
 kind: Namespace
 metadata:
   name: jhipsternamespace
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: jhipsternamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "knative/registry-knative/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: jhipsternamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.jhipsternamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },

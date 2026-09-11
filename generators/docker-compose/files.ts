@@ -17,12 +17,13 @@
  * limitations under the License.
  */
 import { APPLICATION_TYPE_MICROSERVICE } from '../../lib/core/application-types.ts';
-import { authenticationTypes, monitoringTypes } from '../../lib/jhipster/index.ts';
+import { authenticationTypes, monitoringTypes, serviceDiscoveryTypes } from '../../lib/jhipster/index.ts';
 import { asWriteFilesSection } from '../base-application/support/index.ts';
 import { asWritingWorkspacesTask } from '../base-workspaces/support/task-type-inference.ts';
 
 const { PROMETHEUS } = monitoringTypes;
 const { OAUTH2 } = authenticationTypes;
+const { EUREKA } = serviceDiscoveryTypes;
 
 export const files = asWriteFilesSection({
   dockerCompose: [
@@ -32,7 +33,7 @@ export const files = asWriteFilesSection({
   ],
   registry: [
     {
-      condition: deployment => deployment.serviceDiscoveryAny,
+      condition: deployment => deployment.serviceDiscoveryType === EUREKA,
       templates: ['central-server-config/application.yml'],
     },
   ],

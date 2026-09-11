@@ -38,11 +38,7 @@ const desiredEurekaConfig = {
 };
 
 const expectedConsulFiles = () => {
-  return [
-    `${JAVA_DOCKER_DIR}central-server-config/application.yml`,
-    `${JAVA_DOCKER_DIR}consul.yml`,
-    `${JAVA_DOCKER_DIR}config/git2consul.json`,
-  ];
+  return [`${JAVA_DOCKER_DIR}consul.yml`];
 };
 
 const desiredConsulConfig = {

@@ -131,16 +131,6 @@ export const deploymentKubernetesFiles = (suffix = '') =>
         renameTo: () => `csvc-${suffix}/templates/consul.yml`,
         templates: ['registry/consul.yml'],
       },
-      {
-        condition: data => data.serviceDiscoveryTypeConsul,
-        renameTo: () => `csvc-${suffix}/templates/consul-config-loader.yml`,
-        templates: ['registry/consul-config-loader.yml'],
-      },
-      {
-        condition: data => data.serviceDiscoveryTypeConsul,
-        renameTo: () => `csvc-${suffix}/templates/application-configmap.yml`,
-        templates: ['registry/application-configmap.yml'],
-      },
     ],
     istio: [
       {

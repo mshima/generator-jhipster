@@ -25,11 +25,7 @@ const GENERATOR_KUBERNETES_KNATIVE = 'kubernetes:knative';
 
 const expectedFiles = {
   eurekaregistry: ['./knative/registry-knative/jhipster-registry.yml', './knative/registry-knative/application-configmap.yml'],
-  consulregistry: [
-    './knative/registry-knative/consul.yml',
-    './knative/registry-knative/consul-config-loader.yml',
-    './knative/registry-knative/application-configmap.yml',
-  ],
+  consulregistry: ['./knative/registry-knative/consul.yml'],
   jhgate: ['./knative/jhgate-knative/jhgate-mysql.yml', './knative/jhgate-knative/jhgate-service.yml'],
   jhgateingress: ['./knative/jhgate-knative/jhgate-ingress.yml'],
   customnamespace: ['./knative/namespace.yml'],
@@ -65,11 +61,7 @@ const helmExpectedFiles = {
     './knative/csvc-knative/templates/_helpers.tpl',
   ],
   eurekaregistry: ['./knative/csvc-knative/templates/jhipster-registry.yml', './knative/csvc-knative/templates/application-configmap.yml'],
-  consulregistry: [
-    './knative/csvc-knative/templates/consul.yml',
-    './knative/csvc-knative/templates/consul-config-loader.yml',
-    './knative/csvc-knative/templates/application-configmap.yml',
-  ],
+  consulregistry: ['./knative/csvc-knative/templates/consul.yml'],
   jhgate: [
     './knative/jhgate-knative/templates/jhgate-service.yml',
     './knative/jhgate-knative/Chart.yaml',

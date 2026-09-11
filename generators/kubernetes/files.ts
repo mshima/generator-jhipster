@@ -67,7 +67,7 @@ export const applicationFiles = (suffix: string) =>
     ],
     serviceDiscovery: [
       {
-        condition: data => !data.app.serviceDiscoveryAny && data.app.authenticationTypeJwt,
+        condition: data => !data.app.serviceDiscoveryEureka && data.app.authenticationTypeJwt,
         renameTo: data => `${data.app.baseName.toLowerCase()}-${suffix}/${data.app.baseName.toLowerCase()}-jwt-secret.yml`,
         templates: ['secret/jwt-secret.yml'],
       },
@@ -182,11 +182,7 @@ export const writeDeploymentFiles = (suffix = '') =>
       },
       {
         condition: data => data.serviceDiscoveryTypeConsul,
-        templates: [
-          { sourceFile: 'registry/consul.yml.ejs', destinationFile: `registry-${suffix}/consul.yml` },
-          { sourceFile: 'registry/consul-config-loader.yml.ejs', destinationFile: `registry-${suffix}/consul-config-loader.yml` },
-          { sourceFile: 'registry/application-configmap.yml.ejs', destinationFile: `registry-${suffix}/application-configmap.yml` },
-        ],
+        templates: [{ sourceFile: 'registry/consul.yml.ejs', destinationFile: `registry-${suffix}/consul.yml` }],
       },
     ],
     serviceMesh: [

@@ -31,11 +31,7 @@ const expectedFiles = {
     './helm/csvc-helm/templates/_helpers.tpl',
   ],
   eurekaregistry: ['./helm/csvc-helm/templates/jhipster-registry.yml', './helm/csvc-helm/templates/application-configmap.yml'],
-  consulregistry: [
-    './helm/csvc-helm/templates/consul.yml',
-    './helm/csvc-helm/templates/consul-config-loader.yml',
-    './helm/csvc-helm/templates/application-configmap.yml',
-  ],
+  consulregistry: ['./helm/csvc-helm/templates/consul.yml'],
   jhgate: [
     './helm/jhgate-helm/templates/jhgate-deployment.yml',
     './helm/jhgate-helm/templates/jhgate-service.yml',

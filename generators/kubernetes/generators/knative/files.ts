@@ -46,7 +46,7 @@ export const applicationKubernetesFiles = (suffix = '') =>
     ],
     authentication: [
       {
-        condition: data => !data.app.serviceDiscoveryType && data.app.authenticationTypeJwt,
+        condition: data => !data.app.serviceDiscoveryEureka && data.app.authenticationTypeJwt,
         renameTo: data => `${data.app.baseName.toLowerCase()}-${suffix}/${data.generatorTypeK8s ? '' : 'templates/'}jwt-secret.yml`,
         templates: ['secret/jwt-secret.yml'],
       },
@@ -176,18 +176,6 @@ export const deploymentKubernetesFiles = (suffix = '') =>
         condition: generator => generator.serviceDiscoveryTypeConsul,
         renameTo: data => `${data.generatorTypeK8s ? 'registry' : 'csvc'}-${suffix}/${data.generatorTypeK8s ? '' : 'templates/'}consul.yml`,
         templates: ['registry/consul.yml'],
-      },
-      {
-        condition: generator => generator.serviceDiscoveryTypeConsul,
-        renameTo: data =>
-          `${data.generatorTypeK8s ? 'registry' : 'csvc'}-${suffix}/${data.generatorTypeK8s ? '' : 'templates/'}consul-config-loader.yml`,
-        templates: ['registry/consul-config-loader.yml'],
-      },
-      {
-        condition: generator => generator.serviceDiscoveryTypeConsul,
-        renameTo: data =>
-          `${data.generatorTypeK8s ? 'registry' : 'csvc'}-${suffix}/${data.generatorTypeK8s ? '' : 'templates/'}application-configmap.yml`,
-        templates: ['registry/application-configmap.yml'],
       },
     ],
     istio: [

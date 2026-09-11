@@ -678,14 +678,14 @@ resources:
 - msmysql-k8s/msmysql-deployment.yml
 - msmysql-k8s/msmysql-service.yml
 - msmysql-k8s/msmysql-mysql.yml
+- msmysql-k8s/jwt-secret.yml
 - mspsql-k8s/mspsql-deployment.yml
 - mspsql-k8s/mspsql-service.yml
 - mspsql-k8s/mspsql-postgresql.yml
 - mspsql-k8s/mspsql-elasticsearch.yml
+- mspsql-k8s/jwt-secret.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
 ",
@@ -748,6 +748,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -780,6 +785,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmysql-k8s/msmysql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -928,6 +945,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
         - name: SPRING_DATASOURCE_USERNAME
@@ -1057,6 +1079,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "kubernetes/mspsql-k8s/mspsql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "kubernetes/mspsql-k8s/mspsql-postgresql.yml": {
     "contents": "apiVersion: v1
 kind: PersistentVolumeClaim
@@ -1152,64 +1186,6 @@ spec:
   ports:
   - name: http
     port: 8081
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -1643,6 +1619,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -1699,6 +1680,18 @@ spec:
             name: jhgate
             port:
               name: http
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/jhgate-k8s/jhgate-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -1863,70 +1856,11 @@ resources:
 - jhgate-k8s/jhgate-service.yml
 - jhgate-k8s/jhgate-mysql.yml
 - jhgate-k8s/jhgate-ingress.yml
+- jhgate-k8s/jwt-secret.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -5394,68 +5328,8 @@ resources:
 - keycloak-k8s/keycloak.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -8837,68 +8711,8 @@ resources:
 - keycloak-k8s/keycloak.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -9347,6 +9161,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -9381,6 +9200,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/jhgate-k8s/jhgate-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -9541,13 +9372,13 @@ resources:
 - jhgate-k8s/jhgate-deployment.yml
 - jhgate-k8s/jhgate-service.yml
 - jhgate-k8s/jhgate-mysql.yml
+- jhgate-k8s/jwt-secret.yml
 - msmysql-k8s/msmysql-deployment.yml
 - msmysql-k8s/msmysql-service.yml
 - msmysql-k8s/msmysql-mysql.yml
+- msmysql-k8s/jwt-secret.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
 ",
@@ -9610,6 +9441,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -9642,6 +9478,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmysql-k8s/msmysql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -9730,64 +9578,6 @@ spec:
   ports:
   - name: http
     port: 8081
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -10364,6 +10154,11 @@ spec:
           value: jhgate
         - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
           value: jhgate
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -10477,6 +10272,18 @@ spec:
   - route:
     - destination:
         host: jhgate
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/jhgate-k8s/jhgate-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -10664,12 +10471,11 @@ resources:
 - jhgate-k8s/jhgate-service.yml
 - jhgate-k8s/jhgate-mysql.yml
 - jhgate-k8s/jhgate-gateway.yml
+- jhgate-k8s/jwt-secret.yml
 - jhgate-k8s/jhgate-destination-rule.yml
 - jhgate-k8s/jhgate-virtual-service.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 # istio
 - istio-k8s/grafana-gateway.yml
 - istio-k8s/zipkin-gateway.yml
@@ -10737,64 +10543,6 @@ patchesJson6902:
     "contents": "- op: replace
   path: "/metadata/namespace"
   value: "istio-system"
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -11326,6 +11074,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -11360,6 +11113,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/jhgate-k8s/jhgate-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -11524,26 +11289,30 @@ resources:
 - jhgate-k8s/jhgate-deployment.yml
 - jhgate-k8s/jhgate-service.yml
 - jhgate-k8s/jhgate-mysql.yml
+- jhgate-k8s/jwt-secret.yml
 - msmysql-k8s/msmysql-deployment.yml
 - msmysql-k8s/msmysql-service.yml
 - msmysql-k8s/msmysql-mysql.yml
+- msmysql-k8s/jwt-secret.yml
 - mspsql-k8s/mspsql-deployment.yml
 - mspsql-k8s/mspsql-service.yml
 - mspsql-k8s/mspsql-postgresql.yml
 - mspsql-k8s/mspsql-elasticsearch.yml
+- mspsql-k8s/jwt-secret.yml
 - msmongodb-k8s/msmongodb-deployment.yml
 - msmongodb-k8s/msmongodb-service.yml
 - msmongodb-k8s/msmongodb-mongodb.yml
+- msmongodb-k8s/jwt-secret.yml
 - msmariadb-k8s/msmariadb-deployment.yml
 - msmariadb-k8s/msmariadb-service.yml
 - msmariadb-k8s/msmariadb-mariadb.yml
+- msmariadb-k8s/jwt-secret.yml
 - msmssqldb-k8s/msmssqldb-deployment.yml
 - msmssqldb-k8s/msmssqldb-service.yml
 - msmssqldb-k8s/msmssqldb-mssql.yml
+- msmssqldb-k8s/jwt-secret.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
 ",
@@ -11606,6 +11375,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mariadb://msmariadb-mariadb.default.svc.cluster.local:3306/msmariadb?useLegacyDatetimeCode=false
         - name: SPRING_LIQUIBASE_URL
@@ -11643,6 +11417,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmariadb-k8s/msmariadb-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -11806,6 +11592,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_MONGODB_URI
           value: "mongodb://msmongodb-mongodb-0.msmongodb-mongodb.default:27017/msmongodb"
         - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -11836,6 +11627,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmongodb-k8s/msmongodb-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -12238,6 +12041,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
           value: "x-request-id,x-ot-span-context"
         - name: JAVA_OPTS
@@ -12266,6 +12074,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmssqldb-k8s/msmssqldb-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -12433,6 +12253,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -12465,6 +12290,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmysql-k8s/msmysql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -12613,6 +12450,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
         - name: SPRING_DATASOURCE_USERNAME
@@ -12742,6 +12584,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "kubernetes/mspsql-k8s/mspsql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "kubernetes/mspsql-k8s/mspsql-postgresql.yml": {
     "contents": "apiVersion: v1
 kind: PersistentVolumeClaim
@@ -12837,64 +12691,6 @@ spec:
   ports:
   - name: http
     port: 8081
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -13867,6 +13663,7 @@ resources:
 - msmysql-k8s/msmysql-deployment.yml
 - msmysql-k8s/msmysql-service.yml
 - msmysql-k8s/msmysql-mysql.yml
+- msmysql-k8s/jwt-secret.yml
 - msmysql-k8s/msmysql-prometheus-sm.yml
 # monitoring prometheus
 - monitoring-k8s/jhipster-prometheus-cr.yml
@@ -13875,8 +13672,6 @@ resources:
 - monitoring-k8s/jhipster-grafana-dashboard.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
 ",
@@ -16549,6 +16344,11 @@ spec:
           value: consul-headless.mynamespace.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.mynamespace.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -16583,6 +16383,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmysql-k8s/msmysql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: mynamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -16697,64 +16509,6 @@ spec:
 kind: Namespace
 metadata:
   name: mynamespace
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: mynamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: mynamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.mynamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -17194,10 +16948,9 @@ resources:
 - msmysql-k8s/msmysql-deployment.yml
 - msmysql-k8s/msmysql-service.yml
 - msmysql-k8s/msmysql-mysql.yml
+- msmysql-k8s/jwt-secret.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
 ",
@@ -17260,6 +17013,11 @@ spec:
           value: consul-headless.mynamespace.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.mynamespace.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -17292,6 +17050,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmysql-k8s/msmysql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: mynamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -17388,64 +17158,6 @@ spec:
 kind: Namespace
 metadata:
   name: mynamespace
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: mynamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: mynamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.mynamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -17965,6 +17677,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -17999,6 +17716,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/jhgate-k8s/jhgate-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -18163,26 +17892,30 @@ resources:
 - jhgate-k8s/jhgate-deployment.yml
 - jhgate-k8s/jhgate-service.yml
 - jhgate-k8s/jhgate-mysql.yml
+- jhgate-k8s/jwt-secret.yml
 - msmysql-k8s/msmysql-deployment.yml
 - msmysql-k8s/msmysql-service.yml
 - msmysql-k8s/msmysql-mysql.yml
+- msmysql-k8s/jwt-secret.yml
 - mspsql-k8s/mspsql-deployment.yml
 - mspsql-k8s/mspsql-service.yml
 - mspsql-k8s/mspsql-postgresql.yml
 - mspsql-k8s/mspsql-elasticsearch.yml
+- mspsql-k8s/jwt-secret.yml
 - msmongodb-k8s/msmongodb-deployment.yml
 - msmongodb-k8s/msmongodb-service.yml
 - msmongodb-k8s/msmongodb-mongodb.yml
+- msmongodb-k8s/jwt-secret.yml
 - msmariadb-k8s/msmariadb-deployment.yml
 - msmariadb-k8s/msmariadb-service.yml
 - msmariadb-k8s/msmariadb-mariadb.yml
+- msmariadb-k8s/jwt-secret.yml
 - msmssqldb-k8s/msmssqldb-deployment.yml
 - msmssqldb-k8s/msmssqldb-service.yml
 - msmssqldb-k8s/msmssqldb-mssql.yml
+- msmssqldb-k8s/jwt-secret.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
 ",
@@ -18245,6 +17978,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mariadb://msmariadb-mariadb.default.svc.cluster.local:3306/msmariadb?useLegacyDatetimeCode=false
         - name: SPRING_LIQUIBASE_URL
@@ -18282,6 +18020,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmariadb-k8s/msmariadb-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -18445,6 +18195,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_MONGODB_URI
           value: "mongodb://msmongodb-mongodb-0.msmongodb-mongodb.default:27017/msmongodb"
         - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -18475,6 +18230,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmongodb-k8s/msmongodb-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -18877,6 +18644,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
           value: "x-request-id,x-ot-span-context"
         - name: JAVA_OPTS
@@ -18905,6 +18677,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmssqldb-k8s/msmssqldb-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -19072,6 +18856,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -19104,6 +18893,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/msmysql-k8s/msmysql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -19252,6 +19053,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
         - name: SPRING_DATASOURCE_USERNAME
@@ -19381,6 +19187,18 @@ spec:
 ",
     "stateCleared": "modified",
   },
+  "kubernetes/mspsql-k8s/mspsql-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: default
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
+",
+    "stateCleared": "modified",
+  },
   "kubernetes/mspsql-k8s/mspsql-postgresql.yml": {
     "contents": "apiVersion: v1
 kind: PersistentVolumeClaim
@@ -19476,64 +19294,6 @@ spec:
   ports:
   - name: http
     port: 8081
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -19978,6 +19738,11 @@ spec:
           value: consul-headless.jhipsternamespace.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.jhipsternamespace.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -20010,6 +19775,18 @@ spec:
             path: /management/health/liveness
             port: http
           initialDelaySeconds: 120
+",
+    "stateCleared": "modified",
+  },
+  "kubernetes/jhgate-k8s/jhgate-jwt-secret.yml": {
+    "contents": "apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-secret
+  namespace: jhipsternamespace
+type: Opaque
+data:
+  secret: U0VDUkVULS01MA==
 ",
     "stateCleared": "modified",
   },
@@ -20172,10 +19949,9 @@ resources:
 - jhgate-k8s/jhgate-deployment.yml
 - jhgate-k8s/jhgate-service.yml
 - jhgate-k8s/jhgate-mysql.yml
+- jhgate-k8s/jwt-secret.yml
 # service discovery eureka/consul
 - registry-k8s/consul.yml
-- registry-k8s/consul-config-loader.yml
-- registry-k8s/application-configmap.yml
 
 patchesJson6902:
 ",
@@ -20186,64 +19962,6 @@ patchesJson6902:
 kind: Namespace
 metadata:
   name: jhipsternamespace
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: jhipsternamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "kubernetes/registry-k8s/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: jhipsternamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.jhipsternamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -20918,7 +20636,7 @@ metadata:
 data:
   application.yml: |-
     configserver:
-      name:  JHipster Registry
+      name: JHipster Registry
       status: Connected to the JHipster Registry running in Kubernetes
     eureka:
       client:

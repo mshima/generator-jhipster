@@ -74,20 +74,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -102,6 +88,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -143,6 +130,7 @@ jhipster:
       - SPRING_COUCHBASE_CONNECTION_STRING=mscouchbase-couchbase
       - JHIPSTER_DATABASE_COUCHBASE_BUCKET_NAME=mscouchbase
       - JHIPSTER_SLEEP=20
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -177,14 +165,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -261,20 +241,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -289,6 +255,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -327,6 +294,7 @@ jhipster:
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_CASSANDRA_CONTACTPOINTS=mscassandra-cassandra
       - JHIPSTER_SLEEP=10
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -362,14 +330,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -501,20 +461,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -529,6 +475,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -569,6 +516,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -608,6 +556,7 @@ jhipster:
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://mspsql-postgresql:5432/mspsql
       - SPRING_ELASTICSEARCH_URIS=http://mspsql-elasticsearch:9200
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -657,6 +606,7 @@ jhipster:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_MONGODB_URI=mongodb://msmongodb-mongodb:27017/msmongodb
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -694,6 +644,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mariadb://msmariadb-mariadb:3306/msmariadb?useLegacyDatetimeCode=false
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -730,14 +681,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -868,20 +811,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ### Additional Services:
 
 - [Keycloak server](http://localhost:9080)
-",
-    "stateCleared": "modified",
-  },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
 ",
     "stateCleared": "modified",
   },
@@ -1128,14 +1057,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
   keycloak:
     image: keycloak-placeholder
     command: 'start-dev --import-realm'
@@ -1295,20 +1216,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -1323,6 +1230,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -1363,6 +1271,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -1402,6 +1311,7 @@ jhipster:
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://mspsql-postgresql:5432/mspsql
       - SPRING_ELASTICSEARCH_URIS=http://mspsql-elasticsearch:9200
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -1451,6 +1361,7 @@ jhipster:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_MONGODB_URI=mongodb://msmongodb-mongodb:27017/msmongodb
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -1481,14 +1392,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -1621,20 +1524,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -1649,6 +1538,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -1689,6 +1579,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -1728,6 +1619,7 @@ jhipster:
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://mspsql-postgresql:5432/mspsql
       - SPRING_ELASTICSEARCH_URIS=http://mspsql-elasticsearch:9200
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -1781,6 +1673,7 @@ jhipster:
       - SPRING_COUCHBASE_CONNECTION_STRING=mscouchbase-couchbase
       - JHIPSTER_DATABASE_COUCHBASE_BUCKET_NAME=mscouchbase
       - JHIPSTER_SLEEP=20
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -1817,6 +1710,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mariadb://msmariadb-mariadb:3306/msmariadb?useLegacyDatetimeCode=false
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -1853,14 +1747,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -1938,20 +1824,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -1966,6 +1838,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -2006,6 +1879,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -2039,14 +1913,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -2124,20 +1990,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -2152,6 +2004,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -2192,6 +2045,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -2225,14 +2079,213 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
+",
+    "stateCleared": "modified",
+  },
+}
+`;
+
+exports[`generator - Docker Compose gateway and one microservice, with eureka should match files snapshot 1`] = `
+{
+  "01-gateway/.yo-rc.json": {
+    "contents": "{
+  "generator-jhipster": {
+    "applicationType": "gateway",
+    "baseName": "jhgate",
+    "entities": [],
+    "prodDatabaseType": "mysql",
+    "serverPort": 8080,
+    "serviceDiscoveryType": "eureka"
+  }
+}
+",
+    "stateCleared": "modified",
+  },
+  "02-mysql/.yo-rc.json": {
+    "contents": "{
+  "generator-jhipster": {
+    "applicationType": "microservice",
+    "baseName": "msmysql",
+    "databaseType": "sql",
+    "entities": [],
+    "prodDatabaseType": "mysql",
+    "serverPort": 8081,
+    "serviceDiscoveryType": "eureka"
+  }
+}
+",
+    "stateCleared": "modified",
+  },
+  "docker-compose/.yo-rc.json": {
+    "contents": "{
+  "generator-jhipster": {
+    "adminPassword": "admin",
+    "appsFolders": [
+      "01-gateway",
+      "02-mysql"
+    ],
+    "deploymentType": "docker-compose",
+    "directoryPath": "../",
+    "jwtSecretKey": "SECRET--50",
+    "monitoring": "no",
+    "serviceDiscoveryType": "eureka"
+  }
+}
+",
+    "stateCleared": "modified",
+  },
+  "docker-compose/README-DOCKER-COMPOSE.md": {
+    "contents": "# JHipster generated Docker-Compose configuration
+
+## Usage
+
+Launch all your infrastructure by running: \`docker compose up -d\`.
+
+## Configured Docker services
+
+### Service registry and configuration server:
+- [JHipster Registry](http://localhost:8761)
+
+### Applications and dependencies:
+- jhgate (gateway application)
+- jhgate's mysql database
+- msmysql (microservice application)
+- msmysql's mysql database
+
+### Additional Services:
+
+",
+    "stateCleared": "modified",
+  },
+  "docker-compose/central-server-config/application.yml": {
+    "contents": "#common configuration shared between all applications
+configserver:
+  name: Service Registry
+  status: Connected to the JHipster Registry running in Docker
+
+jhipster:
+  security:
+    authentication:
+      jwt:
+        base64-secret: SECRET--50
+eureka:
+  client:
+    service-url:
+      defaultZone: http://admin:\${jhipster.registry.password}@jhipster-registry:8761/eureka/
+",
+    "stateCleared": "modified",
+  },
+  "docker-compose/docker-compose.yml": {
+    "contents": "services:
+  jhgate:
+    image: jhgate
     environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+      - SPRING_PROFILES_ACTIVE=prod,api-docs,secret-samples
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:$\${jhipster.registry.password}@jhipster-registry:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://admin:$\${jhipster.registry.password}@jhipster-registry:8761/config
+      - SPRING_R2DBC_URL=r2dbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - SPRING_R2DBC_USERNAME=root
+      - SPRING_R2DBC_PASSWORD=
+      - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_REGISTRY_PASSWORD=admin
+    ports:
+      - 8080:8080
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080; printf \\"GET /management/health HTTP/1.0\\\\r\\\\nHost: localhost\\\\r\\\\n\\\\r\\\\n\\" >&3; grep -q \\"\\\\\\"status\\\\\\":\\\\\\"UP\\\\\\"\\" <&3'"
+      interval: 5s
+      timeout: 5s
+      retries: 40
+    depends_on:
+      jhgate-mysql:
+        condition: service_healthy
+      jhipster-registry:
+        condition: service_healthy
+  jhgate-mysql:
+    image: mysql-placeholder
+    volumes:
+      - ./config/mysql:/etc/mysql/conf.d:ro
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=jhgate
+    command: mysqld --lower_case_table_names=1 --skip-mysqlx --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysql -e "SHOW DATABASES;" && sleep 5
+      interval: 5s
+      timeout: 10s
+      retries: 10
+  
+  msmysql:
+    image: msmysql
+    environment:
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+      - SPRING_PROFILES_ACTIVE=prod,api-docs,secret-samples
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:$\${jhipster.registry.password}@jhipster-registry:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://admin:$\${jhipster.registry.password}@jhipster-registry:8761/config
+      - SPRING_DATASOURCE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_REGISTRY_PASSWORD=admin
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8081; printf \\"GET /management/health HTTP/1.0\\\\r\\\\nHost: localhost\\\\r\\\\n\\\\r\\\\n\\" >&3; grep -q \\"\\\\\\"status\\\\\\":\\\\\\"UP\\\\\\"\\" <&3'"
+      interval: 5s
+      timeout: 5s
+      retries: 40
+    depends_on:
+      msmysql-mysql:
+        condition: service_healthy
+      jhipster-registry:
+        condition: service_healthy
+  msmysql-mysql:
+    image: mysql-placeholder
+    volumes:
+      - ./config/mysql:/etc/mysql/conf.d:ro
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=msmysql
+    command: mysqld --lower_case_table_names=1 --skip-mysqlx --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysql -e "SHOW DATABASES;" && sleep 5
+      interval: 5s
+      timeout: 10s
+      retries: 10
+  
+  jhipster-registry:
+    image: jhipster-registry-placeholder
+    volumes:
+      - ./central-server-config:/central-config
+    # By default the JHipster Registry runs with the "dev" and "native"
+    # Spring profiles.
+    # "native" profile means the filesystem is used to store data, see
+    # https://docs.spring.io/spring-cloud-config/docs/current/reference/html/
+    environment:
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_SECURITY_USER_PASSWORD=admin
+      - JHIPSTER_REGISTRY_PASSWORD=admin
+      - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_TYPE=native
+      - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_SEARCH_LOCATIONS=file:./central-config
+      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_TYPE=git
+      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_URI=https://github.com/jhipster/jhipster-registry/
+      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_SEARCH_PATHS=central-config
+    ports:
+      - 8761:8761
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/management/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 ",
     "stateCleared": "modified",
   },
@@ -2330,25 +2383,6 @@ receivers:
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-management:
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -2363,6 +2397,8 @@ management:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
     ports:
       - 8080:8080
     healthcheck:
@@ -2403,6 +2439,8 @@ management:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
     healthcheck:
       test:
         - CMD-SHELL
@@ -2436,14 +2474,6 @@ management:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 
   prometheus:
     image: prometheus-placeholder
@@ -2610,20 +2640,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -2638,6 +2654,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -2678,6 +2695,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -2711,14 +2729,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -2896,20 +2906,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   msmysql:
@@ -2924,6 +2920,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -2957,14 +2954,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -3024,20 +3013,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   jhgate:
@@ -3052,6 +3027,7 @@ jhipster:
       - SPRING_R2DBC_USERNAME=root
       - SPRING_R2DBC_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://jhgate-mysql:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     ports:
       - 8080:8080
     healthcheck:
@@ -3087,14 +3063,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },
@@ -3154,20 +3122,6 @@ Launch all your infrastructure by running: \`docker compose up -d\`.
 ",
     "stateCleared": "modified",
   },
-  "docker-compose/central-server-config/application.yml": {
-    "contents": "#common configuration shared between all applications
-configserver:
-  name: Service Registry
-  status: Connected to Consul running in Docker
-
-jhipster:
-  security:
-    authentication:
-      jwt:
-        base64-secret: SECRET--50
-",
-    "stateCleared": "modified",
-  },
   "docker-compose/docker-compose.yml": {
     "contents": "services:
   msmysql:
@@ -3182,6 +3136,7 @@ jhipster:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:mysql://msmysql-mysql:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=SECRET--50
     healthcheck:
       test:
         - CMD-SHELL
@@ -3215,14 +3170,6 @@ jhipster:
       - 8500:8500
       - 8600:8600
     command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
-  consul-config-loader:
-    image: consul-config-loader-placeholder
-    volumes:
-      - ./central-server-config:/config
-    environment:
-      - INIT_SLEEP_SECONDS=5
-      - CONSUL_URL=consul
-      - CONSUL_PORT=8500
 ",
     "stateCleared": "modified",
   },

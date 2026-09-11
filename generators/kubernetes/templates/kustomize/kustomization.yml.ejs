@@ -30,7 +30,7 @@ resources:
 - <%- appOut %>/<%- appName %>-ingress.yml
     <%_ } _%>
   <%_ } _%>
-  <%_ if (!appConfig.serviceDiscoveryAny && appConfig.authenticationTypeJwt) { _%>
+  <%_ if (!appConfig.serviceDiscoveryEureka && appConfig.authenticationTypeJwt) { _%>
 - <%- appOut %>/jwt-secret.yml
   <%_ } _%>
   <%_ if (monitoringPrometheus) { _%>
@@ -75,8 +75,6 @@ resources:
 <%_ } else if (serviceDiscoveryConsul) { _%>
   <%_ const registryOut = 'registry'.concat('-', suffix); _%>
 - <%- registryOut %>/consul.yml
-- <%- registryOut %>/consul-config-loader.yml
-- <%- registryOut %>/application-configmap.yml
 <%_ } _%>
 <%_ if (istio) { _%>
   <%_ const istioOut = 'istio'.concat('-', suffix); _%>

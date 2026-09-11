@@ -512,64 +512,6 @@ dependencies:
 ",
     "stateCleared": "modified",
   },
-  "helm/csvc-helm/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
-",
-    "stateCleared": "modified",
-  },
   "helm/csvc-helm/templates/consul.yml": {
     "contents": "# Consul HA cluster
 #
@@ -946,6 +888,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -1116,6 +1063,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
         - name: SPRING_DATASOURCE_USERNAME
@@ -1381,64 +1333,6 @@ dependencies:
   },
   "helm/csvc-helm/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -1813,6 +1707,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -2042,64 +1941,6 @@ dependencies:
   },
   "helm/csvc-helm/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -2479,6 +2320,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -2652,6 +2498,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -2839,64 +2690,6 @@ dependencies:
   },
   "helm/csvc-helm/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -3417,6 +3210,11 @@ spec:
           value: jhgate
         - name: SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME
           value: jhgate
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -3780,64 +3578,6 @@ dependencies:
   },
   "helm/csvc-helm/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: default
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.default.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -4232,6 +3972,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.default.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -4405,6 +4150,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mariadb://msmariadb-mariadb.default.svc.cluster.local:3306/msmariadb?useLegacyDatetimeCode=false
         - name: SPRING_LIQUIBASE_URL
@@ -4579,6 +4329,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_MONGODB_URI
           value: "mongodb://msmongodb-mongodb-0.msmongodb-mongodb.default:27017/msmongodb"
         - name: MANAGEMENT_TRACING_BAGGAGE_REMOTE_FIELDS
@@ -4744,6 +4499,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.default.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -4914,6 +4674,11 @@ spec:
           value: consul-headless.default.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:postgresql://mspsql-postgresql.default.svc.cluster.local:5432/mspsql
         - name: SPRING_DATASOURCE_USERNAME
@@ -5600,64 +5365,6 @@ prometheus/grafana customisation
 {{- define "grafana.fullname" -}}
 {{- default "jhipster-grafana" -}}
 {{- end -}}
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: mynamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: mynamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.mynamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -8328,6 +8035,11 @@ spec:
           value: consul-headless.mynamespace.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.mynamespace.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -8526,64 +8238,6 @@ dependencies:
   },
   "helm/csvc-helm/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: mynamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: mynamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.mynamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -8959,6 +8613,11 @@ spec:
           value: consul-headless.mynamespace.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://msmysql-mysql.mynamespace.svc.cluster.local:3306/msmysql?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL
@@ -9154,64 +8813,6 @@ dependencies:
   },
   "helm/csvc-helm/templates/_helpers.tpl": {
     "contents": "{{/* vim: set filetype=mustache: */}}
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/application-configmap.yml": {
-    "contents": "apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-config
-  namespace: jhipsternamespace
-#common configuration shared between all applications
-data:
-  application.yml: |-
-    configserver:
-      name: Consul
-      status: Connected to Consul running in Kubernetes
-    jhipster:
-      security:
-        authentication:
-          jwt:
-            base64-secret: SECRET--50
-  # app specific configuration
-",
-    "stateCleared": "modified",
-  },
-  "helm/csvc-helm/templates/consul-config-loader.yml": {
-    "contents": "apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: consul-config-loader
-  namespace: jhipsternamespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: consul-config-loader
-  template:
-    metadata:
-      labels:
-        app: consul-config-loader
-    spec:
-      containers:
-      - name: consul-config-loader
-        image: consul-config-loader-placeholder
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: INIT_SLEEP_SECONDS
-          value: "5"
-        - name: CONSUL_URL
-          value: consul-headless.jhipsternamespace.svc.cluster.local
-        - name: CONSUL_PORT
-          value: "8500"
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-      volumes:
-      - name: config-volume
-        configMap:
-          name: application-config
 ",
     "stateCleared": "modified",
   },
@@ -9587,6 +9188,11 @@ spec:
           value: consul-headless.jhipsternamespace.svc.cluster.local
         - name: SPRING_CLOUD_CONSUL_PORT
           value: "8500"
+        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://jhgate-mysql.jhipsternamespace.svc.cluster.local:3306/jhgate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
         - name: SPRING_LIQUIBASE_URL

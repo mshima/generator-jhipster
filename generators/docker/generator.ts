@@ -241,10 +241,7 @@ export default class DockerGenerator extends BaseApplicationGenerator<Applicatio
           source.addDockerDependencyToApplication!({ serviceName: 'jhipster-registry', condition: SERVICE_HEALTHY });
         }
         if (application.dockerServices.includes('consul')) {
-          source.addDockerExtendedServiceToApplicationAndServices!(
-            { serviceName: 'consul' },
-            { serviceFile: './consul.yml', serviceName: 'consul-config-loader' },
-          );
+          source.addDockerExtendedServiceToApplicationAndServices!({ serviceName: 'consul' });
         }
         if (application.dockerServices.includes('kafka')) {
           source.addDockerExtendedServiceToApplicationAndServices!({ serviceName: 'kafka' });

@@ -41,7 +41,7 @@ import cleanupOldFilesTask from './cleanup.ts';
 import { writeFiles } from './files.ts';
 
 const { PROMETHEUS } = monitoringTypes;
-const { EUREKA, NO: NO_SERVICE_DISCOVERY } = serviceDiscoveryTypes;
+const { CONSUL, EUREKA, NO: NO_SERVICE_DISCOVERY } = serviceDiscoveryTypes;
 
 export default class DockerComposeGenerator extends BaseWorkspacesGenerator {
   async beforeQueue() {
@@ -235,6 +235,17 @@ export default class DockerComposeGenerator extends BaseWorkspacesGenerator {
           if (deployment.serviceDiscoveryType === EUREKA) {
             // Set the JHipster Registry password
             yamlConfig.environment.push(`JHIPSTER_REGISTRY_PASSWORD=${deployment.adminPassword}`);
+          }
+
+          if (deployment.serviceDiscoveryType === CONSUL) {
+            // Consul only provides discovery: the settings the JHipster Registry would serve from
+            // central-server-config are passed to each application directly.
+            if (appConfig.authenticationTypeJwt) {
+              yamlConfig.environment.push(`JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${deployment.jwtSecretKey}`);
+            }
+            if (deployment.monitoring === PROMETHEUS) {
+              yamlConfig.environment.push('MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true');
+            }
           }
 
           const hasNoServiceDiscovery = !deployment.serviceDiscoveryType && deployment.serviceDiscoveryType !== NO_SERVICE_DISCOVERY;

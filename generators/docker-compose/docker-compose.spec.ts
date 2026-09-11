@@ -31,7 +31,8 @@ const { PROMETHEUS } = monitoringTypes;
 const NO_MONITORING = monitoringTypes.NO;
 
 const expectedFiles = {
-  dockercompose: ['docker-compose/docker-compose.yml', 'docker-compose/central-server-config/application.yml'],
+  dockercompose: ['docker-compose/docker-compose.yml'],
+  registry: ['docker-compose/central-server-config/application.yml'],
   prometheus: [
     'docker-compose/prometheus-conf/alert_rules.yml',
     'docker-compose/prometheus-conf/prometheus.yml',
@@ -188,6 +189,11 @@ describe('generator - Docker Compose', () => {
     it('creates consul content', () => {
       runResult.assertFileContent('docker-compose/docker-compose.yml', /SPRING_CLOUD_CONSUL_HOST=consul/);
     });
+    it('passes the shared jwt secret to the applications instead of loading it into consul', () => {
+      runResult.assertFileContent('docker-compose/docker-compose.yml', /JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=/);
+      runResult.assertNoFileContent('docker-compose/docker-compose.yml', /consul-config-loader/);
+      runResult.assertNoFile(expectedFiles.registry);
+    });
     it('no prometheus files', () => {
       runResult.assertNoFile(expectedFiles.prometheus);
     });
@@ -198,6 +204,34 @@ describe('generator - Docker Compose', () => {
     });
   });
 
+  describe('gateway and one microservice, with eureka', () => {
+    const chosenApps = ['01-gateway', '02-mysql'];
+    before(async () => {
+      await helpers
+        .generateDeploymentWorkspaces({ serviceDiscoveryType: 'eureka' })
+        .withWorkspacesSamples(...chosenApps)
+        .withGenerateWorkspaceApplications();
+
+      await helpers.runJHipsterDeployment(GENERATOR_DOCKER_COMPOSE).withAnswers({
+        deploymentApplicationType: APPLICATION_TYPE_MICROSERVICE,
+        directoryPath: '../',
+        appsFolders: chosenApps,
+        clusteredDbApps: [],
+      });
+    });
+    it('should match files snapshot', function () {
+      expect(runResult.getSnapshot()).toMatchSnapshot();
+    });
+    it('creates expected default files', () => {
+      runResult.assertFile(expectedFiles.dockercompose);
+      runResult.assertFile(expectedFiles.registry);
+    });
+    it('creates eureka content', () => {
+      runResult.assertFileContent('docker-compose/docker-compose.yml', /jhipster-registry:/);
+      runResult.assertFileContent('docker-compose/docker-compose.yml', /JHIPSTER_REGISTRY_PASSWORD=/);
+      runResult.assertNoFileContent('docker-compose/docker-compose.yml', /JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=/);
+    });
+  });
   describe('gateway and one microservice, with curator', () => {
     const chosenApps = ['01-gateway', '02-mysql'];
     before(async () => {
@@ -259,6 +293,7 @@ describe('generator - Docker Compose', () => {
     });
     it('creates consul content', () => {
       runResult.assertFileContent('docker-compose/docker-compose.yml', /SPRING_CLOUD_CONSUL_HOST=consul/);
+      runResult.assertFileContent('docker-compose/docker-compose.yml', /MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true/);
     });
     it('creates compose file without container_name, external_links, links', () => {
       runResult.assertNoFileContent('docker-compose/docker-compose.yml', /container_name:/);
