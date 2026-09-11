@@ -25,7 +25,9 @@ blueprint referenced from them.
 **Blueprints are executable code.** The `blueprints` and `generators` entries name npm packages. During generation those packages are
 resolved, possibly installed, and then **executed** in the generation process — before a single generated file has been reviewed. Their npm
 lifecycle scripts (`preinstall`, `install`, `postinstall`) run as well. This is the highest-impact property of the file, and validating the
-other properties does not compensate for it.
+other properties does not compensate for it. Installing a package that is not already present prompts for confirmation, but a blueprint that is
+already resolvable in the environment (globally installed, in `node_modules`, or on a lookup path) is composed and executed with no prompt — so
+a pre-installed blueprint is enough. JDL is equivalent: an application block can declare `blueprints`, which end up in `.yo-rc.json`.
 
 **Free-text values are embedded in generated files.** Values such as `baseName`, `packageName`, `jhipsterVersion`, `clientPackageManager`,
 entity and field names, or validation patterns are interpolated into templates that produce Java sources, `pom.xml` / `build.gradle`,
@@ -37,7 +39,8 @@ starts the generated project, which is exactly what happens next.
 **Path-like values can write outside the project.** Anything that participates in a file path — custom folders, entity file names, `--dest`,
 and any value a blueprint passes to `destinationPath()` — can contain `..` segments or an absolute path. Targets such as `~/.zshrc`,
 `~/.ssh/authorized_keys`, `~/.gitconfig` or `.git/hooks/*` turn a file write into code execution; a git hook needs no build step at all, it
-runs on the next commit or checkout.
+runs on the next commit or checkout. Creating a new file at such a path is never prompted, and a run using `--force` (as automated and hosted
+runs do) overwrites an existing file at that path without prompting either.
 
 **URLs and coordinates redirect the supply chain.** Registry URLs, repository URLs, service discovery endpoints and dependency versions coming
 from the configuration decide where the generated project fetches artifacts from and what it fetches. A modified value can point the generated
@@ -72,10 +75,11 @@ and the same holds for Maven and Gradle builds. `.yo-rc.json` belongs to that sa
 
 - Run generation in an ephemeral, network-restricted container, and treat the checkout as untrusted input: never generate into a directory
   shared with credentials, caches or other jobs.
-- Keep generation non-interactive **and** restricted. When no human can answer a trust prompt, the safe default is untrusted, not "assume
-  yes".
-- Where the configuration is assembled from user input — a hosted generation service, for instance — accept only a fixed allow-list of options
-  and values. Never forward arbitrary configuration objects, path-like values or blueprint names to the generator.
+- A non-interactive run in an untrusted directory is refused, since no human can answer the trust prompt. A hosted service must therefore rely
+  on the technical boundaries below rather than on trusting the input: run with `--export-application` so nothing is committed to the host
+  filesystem, and with `--disable-blueprints` so no blueprint is resolved or executed.
+- Keep any remaining validation to your own application-level policy (which git provider, repository name, and so on). Do not forward the raw
+  request body to the generator as `.yo-rc.json`.
 
 ### What the generator does on its side
 
@@ -85,9 +89,11 @@ documented before they are implemented. -->
 These are hardening measures, not a replacement for the trust decision described above:
 
 - File writes are constrained to descendants of the destination root, so a configured path cannot escape the project directory.
-- Generation in a directory that is not on the trusted-paths list asks for explicit confirmation before the configuration is applied;
-  non-interactive runs default to the restricted behaviour.
-- Values interpolated into structured outputs are escaped for their target format.
+- Generation in a directory that is not on the trusted-paths list is refused unless the user confirms they trust the source; a non-interactive
+  run is refused outright. In both cases the message points here for the reasoning.
+- `--export-application` generates into an in-memory store and serializes the result without committing to the host filesystem, so a
+  server-side consumer never writes attacker-controlled paths onto its own disk.
+- `--disable-blueprints` prevents blueprints from being resolved, installed or executed.
 
 None of this makes an untrusted `.yo-rc.json` safe to run, because blueprints are by design executable extensions. The trust decision is the
 actual security boundary.
