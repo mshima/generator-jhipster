@@ -648,17 +648,19 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
 ## JDL lexer: keywords versus identifiers
 
 - The JDL lexer (`lib/jdl/core/parsing/lexer/`) is a chevrotain lexer. `token-creator.ts` turns every string
-  pattern that looks like an identifier into a keyword token with `longer_alt = NAME`, and `lexer.ts` places `NAME`
-  last. That handles `applicationType` versus `application` only when the longer keyword is tried first: when a
-  keyword that is a prefix of another keyword (`microfrontend` / `microfrontends`, `reactive` / a blueprint's
-  `reactiveFoo`) comes first in the token list, chevrotain matches the prefix, `NAME` then matches the whole word as
-  the longer alternative and the longer keyword is never tried, so the JDL fails to parse with an unexpected `NAME`.
-  Blueprint tokens (`tokenConfigs` in `buildJDLApplicationConfig`, `lib/jdl-config/jhipster-jdl-config.ts`) are
-  appended after the built-in ones, so a blueprint option whose name extends a built-in option name hit this
-  regardless of how the blueprint ordered its options.
-- `createJDLLexer` now runs `sortKeywordsLongestFirst` over the token list before building the lexer, so the
-  declaration order in `application-tokens.ts`, `deployment-tokens.ts`, `option-tokens.ts` and blueprint configs no
-  longer matters. Regression tests live in `lexer.spec.ts`; reproduce a suspected case by creating a runtime with
+  pattern that looks like an identifier into a keyword token whose regex only matches a whole word (a trailing
+  `(?![a-zA-Z_\-\d])` lookahead), so `entity` never matches the start of `entityName` and `microfrontend` never
+  matches the start of `microfrontends`; the plain `NAME` token, placed last in `lexer.ts`, picks up whatever no
+  keyword matched. Before that the creator relied on chevrotain's `longer_alt = NAME` instead, which only works when
+  a keyword is tried before every keyword it is a prefix of: otherwise the prefix matched, `NAME` won as the longer
+  alternative and the longer keyword was never tried, so the JDL failed with an unexpected `NAME`. Blueprint tokens
+  (`tokenConfigs` in `buildJDLApplicationConfig`, `lib/jdl-config/jhipster-jdl-config.ts`) are appended after the
+  built-in ones, so any blueprint option whose name extended a built-in option name hit that regardless of order.
+- `createTokenFromConfig` must not mutate the config it receives: the token configs of the default JDL application
+  config are shared by every runtime created from it (each importer test creates one), and a transform that is not
+  idempotent (replacing the string pattern by a regex) broke the second runtime, which then failed the
+  `Unused token definitions found` self-check because the reused tokens had lost their `KEYWORD` category.
+- Regression tests live in `lexer.spec.ts`; reproduce a suspected case by creating a runtime with
   `createRuntime({ tokenConfigs: [...], validatorConfig: { <TOKEN_NAME>: { type: 'BOOLEAN' } }, ... })` and calling
   `runtime.lexer.tokenize('<word>')`. The self-check in `parsing-system-checker.ts` requires the `validatorConfig` key to
   be the token name, in upper snake case, and rejects both missing and extra keys.
