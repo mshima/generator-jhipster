@@ -645,6 +645,24 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   the REST resource and the `jakarta.validation` import on the domain class. The entity ITs use `image/jpg`/`image/png`,
   Liquibase fake data `image/png` and Cypress `'unknown'`, all of which pass the deny list.
 
+## JDL lexer: keywords versus identifiers
+
+- The JDL lexer (`lib/jdl/core/parsing/lexer/`) is a chevrotain lexer. `token-creator.ts` turns every string
+  pattern that looks like an identifier into a keyword token with `longer_alt = NAME`, and `lexer.ts` places `NAME`
+  last. That handles `applicationType` versus `application` only when the longer keyword is tried first: when a
+  keyword that is a prefix of another keyword (`microfrontend` / `microfrontends`, `reactive` / a blueprint's
+  `reactiveFoo`) comes first in the token list, chevrotain matches the prefix, `NAME` then matches the whole word as
+  the longer alternative and the longer keyword is never tried, so the JDL fails to parse with an unexpected `NAME`.
+  Blueprint tokens (`tokenConfigs` in `buildJDLApplicationConfig`, `lib/jdl-config/jhipster-jdl-config.ts`) are
+  appended after the built-in ones, so a blueprint option whose name extends a built-in option name hit this
+  regardless of how the blueprint ordered its options.
+- `createJDLLexer` now runs `sortKeywordsLongestFirst` over the token list before building the lexer, so the
+  declaration order in `application-tokens.ts`, `deployment-tokens.ts`, `option-tokens.ts` and blueprint configs no
+  longer matters. Regression tests live in `lexer.spec.ts`; reproduce a suspected case by creating a runtime with
+  `createRuntime({ tokenConfigs: [...], validatorConfig: { <TOKEN_NAME>: { type: 'BOOLEAN' } }, ... })` and calling
+  `runtime.lexer.tokenize('<word>')`. The self-check in `parsing-system-checker.ts` requires the `validatorConfig` key to
+  be the token name, in upper snake case, and rejects both missing and extra keys.
+
 ## Server-side user caches
 
 - Cache names: `usersByLogin` / `usersByEmail` (constants on `UserRepository`).
