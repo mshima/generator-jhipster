@@ -19,6 +19,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { existsSync } from 'node:fs';
+
 import chalk from 'chalk';
 
 import JSONToJDLEntityConverter from '../../lib/jdl/converters/json-to-jdl-entity-converter.ts';
@@ -86,6 +88,37 @@ export default class InfoGenerator extends BaseCoreGenerator<
             }
           }
         }
+      },
+
+      displayExecutableEntryPoints() {
+        // Report the trust-sensitive entry points present in this directory: files that JHipster imports and
+        // executes when it is invoked here, and which do not appear as regular configuration. See SECURITY.md.
+        console.log('\n##### **Executable entry points in this directory**\n');
+
+        const blueprints = (this.jhipsterConfig as { blueprints?: { name: string; version?: string }[] }).blueprints ?? [];
+        if (blueprints.length > 0) {
+          console.log('Declared blueprints (npm packages resolved and executed during generation):');
+          for (const blueprint of blueprints) {
+            console.log(`- \`${blueprint.name}${blueprint.version ? `@${blueprint.version}` : ''}\``);
+          }
+        } else {
+          console.log('- Declared blueprints: none');
+        }
+
+        const localBlueprint = existsSync(this.destinationPath('.blueprint'));
+        console.log(
+          `- Local \`.blueprint/\` directory (composed and executed automatically, without being declared): ${
+            localBlueprint ? '**present**' : 'none'
+          }`,
+        );
+
+        const sharedOptions = ['js', 'cjs', 'mjs']
+          .map(extension => `${JHIPSTER_CONFIG_DIR}/sharedOptions.${extension}`)
+          .find(file => existsSync(this.destinationPath(file)));
+        console.log(
+          `- \`${JHIPSTER_CONFIG_DIR}/sharedOptions.*\` (imported and executed): ${sharedOptions ? `**${sharedOptions}**` : 'none'}`,
+        );
+        console.log();
       },
 
       async checkJava() {
