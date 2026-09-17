@@ -675,6 +675,39 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   with a stale user, and later creations fail with `login-already-used` / `email-already-used` even though the
   database row is gone.
 
+## CLI: the three kinds of blueprint and what disables them
+
+- `cli/environment-builder.ts` `prepare()` registers blueprint code from three distinct sources, and they are gated
+  differently:
+  - **Declared** — `blueprints` in `.yo-rc.json` or `--blueprints`; resolved and installed as npm packages by
+    `_loadBlueprints` / `_lookupBlueprints`.
+  - **Local** — a `.blueprint/` directory in `process.cwd()`, registered by `_lookupLocalBlueprint` under
+    `@jhipster/jhipster-local` and composed automatically (`sharedOptions.composeWithLocalBlueprint`) without being
+    declared anywhere. It is project code that executes on a `jhipster` invocation in that directory.
+  - **Dev** — the generator package's own `.blueprint/`, enabled only when `JHIPSTER_DEV_BLUEPRINT=true`, registered
+    under `@jhipster/jhipster-dev`.
+- `--disable-blueprints` gates the first two only: `_loadBlueprints` short-circuits to `{}` before any lookup or
+  install, and `localBlueprintExists` becomes `false`. **The dev blueprint is deliberately left enabled** — it is the
+  generator's own code rather than the project's, and CI depends on it (`generate-sample`, `github-build-matrix`). Do
+  not "fix" that asymmetry, and do not write comments claiming dev blueprints are disabled.
+- Local coverage arrived in #35008. Before it the flag stopped only declared blueprints, so it was useless as CI
+  hardening: a `.blueprint/` in the checkout still executed.
+- `localBlueprintExists` also requires `localBlueprintPath !== devBlueprintPath`, so the dev runner inside the
+  generator repo treats its own `.blueprint/` as the dev one, never as a local one.
+- The flag is read straight from `process.argv` rather than from parsed options, because the environment has to be
+  built up front: blueprint-provided commands must be registered before commander parses.
+
+### Reproducing blueprint behaviour: use the right entry point
+
+- `bin/jhipster.cjs` is the JIT dev runner and **sets `JHIPSTER_DEV_BLUEPRINT=true`**; `cli/jhipster.cjs` is the entry
+  real users get. Anything investigated about local or dev blueprints through `bin/jhipster.cjs` shows dev-blueprint
+  behaviour and silently misleads. Use `env -u JHIPSTER_DEV_BLUEPRINT node cli/jhipster.cjs`.
+- Local and dev generators are looked up with `['.', './*/generators']`, so the shape that actually registers is
+  `.blueprint/<name>/index.mjs`; `.blueprint/generators/<name>/` does not register.
+- A blueprint's extra CLI commands come from `<packagePath>/cli/commands.{js,cjs,mjs,ts,cts,mts}`, but
+  `getBlueprintCommands()` adds the **local** blueprint's command file only when `devBlueprintPath` is set — so that
+  route is dev-only, while `.blueprint/<name>/index.mjs` executes for real users too.
+
 ## Testing and samples
 
 - `lib/testing/helpers.ts`: the `jhipster` preset injects `skipChecks`, `reproducibleTests`, `skipInstall`,
@@ -792,6 +825,7 @@ MaybeLocal` in `node::cjs_lexer::Parse` of the spawned CLI under a full parallel
   `git cherry -v upstream/main "$b"` then confirms per commit: a leading `-` means the patch already exists upstream,
   `+` means it does not. Never judge by `git diff upstream/main "$b"` — an old branch shows tens of thousands of
   changed lines purely because it is behind, which says nothing about whether its own change landed.
+
 - Quick before/after baseline from a JDL with the JIT CLI: `bin/jhipster.cjs jdl ../sample.jdl --skip-install
 --skip-git --skip-jhipster-dependencies --force --skip-checks --no-workspaces` run inside an empty scratch
   directory. Pass the JDL as a relative path and use the `--no-<flag>` form for booleans: an absolute path or
@@ -880,7 +914,7 @@ The Cypress generator (`generators/cypress`) is the reference to mirror spec by 
   `getEntityDetailsHeading`, `getEntityDeleteDialogHeading`, `setFieldImageAsBytesOfEntity`,
   `setFieldSelectToLastOfEntity`, `authenticatedRequest`, `login`, `credentials`, `getOauth2Data`, `oauthLogin`,
   `keycloakLogin`, `auth0Login`, `oktaLogin`, `oauthLogout`, `getManagementInfo`, `clickOn{Login,Logout,Register,
-  Settings,Password,AdminMenu,EntityMenu}Item`.
+Settings,Password,AdminMenu,EntityMenu}Item`.
 - Entity spec template (`e2e/entity/_entity_.cy.ts.ejs`): creates required related entities through the API in
   `beforeEach`, intercepts the entity API calls, tests list, detail, edit, delete and create; the create test is
   skipped (`it.skip` with a reason) when required relationships cannot be bootstrapped, and types every field that
