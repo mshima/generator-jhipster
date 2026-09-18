@@ -7,6 +7,28 @@ source tree when written; when in doubt, re-verify — file paths are the anchor
 [user caches](#server-side-user-caches), [testing and samples](#testing-and-samples),
 [debugging CI](#debugging-ci-failures).
 
+## Pluralizing names: entities force a distinct plural, relationships do not
+
+`pluralize(name, { force })` (`lib/utils/string-utils.ts`) only differs from the raw library when
+`pluralize(name) === name` — a name that is already plural or has no distinct plural (`jobs`, `UserData`,
+`series`). `force: true` then appends `s`/`es` to make the plural differ from the singular.
+
+The two kinds of name need opposite settings, and conflating them breaks generation:
+
+- **Entity names force it** (`entityNamePlural`, `entityAngularNamePlural`). The angular service is emitted as
+  `class ${entityAngularNamePlural}Service` with `class ${entityAngularName}Service extends` it, so if the plural
+  equalled the singular the file would read `UserDataService extends UserDataService`, which does not compile.
+  `UserData` (an entity in the `blog-store` e2e samples) must become `UserDatas`.
+- **Relationship names must not force it** (`relationshipFieldNamePlural`, `relationshipNamePlural`,
+  `relationshipNameCapitalizedPlural`). The name reaches the generated entity — which is also the Elasticsearch
+  document — so forcing turned a relationship named `jobs` into `jobses` and invalidated existing indexes
+  (#33986). A relationship plural equal to its singular is correct.
+
+So a change that removes `force` to fix the relationship case must leave the entity plurals forcing. The e2e
+`UserData` entity is what catches an over-broad removal; a fast guard lives in `base-application/entity.spec.ts`,
+asserting `mutateEntity.entityNamePlural('UserData') === 'UserDatas'` and `mutateRelationship`'s plural of `jobs`
+stays `jobs`.
+
 ## Templates and generator conventions
 
 - Refactoring rule: generated code must stay byte-identical unless a real output bug is being fixed.
