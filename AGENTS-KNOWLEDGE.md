@@ -708,6 +708,56 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   `getBlueprintCommands()` adds the **local** blueprint's command file only when `devBlueprintPath` is set — so that
   route is dev-only, while `.blueprint/<name>/index.mjs` executes for real users too.
 
+## Where a helper module goes: `support/` versus `internal/`
+
+- `package.json` `exports` publishes `./generators/*/support` and `./generators/*/generators/*/support` as real entry
+  points, mapped to `dist/generators/*/support/index.js`. Anything under a generator's `support/` is API a blueprint
+  may import, so renaming or deleting it is a breaking change.
+- `internal/` has no such entry. Helpers backing a prompt, a task or a template belong there, leaving the project free
+  to change them. `base`, `base-application`, `base-core`, `bootstrap`, `jdl`, `liquibase`, `base-workspaces`,
+  `project-name` and `generate-blueprint` already have one, so creating it for a generator that lacks it is normal.
+
+## Command-declared prompts
+
+- A question is declared as a `prompt` entry on a config in the generator's `command.ts`, not as a task group in a
+  `prompts.ts`. `#prepareQuestions` (`generators/base-core/generator.ts`) builds the inquirer question as
+  `{ name, choices: def.choices, ...promptSpec, storage }` — the prompt spec is spread _after_ `choices`, so a
+  `choices` declared inside `prompt` overrides the static config-level one. That is how a prompt offers options
+  computed or fetched at prompt time; `PromptSpec.choices` accepts a function and may be asynchronous.
+- When the spec omits `default`, the machinery supplies `() => jhipsterConfigWithDefaults[name]`, so repeating the
+  stored value as a default is unnecessary.
+- Do not hand-write an "existing project / askAnswered" guard. yeoman-generator's `prompt()` sets
+  `question.askAnswered = this.options.askAnswered === true`, and a storage-backed question is skipped when the value
+  is already configured.
+- **Question order is the config declaration order**, and it is pinned: the app generator's `should match order`
+  inline snapshot lists every prompt in sequence. Adding a prompt or moving a config changes that snapshot — so when
+  a refactor is meant to be behaviour-neutral, place the config to preserve the order and let the untouched snapshot
+  prove it.
+
+### Testing prompts
+
+- `withJHipsterConfig(...)` makes the run an _existing project_, which suppresses prompting. A probe asserting that a
+  prompt persists a value must start from a fresh project — `helpers.runJHipster('app').withAnswers({...})`, as
+  `generators/client/prompts.spec.ts` does. Otherwise it fails for a reason unrelated to the code under test; confirm
+  any failing probe against unmodified `main` before concluding the change broke something.
+- An unanswered question only logs `question <name> was asked but answer was not provided`; nothing fails. So "this
+  prompt must not be shown" cannot be asserted by omitting the answer — supply the answer and assert it was _not_
+  persisted, or the test passes whatever the `when` returns. Verify such a test by mutating the condition and
+  confirming it then fails.
+- What the snapshots do and do not protect: they record file _state_, not contents. The Angular spec is the only
+  client generator with content entries — 21 of them against 1862 `stateCleared` entries, all from one narrow
+  `runResult.getSnapshot('**/entities/admin/user-management/**')` covering the built-in `UserManagement` entity;
+  React and Vue have 1026 and 1151 state entries and zero contents. A change inside a template therefore leaves no
+  snapshot diff, and behaviour-level coverage only spans the configurations CI actually runs — which is why a bug
+  that appears solely under a non-root base path is invisible to both.
+
+## Type checking
+
+- Use `npm run check-types`: `node --max-old-space-size=4096 tsc -p tsconfig.spec.json`. Running
+  `npx tsc --noEmit -p tsconfig.json` directly exhausts the default heap and dies with
+  `Ineffective mark-compacts near heap limit`, which reads like a repository problem but is only the missing flag and
+  the wrong project file.
+
 ## Testing and samples
 
 - `lib/testing/helpers.ts`: the `jhipster` preset injects `skipChecks`, `reproducibleTests`, `skipInstall`,
