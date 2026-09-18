@@ -808,6 +808,29 @@ publish the subpath, a consumer cannot deep-import it either, so its helpers can
 a compatibility shim. Check this at the level of the symbol, not the file: a module being imported somewhere
 does not make its exports public.
 
+## Generator priorities: the lists, and the partial order
+
+- There are three `PRIORITY_NAMES_LIST`s — `base-core`, `base-application` (which interleaves the entity
+  priorities), and `base-workspaces`. No single one holds every priority: the `base-application` list was
+  written by hand and dropped `postPreparing`, even though `postPreparing` is in its `PRIORITY_NAMES` map
+  (inherited from base-core) and nine generators implement it. The list is not decorative — `generate-blueprint`
+  offers it as the tasks a sub-generator can implement (`prioritiesForSub`), and `testBlueprintSupport`
+  (`test/support/tests.ts`) iterates it to assert every priority delegates to its blueprint. A priority missing
+  from the list is silently not offered and not delegation-tested.
+- **The priorities are only partially ordered.** In `priorities.ts` each entry declares a `before:`; the entity
+  chain and `postPreparing` both link `before: DEFAULT` with no edge between them, so their relative run order is
+  not defined by the graph. When adding a priority to a list, place it to match the order the generators declare
+  it in — `postPreparing` goes right after `preparing` (mirroring base-core), before the entity priorities,
+  because that is where all nine generators declare it.
+- This matters because of the `jhipster/task-group-order` lint rule, which derives its order from those lists by
+  treating two priorities as comparable only when a single list holds both. Adding a priority to a list creates a
+  total order against everything else in that list: put `postPreparing` after `postPreparingEachEntity` and the
+  rule flags every entity-priority getter as declared out of order, because the generators declare them after
+  `postPreparing`. The list position and the declaration order must agree.
+- When restoring a priority to the list exposes a generator whose delegating getter returned its task group
+  directly instead of `this.delegateTasksToBlueprint(() => this.<priority>)` — the client's `postPreparing` did
+  this — that is a real delegation bug the list was hiding, not a test artifact: fix the delegation.
+
 ## Testing and samples
 
 - `lib/testing/helpers.ts`: the `jhipster` preset injects `skipChecks`, `reproducibleTests`, `skipInstall`,
