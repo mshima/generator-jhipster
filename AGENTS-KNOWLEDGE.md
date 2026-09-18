@@ -784,6 +784,30 @@ the task group is gone: it is conditional on the generator having prompting task
   `Ineffective mark-compacts near heap limit`, which reads like a repository problem but is only the missing flag and
   the wrong project file.
 
+## A new entity or relationship property is reachable from JDL without touching the grammar
+
+- JDL annotations are assigned straight onto the object, so a property added to the entity or relationship
+  configuration is configurable as `@myProperty("value")` with no change to the parser. Entity annotations are
+  merged in `generators/base-application/generators/bootstrap/generator.ts` (`{ ...entity, ...entity.annotations }`);
+  field and relationship annotations are merged by `loadEntitiesAnnotations`
+  (`base-application/support/relationship.ts`), which does `Object.assign(relationship, relationship.options)`.
+- **The relationship side is inverted.** Options written on one side of a JDL relationship are applied to the
+  relationship held by the entity on the _opposite_ side: `setOptionsForRelationshipDestinationSide` consumes
+  `forEachSourceOption`, and vice versa. So `Task{jobs} to @x("v") Job{tasks}` configures `Task`'s `jobs`
+  relationship, not `Job`'s. Verify which side received it by reading the generated `.jhipster/<Entity>.json`
+  rather than assuming.
+- Entity-only JDL needs an application to import into: a spec driving the `jdl` generator with
+  `withOptions({ inline })` fails with "The JDL object and its application's name are mandatory" unless it also
+  calls `withJHipsterConfig()`.
+
+## `lib/utils/string-utils.ts` is not public API
+
+The `./utils` entry point resolves to `lib/utils/index.ts`, which re-exports `./string.ts` — not
+`./string-utils.ts` — and neither the `./jdl` barrel nor the root entry reaches it. Since `exports` does not
+publish the subpath, a consumer cannot deep-import it either, so its helpers can be changed or removed without
+a compatibility shim. Check this at the level of the symbol, not the file: a module being imported somewhere
+does not make its exports public.
+
 ## Testing and samples
 
 - `lib/testing/helpers.ts`: the `jhipster` preset injects `skipChecks`, `reproducibleTests`, `skipInstall`,
