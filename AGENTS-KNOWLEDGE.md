@@ -734,6 +734,32 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   a refactor is meant to be behaviour-neutral, place the config to preserve the order and let the untouched snapshot
   prove it.
 
+### Converting a `prompts.ts` into command-declared prompts
+
+Three assumptions that look obvious are wrong, and each one silently produces a generator that never asks
+anything:
+
+- **`shouldAskForPrompts` gates the whole command prompting task.** `BaseGenerator` overrides it as
+  `!control.existingProject || this.options.askAnswered === true`, so on an existing project the queued
+  `promptCurrentCommand` returns before asking a single question. A generator that must ask there —
+  `jhipster languages` being the clear case — has to override it with its own gate. This is the reason a
+  generator can still be carrying a hand-written `prompts.ts`: its questions were never eligible for the
+  command machinery.
+- **The command prompts run after the generator's own `prompting` task group**, not before. Anything that
+  reads what the user answered therefore belongs in `configuring`; a task in `prompting` still sees the
+  config untouched. Conversely any flag the prompts depend on must be computed in `initializing`.
+- **A storage-backed prompt is skipped when the config already holds a value**, and when it does run its
+  answer _replaces_ that value. A prompt whose old implementation called `this.prompt(questions)` without
+  passing a storage was neither of those things: it always asked, and the code merged the answer by hand.
+  Reproducing it needs `askAnswered` on the prompt plus an explicit merge of the previous value.
+
+Recovering what the prompts changed is done by capturing the relevant config in `initializing` and diffing
+in `configuring`, since a command prompt writes to storage and returns nothing to the generator.
+
+Expect the generic `should call prompting tasks if implemented` test to move from passing to pending once
+the task group is gone: it is conditional on the generator having prompting tasks. That is the one legitimate
+`passing -1 / pending +1` shift; any other change in the counts is a real regression.
+
 ### Testing prompts
 
 - `withJHipsterConfig(...)` makes the run an _existing project_, which suppresses prompting. A probe asserting that a
