@@ -775,6 +775,19 @@ anything:
   passing a storage was neither of those things: it always asked, and the code merged the answer by hand.
   Reproducing it needs `askAnswered` on the prompt plus an explicit merge of the previous value.
 
+The `cypress` prompts (`cypressCoverage`, Angular only, and `cypressAudit`) were a clean fit: storage-backed,
+new-project-only, nothing to do afterwards. Two details from that conversion:
+
+- A prompt that reads a config owned by another generator (`config.clientFramework` in the cypress command) fails
+  type-checking under the default `JHipsterCommandDefinition`, whose context is `BaseCoreGenerator`. Declare the
+  command `satisfies JHipsterCommandDefinition<any>`, as `client`, `server` and `spring-boot` do; importing the
+  generator type instead would be circular, because `types.d.ts` derives `Config` from the command.
+- Generators that are only composed for some answers (cypress needs `clientTestFrameworks: [cypress]`) do not show
+  up in the app `should match order` snapshots, so nothing covers their prompts. Add a `prompts.spec.ts` that
+  drives `app` with the enabling answers (see `generators/cypress/prompts.spec.ts`). For a conditional prompt,
+  answer it anyway and assert the value was **not** stored. Run the spec against the old code too (it should pass,
+  proving the conversion is behaviour-neutral), then break the `when` and confirm the spec fails.
+
 Recovering what the prompts changed is done by capturing the relevant config in `initializing` and diffing
 in `configuring`, since a command prompt writes to storage and returns nothing to the generator.
 
