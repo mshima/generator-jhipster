@@ -687,6 +687,49 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   `runtime.lexer.tokenize('<word>')`. The self-check in `parsing-system-checker.ts` requires the `validatorConfig` key to
   be the token name, in upper snake case, and rejects both missing and extra keys.
 
+## JDL application options: legacy built-ins versus command `jdl` specs
+
+- The set of application-level options the JDL grammar understands comes from two sources that are merged. The
+  legacy source is hand-maintained in three places: `jhipsterOptionTypes` (and `jhipsterQuotedOptionNames`) in
+  `lib/jhipster/application-options.ts`, which feed `builtInJDLApplicationConfig`; the hardcoded token list in
+  `lib/jdl/core/built-in-options/tokens/application-tokens.ts`; and `builtInConfigPropsValidations` in
+  `lib/jhipster/jdl-validator-definition.ts`. The modern source is each generator command's `jdl` spec (`type`,
+  `tokenType`, `tokenValuePattern`, plus the config's `choices`), which `buildJDLApplicationConfig`
+  (`lib/jdl-config/jhipster-jdl-config.ts`) turns into the same tokenConfigs/validatorConfig/optionsTypes/optionsValues.
+  `createRuntime(definition)` merges the passed definition on top of `builtInJDLApplicationConfig`;
+  `getDefaultRuntime`/`getDefaultJDLApplicationConfig` pass the aggregation of the app-composing commands (spring-boot,
+  bootstrap, base, client, java-simple-application, liquibase, gateway).
+- There is an ongoing migration to move each legacy option into its owning command's `jdl` spec and delete it from
+  the three legacy places, one generator at a time. `OptionNames` and `OptionValues` (`jhipsterOptionValues`) in
+  application-options.ts must stay — `default-application-options.ts` uses them to compute default config — so only
+  `jhipsterOptionTypes`, `jhipsterQuotedOptionNames` and the token/validator entries are JDL-only and safe to remove.
+  Find an option's owning command with `jhipster describe --config <name>`.
+- The one behaviour change to decide per option is validation strictness. `builtInJDLApplicationConfig` sets
+  `optionsValues: {}` ("Don't validate built-in options"), so a built-in option accepts ANY value in JDL. A
+  command-declared option gets `optionsValues` populated from its `choices`, so
+  `createApplicationConfigurationFromObject` (`jdl-application-configuration-factory.ts`) throws
+  "The value 'X' is not allowed for the option 'Y'" on out-of-list values. Moving an option that has `choices`
+  therefore flips it from lax to strict (e.g. `clientFramework svelte` becomes invalid, since the client command only
+  lists angular/react/vue/no). An option that must stay free-form (e.g. `clientTheme`, any Bootswatch name) is
+  declared with a `jdl` spec but NO `choices`, so its `optionsValues` stays empty and any value is accepted.
+- Spec type shapes: boolean is `{ type: 'boolean', tokenType: 'BOOLEAN' }`; a name with choices is
+  `{ type: 'string', tokenType: 'NAME', tokenValuePattern: ALPHANUMERIC_PATTERN }`; a list is
+  `{ type: 'list', tokenType: 'list', tokenValuePattern: ... }`. `ALPHANUMERIC_PATTERN` in `lib/constants/jdl.ts`
+  (the generator-facing constants) is byte-identical to the validator's `ALPHANUMERIC`; `ALPHANUMERIC_UNDERSCORE_PATTERN`
+  was added there for the `microfrontends` list.
+- Two guards keep the two systems in sync. `lib/jdl-config/jhipster-jdl-config.spec.ts` asserts the hardcoded
+  aggregation list equals the full command discovery (`lookupCommandsConfigs`), so a moved option in a command that is
+  not in the aggregation list would fail it. `lib/command/lookup-commands-configs.spec.ts` holds an inline snapshot of
+  the jdl-config names and runs a JDL round-trip per option; options with no enumerable choices (list, quotedList,
+  free NAME) must be added to its manual-skip list (currently `routes`, `clientTheme`, `microfrontends`) or it throws
+  `No choices found for <name>`.
+- Gotcha: several `lib/jdl` specs build a bare runtime via `createRuntime()` (built-in config only, no commands). If
+  such a spec references an option you moved out of the built-ins it stops recognising it (lexer/validator errors);
+  switch it to `createRuntime(getDefaultJDLApplicationConfig())`, which is what `lib/jdl/core/__test-support__/index.ts`
+  already does. The client slice had to update `lexer.spec.ts`, `validator.spec.ts`, `jdl-application.spec.ts` and
+  `jdl-exporter.spec.ts` this way, and a `clientThemeVariant` test that used the placeholder value `'aVariant'` had to
+  switch to a real variant (`primary`) once validation turned strict.
+
 ## Server-side user caches
 
 - Cache names: `usersByLogin` / `usersByEmail` (constants on `UserRepository`).
