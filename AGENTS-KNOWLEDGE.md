@@ -881,6 +881,13 @@ the task group is gone: it is conditional on the generator having prompting task
 
 ## Type checking
 
+- To work beside uncommitted changes in the main checkout, use a git worktree whose **folder is named
+  `generator-jhipster`** (e.g. `/Volumes/T7/git/wt-<topic>/generator-jhipster`). Yeoman derives the package
+  namespace from the folder name, so a worktree in `generator-jhipster-k8s` or `k8s` fails every test that runs a
+  generator with `You don't seem to have a generator with the name "generator-jhipster" installed`. It needs its
+  own `npm ci` (a symlinked `node_modules` resolves yeoman from the other checkout), and `test/api.spec.ts` needs
+  `npm run build` because it imports from `dist/`. `git worktree move` cannot cross volumes (the scratchpad is on
+  another device).
 - Use `npm run check-types`: `node --max-old-space-size=4096 tsc -p tsconfig.spec.json`. Running
   `npx tsc --noEmit -p tsconfig.json` directly exhausts the default heap and dies with
   `Ineffective mark-compacts near heap limit`, which reads like a repository problem but is only the missing flag and
