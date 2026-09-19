@@ -756,6 +756,26 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   a refactor is meant to be behaviour-neutral, place the config to preserve the order and let the untouched snapshot
   prove it.
 
+### Shared prompts in a `<ns>:common` generator
+
+- `ci-cd:common` and `kubernetes:common` hold the prompting shared by sibling generators. Each caller runs
+  `const common = await this.dependsOnJHipster('jhipster:<ns>:common')` in `beforeQueue` and configures the
+  returned instance (`common.ciCd.push('github')`, `common.target = 'helm'`). The common generator's task getters
+  are evaluated while it is being composed, before the caller's assignment, so a per-caller difference must be
+  checked **inside the task body** (`if (this.target === 'knative') return;`), never by building the task group
+  conditionally.
+- Adding a generator namespace updates `generators/types.d.ts` by hand and three namespace snapshots
+  (`generate-blueprint/internal/lookup-namespaces.spec.ts`, `generate-blueprint/__snapshots__`,
+  `lib/testing/__snapshots__/helpers.spec.ts.snap`); regenerate them and check the diff only adds the new name.
+- `testBlueprintSupport` fails its sbs case for workspaces generators: the sbs run executes the real
+  `kubernetes:bootstrap`, whose `setWorkspacesRoot` needs `directoryPath`. The kubernetes generators therefore use
+  `{ skipSbsBlueprint: true }` or only `shouldSupportFeatures`.
+- Before moving prompts, record the current order: an empty `toMatchInlineSnapshot()` on
+  `runResult.askedQuestions.map(({ name }) => name)` is only written with `env -u CI npx esmocha <spec>
+  --update-snapshot`. Run the deployment with `askAnswered: true` so storage-backed questions are not skipped.
+- To mutation-test a source file, copy it aside and copy it back. `git checkout -- <file>` restores `HEAD` and
+  silently discards the uncommitted change under test along with the mutation.
+
 ### Converting a `prompts.ts` into command-declared prompts
 
 Three assumptions that look obvious are wrong, and each one silently produces a generator that never asks
