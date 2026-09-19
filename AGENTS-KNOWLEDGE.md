@@ -728,7 +728,11 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   switch it to `createRuntime(getDefaultJDLApplicationConfig())`, which is what `lib/jdl/core/__test-support__/index.ts`
   already does. The client slice had to update `lexer.spec.ts`, `validator.spec.ts`, `jdl-application.spec.ts` and
   `jdl-exporter.spec.ts` this way, and a `clientThemeVariant` test that used the placeholder value `'aVariant'` had to
-  switch to a real variant (`primary`) once validation turned strict.
+  switch to a real variant (`primary`) once validation turned strict. The new
+  `import { getDefaultJDLApplicationConfig } from '.../jdl-config/jhipster-jdl-config.ts'` must be placed in
+  import-group order (before the sibling `../..` imports), because `npm test` (the `check-npm-test` CI job) runs
+  ESLint too and `import-x/order` will fail the build even when every spec passes — a scoped `esmocha <file>` run does
+  not catch it, so run `npx eslint --fix` on the touched specs before pushing.
 
 ## Server-side user caches
 
