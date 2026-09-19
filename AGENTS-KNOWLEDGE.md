@@ -733,6 +733,25 @@ flag dies in `jhipster:languages#updateLanguages` when translations are enabled)
   import-group order (before the sibling `../..` imports), because `npm test` (the `check-npm-test` CI job) runs
   ESLint too and `import-x/order` will fail the build even when every spec passes — a scoped `esmocha <file>` run does
   not catch it, so run `npx eslint --fix` on the touched specs before pushing.
+- Ownership when an option is declared in more than one command: the option's structural fields (`cli`, `choices`,
+  `scope`) live in a base command and a downstream command re-declares it by spreading that base to add a prompt —
+  e.g. `spring-boot`'s `databaseType` is `{ ...serverCommand.configs.databaseType, prompt }`, and its
+  `cacheProvider`/`enableHibernateCache` spread `...cacheCommand.configs.*`. Put the `jdl` spec on the BASE
+  declaration (`server`, `spring-boot:cache`): the spread carries it into `spring-boot`, which is already in the
+  aggregation list, so the option reaches the default config without adding the base command to that list. A
+  server-only option that is NOT spread into an aggregated command (e.g. `searchEngine`, `websocket`,
+  `enableSwaggerCodegen`) would instead require adding `server` to the aggregation, so those are a separate step.
+  Find where a config's structural fields really live with `grep "^    <name>:" generators/*/command.ts` rather than
+  trusting `describe --config`, which lists every command that declares the key.
+- Two kinds of option are NOT a pure "move" and should be deferred until the machinery supports them. (1) Quoted
+  options — `buildJDLApplicationConfig` hardcodes `quotedOptionNames: []`, so an option currently in
+  `jhipsterQuotedOptionNames` (`jhipsterVersion`, `rememberMeKey`, `jwtSecretKey`, `gradleDevelocityHost`) would lose
+  its quoting in JDL output if moved. (2) Options that have a validator/optionType entry but NO token in
+  `application-tokens.ts` (e.g. `serviceDiscoveryType`) are not JDL-parseable today; giving them a command `jdl` spec
+  adds a token, which expands the grammar rather than moving an existing capability. Check for a token before moving.
+- When a migrated option was used as the sample built-in keyword in a bare-runtime lexer test (the append-order
+  prefix regression in `lexer.spec.ts`), repoint the test to a still-built-in keyword rather than deleting it —
+  `reactive` became `baseName` in the server/data slice.
 
 ## Server-side user caches
 
