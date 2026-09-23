@@ -173,9 +173,9 @@ Options:
   --force-git                              Force commit to git repository
   --commit-msg <value>                     Commit changes (implies forceGit)
   --monorepository                         Use monorepository
-  --jhi-prefix <value>                     Add prefix before services, controllers and states name
+  --jhi-prefix <value>                     Add prefix before services, controllers and states name (default: jhi)
   --entity-suffix <value>                  Add suffix after entities name
-  --dto-suffix <value>                     Add suffix after dtos name
+  --dto-suffix <value>                     Add suffix after dtos name (default: DTO)
   --pk-type <value>                        Default primary key type (beta)
   --test-frameworks <value...>             Test frameworks to be generated
   --skip-checks                            Check the status of the required tools
@@ -194,16 +194,16 @@ Options:
   --jdl-store <value>                      JDL store
   --skip-client                            Skip the client-side application generation
   --skip-server                            Skip the server-side application generation
-  --auth <value>                           Provide authentication type for the application when skipping server side generation (choices: "jwt", "oauth2", "session")
-  --application-type <value>               Application type to generate (choices: "monolith", "gateway", "microservice")
-  --server-port <value>                    Server port to use (default: 8080)
+  --auth <value>                           Provide authentication type for the application when skipping server side generation (default: jwt) (choices: "jwt", "oauth2", "session")
+  --application-type <value>               Application type to generate (default: monolith) (choices: "monolith", "gateway", "microservice")
+  --server-port <value>                    Server port to use
   --prettier-tab-width <value>             Default tab width for prettier (default: 2)
   --skip-commit-hook                       Skip adding husky commit hooks
-  --enable-swagger-codegen                 API first development using OpenAPI-generator
-  --search-engine <value>                  Provide search engine for the application when skipping server side generation (choices: "no", "elasticsearch", "couchbase")
+  --enable-swagger-codegen                 API first development using OpenAPI-generator (default: false)
+  --search-engine <value>                  Provide search engine for the application when skipping server side generation (default: no) (choices: "no", "elasticsearch", "couchbase")
   --skip-check-length-of-identifier        Skip check the length of the identifier, only for recent Oracle databases that support 30+ characters metadata
   --skip-fake-data                         Skip generation of fake data for development
-  --websocket <value>                      Provide websocket option for the application when skipping server side generation
+  --websocket <value>                      Provide websocket option for the application when skipping server side generation (default: no)
   --db <value>                             Provide DB name for the application when skipping server side generation
   --dev-database-type <value>              Development database (choices: "postgresql", "mysql", "mariadb", "oracle", "mssql", "h2Disk", "h2Memory")
   --reactive                               Generate a reactive backend
@@ -213,7 +213,7 @@ Options:
   --cache-provider <value>                 Cache provider (choices: "no", "caffeine", "ehcache", "hazelcast", "infinispan", "memcached", "redis")
   --enable-hibernate-cache                 Enable hibernate cache
   --database-migration <value>             Database migration (choices: "liquibase", "loader", "no")
-  --message-broker <value>                 message broker (choices: "kafka", "pulsar", "no")
+  --message-broker <value>                 message broker (default: no) (choices: "kafka", "pulsar", "no")
   --with-generated-flag                    Add a GeneratedByJHipster annotation to all generated java classes and interfaces
   --package-name <value>                   The package name for the generated application
   --project-version <value>                project version to use, this option is not persisted (env: JHI_PROJECT_VERSION)
@@ -229,13 +229,13 @@ Options:
   --microfrontend                          Enable microfrontend support
   --microfrontends <value>                 Microfrontends to load
   --client-test-framework <value>          undefined (default: vitest) (choices: "vitest")
-  --with-admin-ui                          Generate administrative user interface
+  --with-admin-ui                          Generate administrative user interface (default: true)
   --client-root-dir <value>                Client root
   --cypress-coverage                       Enable Cypress code coverage report generation
   --cypress-audit                          Enable cypress-audit/lighthouse report generation
-  --enable-translation                     Enable translation
+  --enable-translation                     Enable translation (default: true)
   -l, --language <value...>                Language to be added to application (existing languages are not removed)
-  -n, --native-language [value]            Set application native language
+  -n, --native-language [value]            Set application native language (default: en)
   --regenerate-languages                   Regenerate languages
   -h, --help                               display help for command
 "

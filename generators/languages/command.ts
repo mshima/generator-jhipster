@@ -40,6 +40,7 @@ const command = {
         tokenType: 'list',
         tokenValuePattern: LANGUAGE_PATTERN,
       },
+      default: ({ enableTranslation }: any) => (enableTranslation ? [] : undefined),
       scope: 'storage',
     },
     languagesDefinition: {
@@ -58,6 +59,7 @@ const command = {
         type: 'boolean',
         tokenType: 'BOOLEAN',
       },
+      default: true,
       scope: 'storage',
     },
     language: {
@@ -97,6 +99,7 @@ const command = {
           }
         }
       },
+      default: 'en',
       scope: 'storage',
     },
     regenerateLanguages: {

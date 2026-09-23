@@ -20,8 +20,7 @@ import { snakeCase, upperCase } from 'lodash-es';
 
 import type { JHipsterConfigs } from '../command/types.ts';
 import type { JDLApplicationConfig, JHipsterOptionDefinition } from '../jdl/core/types/parsing.ts';
-import { resolveGeneratorDependencies } from '../resolver/generator-dependencies.ts';
-import { getJHipsterStore } from '../resolver/lookups.ts';
+import { lookupConfigsFrom } from '../resolver/lookups.ts';
 
 export const extractJdlDefinitionFromCommandConfig = (configs: JHipsterConfigs = {}): JHipsterOptionDefinition[] =>
   Object.entries(configs)
@@ -63,15 +62,6 @@ export const buildJDLApplicationConfig = (configs: JHipsterConfigs): JDLApplicat
 };
 
 /** The configs of a generator and of everything it imports, the dependency graph the cli resolves. */
-const lookupConfigsFrom = (generator: string): JHipsterConfigs => {
-  const store = getJHipsterStore();
-  const configs: JHipsterConfigs = {};
-  for (const { command } of resolveGeneratorDependencies([generator], { getGeneratorMeta: namespace => store.getMeta(namespace) })) {
-    Object.assign(configs, command?.configs);
-  }
-  return configs;
-};
-
 let defaultJDLApplicationConfig: Readonly<JDLApplicationConfig>;
 /**
  * The application JDL definitions: the jdl options of the `app` generator and of everything it imports, so an option
@@ -89,18 +79,13 @@ const deploymentDefaults = new Map<string, Readonly<Record<string, any>>>();
  */
 export const getDefaultJDLDeploymentDefaults = (deploymentType = ''): Readonly<Record<string, any>> => {
   if (!deploymentDefaults.has(deploymentType)) {
-    const store = getJHipsterStore();
     const defaults: Record<string, any> = {};
     // base-workspaces declares the options shared by every type, the generator of the type imports it; the type may
     // name no generator (`none` for workspaces).
-    const dependencies = resolveGeneratorDependencies(['base-workspaces', ...(deploymentType ? [deploymentType] : [])], {
-      getGeneratorMeta: namespace => store.getMeta(namespace),
-    });
-    for (const { command } of dependencies) {
-      for (const [name, config] of Object.entries(command?.configs ?? {})) {
-        if (config.default !== undefined && typeof config.default !== 'function') {
-          defaults[name] = config.default;
-        }
+    const configs = lookupConfigsFrom(['base-workspaces', ...(deploymentType ? [deploymentType] : [])]);
+    for (const [name, config] of Object.entries(configs)) {
+      if (config.default !== undefined && typeof config.default !== 'function') {
+        defaults[name] = config.default;
       }
     }
     deploymentDefaults.set(deploymentType, Object.freeze(defaults));

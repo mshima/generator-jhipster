@@ -186,9 +186,15 @@ export default class JHipsterCommand extends Command {
     }
     // Passing default to `commander` (`.default(optionDefinition.default)`), will set at options passed to initial generator, so it's used in entire generation process.
     // We want default value to be set on jhipster options parsing so ignore default at commander.
+    // A function default is computed from the other options, it has no value to show.
     let defaultDescription = '';
-    if (optionDefinition.default !== undefined && (!Array.isArray(optionDefinition.default) || optionDefinition.default.length !== 0)) {
-      defaultDescription = ` (default: ${typeof optionDefinition.default === 'function' ? optionDefinition.default() : optionDefinition.default})`;
+    if (
+      optionDefinition.default !== undefined &&
+      optionDefinition.default !== '' &&
+      typeof optionDefinition.default !== 'function' &&
+      (!Array.isArray(optionDefinition.default) || optionDefinition.default.length !== 0)
+    ) {
+      defaultDescription = ` (default: ${optionDefinition.default})`;
     }
     const option = new Option(cmdString, optionDefinition.description + defaultDescription + additionalDescription).hideHelp(
       optionDefinition.hide ?? false,

@@ -61,6 +61,7 @@ const command = {
         type: 'confirm',
         message: 'Do you want to make it reactive with Spring WebFlux?',
       }),
+      default: ({ applicationType }: any) => applicationType === 'gateway',
       scope: 'storage',
     },
     serverPort: {
@@ -96,6 +97,7 @@ const command = {
         { value: 'eureka', name: 'JHipster Registry (legacy, uses Eureka, provides Spring Cloud Config support)' },
         { value: 'no', name: 'No service discovery' },
       ],
+      default: ({ applicationType }: any) => (applicationType === 'monolith' ? 'no' : 'consul'),
       internal: {
         alias: 'serviceDiscovery',
         type: String,
@@ -384,6 +386,7 @@ const command = {
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
       choices: ['liquibase', 'loader', 'no'],
+      default: ({ databaseType }: any) => (['sql', 'cassandra'].includes(databaseType) ? 'liquibase' : 'no'),
       scope: 'storage',
     },
     messageBroker: {
@@ -397,6 +400,7 @@ const command = {
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
       choices: ['kafka', 'pulsar', 'no'],
+      default: 'no',
       scope: 'storage',
     },
   },

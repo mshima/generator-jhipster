@@ -32,6 +32,12 @@ const command = {
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
       choices: ['no', 'caffeine', 'ehcache', 'hazelcast', 'infinispan', 'memcached', 'redis'],
+      default: ({ applicationType, reactive }: any) => {
+        if (applicationType === 'gateway' || reactive) {
+          return 'no';
+        }
+        return applicationType === 'microservice' ? 'hazelcast' : 'ehcache';
+      },
       scope: 'storage',
     },
     enableHibernateCache: {
@@ -43,6 +49,8 @@ const command = {
         type: 'boolean',
         tokenType: 'BOOLEAN',
       },
+      default: ({ databaseType, reactive, cacheProvider }: any) =>
+        databaseType === 'sql' && !reactive && !['no', 'memcached'].includes(cacheProvider),
       scope: 'storage',
     },
   },

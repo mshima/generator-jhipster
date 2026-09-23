@@ -42,6 +42,7 @@ const command = {
         tokenType: 'NAME',
         tokenValuePattern: JHI_PREFIX_NAME_PATTERN,
       },
+      default: 'jhi',
       scope: 'storage',
     },
     entitySuffix: {
@@ -54,6 +55,7 @@ const command = {
         tokenType: 'NAME',
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
+      default: '',
       scope: 'storage',
     },
     dtoSuffix: {
@@ -66,6 +68,7 @@ const command = {
         tokenType: 'NAME',
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
+      default: 'DTO',
       scope: 'storage',
     },
     pkType: {

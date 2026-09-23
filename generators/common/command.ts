@@ -67,6 +67,7 @@ const command = {
         { value: 'oauth2', name: 'OAuth 2.0 / OIDC Authentication (stateful, works with Keycloak and Okta)' },
         { value: 'session', name: 'HTTP Session Authentication (stateful, default Spring Security mechanism)' },
       ],
+      default: 'jwt',
       scope: 'storage',
     },
     skipUserManagement: {
@@ -78,6 +79,7 @@ const command = {
         type: 'boolean',
         tokenType: 'BOOLEAN',
       },
+      default: ({ applicationType, authenticationType }: any) => applicationType === 'microservice' || authenticationType === 'oauth2',
       scope: 'storage',
     },
     applicationType: {
@@ -95,6 +97,7 @@ const command = {
         message: `Which ${chalk.yellow('*type*')} of application would you like to create?`,
       },
       choices: applicationTypesChoices,
+      default: 'monolith',
       scope: 'storage',
     },
     serverPort: {
@@ -106,7 +109,7 @@ const command = {
         type: 'integer',
         tokenType: 'INTEGER',
       },
-      default: 8080,
+      default: ({ applicationType }: any) => (applicationType === 'microservice' ? 8081 : 8080),
       scope: 'storage',
     },
     gatewayServerPort: {

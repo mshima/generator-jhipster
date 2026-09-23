@@ -19,16 +19,16 @@
 
 import { before, describe, expect, it } from 'esmocha';
 
-import * as defaultApplicationOptions from './default-application-options.ts';
+import { getConfigWithDefaults } from './default-application-options.ts';
 
-const {
-  getConfigForMonolithApplication,
-  getConfigForGatewayApplication,
-  getConfigForMicroserviceApplication,
-  getDefaultConfigForNewApplication,
-} = defaultApplicationOptions;
+const getConfigForMonolithApplication = (options: Parameters<typeof getConfigWithDefaults>[0] = {}) =>
+  getConfigWithDefaults({ applicationType: 'monolith', ...options });
+const getConfigForGatewayApplication = (options: Parameters<typeof getConfigWithDefaults>[0] = {}) =>
+  getConfigWithDefaults({ applicationType: 'gateway', ...options });
+const getConfigForMicroserviceApplication = (options: Parameters<typeof getConfigWithDefaults>[0] = {}) =>
+  getConfigWithDefaults({ applicationType: 'microservice', ...options });
 
-describe('jdl - DefaultApplicationOptions', () => {
+describe('DefaultApplicationOptions', () => {
   describe('getConfigForMonolithApplication', () => {
     describe('without passing custom options', () => {
       let options: ReturnType<typeof getConfigForMonolithApplication>;
@@ -89,20 +89,6 @@ describe('jdl - DefaultApplicationOptions', () => {
 
       it('should set the user management skipping option to true', () => {
         expect(skipUserManagementOption).toBe(true);
-      });
-    });
-    describe('when passing custom options', () => {
-      let options: ReturnType<typeof getConfigForMonolithApplication>;
-
-      before(() => {
-        options = getConfigForMonolithApplication({
-          // @ts-expect-error check invalid option
-          applicationType: 'custom',
-        });
-      });
-
-      it('should ignore the application type', () => {
-        expect(options.applicationType).toBe('monolith');
       });
     });
   });
@@ -190,20 +176,6 @@ describe('jdl - DefaultApplicationOptions', () => {
         expect(skipUserManagementOption).toBe(true);
       });
     });
-    describe('when passing custom options', () => {
-      let options: ReturnType<typeof getConfigForGatewayApplication>;
-
-      before(() => {
-        options = getConfigForGatewayApplication({
-          // @ts-expect-error check invalid option
-          applicationType: 'custom',
-        });
-      });
-
-      it('should ignore the application type', () => {
-        expect(options.applicationType).toBe('gateway');
-      });
-    });
   });
   describe('getConfigForMicroserviceApplication', () => {
     describe('without passing custom options', () => {
@@ -265,8 +237,6 @@ describe('jdl - DefaultApplicationOptions', () => {
 
       before(() => {
         options = getConfigForMicroserviceApplication({
-          // @ts-expect-error check invalid option
-          applicationType: 'ignored',
           skipClient: false,
           clientFramework: 'react',
           clientTheme: 'something',
@@ -275,9 +245,6 @@ describe('jdl - DefaultApplicationOptions', () => {
         });
       });
 
-      it('should ignore the application type option', () => {
-        expect(options.applicationType).toBe('microservice');
-      });
       it('should not ignore the client skipping option', () => {
         expect(options.skipClient).toBe(false);
       });
@@ -295,157 +262,6 @@ describe('jdl - DefaultApplicationOptions', () => {
       });
       it('should not remove the server skipping option', () => {
         expect(options.skipServer).toBeDefined();
-      });
-    });
-  });
-  describe('getDefaultConfigForNewApplication', () => {
-    describe('when not passing custom options', () => {
-      let options: ReturnType<typeof getDefaultConfigForNewApplication>;
-
-      before(() => {
-        options = getDefaultConfigForNewApplication();
-      });
-
-      it('should set the base name option to jhipster', () => {
-        expect(options.baseName).toBe('jhipster');
-      });
-      it('should set the build tool option to maven', () => {
-        expect(options.buildTool).toBe('maven');
-      });
-      it('should set the database type option to sql', () => {
-        expect(options.databaseType).toBe('sql');
-      });
-      it('should set the development database type option to the same that production database', () => {
-        expect(options.devDatabaseType).toBe(options.prodDatabaseType);
-      });
-      it('should set the hibernate cache enabling option to true', () => {
-        expect(options.enableHibernateCache).toBe(true);
-      });
-      it('should set the swagger codegen enabling option to false', () => {
-        expect(options.enableSwaggerCodegen).toBe(false);
-      });
-      it('should set the translation enabling option to true', () => {
-        expect(options.enableTranslation).toBe(true);
-      });
-      it('should set the jhipster prefix option to jhi', () => {
-        expect(options.jhiPrefix).toBe('jhi');
-      });
-      it('should set the languages option to an empty array', () => {
-        expect(options.languages).toEqual([]);
-      });
-      it('should set the package name to com.mycompany.myapp', () => {
-        expect(options.packageName).toBe('com.mycompany.myapp');
-      });
-      it('should set the production database type option to postgresql', () => {
-        expect(options.prodDatabaseType).toBe('postgresql');
-      });
-      it('should set the search engine option to no', () => {
-        expect(options.searchEngine).toBe('no');
-      });
-      it('should set the test frameworks option to nothing', () => {
-        expect(options.testFrameworks).toHaveLength(0);
-      });
-      it('should set the websocket option to no', () => {
-        expect(options.websocket).toBe('no');
-      });
-    });
-    describe('when there is no package name option but only a package folder', () => {
-      let packageNameOption: ReturnType<typeof getDefaultConfigForNewApplication>['packageName'];
-
-      before(() => {
-        packageNameOption = getDefaultConfigForNewApplication({
-          packageFolder: 'a/b/c/d',
-        }).packageName;
-      });
-
-      it('should set the package name accordingly', () => {
-        expect(packageNameOption).toBe('a.b.c.d');
-      });
-    });
-    describe('when the client framework option is angular', () => {
-      let clientFrameworkOption: ReturnType<typeof getDefaultConfigForNewApplication>['clientFramework'];
-
-      before(() => {
-        clientFrameworkOption = getDefaultConfigForNewApplication({
-          clientFramework: 'angular',
-        }).clientFramework;
-      });
-
-      it('should set the option to angular', () => {
-        expect(clientFrameworkOption).toBe('angular');
-      });
-    });
-    describe('when the database type option is MongoDB', () => {
-      let enableHibernateCacheOption: ReturnType<typeof getDefaultConfigForNewApplication>['enableHibernateCache'];
-
-      before(() => {
-        const options = getDefaultConfigForNewApplication({
-          databaseType: 'mongodb',
-        });
-        enableHibernateCacheOption = options.enableHibernateCache;
-      });
-
-      it('should set the enableHibernateCache option to false', () => {
-        expect(enableHibernateCacheOption).toBe(false);
-      });
-    });
-    describe('when the database type option is couchbase', () => {
-      let enableHibernateCacheOption: ReturnType<typeof getDefaultConfigForNewApplication>['enableHibernateCache'];
-
-      before(() => {
-        const options = getDefaultConfigForNewApplication({
-          databaseType: 'couchbase',
-        });
-        enableHibernateCacheOption = options.enableHibernateCache;
-      });
-
-      it('should set the enableHibernateCache option to false', () => {
-        expect(enableHibernateCacheOption).toBe(false);
-      });
-    });
-    describe('when the database type option is cassandra', () => {
-      let enableHibernateCacheOption: ReturnType<typeof getDefaultConfigForNewApplication>['enableHibernateCache'];
-
-      before(() => {
-        const options = getDefaultConfigForNewApplication({
-          databaseType: 'cassandra',
-        });
-        enableHibernateCacheOption = options.enableHibernateCache;
-      });
-
-      it('should set the enableHibernateCache option to false', () => {
-        expect(enableHibernateCacheOption).toBe(false);
-      });
-    });
-    describe('when the reactive option is set', () => {
-      let cacheProviderOption: ReturnType<typeof getDefaultConfigForNewApplication>['cacheProvider'];
-
-      before(() => {
-        cacheProviderOption = getDefaultConfigForNewApplication({
-          reactive: true,
-        }).cacheProvider;
-      });
-
-      it('should set the cache provider option to no', () => {
-        expect(cacheProviderOption).toBe('no');
-      });
-    });
-    describe('when the cache option is set to ehcache', () => {
-      it('should set the enableHibernateCache option to true', () => {
-        expect(
-          getDefaultConfigForNewApplication({
-            cacheProvider: 'ehcache',
-          }).enableHibernateCache,
-        ).toBe(true);
-      });
-    });
-    describe('when the cache option is set to memcached', () => {
-      it('should set the enableHibernateCache option to false', () => {
-        expect(
-          getDefaultConfigForNewApplication({
-            cacheProvider: 'memcached',
-          }).enableHibernateCache,
-        ).toBe(false);
       });
     });
   });

@@ -56,6 +56,7 @@ const command = {
             'The package name you have provided is not a valid Java package name.'
           ),
       }),
+      default: ({ packageFolder }: any) => (packageFolder ? packageFolder.split('/').filter(Boolean).join('.') : 'com.mycompany.myapp'),
       scope: 'storage',
       description: 'The package name for the generated application',
     },

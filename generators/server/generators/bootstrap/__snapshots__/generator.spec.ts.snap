@@ -45,6 +45,7 @@ exports[`generator - server:bootstrap bootstrapping default config should prepar
   "clientRootDir": "",
   "clientSrcDir": "src/main/webapp/",
   "clientTestDir": "src/test/javascript/",
+  "clientTestFramework": "vitest",
   "clientTheme": "none",
   "commandName": "server:bootstrap",
   "communicationSpringWebsocket": undefined,

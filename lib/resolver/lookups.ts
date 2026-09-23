@@ -20,7 +20,10 @@ import { relative } from 'node:path';
 
 import { Store, type StoreGeneratorMeta } from 'yeoman-environment';
 
+import type { JHipsterConfigs } from '../command/types.ts';
 import { getPackageRoot, isDistFolder } from '../index.ts';
+
+import { resolveGeneratorDependencies } from './generator-dependencies.ts';
 
 /** Lookups supporting nested generators. */
 export const generatorsLookup = ['generators', 'generators/*/generators'];
@@ -67,4 +70,18 @@ export const lookupGeneratorsMeta = (store: GeneratorsStore = getJHipsterStore()
       .filter((meta): meta is ImportableGeneratorMeta => Boolean(meta.resolved && meta.requireModule))
       .sort((a, b) => Number(generatorPath(a) > generatorPath(b)) - Number(generatorPath(a) < generatorPath(b)))
   );
+};
+
+/**
+ * The configs generators reach: the ones of their commands and of everything they import, merged in dependency order.
+ */
+export const lookupConfigsFrom = (generators: string | string[], store: Store = getJHipsterStore()): JHipsterConfigs => {
+  const configs: JHipsterConfigs = {};
+  const dependencies = resolveGeneratorDependencies(Array.isArray(generators) ? generators : [generators], {
+    getGeneratorMeta: namespace => store.getMeta(namespace),
+  });
+  for (const { command } of dependencies) {
+    Object.assign(configs, command?.configs);
+  }
+  return configs;
 };

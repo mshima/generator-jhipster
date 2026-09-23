@@ -180,7 +180,6 @@ describe(`generator - ${helpers.commandName}`, () => {
   "devDatabaseType",
   "serverSideOptions",
   "enableGradleDevelocity",
-  "gradleDevelocityHost",
   "clientFramework",
   "microfrontend",
   "clientTestFrameworks",

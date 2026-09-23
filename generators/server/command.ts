@@ -32,6 +32,7 @@ const command = {
         type: 'boolean',
         tokenType: 'BOOLEAN',
       },
+      default: false,
       scope: 'storage',
     },
     searchEngine: {
@@ -45,6 +46,7 @@ const command = {
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
       choices: ['no', 'elasticsearch', 'couchbase'],
+      default: 'no',
       scope: 'storage',
     },
     skipCheckLengthOfIdentifier: {
@@ -71,6 +73,7 @@ const command = {
         tokenType: 'NAME',
         tokenValuePattern: ALPHANUMERIC_DASH_PATTERN,
       },
+      default: 'no',
       scope: 'storage',
     },
     db: {
@@ -105,6 +108,7 @@ const command = {
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
       choices: ['sql', 'mongodb', 'couchbase', 'cassandra', 'neo4j', 'no'],
+      default: 'sql',
       scope: 'storage',
     },
     devDatabaseType: {
@@ -118,6 +122,7 @@ const command = {
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
       choices: ['postgresql', 'mysql', 'mariadb', 'oracle', 'mssql', 'h2Disk', 'h2Memory'],
+      default: ({ databaseType, prodDatabaseType }: any) => (databaseType === 'sql' ? prodDatabaseType : undefined),
       scope: 'storage',
     },
     prodDatabaseType: {
@@ -131,6 +136,7 @@ const command = {
         tokenValuePattern: ALPHANUMERIC_PATTERN,
       },
       choices: ['postgresql', 'mysql', 'mariadb', 'oracle', 'mssql'],
+      default: ({ databaseType }: any) => (databaseType === 'sql' ? 'postgresql' : undefined),
       scope: 'storage',
     },
   },

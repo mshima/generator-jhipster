@@ -65,6 +65,7 @@ const command = {
         { value: VUE, name: 'Vue' },
         { value: CLIENT_FRAMEWORK_NO, name: 'No client' },
       ],
+      default: ({ applicationType }: any) => (applicationType === 'microservice' ? 'no' : 'angular'),
       scope: 'storage',
     },
     clientBundler: {
@@ -188,6 +189,7 @@ const command = {
         when: answers => [ANGULAR, REACT, VUE].includes(answers.clientFramework ?? config.clientFramework),
         message: 'Do you want to generate the admin UI?',
       }),
+      default: true,
       scope: 'storage',
     },
     clientTheme: {
@@ -206,6 +208,7 @@ const command = {
         message: 'Would you like to use a Bootswatch theme (https://bootswatch.com/)?',
         choices: async () => [{ value: 'none', name: 'Default JHipster' }, ...(await retrieveBootswatchThemes(generator))],
       }),
+      default: ({ clientFramework }: any) => (clientFramework === 'no' ? undefined : 'none'),
       scope: 'storage',
     },
     clientThemeVariant: {
@@ -228,6 +231,7 @@ const command = {
         { value: 'dark', name: 'Dark' },
         { value: 'light', name: 'Light' },
       ],
+      default: ({ clientFramework, clientTheme }: any) => (clientFramework !== 'no' && clientTheme !== 'none' ? 'primary' : undefined),
       scope: 'storage',
     },
     clientRootDir: {
