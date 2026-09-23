@@ -61,6 +61,7 @@ export const createRuntime = (
   const newDefinition = mergeDefinition(definition, builtInJDLApplicationConfig);
   const propertyValidations: Record<string, JDLValidatorOption> = newDefinition.validatorConfig;
   const deploymentPropertyValidations: Record<string, JDLValidatorOption> = deploymentDefinition.validatorConfig;
+  const deploymentOptionTypes = deploymentDefinition.optionsTypes;
   const applicationDefinition = new JDLApplicationDefinition({
     optionValues: newDefinition.optionsValues,
     optionTypes: newDefinition.optionsTypes,
@@ -106,6 +107,7 @@ export const createRuntime = (
     applicationDefinition,
     propertyValidations,
     deploymentPropertyValidations,
+    deploymentOptionTypes,
   };
 };
 
