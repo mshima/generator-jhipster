@@ -109,8 +109,8 @@ relationship ManyToMany {
 
 noFluentMethod Department, Employee
 dto Employee with mapstruct
-paginate Employee, JobHistory with infinite-scroll
-paginate Job with pagination
+pagination Employee, JobHistory with infinite-scroll
+pagination Job with pagination
 service Employee with serviceClass
 search Employee with elasticsearch
 angularSuffix Employee with myentities
@@ -230,8 +230,8 @@ relationship ManyToMany {
 
 noFluentMethod Department, Employee
 dto Employee with mapstruct
-paginate Employee, JobHistory with infinite-scroll
-paginate Job with pagination
+pagination Employee, JobHistory with infinite-scroll
+pagination Job with pagination
 service Employee with serviceClass
 search Employee with elasticsearch
 angularSuffix Employee with myentities

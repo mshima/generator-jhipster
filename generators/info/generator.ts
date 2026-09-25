@@ -21,8 +21,9 @@
  */
 import chalk from 'chalk';
 
-import JSONToJDLEntityConverter from '../../lib/jdl/converters/json-to-jdl-entity-converter.ts';
-import JSONToJDLOptionConverter from '../../lib/jdl/converters/json-to-jdl-option-converter.ts';
+import { createJDLASTBuilder } from '../../lib/jdl/converters/json-to-jdl-ast.ts';
+import { printJDL } from '../../lib/jdl/core/printing/print-jdl.ts';
+import { getDefaultRuntime } from '../../lib/jdl-config/jdl-runtime.ts';
 import type { Entity } from '../../lib/jhipster/types/entity.ts';
 import { getEntitiesFromDir } from '../base-application/support/index.ts';
 import BaseCoreGenerator, {
@@ -123,7 +124,7 @@ export default class InfoGenerator extends BaseCoreGenerator<
         console.log('\n##### **JDL for the Entity configuration(s) `entityName.json` files generated in the `.jhipster` directory**\n');
         const jdl = this.generateJDLFromEntities();
         console.log('<details>\n<summary>JDL entity definitions</summary>\n');
-        console.log(`<pre>\n${jdl?.toString()}\n</pre>\n</details>\n`);
+        console.log(`<pre>\n${jdl}\n</pre>\n</details>\n`);
       },
     });
   }
@@ -144,7 +145,7 @@ export default class InfoGenerator extends BaseCoreGenerator<
    * @returns generated JDL from entities
    */
   generateJDLFromEntities() {
-    let jdlObject;
+    let jdl;
     const entities = new Map<string, Entity>();
     try {
       const foundEntities = getEntitiesFromDir(this.destinationPath(JHIPSTER_CONFIG_DIR));
@@ -154,12 +155,12 @@ export default class InfoGenerator extends BaseCoreGenerator<
           entities.set(entity, entityJson);
         }
       }
-      jdlObject = JSONToJDLEntityConverter.convertEntitiesToJDL(entities);
-      JSONToJDLOptionConverter.convertServerOptionsToJDL({ 'generator-jhipster': this.config.getAll() }, jdlObject);
+      const runtime = getDefaultRuntime();
+      jdl = printJDL(createJDLASTBuilder(runtime).addEntities(entities).addApplicationOptions(this.config.getAll()).build(), runtime);
     } catch (error) {
       this.log.error('Error while parsing entities to JDL', error);
       throw new Error('\nError while parsing entities to JDL\n', { cause: error });
     }
-    return jdlObject;
+    return jdl;
   }
 }

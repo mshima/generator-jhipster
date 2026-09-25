@@ -25,7 +25,7 @@ import { loadFile } from 'mem-fs';
 import { setModifiedFileState } from 'mem-fs-editor/state';
 import { Minimatch } from 'minimatch';
 
-import { getJDLObjectFromSingleApplication } from '../../../lib/jdl/converters/json-to-jdl-converter.ts';
+import { convertSingleContentToJDL } from '../../../lib/jdl/converters/json-to-jdl-converter.ts';
 import type { JDLApplicationConfig, JDLDefinitions } from '../../../lib/jdl/core/parsing/types/parsing.ts';
 import { createJDLRuntime, getDefaultRuntime } from '../../../lib/jdl-config/jdl-runtime.ts';
 import type { Entity } from '../../../lib/jhipster/types/entity.ts';
@@ -79,13 +79,11 @@ export const exportJDLTransform = ({
         const { jdlStore, jwtSecretKey, rememberMeKey, jhipsterVersion, creationTimestamp, incrementalChangelog, ...rest } =
           contents[GENERATOR_JHIPSTER];
 
-        const jdlObject = getJDLObjectFromSingleApplication(
+        const jdlContents = convertSingleContentToJDL(
           { ...contents, [GENERATOR_JHIPSTER]: { ...rest, incrementalChangelog } },
           definitions ? createJDLRuntime(definitions) : getDefaultRuntime(),
           entitiesMap,
         );
-
-        const jdlContents = jdlObject.toString();
 
         const jdlStoreFile = jdlStoreFileInMemory ?? (loadFile(jdlStorePath) as ConflicterFile);
         jdlStoreFile.contents = Buffer.from(jdlContents);
