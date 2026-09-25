@@ -1664,7 +1664,8 @@ entity Job {
   maxSalary Long
 }
 /**
- * The Employee entity.\\nSecond line in javadoc.
+ * The Employee entity.
+ * Second line in javadoc.
  */
 entity Employee {
   /**
@@ -1761,8 +1762,8 @@ service TheLabel, Operation, Department, JobHistory, Job, Employee, Task, Golden
 angularSuffix BankAccount with mySuffix
 filter BankAccount, Employee
 clientRootFolder BankAccount, TheLabel, Operation with test-root
-paginate TheLabel, Job with pagination
-paginate Operation, JobHistory, Employee with infinite-scroll
+pagination TheLabel, Job with pagination
+pagination Operation, JobHistory, Employee with infinite-scroll
 ",
 }
 `;
@@ -3141,7 +3142,8 @@ entity Job {
   maxSalary Long
 }
 /**
- * The Employee entity.\\nSecond line in javadoc.
+ * The Employee entity.
+ * Second line in javadoc.
  */
 entity Employee {
   /**
@@ -3237,8 +3239,8 @@ service TheLabel, Operation, Department, JobHistory, Job, Employee, Task, Golden
 angularSuffix BankAccount with mySuffix
 filter BankAccount, Employee
 clientRootFolder BankAccount, TheLabel, Operation with test-root
-paginate TheLabel, Job with pagination
-paginate Operation, JobHistory, Employee with infinite-scroll
+pagination TheLabel, Job with pagination
+pagination Operation, JobHistory, Employee with infinite-scroll
 ",
 }
 `;
@@ -4142,7 +4144,7 @@ relationship ManyToMany {
 
 dto Blog, Post, Tag with mapstruct
 service Blog, Post, Tag with serviceClass
-paginate Post, Tag with infinite-scroll
+pagination Post, Tag with infinite-scroll
 ",
   "gateway": "application {
   config {
@@ -4229,7 +4231,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 ",
 }
@@ -4964,7 +4966,7 @@ relationship ManyToMany {
   Post{tag(name)} to Tag{post}
 }
 
-paginate Post, Tag with infinite-scroll
+pagination Post, Tag with infinite-scroll
 ",
   "gateway": "application {
   config {
@@ -4998,7 +5000,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 microservice Product with store
 ",
@@ -5062,7 +5064,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 microservice Product with store
 ",
@@ -5813,7 +5815,7 @@ relationship ManyToMany {
 
 dto Blog, Post, Tag with mapstruct
 service Blog, Post, Tag with serviceClass
-paginate Post, Tag with infinite-scroll
+pagination Post, Tag with infinite-scroll
 ",
   "gateway": "application {
   config {
@@ -5845,7 +5847,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 microservice Product with store
 ",
@@ -5911,7 +5913,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 microservice Product with store
 ",
@@ -6663,7 +6665,7 @@ relationship ManyToMany {
 
 dto Blog, Post, Tag with mapstruct
 service Blog, Post, Tag with serviceClass
-paginate Post, Tag with infinite-scroll
+pagination Post, Tag with infinite-scroll
 ",
   "gateway": "application {
   config {
@@ -6695,7 +6697,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 microservice Product with store
 ",
@@ -6760,7 +6762,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 microservice Product with store
 ",
@@ -7660,7 +7662,7 @@ relationship ManyToMany {
 dto Blog, Post, Tag with mapstruct
 service Blog, Post, Tag with serviceClass
 microservice Blog, Post, Tag with blog
-paginate Post, Tag with infinite-scroll
+pagination Post, Tag with infinite-scroll
 ",
   "gateway": "application {
   config {
@@ -7728,8 +7730,8 @@ service Notification with serviceImpl
 microservice Blog, Post, Tag with blog
 microservice Product with store
 microservice Notification with notification
-paginate Post, Tag with infinite-scroll
-paginate Product with pagination
+pagination Post, Tag with infinite-scroll
+pagination Product with pagination
 ",
   "notification": "application {
   config {
@@ -7791,7 +7793,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 microservice Product with store
 ",
@@ -9543,7 +9545,7 @@ relationship ManyToMany {
 dto Blog, Post, Tag with mapstruct
 service Blog, Post, Tag with serviceClass
 microservice Blog, Post, Tag with blog
-paginate Post, Tag with infinite-scroll
+pagination Post, Tag with infinite-scroll
 ",
   "gateway": "application {
   config {
@@ -9608,8 +9610,8 @@ service Notification with serviceImpl
 microservice Blog, Post, Tag with blog
 microservice Product with store
 microservice Notification with notification
-paginate Post, Tag with infinite-scroll
-paginate Product with pagination
+pagination Post, Tag with infinite-scroll
+pagination Product with pagination
 ",
   "notification": "application {
   config {
@@ -9669,7 +9671,7 @@ entity Product {
   image ImageBlob
 }
 
-paginate Product with pagination
+pagination Product with pagination
 service Product with serviceClass
 microservice Product with store
 ",
@@ -11451,7 +11453,8 @@ entity Job {
   maxSalary Long
 }
 /**
- * The Employee entity.\\nSecond line in documentation.
+ * The Employee entity.
+ * Second line in documentation.
  */
 entity Employee {
   /**
@@ -11547,8 +11550,8 @@ service TheLabel, Department, Employee, GoldenBadge, SilverBadge, Identifier, Re
 angularSuffix BankAccount with mySuffix
 filter BankAccount, Employee
 clientRootFolder BankAccount, TheLabel, Operation with test-root
-paginate TheLabel, Job with pagination
-paginate Operation, JobHistory, Employee with infinite-scroll
+pagination TheLabel, Job with pagination
+pagination Operation, JobHistory, Employee with infinite-scroll
 ",
 }
 `;
@@ -13519,7 +13522,7 @@ entity B
 entity C
 
 relationship OneToMany {
-  @AnnotationOnDestination A{b required} to @AnnotationOnSource(toto) B{a}
+  @AnnotationOnDestination A{b required} to @AnnotationOnSource("toto") B{a}
 }
 ",
 }
@@ -13610,7 +13613,7 @@ entity C
 
 service A with serviceImpl
 readOnly A
-paginate B, C with pagination
+pagination B, C with pagination
 embedded B
 ",
 }
@@ -14792,7 +14795,8 @@ entity Job {
   maxSalary Long
 }
 /**
- * The Employee entity.\\nSecond line in documentation.
+ * The Employee entity.
+ * Second line in documentation.
  */
 entity Employee {
   /**
@@ -14862,8 +14866,8 @@ relationship ManyToMany {
 
 microservice Department, JobHistory, Job, Employee, Location, Task, Country, Region with mymicroservice
 embedded Department
-paginate JobHistory, Employee with infinite-scroll
-paginate Job with pagination
+pagination JobHistory, Employee with infinite-scroll
+pagination Job with pagination
 readOnly JobHistory
 dto Employee with mapstruct
 service Employee with serviceClass
@@ -15541,7 +15545,8 @@ entity Job {
   maxSalary Long
 }
 /**
- * The Employee entity.\\nSecond line in documentation.
+ * The Employee entity.
+ * Second line in documentation.
  */
 entity Employee {
   /**
@@ -15610,8 +15615,8 @@ relationship ManyToMany {
 }
 
 microservice Department, JobHistory, Job, Employee, Location, Task, Country, Region with mymicroservice
-paginate JobHistory, Employee with infinite-scroll
-paginate Job with pagination
+pagination JobHistory, Employee with infinite-scroll
+pagination Job with pagination
 dto Employee with mapstruct
 service Employee with serviceClass
 search Employee with elasticsearch
@@ -15819,8 +15824,8 @@ entity G {
 }
 
 dto A, B, C, D, E, F with mapstruct
-paginate A, B, C, D, E, F with infinite-scroll
-paginate G with pagination
+pagination A, B, C, D, E, F with infinite-scroll
+pagination G with pagination
 service A, B, C, D, E, F with serviceClass
 service G with serviceImpl
 ",
@@ -16131,8 +16136,8 @@ enum JobType {
   TYPE2
 }
 
-paginate JobHistory, Employee with infinite-scroll
-paginate Job with pagination
+pagination JobHistory, Employee with infinite-scroll
+pagination Job with pagination
 dto Employee with mapstruct
 service Employee with serviceClass
 ",
@@ -17433,8 +17438,8 @@ enum JobType {
   TYPE2
 }
 
-paginate JobHistory, Employee with infinite-scroll
-paginate Job with pagination
+pagination JobHistory, Employee with infinite-scroll
+pagination Job with pagination
 dto Employee with mapstruct
 service Employee with serviceClass
 ",
@@ -19358,7 +19363,7 @@ relationship OneToMany {
   Invoice{shipment} to Shipment{invoice(code) required}
 }
 
-paginate Invoice, Shipment with pagination
+pagination Invoice, Shipment with pagination
 service Invoice, Shipment with serviceClass
 microservice Invoice, Shipment with invoice
 ",
@@ -19462,7 +19467,7 @@ relationship ManyToOne {
   OrderItem{product(name) required} to Product
 }
 
-paginate Product, ProductOrder, OrderItem with pagination
+pagination Product, ProductOrder, OrderItem with pagination
 service Product, ProductCategory, ProductOrder, OrderItem with serviceClass
 microservice Product, ProductCategory, ProductOrder, OrderItem with product
 ",
@@ -19591,7 +19596,7 @@ relationship ManyToOne {
   OrderItem{product(name) required} to Product
 }
 
-paginate Customer, Product, ProductOrder, OrderItem, Invoice, Shipment with pagination
+pagination Customer, Product, ProductOrder, OrderItem, Invoice, Shipment with pagination
 service Customer, Product, ProductCategory, ProductOrder, OrderItem, Invoice, Shipment with serviceClass
 microservice Product, ProductCategory, ProductOrder, OrderItem with product
 microservice Invoice, Shipment with invoice
@@ -20474,7 +20479,7 @@ exports[`jdl - golden lib/jdl/core/printing/__test-support__/application.jdl sho
 entity Product
 
 dto Product with mapstruct
-paginate Product with infinite-scroll
+pagination Product with infinite-scroll
 service Product with serviceImpl
 readOnly Product
 ",
@@ -20640,7 +20645,8 @@ exports[`jdl - golden lib/jdl/core/printing/__test-support__/entities.jdl should
 @Skip
 entity Product (product_table) {
   /**
-   * First line.\\nSecond line.
+   * First line.
+   * Second line.
    */
   @Id
   @Custom(1)
@@ -20744,8 +20750,8 @@ entity C
 
 noFluentMethod A
 dto A, B with mapstruct
-paginate A with infinite-scroll
-paginate B with pagination
+pagination A with infinite-scroll
+pagination B with pagination
 service A, C with serviceClass
 service B with serviceImpl
 search A with no
@@ -21022,7 +21028,7 @@ relationship OneToMany {
   A{b} to B{a}
 }
 relationship ManyToOne {
-  @Other(x) A{user(login)} to User with builtInEntity
+  @Other("x") A{user(login)} to User with builtInEntity
   /**
    * Commented after an annotation.
    */

@@ -221,7 +221,7 @@ relationship ManyToMany {
 }
 
 noFluentMethod Country, Department, Employee, Job, JobHistory, Location, Region, Task
-paginate Country with pager
+pagination Country with pager
 "
 `);
         });

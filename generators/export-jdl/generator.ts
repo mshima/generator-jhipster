@@ -36,10 +36,7 @@ export default class extends CommandCoreGenerator<typeof command> {
         try {
           const jdlDefinitions = resolveJDLDefinitions(this.options);
           const runtime = jdlDefinitions ? createJDLRuntime(jdlDefinitions) : getDefaultRuntime();
-          const jdlObject = convertToJDL(runtime, this.destinationPath(), false);
-          if (jdlObject) {
-            this.jdlContent = jdlObject.toString();
-          }
+          this.jdlContent = convertToJDL(runtime, this.destinationPath(), false);
         } catch (error: unknown) {
           throw new Error(`An error occurred while exporting to JDL: ${(error as Error).message}\n${error}`, { cause: error });
         }
