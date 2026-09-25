@@ -37,13 +37,25 @@ export default function exportDeployments(
   if (!deployments) {
     throw new Error('Deployments have to be passed to be exported.');
   }
-  return Object.values(deployments).map(deployment => {
-    const yoRcDeployment: Partial<YoRcJHipsterDeploymentContent> = setUpDeploymentStructure(deployment);
-    if (!skipFileGeneration) {
-      writeDeploymentConfigs(yoRcDeployment);
-    }
-    return yoRcDeployment;
-  });
+  return exportJSONDeployments(
+    Object.values(deployments).map(deployment => setUpDeploymentStructure(deployment)),
+    { skipFileGeneration },
+  );
+}
+
+/**
+ * Writes the `.yo-rc.json` file of each deployment in a folder named after its type, unless the generation is skipped.
+ * @param deployments the `.yo-rc.json` contents of the deployments.
+ * @return the deployments.
+ */
+export function exportJSONDeployments(
+  deployments: Partial<YoRcJHipsterDeploymentContent>[],
+  { skipFileGeneration = false }: { skipFileGeneration?: boolean } = {},
+): Partial<YoRcJHipsterDeploymentContent>[] {
+  if (!skipFileGeneration) {
+    deployments.forEach(deployment => writeDeploymentConfigs(deployment));
+  }
+  return deployments;
 }
 
 function setUpDeploymentStructure(deployment: JDLDeployment) {
