@@ -42,7 +42,7 @@ import type { PostProcessedJDLJSONApplication } from '../../core/types/exporter.
 import type { JSONField, JSONRelationship } from '../../core/types/json-config.ts';
 import { formatComment } from '../../core/utils/format-utils.ts';
 
-import { type EntityOptionStatement, type EntityOptions, collectOptionStatements, resolveEntityOptions } from './resolve-entity-options.ts';
+import { type EntityOptionStatement, collectOptionStatements, resolveEntityOptions } from './resolve-entity-options.ts';
 
 const {
   Validations: { PATTERN, REQUIRED, UNIQUE },
@@ -90,13 +90,19 @@ export type ImportTarget = {
   applicationType?: ApplicationType;
 };
 
+/** An application of the jdl and its json entities. */
+export type JDLJSONApplication = {
+  /** The `.yo-rc.json` content of the application; none for the application a jdl without application is imported into. */
+  config?: PostProcessedJDLJSONApplication;
+  entities: JDLJSONEntity[];
+};
+
 export type JDLJSON = {
-  /** The applications, as their `.yo-rc.json` content. */
-  applications: PostProcessedJDLJSONApplication[];
-  /** The json entities of each application, by application name. */
-  entitiesPerApplication: Map<string, JDLJSONEntity[]>;
-  /** The json entities, when the jdl declares no application. */
-  entities?: JDLJSONEntity[];
+  /**
+   * The applications, as they are declared; a jdl declaring entities but no application has one, the application it is
+   * imported into.
+   */
+  applications: JDLJSONApplication[];
   deployments: Partial<YoRcJHipsterDeploymentContent>[];
 };
 
@@ -452,59 +458,45 @@ function convertDeployment(deployment: ParsedJDLDeployment): Partial<YoRcJHipste
 export function astToJson(ast: ParsedJDLApplications, target: ImportTarget, runtime: JDLRuntime): JDLJSON {
   const entities = convertEntities(ast);
   const entityNames = [...entities.keys()];
+  const deployments = ast.deployments.map(deployment => convertDeployment(deployment));
+
+  // The application a jdl without application is imported into holds every entity, named `*` in them.
+  let applications: (ParsedJDLApplication | undefined)[] = [...ast.applications];
+  if (applications.length === 0 && entityNames.length > 0) {
+    applications = [undefined];
+  }
+
   const globalOptions = resolveEntityOptions(
     collectOptionStatements(ast.options, ast.useOptions, importTargetOptions(ast, target)),
     entityNames,
   );
-  const deployments = ast.deployments.map(deployment => convertDeployment(deployment));
-
-  if (ast.applications.length === 0) {
-    const withOptions = [...entities.values()].map(entity => {
-      applyOptions(entity, globalOptions.get(entity.name));
-      entity.applications.push('*');
-      return entity;
-    });
-    return { applications: [], entitiesPerApplication: new Map(), entities: withOptions, deployments };
-  }
-
-  const applications = ast.applications.map(application => convertApplicationConfig(application, runtime));
   for (const entity of entities.values()) {
     applyOptions(entity, globalOptions.get(entity.name));
   }
-  const entitiesPerApplication = new Map<string, JDLJSONEntity[]>();
-  const withoutEntities: string[] = [];
-  const applicationOptions: [ParsedJDLApplication, EntityOptions][] = [];
-  for (const application of ast.applications) {
-    const baseName = application.config.baseName ?? 'jhipster';
-    const applicationEntityNames = application.entities ?? [];
-    if (applicationEntityNames.length === 0) {
-      withoutEntities.push(baseName);
-      continue;
+  for (const application of applications) {
+    for (const entityName of application?.entities ?? entityNames) {
+      entities.get(entityName)?.applications.push(application ? (application.config.baseName ?? 'jhipster') : '*');
     }
-    for (const entityName of applicationEntityNames) {
-      entities.get(entityName)?.applications.push(baseName);
-    }
-    applicationOptions.push([
-      application,
-      resolveEntityOptions(collectOptionStatements(application.options ?? {}, application.useOptions ?? []), applicationEntityNames),
-    ]);
   }
-  for (const [application, options] of applicationOptions) {
-    const baseName = application.config.baseName ?? 'jhipster';
-    // An entity is kept once in an application, by its json name.
-    const applicationEntities = new Map<string, JDLJSONEntity>();
-    for (const entityName of application.entities!) {
-      const entity = entities.get(entityName);
-      if (entity) applicationEntities.set(entity.name, entity);
-    }
-    for (const [entityName, entityOptions] of options) {
-      const entity = applicationEntities.get(entityName);
-      if (entity) applyOptions(entity, entityOptions);
-    }
-    entitiesPerApplication.set(baseName, [...applicationEntities.values()]);
-  }
-  for (const baseName of withoutEntities) {
-    entitiesPerApplication.set(baseName, []);
-  }
-  return { applications, entitiesPerApplication, deployments };
+
+  return {
+    applications: applications.map(application => {
+      const applicationEntityNames = application?.entities ?? entityNames;
+      const applicationEntities = applicationEntityNames.map(entityName => entities.get(entityName)).filter(entity => entity !== undefined);
+      if (application) {
+        const options = resolveEntityOptions(
+          collectOptionStatements(application.options ?? {}, application.useOptions ?? []),
+          applicationEntityNames,
+        );
+        for (const entity of applicationEntities) {
+          applyOptions(entity, options.get(entity.name));
+        }
+      }
+      return {
+        config: application ? convertApplicationConfig(application, runtime) : undefined,
+        entities: [...new Set(applicationEntities)],
+      };
+    }),
+    deployments,
+  };
 }

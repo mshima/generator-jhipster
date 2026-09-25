@@ -33,7 +33,7 @@ const convert = (jdl: string, target: ImportTarget = {}) =>
 describe('jdl - astToJson', () => {
   describe('without application', () => {
     it('should convert the entities, for every application', () => {
-      const { entities, applications } = convert(`
+      const { applications } = convert(`
 /** An entity. */
 @ChangelogDate("20200101000000")
 entity A (a_table) {
@@ -50,8 +50,8 @@ enum Kind {
   TWO
 }
 `);
-      expect(applications).toEqual([]);
-      expect(entities).toMatchInlineSnapshot(`
+      expect(applications.map(application => application.config)).toEqual([undefined]);
+      expect(applications[0].entities).toMatchInlineSnapshot(`
 [
   {
     "angularJSSuffix": undefined,
@@ -111,11 +111,11 @@ enum Kind {
     });
 
     it('should give the entities of a microservice its name and client root folder', () => {
-      const { entities } = convert('entity A\nentity B\nmicroservice B with other', {
+      const [{ entities }] = convert('entity A\nentity B\nmicroservice B with other', {
         applicationName: 'ms',
         applicationType: 'microservice',
-      });
-      expect(entities!.map(({ name, microserviceName, clientRootFolder }) => ({ name, microserviceName, clientRootFolder }))).toEqual([
+      }).applications;
+      expect(entities.map(({ name, microserviceName, clientRootFolder }) => ({ name, microserviceName, clientRootFolder }))).toEqual([
         { name: 'A', microserviceName: undefined, clientRootFolder: 'ms' },
         { name: 'B', microserviceName: 'other', clientRootFolder: 'ms' },
       ]);
@@ -124,8 +124,8 @@ enum Kind {
 
   describe('relationships', () => {
     it('should make a relationship without injected field bidirectional', () => {
-      const { entities } = convert('entity A\nentity B\nrelationship OneToMany { A to B }');
-      expect(entities!.map(entity => entity.relationships)).toEqual([
+      const [{ entities }] = convert('entity A\nentity B\nrelationship OneToMany { A to B }').applications;
+      expect(entities.map(entity => entity.relationships)).toEqual([
         [
           {
             relationshipSide: 'left',
@@ -148,13 +148,13 @@ enum Kind {
     });
 
     it('should convert the options, the required sides and the built-in entities', () => {
-      const { entities } = convert(`
+      const [{ entities }] = convert(`
 entity A
 relationship ManyToOne {
   @OnDelete("CASCADE") A{user(login) required} to @Other User with builtInEntity
 }
-`);
-      expect(entities![0].relationships).toEqual([
+`).applications;
+      expect(entities[0].relationships).toEqual([
         {
           relationshipSide: 'left',
           relationshipType: 'many-to-one',
@@ -169,20 +169,20 @@ relationship ManyToOne {
     });
 
     it('should order the relationships by type, a relationship written twice once', () => {
-      const { entities } = convert(`
+      const [{ entities }] = convert(`
 entity A
 entity B
 relationship ManyToMany { A{b} to B{a} }
 relationship OneToOne { A{c} to B }
 relationship ManyToMany { A{b} to B{a} }
-`);
-      expect(entities![0].relationships.map(relationship => relationship.relationshipType)).toEqual(['one-to-one', 'many-to-many']);
+`).applications;
+      expect(entities[0].relationships.map(relationship => relationship.relationshipType)).toEqual(['one-to-one', 'many-to-many']);
     });
   });
 
   describe('with applications', () => {
     it('should convert each application and its entities', () => {
-      const { applications, entitiesPerApplication, entities } = convert(`
+      const { applications } = convert(`
 application {
   config {
     baseName one
@@ -206,8 +206,7 @@ entity A
 entity B
 paginate * with pagination
 `);
-      expect(entities).toBeUndefined();
-      expect(applications).toMatchInlineSnapshot(`
+      expect(applications.map(application => application.config)).toMatchInlineSnapshot(`
 [
   {
     "generator-jhipster": {
@@ -253,11 +252,10 @@ paginate * with pagination
   },
 ]
 `);
-      // The applications without entities come last.
-      expect([...entitiesPerApplication.keys()]).toEqual(['one', 'three', 'two']);
-      const [a] = entitiesPerApplication.get('one')!;
-      expect(a).toMatchObject({ name: 'A', dto: 'mapstruct', pagination: 'pagination', applications: ['one', 'three'] });
-      expect(entitiesPerApplication.get('three')!.map(entity => entity.name)).toEqual(['A', 'B']);
+      const [one, two, three] = applications;
+      expect(one.entities).toMatchObject([{ name: 'A', dto: 'mapstruct', pagination: 'pagination', applications: ['one', 'three'] }]);
+      expect(two.entities).toEqual([]);
+      expect(three.entities.map(entity => entity.name)).toEqual(['A', 'B']);
     });
   });
 

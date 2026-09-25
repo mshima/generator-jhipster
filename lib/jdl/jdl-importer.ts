@@ -22,7 +22,13 @@ import { APPLICATION_TYPE_KEY, type ApplicationType } from '../core/application-
 import { createJDLRuntime, getDefaultRuntime } from '../jdl-config/jdl-runtime.ts';
 import { readCurrentPathYoRcFile } from '../utils/yo-rc.ts';
 
-import { type ImportTarget, type JDLJSON, type JDLJSONEntity, astToJson } from './converters/ast-to-json/ast-to-json.ts';
+import {
+  type ImportTarget,
+  type JDLJSON,
+  type JDLJSONApplication,
+  type JDLJSONEntity,
+  astToJson,
+} from './converters/ast-to-json/ast-to-json.ts';
 import { GENERATOR_NAME } from './converters/exporters/export-utils.ts';
 import { exportJSONDeployments } from './converters/exporters/jhipster-deployment-exporter.ts';
 import exportEntities from './converters/exporters/jhipster-entity-exporter.ts';
@@ -139,13 +145,7 @@ function makeJDLImporter(content: ParsedJDLApplications, configuration: JDLAppli
     import: () => {
       checkSemanticErrors(content, runtime);
       const json = astToJson(content, getImportTarget(configuration), runtime);
-      if (content.applications.length === 0 && content.entities.length > 0) {
-        importState.exportedEntities = importOnlyEntities(json, configuration);
-      } else if (content.applications.length === 1) {
-        importState = importOneApplicationAndEntities(json);
-      } else {
-        importState = importApplicationsAndEntities(json);
-      }
+      importState = importApplications(json.applications, configuration);
       if (content.deployments.length > 0) {
         importState.exportedDeployments = importDeployments(json.deployments, configuration);
       }
@@ -181,7 +181,46 @@ function checkSemanticErrors(content: ParsedJDLApplications, runtime: JDLRuntime
   }
 }
 
-function importOnlyEntities(json: JDLJSON, configuration: JDLApplicationConfiguration) {
+/**
+ * Exports the entities of each application, merged with those on the disk. The application a jdl without application is
+ * imported into gives only its entities; the applications without entities come last.
+ */
+function importApplications(applications: JDLJSONApplication[], configuration: JDLApplicationConfiguration): ImportState {
+  const declared = applications.filter(application => application.config);
+  const importState: ImportState = {
+    exportedApplications: declared.map(application => application.config!),
+    exportedApplicationsWithEntities: {},
+    exportedEntities: [],
+    exportedDeployments: [],
+  };
+  const ordered = [
+    ...applications.filter(application => application.entities.length > 0),
+    ...applications.filter(application => application.entities.length === 0),
+  ];
+  for (const { config: yoRc, entities } of ordered) {
+    if (!yoRc) {
+      checkImportApplicationName(configuration);
+      importState.exportedEntities = exportJSONEntities(entities, configuration);
+      continue;
+    }
+    const { [GENERATOR_NAME]: config, ...remaining } = yoRc;
+    const applicationName = config.baseName!;
+    const exportedJSONEntities =
+      entities.length > 0 ?
+        exportJSONEntities(entities, {
+          applicationName,
+          applicationType: config[APPLICATION_TYPE_KEY],
+          forSeveralApplications: declared.length > 1,
+        })
+      : [];
+    importState.exportedApplicationsWithEntities[applicationName] = { config, ...remaining, entities: exportedJSONEntities };
+    importState.exportedEntities = uniqBy([...importState.exportedEntities, ...exportedJSONEntities], 'name');
+  }
+  return importState;
+}
+
+/** The entities of a jdl without application are imported into an application, which must be named. */
+function checkImportApplicationName(configuration: JDLApplicationConfiguration) {
   let { applicationName } = configuration;
 
   let { application } = configuration;
@@ -192,62 +231,6 @@ function importOnlyEntities(json: JDLJSON, configuration: JDLApplicationConfigur
   if (!applicationName) {
     throw new Error("The JDL object and its application's name are mandatory.");
   }
-  return exportJSONEntities(json.entities!, configuration);
-}
-
-function importOneApplicationAndEntities(json: JDLJSON) {
-  const importState: ImportState = {
-    exportedApplications: [],
-    exportedApplicationsWithEntities: {},
-    exportedEntities: [],
-    exportedDeployments: [],
-  };
-  const [formattedApplication] = json.applications;
-  importState.exportedApplications.push(formattedApplication);
-  const { [GENERATOR_NAME]: config, ...remaining } = formattedApplication;
-  const applicationName = config.baseName!;
-  const jsonEntities = json.entitiesPerApplication.get(applicationName)!;
-  importState.exportedApplicationsWithEntities[applicationName] = {
-    config,
-    ...remaining,
-    entities: [],
-  };
-  if (jsonEntities.length !== 0) {
-    const exportedJSONEntities = exportJSONEntities(jsonEntities, {
-      applicationName,
-      applicationType: config[APPLICATION_TYPE_KEY],
-      forSeveralApplications: false,
-    });
-    importState.exportedApplicationsWithEntities[applicationName].entities = exportedJSONEntities;
-    importState.exportedEntities = uniqBy([...importState.exportedEntities, ...exportedJSONEntities], 'name');
-  }
-  return importState;
-}
-
-function importApplicationsAndEntities(json: JDLJSON) {
-  const importState: ImportState = {
-    exportedApplications: json.applications,
-    exportedApplicationsWithEntities: {},
-    exportedEntities: [],
-    exportedDeployments: [],
-  };
-
-  json.entitiesPerApplication.forEach((jsonEntities, applicationName) => {
-    const exportedConfig = importState.exportedApplications.find(config => applicationName === config[GENERATOR_NAME].baseName)!;
-    const { [GENERATOR_NAME]: config, ...remaining } = exportedConfig;
-    const exportedJSONEntities = exportJSONEntities(jsonEntities, {
-      applicationName,
-      applicationType: config[APPLICATION_TYPE_KEY],
-      forSeveralApplications: true,
-    });
-    importState.exportedApplicationsWithEntities[applicationName] = {
-      config,
-      ...remaining,
-      entities: exportedJSONEntities,
-    };
-    importState.exportedEntities = uniqBy([...importState.exportedEntities, ...exportedJSONEntities], 'name');
-  });
-  return importState;
 }
 
 function importDeployments(deployments: JDLJSON['deployments'], configuration: JDLApplicationConfiguration) {
