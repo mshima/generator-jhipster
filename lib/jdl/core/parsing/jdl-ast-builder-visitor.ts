@@ -65,6 +65,15 @@ const parseStringLiteral = (image: string): string => image.slice(1, -1);
 
 const deduplicate = <T>(array: T[]): T[] => [...new Set(array)];
 
+/** Where the commas of a rule are, which separate the items of a block without being needed. */
+const commaLocations = (context: Record<string, unknown>): JDLLocation[] => ((context.COMMA ?? []) as IToken[]).map(tokenLocation);
+
+/** A `key value` declaration without its trailing comma. */
+const withoutComma = <T extends Record<string, unknown>>(context: T): Omit<T, 'COMMA'> => {
+  const { COMMA: _comma, ...declaration } = context;
+  return declaration;
+};
+
 /**
  * @param onWarning - receives the warnings about what the jdl uses, a deprecated option for instance, with where it is written.
  */
@@ -231,8 +240,11 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
       }
 
       const entity = setLocation({ annotations, name, tableName, body, documentation }, spanLocation(context));
-      // An entity without fields may be declared with or without braces.
-      return context.entityBody ? setOtherLocation(entity, 'bodyLocation', spanLocation(context.entityBody[0].children)) : entity;
+      if (!context.entityBody) return entity;
+      // An entity without fields may be declared with or without braces, and fields with or without commas between them.
+      const bodyChildren = context.entityBody[0].children;
+      setOtherLocation(entity, 'commaLocations', ((bodyChildren.COMMA ?? []) as IToken[]).map(tokenLocation));
+      return setOtherLocation(entity, 'bodyLocation', spanLocation(bodyChildren));
     }
 
     annotationDeclaration(context: Record<'AT' | 'value' | 'option', IToken[]>): ParsedJDLAnnotation {
@@ -337,9 +349,11 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
       const relationshipBodies = context.relationshipBody.map(element => this.visit(element));
 
       const declarationLocation = spanLocation(context);
+      const declarationCommas = commaLocations(context);
       relationshipBodies.forEach(relationshipBody => {
         relationshipBody.cardinality = cardinality;
         setOtherLocation(relationshipBody, 'declarationLocation', declarationLocation);
+        setOtherLocation(relationshipBody, 'commaLocations', declarationCommas);
       });
 
       return relationshipBodies;
@@ -424,7 +438,8 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
         documentation = trimComment(context.JAVADOC[0].image);
       }
 
-      return setLocation({ name, values, documentation }, spanLocation(context));
+      const jdlEnum = setLocation({ name, values, documentation }, spanLocation(context));
+      return setOtherLocation(jdlEnum, 'commaLocations', commaLocations(context.enumPropList[0].children));
     }
 
     enumPropList(context: Record<'enumProp', CstNode[]>): ParsedJDLEnumValue[] {
@@ -490,12 +505,17 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
       const keyLocations: Record<string, JDLLocation | undefined> = {};
 
       if (context.deploymentConfigDeclaration) {
-        const configProps: { key: string; value: string | boolean | string[]; location?: JDLLocation }[] =
+        const configProps: { key: string; value: string | boolean | string[]; location?: JDLLocation; commas: JDLLocation[] }[] =
           context.deploymentConfigDeclaration.map(element => this.visit(element));
         configProps.forEach(configProp => {
           config[configProp.key] = configProp.value;
           keyLocations[configProp.key] = configProp.location;
         });
+        setOtherLocation(
+          config,
+          'commaLocations',
+          configProps.flatMap(configProp => configProp.commas),
+        );
       }
 
       return setKeyLocations(setLocation(config, spanLocation(context)), keyLocations);
@@ -505,9 +525,9 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
       const key = context.NAME[0].image;
       const value = this.visit(context.deploymentConfigValue);
 
-      warnIfDeprecated(key, runtime.deploymentDefinition.optionTypes[key], 'deployment', context);
+      warnIfDeprecated(key, runtime.deploymentDefinition.optionTypes[key], 'deployment', withoutComma(context));
 
-      return { key, value, location: spanLocation(context) };
+      return { key, value, location: spanLocation(withoutComma(context)), commas: commaLocations(context) };
     }
 
     deploymentConfigValue(
@@ -612,6 +632,11 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
           config[configProp.key] = configProp.value;
           keyLocations[configProp.key] = configProp.location;
         });
+        setOtherLocation(
+          config,
+          'commaLocations',
+          configProps.flatMap(configProp => configProp.commas),
+        );
       }
 
       return { namespace, config: setKeyLocations(setLocation(config, spanLocation(context)), keyLocations) };
@@ -621,7 +646,7 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
       const key = context.NAME[0].image;
       const value = this.visit(context.namespaceConfigValue);
 
-      return { key, value, location: spanLocation(context) };
+      return { key, value, location: spanLocation(withoutComma(context)), commas: commaLocations(context) };
     }
 
     namespaceConfigValue(
@@ -660,6 +685,11 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
           config[configProp.key] = configProp.value;
           keyLocations[configProp.key] = configProp.location;
         });
+        setOtherLocation(
+          config,
+          'commaLocations',
+          configProps.flatMap(configProp => configProp.commas),
+        );
       }
 
       return setKeyLocations(config, keyLocations);
@@ -673,9 +703,9 @@ export const buildJDLAstBuilderVisitor = (runtime: JDLRuntime, onWarning: (messa
       const key = context.NAME[0].image;
       const value = this.visit(context.configValue);
 
-      warnIfDeprecated(key, runtime.applicationDefinition.optionTypes[key], 'application', context);
+      warnIfDeprecated(key, runtime.applicationDefinition.optionTypes[key], 'application', withoutComma(context));
 
-      return { key, value, location: spanLocation(context) };
+      return { key, value, location: spanLocation(withoutComma(context)), commas: commaLocations(context) };
     }
 
     configValue(context: Record<'INTEGER' | 'STRING' | 'BOOLEAN', IToken[]> & Record<'qualifiedName' | 'list' | 'quotedList', CstNode[]>) {

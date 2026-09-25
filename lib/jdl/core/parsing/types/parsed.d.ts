@@ -38,6 +38,11 @@ export type KeyLocated = {
   readonly keyLocations?: Record<string, JDLLocation | undefined>;
 };
 
+/** A block whose items may be separated by commas, which are never needed; the property is not enumerable. */
+export type CommaLocated = {
+  readonly commaLocations?: JDLLocation[];
+};
+
 export type ParsedJDLAnnotation = Located & {
   optionName: string;
   type: 'UNARY' | 'BINARY';
@@ -62,6 +67,8 @@ export type ParsedJDLEntityField = Located & {
 export type ParsedJDLEntity = Located & {
   /** Where the braces of the fields are, when the entity is declared with them; not enumerable. */
   readonly bodyLocation?: JDLLocation;
+  /** Where the commas between the fields are, which are never needed; not enumerable. */
+  readonly commaLocations?: JDLLocation[];
   name: string;
   tableName?: string;
   /** The javadoc comment before the declaration, null when there is none. */
@@ -69,9 +76,10 @@ export type ParsedJDLEntity = Located & {
   annotations?: ParsedJDLAnnotation[];
   body?: ParsedJDLEntityField[];
 };
-export type ParsedJDLApplicationConfig = KeyLocated & {
-  baseName: string;
-} & Record<string, any>;
+export type ParsedJDLApplicationConfig = KeyLocated &
+  CommaLocated & {
+    baseName: string;
+  } & Record<string, any>;
 
 export type ParsedJDLEnumValue = Located & {
   key: string;
@@ -79,12 +87,13 @@ export type ParsedJDLEnumValue = Located & {
   comment?: string;
 };
 
-export type ParsedJDLEnum = Located & {
-  name: string;
-  values: ParsedJDLEnumValue[];
-  /** The javadoc comment before the declaration, null when there is none. */
-  documentation?: string | null;
-};
+export type ParsedJDLEnum = Located &
+  CommaLocated & {
+    name: string;
+    values: ParsedJDLEnumValue[];
+    /** The javadoc comment before the declaration, null when there is none. */
+    documentation?: string | null;
+  };
 
 /**
  * The entities of an option; its key locations are where each entity name is written, its location the first statement
@@ -112,7 +121,7 @@ export type ParsedJDLUseOption = Located & {
 
 export type ParsedJDLApplication = Located & {
   config: ParsedJDLApplicationConfig;
-  namespaceConfigs?: Record<string, Located & KeyLocated & Record<string, boolean | number | string[] | string>>;
+  namespaceConfigs?: Record<string, Located & KeyLocated & CommaLocated & Record<string, boolean | number | string[] | string>>;
   entities?: string[];
   options?: Record<string, ParsedJDLOptionConfig | Record<string, ParsedJDLOptionConfig>>;
   useOptions?: ParsedJDLUseOption[];
@@ -121,6 +130,7 @@ export type ParsedJDLApplication = Located & {
 /** A deployment as written, one entry per option: they are checked after parsing, `deploymentType` included. */
 export type ParsedJDLDeployment = Located &
   KeyLocated &
+  CommaLocated &
   Record<string, string | boolean | string[] | undefined> & {
     deploymentType?: string;
     appsFolders?: string[];
@@ -144,6 +154,8 @@ export type ParsedJDLRelationshipOption = {
 export type ParsedJDLRelationship = Located & {
   /** Where the relationship declaration it is part of is, which may declare several; not enumerable. */
   readonly declarationLocation?: JDLLocation;
+  /** Where the commas between the relationships of its declaration are, which are never needed; not enumerable. */
+  readonly commaLocations?: JDLLocation[];
   from: ParsedJDLRelationshipSide;
   to: ParsedJDLRelationshipSide;
   cardinality: JDLRelationshipType;

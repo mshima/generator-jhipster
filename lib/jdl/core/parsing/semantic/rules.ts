@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 import { JDL_RELATIONSHIP_ONE_TO_ONE } from '../relationship-types.ts';
-import type { JDLLocation, ParsedJDLOptionConfig, ParsedJDLUseOption } from '../types/parsed.ts';
+import type { JDLLocation, ParsedJDLApplications, ParsedJDLOptionConfig, ParsedJDLUseOption } from '../types/parsed.ts';
 import type { JDLRuntime } from '../types/runtime.ts';
 
 import type { JDLSemanticRule } from './types.ts';
@@ -394,6 +394,86 @@ export const emptyEntityBody: JDLSemanticRule = {
       })),
 };
 
+/** A block whose items may be separated by commas: the fields of an entity, the options of a config, the values of an enum… */
+type JDLBlock = {
+  /** The block, as a message names it: `the entity A`. */
+  name: string;
+  items: { name: string; location?: JDLLocation }[];
+  commas: JDLLocation[];
+};
+
+const keyItems = (kind: string, keyLocations: Record<string, JDLLocation | undefined> = {}) =>
+  Object.entries(keyLocations).map(([key, location]) => ({ name: `${kind} ${key}`, location }));
+
+/** The blocks of a jdl whose items may be separated by commas, which are never needed. */
+const blocksWithCommas = (ast: ParsedJDLApplications): JDLBlock[] => [
+  ...ast.entities.map(entity => ({
+    name: `the entity ${entity.name}`,
+    items: (entity.body ?? []).map(field => ({ name: `field ${field.name}`, location: field.location })),
+    commas: entity.commaLocations ?? [],
+  })),
+  ...ast.enums.map(jdlEnum => ({
+    name: `the enum ${jdlEnum.name}`,
+    items: jdlEnum.values.map(value => ({ name: `value ${value.key}`, location: value.location })),
+    commas: jdlEnum.commaLocations ?? [],
+  })),
+  ...ast.applications.flatMap(application => [
+    {
+      name: `the config of the application ${application.config.baseName}`,
+      items: keyItems('option', application.config.keyLocations),
+      commas: application.config.commaLocations ?? [],
+    },
+    ...Object.entries(application.namespaceConfigs ?? {}).map(([namespace, config]) => ({
+      name: `the ${namespace} config of the application ${application.config.baseName}`,
+      items: keyItems('option', config.keyLocations),
+      commas: config.commaLocations ?? [],
+    })),
+  ]),
+  ...ast.deployments.map(deployment => ({
+    name: `the ${deployment.deploymentType} deployment`,
+    items: keyItems('option', deployment.keyLocations),
+    commas: deployment.commaLocations ?? [],
+  })),
+  // The relationships of a declaration, which all know its commas.
+  ...[...Map.groupBy(ast.relationships, relationship => relationship.declarationLocation?.startOffset).values()].map(relationships => ({
+    name: `the ${relationships[0].cardinality} declaration`,
+    items: relationships.map(({ from, to, location }) => ({ name: `relationship ${from.name} to ${to.name}`, location })),
+    commas: relationships[0].commaLocations ?? [],
+  })),
+];
+
+export const optionalComma: JDLSemanticRule = {
+  id: 'optional-comma',
+  check: ast =>
+    blocksWithCommas(ast).flatMap(({ name, items, commas }) =>
+      commas.map(comma => {
+        const previous = items.filter(item => (item.location?.endOffset ?? Infinity) < comma.startOffset).at(-1);
+        return {
+          severity: 'info' as const,
+          message: `The comma after the ${previous?.name} of ${name} is not needed.`,
+          location: comma,
+        };
+      }),
+    ),
+};
+
+export const onePerLine: JDLSemanticRule = {
+  id: 'one-per-line',
+  check: ast =>
+    blocksWithCommas(ast).flatMap(({ name, items }) => {
+      const located = items
+        .filter((item): item is { name: string; location: JDLLocation } => Boolean(item.location))
+        .sort((a, b) => a.location.startOffset - b.location.startOffset);
+      return located
+        .filter((item, index) => index > 0 && item.location.startLine === located[index - 1].location.endLine)
+        .map(item => ({
+          severity: 'info' as const,
+          message: `The ${item.name} of ${name} is on the line of the previous one, one per line reads better.`,
+          location: item.location,
+        }));
+    }),
+};
+
 export const individualRelationshipDeclaration: JDLSemanticRule = {
   id: 'individual-relationship-declaration',
   check: ast => {
@@ -435,5 +515,7 @@ export const semanticRules: JDLSemanticRule[] = [
   namespaceConfigBlueprint,
   unusedEnum,
   emptyEntityBody,
+  optionalComma,
+  onePerLine,
   individualRelationshipDeclaration,
 ];

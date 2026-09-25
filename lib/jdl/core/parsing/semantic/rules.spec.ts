@@ -387,12 +387,69 @@ describe('jdl - semantic rules', () => {
     });
   });
 
+  describe('optional-comma and one-per-line', () => {
+    // Every block whose items a comma may separate: none is needed, even between items on the same line.
+    const content = `entity A {
+  name String, age Integer,
+  size Integer
+}
+enum E { X, Y }
+application {
+  config { baseName a, applicationType monolith }
+  config(foo) { bar baz, qux quux }
+}
+deployment {
+  deploymentType docker-compose,
+  appsFolders [a, b]
+}
+relationship ManyToOne { A{e} to A, A{f} to A }`;
+    const suggestions = (ruleId: string) =>
+      suggest(content)
+        .filter(suggestion => suggestion.ruleId === ruleId)
+        .map(({ message, at }) => [message, at]);
+
+    it('suggests dropping every comma between items', () => {
+      expect(suggestions('optional-comma')).toEqual([
+        ['The comma after the field name of the entity A is not needed.', ','],
+        ['The comma after the field age of the entity A is not needed.', ','],
+        ['The comma after the value X of the enum E is not needed.', ','],
+        ['The comma after the option baseName of the config of the application a is not needed.', ','],
+        ['The comma after the option bar of the foo config of the application a is not needed.', ','],
+        ['The comma after the option deploymentType of the docker-compose deployment is not needed.', ','],
+        ['The comma after the relationship A to A of the ManyToOne declaration is not needed.', ','],
+      ]);
+    });
+
+    it('keeps the commas of a list', () => {
+      expect(suggest('application {\n  config {\n    baseName a\n    languages [en, fr]\n  }\n}')).toEqual([]);
+    });
+
+    it('suggests a line per item', () => {
+      expect(suggestions('one-per-line')).toEqual([
+        ['The field age of the entity A is on the line of the previous one, one per line reads better.', 'age Integer'],
+        ['The value Y of the enum E is on the line of the previous one, one per line reads better.', 'Y'],
+        [
+          'The option applicationType of the config of the application a is on the line of the previous one, one per line reads better.',
+          'applicationType monolith',
+        ],
+        [
+          'The option qux of the foo config of the application a is on the line of the previous one, one per line reads better.',
+          'qux quux',
+        ],
+        [
+          'The relationship A to A of the ManyToOne declaration is on the line of the previous one, one per line reads better.',
+          'A{f} to A',
+        ],
+      ]);
+    });
+  });
+
   describe('individual-relationship-declaration', () => {
     it('suggests grouping the declarations of a relationship type', () => {
       expect(
         suggest(
           'entity A\nentity B\nrelationship OneToMany { A to B }\nrelationship OneToMany { B to A }\nrelationship ManyToOne { A{b} to B, B{a} to A }',
-        ),
+        ).filter(suggestion => suggestion.ruleId === 'individual-relationship-declaration'),
       ).toEqual([
         {
           ruleId: 'individual-relationship-declaration',

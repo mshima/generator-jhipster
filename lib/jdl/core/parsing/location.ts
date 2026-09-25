@@ -89,8 +89,8 @@ export function setLocation<T extends object>(node: T, location: JDLLocation | u
   return node;
 }
 
-/** Attach another location to a node, not enumerable for the same reason as {@link setLocation}. */
-export function setOtherLocation<T extends object>(node: T, name: string, location: JDLLocation | undefined): T {
+/** Attach other locations to a node, not enumerable for the same reason as {@link setLocation}. */
+export function setOtherLocation<T extends object>(node: T, name: string, location: JDLLocation | JDLLocation[] | undefined): T {
   Object.defineProperty(node, name, { value: location, enumerable: false, writable: true, configurable: true });
   return node;
 }
