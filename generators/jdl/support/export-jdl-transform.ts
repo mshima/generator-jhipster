@@ -79,13 +79,15 @@ export const exportJDLTransform = ({
         const { jdlStore, jwtSecretKey, rememberMeKey, jhipsterVersion, creationTimestamp, incrementalChangelog, ...rest } =
           contents[GENERATOR_JHIPSTER];
 
+        const jdlStoreFile = jdlStoreFileInMemory ?? (loadFile(jdlStorePath) as ConflicterFile);
+        // What did not change is kept as written in the jdl store, comments included.
         const jdlContents = convertSingleContentToJDL(
           { ...contents, [GENERATOR_JHIPSTER]: { ...rest, incrementalChangelog } },
           definitions ? createJDLRuntime(definitions) : getDefaultRuntime(),
           entitiesMap,
+          { previousJDL: jdlStoreFile.contents?.toString() },
         );
 
-        const jdlStoreFile = jdlStoreFileInMemory ?? (loadFile(jdlStorePath) as ConflicterFile);
         jdlStoreFile.contents = Buffer.from(jdlContents);
         setModifiedFileState(jdlStoreFile);
         jdlStoreFile.conflicter = 'force';

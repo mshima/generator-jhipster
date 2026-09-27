@@ -390,6 +390,47 @@ noFluentMethod Region, Country, Location
     });
   });
   describe('convertSingleContentToJDL', () => {
+    describe('with the previous jdl', () => {
+      const runtime = getDefaultRuntime();
+      const yoRc = { 'generator-jhipster': { baseName: 'shop', applicationType: 'monolith' } } as any;
+      const entitiesWith = (priceType: string) =>
+        new Map<string, any>([
+          [
+            'Product',
+            {
+              name: 'Product',
+              documentation: 'A product.',
+              fields: [
+                { fieldName: 'name', fieldType: 'String', fieldValidateRules: ['required'] },
+                { fieldName: 'price', fieldType: priceType },
+              ],
+              relationships: [],
+            },
+          ],
+          ['Order', { name: 'Order', fields: [], relationships: [] }],
+        ]);
+      // The jdl exported before, commented and spaced by hand.
+      const previousJDL = convertSingleContentToJDL(yoRc, runtime, entitiesWith('BigDecimal'))
+        .replace('application {', '// The shop.\n\napplication {')
+        .replace('  name String required', '  name String required // kept')
+        .replace('entity Order', '\n// The orders.\nentity Order');
+
+      it('should keep the previous jdl as written when nothing changed', () => {
+        expect(convertSingleContentToJDL(yoRc, runtime, entitiesWith('BigDecimal'), { previousJDL })).toBe(previousJDL);
+      });
+
+      it('should change only what changed', () => {
+        expect(convertSingleContentToJDL(yoRc, runtime, entitiesWith('Integer'), { previousJDL })).toBe(
+          previousJDL.replace('price BigDecimal', 'price Integer'),
+        );
+      });
+
+      it('should replace a previous jdl that does not parse', () => {
+        expect(convertSingleContentToJDL(yoRc, runtime, entitiesWith('Integer'), { previousJDL: 'entity {' })).toBe(
+          convertSingleContentToJDL(yoRc, runtime, entitiesWith('Integer')),
+        );
+      });
+    });
     describe('with microservices attribute', () => {
       let jdl: string;
       beforeEach(() => {

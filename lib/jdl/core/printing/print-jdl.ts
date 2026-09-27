@@ -70,8 +70,21 @@ function partsOf(node: object): object[] {
   }
 }
 
-/** Whether a node is copied as written: it and the nodes it prints on their own have a location, none is new. */
-const isWritten = (node: object): boolean => locationOf(node) !== undefined && partsOf(node).every(part => locationOf(part) !== undefined);
+/**
+ * Marks a node as changed: printJDL prints it rather than copying it from the source, the text around it being kept.
+ * The nodes printJDL prints on their own are the statements, the fields, the enum values, the relationships and the
+ * statements of an application: mark the one holding what changed. Not enumerable, like the location.
+ */
+export function markChanged<T extends object>(node: T): T {
+  Object.defineProperty(node, 'changed', { value: true, enumerable: false, writable: true, configurable: true });
+  return node;
+}
+
+const isMarked = (node: object): boolean => (node as { changed?: boolean }).changed === true;
+
+/** Whether a node is copied as written: it and the nodes it prints on their own have a location, none is new or changed. */
+const isWritten = (node: object): boolean =>
+  locationOf(node) !== undefined && !isMarked(node) && partsOf(node).every(part => locationOf(part) !== undefined && !isMarked(part));
 
 /** A printed node without the indentation of its first line, which the copied text before it holds. */
 const withoutIndent = (printed: string) => printed.replace(/^[ \t]+/, '');
@@ -355,10 +368,12 @@ function printEntityHeader(entity: ParsedJDLEntity): string {
 }
 
 function printEntity(entity: ParsedJDLEntity, text: SourceText): string {
-  // The header of an entity holding a new field is copied as written.
+  // The header of an entity holding a new or changed field is copied as written, unless it changed too.
   const { location, bodyLocation } = entity as { location?: JDLLocation; bodyLocation?: JDLLocation };
   const writtenHeader =
-    location && bodyLocation ? text.slice(entity, location.startOffset, bodyLocation.startOffset)?.trimEnd() : undefined;
+    location && bodyLocation && !isMarked(entity) ?
+      text.slice(entity, location.startOffset, bodyLocation.startOffset)?.trimEnd()
+    : undefined;
   let printed = writtenHeader ?? printEntityHeader(entity);
   if (entity.body?.length) {
     const fields = printSequence(entity.body, field => printField(field), text, { indent: INDENT, separator: () => '\n' });
@@ -443,3 +458,13 @@ function printOption({ optionName, optionValue, list, excluded }: ParsedJDLOptio
 function printUse({ optionValues, list, excluded }: ParsedJDLUseOption): string {
   return `use ${optionValues.join(', ')} for ${printEntityList(list, excluded)}`;
 }
+
+/** The text printJDL writes for a node, without source: two nodes printing the same are equal. */
+export const printNode = {
+  statement: (statement: JDLStatement, runtime: JDLRuntime) => printStatement(statement, runtime, sourceText(true)),
+  applicationStatement: printApplicationStatement,
+  entityHeader: printEntityHeader,
+  field: printField,
+  enumValue: printEnumValue,
+  relationship: printRelationship,
+};

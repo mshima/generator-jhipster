@@ -24,6 +24,8 @@ import type { YoRcFileContent } from '../../constants/yeoman.ts';
 import type { YoRcJHipsterApplicationConfigValue, YoRcJHipsterApplicationContent } from '../../jhipster/types/yo-rc.ts';
 import { removeFieldsWithNullishValues } from '../../utils/object.ts';
 import { YO_RC_CONFIG_KEY, readEntityFile, readYoRcFile } from '../../utils/yo-rc.ts';
+import { parse } from '../core/parsing/api.ts';
+import { type JDLStatement, getStatements } from '../core/parsing/statements.ts';
 import type { JDLRuntime } from '../core/parsing/types/runtime.ts';
 import { printJDL } from '../core/printing/print-jdl.ts';
 import type { RawJDLJSONApplication } from '../core/types/exporter.ts';
@@ -31,6 +33,7 @@ import type { JSONEntity } from '../core/types/json-config.ts';
 import { doesDirectoryExist, doesFileExist } from '../core/utils/file-utils.ts';
 
 import { createJDLASTBuilder } from './json-to-jdl-ast.ts';
+import { reusePreviousStatements } from './reuse-previous-jdl.ts';
 
 type JDLASTBuilder = ReturnType<typeof createJDLASTBuilder>;
 
@@ -72,15 +75,32 @@ export function convertToJDL(runtime: JDLRuntime, directory = '.', output: strin
 
 /**
  * Converts an application, its `.yo-rc.json` content and its entities, to a jdl.
+ * @param options.previousJDL - the jdl the application was exported to before: what did not change is kept as written in
+ * it, comments and blanks included; a previous jdl that does not parse is replaced.
  */
 export function convertSingleContentToJDL(
   yoRcFileContent: YoRcJHipsterApplicationContent<Record<string, any>>,
   runtime: JDLRuntime,
   entities?: Map<string, JSONEntity>,
+  { previousJDL }: { previousJDL?: string } = {},
 ): string {
   const builder = createJDLASTBuilder(runtime);
   addApplication(builder, yoRcFileContent, entities);
-  return printJDL(builder.build(), runtime);
+  const statements = builder.build();
+  const previous = previousJDL ? parsePreviousJDL(previousJDL, runtime) : undefined;
+  if (previous) {
+    return printJDL(reusePreviousStatements(statements, previous, runtime), runtime);
+  }
+  return printJDL(statements, runtime);
+}
+
+/** The statements of a previous jdl; none when it does not parse. */
+function parsePreviousJDL(jdl: string, runtime: JDLRuntime): JDLStatement[] | undefined {
+  try {
+    return getStatements(parse(jdl, runtime, { onWarning: () => {} }));
+  } catch {
+    return undefined;
+  }
 }
 
 function addApplication(builder: JDLASTBuilder, yoRcFileContent: YoRcJHipsterApplicationContent, entities?: Map<string, JSONEntity>) {
