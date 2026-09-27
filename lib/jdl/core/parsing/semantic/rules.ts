@@ -455,6 +455,32 @@ export const namespaceConfigBlueprint: JDLSemanticRule = {
     }),
 };
 
+const BLUEPRINT_PREFIX = 'generator-jhipster-';
+
+/** A blueprint is named without its package prefix, which the conversion adds. */
+export const blueprintPrefix: JDLSemanticRule = {
+  id: 'blueprint-prefix',
+  check: ast =>
+    ast.applications.flatMap(application => {
+      const { blueprints } = application.config;
+      const prefixedBlueprints = (Array.isArray(blueprints) ? blueprints : [])
+        .filter(blueprint => typeof blueprint === 'string' && blueprint.startsWith(BLUEPRINT_PREFIX))
+        .map(blueprint => ({
+          severity: 'warning' as const,
+          message: `Write the blueprint ${blueprint} as ${blueprint.slice(BLUEPRINT_PREFIX.length)}: the ${BLUEPRINT_PREFIX} prefix is added.`,
+          location: application.config.keyLocations?.blueprints,
+        }));
+      const prefixedNamespaces = Object.entries(application.namespaceConfigs ?? {})
+        .filter(([namespace]) => namespace.startsWith(BLUEPRINT_PREFIX))
+        .map(([namespace, config]) => ({
+          severity: 'warning' as const,
+          message: `Write the namespace config ${namespace} as ${namespace.slice(BLUEPRINT_PREFIX.length)}: the ${BLUEPRINT_PREFIX} prefix is added.`,
+          location: config.location,
+        }));
+      return [...prefixedBlueprints, ...prefixedNamespaces];
+    }),
+};
+
 export const unusedEnum: JDLSemanticRule = {
   id: 'unused-enum',
   check: ast => {
@@ -520,6 +546,7 @@ export const semanticRules: JDLSemanticRule[] = [
   applicationOptionValue,
   deploymentOptionValue,
   namespaceConfigBlueprint,
+  blueprintPrefix,
   unusedEnum,
   emptyEntityBody,
   individualRelationshipDeclaration,

@@ -485,6 +485,36 @@ entity A`),
     });
   });
 
+  describe('blueprint-prefix', () => {
+    it('warns about a blueprint written with its package prefix, at the blueprints', () => {
+      expect(diagnose('application {\n  config { baseName a blueprints [generator-jhipster-foo, bar] }\n}')).toEqual([
+        {
+          ruleId: 'blueprint-prefix',
+          severity: 'warning',
+          message: 'Write the blueprint generator-jhipster-foo as foo: the generator-jhipster- prefix is added.',
+          at: 'blueprints [generator-jhipster-foo, bar]',
+        },
+      ]);
+    });
+    it('warns about a namespace config written with its package prefix, at the config', () => {
+      expect(
+        check(
+          'application {\n  config { baseName a blueprints [generator-jhipster-foo] }\n  config(generator-jhipster-foo) { bar baz }\n}',
+        ),
+      ).toEqual([
+        expect.objectContaining({ ruleId: 'blueprint-prefix', at: 'blueprints [generator-jhipster-foo]' }),
+        {
+          ruleId: 'blueprint-prefix',
+          message: 'Write the namespace config generator-jhipster-foo as foo: the generator-jhipster- prefix is added.',
+          at: 'config(generator-jhipster-foo) { bar baz }',
+        },
+      ]);
+    });
+    it('accepts the names without the prefix', () => {
+      expect(check('application {\n  config { baseName a blueprints [foo, bar] }\n  config(foo) { bar baz }\n}')).toEqual([]);
+    });
+  });
+
   describe('unused-enum', () => {
     it('suggests removing an enum no field uses', () => {
       expect(suggest('enum Used { X }\nenum Unused { Y }\nentity A {\n  used Used\n}')).toEqual([

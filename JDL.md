@@ -97,9 +97,9 @@ application {
     baseName store
     packageName com.mycompany.store
     languages [en, fr]
-    blueprints [generator-jhipster-foo]
+    blueprints [foo]
   }
-  config(generator-jhipster-foo) {
+  config(foo) {
     someOption someValue
   }
   entities * except Tag
@@ -122,10 +122,10 @@ Each `config` entry is `<key> <value>`, where the value is a boolean, an integer
 a quoted list, as the key requires. An unknown key, a value of the wrong kind, or a value the key does not allow is an error.
 Two keys matter to the JDL itself:
 
-| Key          | Meaning                                                                                                              |
-| ------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `baseName`   | The name of the application; when several applications are declared, each one is generated in a folder of that name. |
-| `blueprints` | A list of blueprint names. A `config(<blueprint>)` block is only accepted for a blueprint listed here.               |
+| Key          | Meaning                                                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `baseName`   | The name of the application; when several applications are declared, each one is generated in a folder of that name.                                                     |
+| `blueprints` | A list of blueprint names, written without the `generator-jhipster-` prefix, which is added. A `config(<blueprint>)` block is only accepted for a blueprint listed here. |
 
 Several applications may be declared in one file. An entity may belong to several applications. A relationship between
 entities of different applications is an error.
