@@ -29,6 +29,12 @@ export const mongoDbFiles = asWriteFilesSection<JavaApplication>({
       templates: ['config/DatabaseConfiguration.java'],
     },
     {
+      condition: generator => generator.reactive,
+      path: `${SERVER_MAIN_SRC_DIR}_package_/`,
+      renameTo: moveToJavaPackageSrcDir,
+      templates: ['config/StoredRelationshipsCallback.java'],
+    },
+    {
       condition: generator => generator.generateBuiltInUserEntity,
       path: `${SERVER_MAIN_SRC_DIR}_package_/`,
       renameTo: moveToJavaPackageSrcDir,

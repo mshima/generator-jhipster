@@ -1,0 +1,155 @@
+<%#
+ Copyright 2013-2026 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+package <%- packageName %>.config;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.data.mapping.PersistentPropertyAccessor;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.mongodb.core.mapping.MongoPersistentEntity;
+import org.springframework.data.mongodb.core.mapping.MongoPersistentProperty;
+import org.springframework.data.mongodb.core.mapping.event.ReactiveBeforeConvertCallback;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+/**
+ * Replaces the related entities of a document with their stored state before it is written.
+ * <p>
+ * Reactive MongoDB relationships are stored as embedded copies of the related documents. The copy is taken from the
+ * stored related document, looked up by id, so a relationship only depends on the id it was given. It holds the related
+ * document's own fields, without its relationships. A related document that does not exist is not stored.
+ */
+@Component
+public class StoredRelationshipsCallback implements ReactiveBeforeConvertCallback<Object> {
+
+    private final MongoMappingContext mappingContext;
+    private final ObjectProvider<ReactiveMongoTemplate> mongoTemplate;
+
+    public StoredRelationshipsCallback(MongoMappingContext mappingContext, ObjectProvider<ReactiveMongoTemplate> mongoTemplate) {
+        this.mappingContext = mappingContext;
+        this.mongoTemplate = mongoTemplate;
+    }
+
+    @Override
+    public Publisher<Object> onBeforeConvert(Object entity, String collection) {
+<%_ if (generateBuiltInUserEntity) { _%>
+        // The user's relationships are maintained by the user service.
+        if (entity instanceof <%- user.entityAbsoluteClass %>) {
+            return Mono.just(entity);
+        }
+<%_ } _%>
+        MongoPersistentEntity<?> persistentEntity = mappingContext.getPersistentEntity(entity.getClass());
+        if (persistentEntity == null) {
+            return Mono.just(entity);
+        }
+        PersistentPropertyAccessor<Object> accessor = persistentEntity.getPropertyAccessor(entity);
+        List<Mono<Void>> resolutions = new ArrayList<>();
+        for (MongoPersistentProperty property : persistentEntity) {
+            MongoPersistentEntity<?> relatedEntity = relatedDocument(property);
+            if (relatedEntity != null) {
+                resolutions.add(resolve(accessor, property, relatedEntity));
+            }
+        }
+        return Flux.concat(resolutions).then(Mono.just(entity));
+    }
+
+    private MongoPersistentEntity<?> relatedDocument(MongoPersistentProperty property) {
+        if (!property.isEntity()) {
+            return null;
+        }
+        Class<?> type = property.getActualType();
+        if (!type.isAnnotationPresent(Document.class)) {
+            // Embedded entities are values of the document itself.
+            return null;
+        }
+        return mappingContext.getPersistentEntity(type);
+    }
+
+    private Mono<Void> resolve(PersistentPropertyAccessor<Object> accessor, MongoPersistentProperty property, MongoPersistentEntity<?> relatedEntity) {
+        Object value = accessor.getProperty(property);
+        if (value == null) {
+            return Mono.empty();
+        }
+        Class<?> type = relatedEntity.getType();
+        if (property.isCollectionLike()) {
+            Set<Object> ids = new HashSet<>();
+            for (Object related : (Collection<?>) value) {
+                Object id = related == null ? null : relatedEntity.getIdentifierAccessor(related).getIdentifier();
+                if (id != null) {
+                    ids.add(id);
+                }
+            }
+            if (ids.isEmpty()) {
+                accessor.setProperty(property, new HashSet<>());
+                return Mono.empty();
+            }
+            return mongoTemplate
+                .getObject()
+                .find(Query.query(Criteria.where("_id").in(ids)), type)
+                .map(this::copyOf)
+                .collect(HashSet::new, Set::add)
+                .doOnNext(stored -> accessor.setProperty(property, stored))
+                .then();
+        }
+        Object id = relatedEntity.getIdentifierAccessor(value).getIdentifier();
+        if (id == null) {
+            accessor.setProperty(property, null);
+            return Mono.empty();
+        }
+        return mongoTemplate
+            .getObject()
+            .findById(id, type)
+            .map(this::copyOf)
+            .doOnNext(stored -> accessor.setProperty(property, stored))
+            .switchIfEmpty(Mono.fromRunnable(() -> accessor.setProperty(property, null)))
+            .then();
+    }
+
+    private Object copyOf(Object stored) {
+<%_ if (generateBuiltInUserEntity) { _%>
+        // Only the user's id and login are copied.
+        if (stored instanceof <%- user.entityAbsoluteClass %> user) {
+            <%- user.entityAbsoluteClass %> copy = new <%- user.entityAbsoluteClass %>();
+            copy.setId(user.getId());
+            copy.setLogin(user.getLogin());
+            return copy;
+        }
+<%_ } _%>
+        // The copy stops at the related document's own fields: its relationships are copies themselves, and keeping
+        // them would nest one more level on every save.
+        MongoPersistentEntity<?> storedEntity = mappingContext.getRequiredPersistentEntity(stored.getClass());
+        PersistentPropertyAccessor<Object> accessor = storedEntity.getPropertyAccessor(stored);
+        for (MongoPersistentProperty property : storedEntity) {
+            if (relatedDocument(property) != null) {
+                accessor.setProperty(property, property.isCollectionLike() ? new HashSet<>() : null);
+            }
+        }
+        return accessor.getBean();
+    }
+}
