@@ -21,7 +21,7 @@
 
 import { describe, expect, it } from 'esmocha';
 
-import { customCamelCase, pluralize } from './string-utils.ts';
+import { customCamelCase, pluralize, singularize } from './string-utils.ts';
 
 describe('jdl - StringUtils', () => {
   describe('pluralize', () => {
@@ -30,6 +30,14 @@ describe('jdl - StringUtils', () => {
     });
     it('should append an "s" when force is true', () => {
       expect(pluralize('UserData', { force: true })).toBe('UserDatas');
+    });
+  });
+  describe('singularize', () => {
+    it('should singularize a plural', () => {
+      expect(singularize('OrderItems')).toBe('OrderItem');
+    });
+    it('should keep a singular as it is', () => {
+      expect(singularize('OrderItem')).toBe('OrderItem');
     });
   });
   describe('customCamelCase', () => {

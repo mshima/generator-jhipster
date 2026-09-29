@@ -27,7 +27,7 @@ import type { Field as BaseField } from '../../lib/jhipster/types/field.ts';
 import type { Relationship as BaseRelationship } from '../../lib/jhipster/types/relationship.ts';
 import { buildMutateDataForProperty } from '../../lib/utils/derived-property.ts';
 import type { MutateDataParam, MutateDataPropertiesWithRequiredProperties } from '../../lib/utils/object.ts';
-import { pluralize } from '../../lib/utils/string-utils.ts';
+import { pluralize, singularize } from '../../lib/utils/string-utils.ts';
 import { formatDocAsApiDescription } from '../java/support/doc.ts';
 
 import { isFieldEnumType } from './internal/types/field-types.ts';
@@ -193,7 +193,9 @@ type BaseApplicationAddedRelationshipProperties = DerivedBooleanPropertiesOf<
 
     relationshipFieldName: string;
     relationshipFieldNamePlural: string;
+    relationshipFieldNameSingular: string;
     relationshipNamePlural: string;
+    relationshipNameSingular: string;
     relationshipNameHumanized: string;
 
     relationshipIgnoreBackReference?: boolean;
@@ -223,7 +225,9 @@ export const mutateRelationship = {
 
   relationshipFieldName: ({ relationshipName }) => lowerFirst(relationshipName),
   relationshipFieldNamePlural: ({ relationshipFieldName }) => pluralize(relationshipFieldName, { force: true }),
+  relationshipFieldNameSingular: ({ relationshipFieldName }) => singularize(relationshipFieldName),
   relationshipNamePlural: ({ relationshipName }) => pluralize(relationshipName, { force: true }),
+  relationshipNameSingular: ({ relationshipName }) => singularize(relationshipName),
   relationshipNameCapitalized: ({ relationshipName }) => upperFirst(relationshipName),
   relationshipNameHumanized: ({ relationshipName }) => startCase(relationshipName),
 
@@ -323,12 +327,15 @@ type BaseApplicationAddedEntityProperties = {
   entityNameCapitalized: string;
   entityNameKebabCase: string;
   entityNamePlural: string;
+  entityNameSingular: string;
   entityNamePluralizedAndSpinalCased: string;
   entityInstancePlural: string;
+  entityInstanceSingular: string;
   entityInstance: string;
 
   entityNameHumanized: string;
   entityNamePluralHumanized: string;
+  entityNameSingularHumanized: string;
 
   resetFakerSeed?(suffix?: string): void;
   generateFakeData?: (type?: 'csv' | 'cypress' | 'json-serializable' | 'ts') => any;
@@ -396,11 +403,14 @@ export const mutateEntity = {
   entityNameCapitalized: ({ name }) => upperFirst(name),
   entityNameKebabCase: ({ name }) => kebabCase(name),
   entityNamePlural: ({ name }) => pluralize(name, { force: true }),
+  entityNameSingular: ({ name }) => singularize(name),
   entityNamePluralizedAndSpinalCased: ({ name }) => kebabCase(pluralize(name, { force: false })),
   entityInstance: ({ name }) => lowerFirst(name),
   entityInstancePlural: ({ entityNamePlural }) => lowerFirst(entityNamePlural),
+  entityInstanceSingular: ({ entityNameSingular }) => lowerFirst(entityNameSingular),
   entityAuthority: ({ adminEntity }) => (adminEntity ? 'ROLE_ADMIN' : undefined),
 
   entityNameHumanized: ({ entityNameCapitalized }) => startCase(entityNameCapitalized),
   entityNamePluralHumanized: ({ entityNameHumanized }) => pluralize(entityNameHumanized, { force: false }),
+  entityNameSingularHumanized: ({ entityNameHumanized }) => singularize(entityNameHumanized),
 } as const satisfies MutateDataPropertiesWithRequiredProperties<MutateDataParam<Entity>, BaseApplicationAddedEntityProperties>;

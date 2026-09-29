@@ -58,6 +58,7 @@ export interface Relationship extends BaseApplicationRelationship, JavaAddedRela
   propertyDtoJavaType?: string;
   relationshipUpdateBackReference?: boolean;
   relationshipNameCapitalizedPlural?: string;
+  relationshipNameCapitalizedSingular?: string;
   ignoreOtherSideProperty?: boolean;
 }
 
@@ -79,6 +80,7 @@ export interface Entity<F extends Field = Field, R extends Relationship = Relati
 
   entityClass: string;
   entityClassPlural: string;
+  entityClassSingular: string;
   entityAbsoluteClass: string;
   /** Entity folder relative to project root */
   entityAbsoluteFolder: string;

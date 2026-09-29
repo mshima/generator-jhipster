@@ -43,3 +43,10 @@ export function pluralize(string: string, { force }: { force: boolean }): string
   }
   return plural;
 }
+
+/**
+ * Singularizes a string. Returns the string itself if it is already singular.
+ */
+export function singularize(string: string): string {
+  return pluralizeString.singular(string);
+}

@@ -20,7 +20,7 @@ import { kebabCase, upperFirst } from 'lodash-es';
 
 import type { MutateDataParam, MutateDataPropertiesWithRequiredProperties } from '../../lib/utils/object.ts';
 import { normalizePathEnd } from '../../lib/utils/path.ts';
-import { pluralize } from '../../lib/utils/string-utils.ts';
+import { pluralize, singularize } from '../../lib/utils/string-utils.ts';
 import { upperFirstCamelCase } from '../../lib/utils/string.ts';
 import type { Relationship as BaseApplicationRelationship } from '../base-application/types.d.ts';
 import type { Entity as CommonEntity, Field as CommonField, Relationship as CommonRelationship } from '../common/types.ts';
@@ -79,6 +79,7 @@ type ClientAddedEntityProperties = {
   entityTsName: string;
   entityAngularName: string;
   entityAngularNamePlural: string;
+  entityAngularNameSingular: string;
   entityReactName: string;
   entityStateName: string;
   entityUrl: string;
@@ -111,6 +112,7 @@ export const mutateEntity = {
 
   entityAngularName: data => data.entityTsName,
   entityAngularNamePlural: data => pluralize(data.entityAngularName, { force: true }),
+  entityAngularNameSingular: data => singularize(data.entityAngularName),
   entityReactName: data => data.entityTsName,
 } as const satisfies MutateDataPropertiesWithRequiredProperties<MutateDataParam<Entity>, ClientAddedEntityProperties>;
 

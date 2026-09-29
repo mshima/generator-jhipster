@@ -143,6 +143,7 @@ export default class ServerBootstrapGenerator extends BaseApplicationGenerator<S
           dtoSuffix: application.dtoSuffix ?? 'DTO',
           entityClass: ({ entityNameCapitalized }) => upperFirst(entityNameCapitalized),
           entityClassPlural: ({ entityNamePlural }) => upperFirst(entityNamePlural),
+          entityClassSingular: ({ entityNameSingular }) => upperFirst(entityNameSingular),
           entityTableName: ({ entityNameCapitalized }) => hibernateSnakeCase(entityNameCapitalized),
 
           persistClass: ({ entityClass, entitySuffix }) => `${entityClass}${entitySuffix ?? ''}`,
