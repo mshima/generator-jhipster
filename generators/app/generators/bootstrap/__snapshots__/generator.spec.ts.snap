@@ -1552,7 +1552,7 @@ exports[`generator - app:bootstrap with skipUserManagement should prepare Entity
   "entityAbsolutePackage": "com.mycompany.myapp",
   "entityAngularJSSuffix": "-js-suffix",
   "entityAngularName": "EntityAJsSuffix",
-  "entityAngularNamePlural": "EntityAJsSuffixes",
+  "entityAngularNamePlural": "EntityASJsSuffix",
   "entityAngularNameSingular": "EntityAJsSuffix",
   "entityApi": "",
   "entityApiDescription": undefined,

@@ -111,8 +111,9 @@ export const mutateEntity = {
   entityUrl: data => data.entityStateName,
 
   entityAngularName: data => data.entityTsName,
-  entityAngularNamePlural: data => pluralize(data.entityAngularName, { force: true }),
-  entityAngularNameSingular: data => singularize(data.entityAngularName),
+  entityAngularNamePlural: data =>
+    pluralize(upperFirst(data.entityNameCapitalized), { force: true }) + upperFirstCamelCase(data.entityAngularJSSuffix),
+  entityAngularNameSingular: data => singularize(upperFirst(data.entityNameCapitalized)) + upperFirstCamelCase(data.entityAngularJSSuffix),
   entityReactName: data => data.entityTsName,
 } as const satisfies MutateDataPropertiesWithRequiredProperties<MutateDataParam<Entity>, ClientAddedEntityProperties>;
 

@@ -4,7 +4,8 @@ exports[`mutation object test expects mutateEntity to match snapshot 1`] = `
 {
   "entityAngularJSSuffix": "-entityAngularJSSuffix",
   "entityAngularName": "EntityNameCapitalizedEntityAngularJsSuffix",
-  "entityAngularNamePlural": "EntityNameCapitalizedEntityAngularJsSuffixes",
+  "entityAngularNamePlural": "EntityNameCapitalizedsEntityAngularJsSuffix",
+  "entityAngularNameSingular": "EntityNameCapitalizedEntityAngularJsSuffix",
   "entityFileName": "entity-name-capitalized-entity-angular-js-suffix",
   "entityFolderName": "clientRootFolder/entity-name-capitalized-entity-angular-js-suffix",
   "entityModelFileName": "clientRootFolder/entity-name-capitalized-entity-angular-js-suffix",
