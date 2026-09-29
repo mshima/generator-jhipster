@@ -5,7 +5,6 @@ exports[`mutation object test expects mutateEntity to match snapshot 1`] = `
   "entityAngularJSSuffix": "-entityAngularJSSuffix",
   "entityAngularName": "EntityNameCapitalizedEntityAngularJsSuffix",
   "entityAngularNamePlural": "EntityNameCapitalizedsEntityAngularJsSuffix",
-  "entityAngularNameSingular": "EntityNameCapitalizedEntityAngularJsSuffix",
   "entityFileName": "entity-name-capitalized-entity-angular-js-suffix",
   "entityFolderName": "clientRootFolder/entity-name-capitalized-entity-angular-js-suffix",
   "entityModelFileName": "clientRootFolder/entity-name-capitalized-entity-angular-js-suffix",
@@ -14,6 +13,8 @@ exports[`mutation object test expects mutateEntity to match snapshot 1`] = `
   "entityServiceFileName": "entity-name-capitalized-entity-angular-js-suffix",
   "entityStateName": "entity-name-capitalized-entity-angular-js-suffix",
   "entityTsName": "EntityNameCapitalizedEntityAngularJsSuffix",
+  "entityTsNamePlural": "EntityNameCapitalizedsEntityAngularJsSuffix",
+  "entityTsNameSingular": "EntityNameCapitalizedEntityAngularJsSuffix",
   "entityUrl": "entity-name-capitalized-entity-angular-js-suffix",
 }
 `;

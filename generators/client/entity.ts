@@ -77,9 +77,10 @@ type ClientAddedEntityProperties = {
   /** Generate only the model at client side for relationships. */
   entityClientModelOnly?: boolean;
   entityTsName: string;
+  entityTsNamePlural: string;
+  entityTsNameSingular: string;
   entityAngularName: string;
   entityAngularNamePlural: string;
-  entityAngularNameSingular: string;
   entityReactName: string;
   entityStateName: string;
   entityUrl: string;
@@ -102,6 +103,9 @@ export const mutateEntity = {
     return entityAngularJSSuffix.startsWith('-') || !entityAngularJSSuffix ? entityAngularJSSuffix : `-${entityAngularJSSuffix}`;
   },
   entityTsName: data => upperFirst(data.entityNameCapitalized) + upperFirstCamelCase(data.entityAngularJSSuffix),
+  entityTsNamePlural: data =>
+    pluralize(upperFirst(data.entityNameCapitalized), { force: true }) + upperFirstCamelCase(data.entityAngularJSSuffix),
+  entityTsNameSingular: data => singularize(upperFirst(data.entityNameCapitalized)) + upperFirstCamelCase(data.entityAngularJSSuffix),
   entityFileName: data => kebabCase(data.entityNameCapitalized + upperFirst(data.entityAngularJSSuffix)),
   entityFolderName: data => `${normalizePathEnd(data.clientRootFolder)}${data.entityFileName}`,
   entityModelFileName: data => data.entityFolderName,
@@ -111,9 +115,7 @@ export const mutateEntity = {
   entityUrl: data => data.entityStateName,
 
   entityAngularName: data => data.entityTsName,
-  entityAngularNamePlural: data =>
-    pluralize(upperFirst(data.entityNameCapitalized), { force: true }) + upperFirstCamelCase(data.entityAngularJSSuffix),
-  entityAngularNameSingular: data => singularize(upperFirst(data.entityNameCapitalized)) + upperFirstCamelCase(data.entityAngularJSSuffix),
+  entityAngularNamePlural: data => data.entityTsNamePlural,
   entityReactName: data => data.entityTsName,
 } as const satisfies MutateDataPropertiesWithRequiredProperties<MutateDataParam<Entity>, ClientAddedEntityProperties>;
 
