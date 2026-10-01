@@ -53,6 +53,9 @@ const OID = {
   certBag: '1.2.840.113549.1.12.10.1.3',
 } as const;
 
+// RFC 5280: UTCTime for dates through 2049, GeneralizedTime from 2050 on, which a 99999 days validity reaches.
+const time = (value: Date) => new Time({ type: value.getUTCFullYear() < 2050 ? TimeType.UTCTime : TimeType.GeneralizedTime, value });
+
 const crypto = new CryptoEngine({ name: 'node', crypto: webcrypto });
 
 /**
@@ -84,13 +87,10 @@ export const createKeyStore = async ({ packageName }: { packageName: string }): 
   }).toBER();
   certificate.subject = RelativeDistinguishedNames.fromBER(name);
   certificate.issuer = RelativeDistinguishedNames.fromBER(name);
-  const notBefore = new Date();
-  // GeneralizedTime, required for dates from 2050 on, which a 99999 days validity reaches.
-  certificate.notBefore = new Time({ type: TimeType.GeneralizedTime, value: notBefore });
-  certificate.notAfter = new Time({
-    type: TimeType.GeneralizedTime,
-    value: new Date(notBefore.getTime() + KEY_STORE_VALIDITY_DAYS * 24 * 60 * 60 * 1000),
-  });
+  // Whole seconds: RFC 5280 forbids fractional seconds, which pkijs would encode in GeneralizedTime.
+  const notBefore = new Date(Math.floor(Date.now() / 1000) * 1000);
+  certificate.notBefore = time(notBefore);
+  certificate.notAfter = time(new Date(notBefore.getTime() + KEY_STORE_VALIDITY_DAYS * 24 * 60 * 60 * 1000));
   await certificate.subjectPublicKeyInfo.importKey(publicKey, crypto);
   await certificate.sign(privateKey, 'SHA-256', crypto);
 

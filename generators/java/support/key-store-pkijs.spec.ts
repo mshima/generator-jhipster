@@ -24,7 +24,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import type { BmpString, OctetString } from 'asn1js';
-import { CertBag, CryptoEngine, PFX, PKCS8ShroudedKeyBag } from 'pkijs';
+import { CertBag, Certificate, CryptoEngine, PFX, PKCS8ShroudedKeyBag, TimeType } from 'pkijs';
 
 import { createKeyStore } from './key-store-pkijs.ts';
 
@@ -76,6 +76,14 @@ describe('generator - java - support - key-store-pkijs', () => {
       expect(certificate.verify(certificate.publicKey)).toBe(true);
       const days = (certificate.validToDate.getTime() - certificate.validFromDate.getTime()) / (24 * 60 * 60 * 1000);
       expect(Math.round(days)).toBe(99999);
+    });
+
+    it('should encode the validity as UTCTime through 2049 and GeneralizedTime from 2050 on, as RFC 5280 requires', () => {
+      const { notBefore, notAfter } = Certificate.fromBER(keyStore.certificate.raw);
+      // UTCTime notBefore (now), GeneralizedTime notAfter (2300).
+      expect([notBefore.type, notAfter.type]).toEqual([TimeType.UTCTime, TimeType.GeneralizedTime]);
+      // Without fractional seconds.
+      expect(notAfter.value.getUTCMilliseconds()).toBe(0);
     });
 
     it('should generate a new key each time', async () => {
