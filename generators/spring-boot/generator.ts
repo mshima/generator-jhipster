@@ -29,7 +29,7 @@ import { editPropertiesFileCallback } from '../base-core/support/properties-file
 import type { Config as ClientConfig, Entity as ClientEntity } from '../client/types.ts';
 import type { Source as CommonSource } from '../common/types.ts';
 import { ADD_SPRING_MILESTONE_REPOSITORY } from '../generator-constants.ts';
-import { addJavaImport, generateKeyStoreContents, javaBeanCase } from '../java/support/index.ts';
+import { addJavaImport, createKeyStore, javaBeanCase } from '../java/support/index.ts';
 import type { JavaArtifactType } from '../java-simple-application/types.ts';
 import {
   getJavaValueGeneratorForType,
@@ -646,13 +646,10 @@ ${classProperties
         } else if (this.fs.exists(keyStoreFile)) {
           this.log.info(`KeyStore '${keyStoreFile}' already exists. Leaving unchanged.`);
         } else {
-          // `keytool` writes to the filesystem, route the KeyStore through the in-memory file system so that it goes
-          // through the commit pipeline like any other generated file, `--export-application` included.
-          const { contents, result } = await generateKeyStoreContents(keyStoreFile, { packageName: application.packageName! });
-          if (contents) {
-            this.writeDestination(keyStoreFile, contents);
-          }
-          this.validateResult(result);
+          // Written through the in-memory file system, the KeyStore goes through the commit pipeline like any other
+          // generated file, `--export-application` included.
+          this.writeDestination(keyStoreFile, await createKeyStore({ packageName: application.packageName! }));
+          this.log.info(`KeyStore '${keyStoreFile}' generated successfully.`);
         }
       },
     });
