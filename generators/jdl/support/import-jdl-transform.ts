@@ -20,16 +20,16 @@
 import { join } from 'node:path';
 import { Duplex } from 'node:stream';
 
-import { upperFirst } from 'lodash-es';
 import { loadFile } from 'mem-fs';
 import type { MemFsEditorFile } from 'mem-fs-editor';
 import { Minimatch } from 'minimatch';
 
+import { convertJDLToFiles } from '../../../lib/jdl/convert-jdl-to-files.ts';
 import type { JDLApplicationConfig, JDLDefinitions } from '../../../lib/jdl/core/parsing/types/parsing.ts';
-import { createImporterFromContent } from '../../../lib/jdl/jdl-importer.ts';
+import { createJDLRuntime } from '../../../lib/jdl-config/jdl-runtime.ts';
 import { mergeYoRcContent } from '../../../lib/utils/yo-rc.ts';
-import { GENERATOR_JHIPSTER } from '../../generator-constants.ts';
 import { resolveJDLDefinitions } from '../internal/jdl-definitions.ts';
+import { readGenerationTargets, toDestinationFiles } from '../internal/jdl-files.ts';
 
 export const importJDLTransform = ({
   destinationPath,
@@ -79,38 +79,25 @@ export const importJDLTransform = ({
     if (entityFields.length > 0) {
       throw new Error('Entities configuration files are not supported by jdlStore');
     }
-    const importer = createImporterFromContent(
+    const jdlFiles = convertJDLToFiles(
       jdlStoreContents.toString(),
-      undefined,
-      resolveJDLDefinitions({ jdlDefinitions, jdlDefinition }),
+      createJDLRuntime(resolveJDLDefinitions({ jdlDefinitions, jdlDefinition })),
     );
-    const importState = importer.import();
-    const applicationWithEntities = Object.values(importState.exportedApplicationsWithEntities);
-    if (applicationWithEntities.length !== 1) {
-      throw new Error(`JDL store supports only jdls with 1 application, found ${applicationWithEntities.length}`);
+    const destinationFiles = toDestinationFiles(jdlFiles);
+    const { applications } = readGenerationTargets(destinationFiles);
+    if (applications.length !== 1) {
+      throw new Error(`JDL store supports only jdls with 1 application, found ${applications.length}`);
     }
 
-    const { config, namespaceConfigs, entities } = applicationWithEntities[0];
-    const yoRcFile = loadFile(yoRcFilePath) as MemFsEditorFile;
-    const yoRcContents = yoRcFileInMemory?.contents ?? yoRcFile.contents;
-
-    yoRcFile.contents = Buffer.from(
-      JSON.stringify(
-        mergeYoRcContent(yoRcContents ? JSON.parse(yoRcContents.toString()) : {}, {
-          ...namespaceConfigs,
-          [GENERATOR_JHIPSTER]: config,
-        }),
-        null,
-        2,
-      ),
-    );
-
-    yield yoRcFile;
-
-    for (const entity of entities) {
-      const configFile = join(entitiesFolder, `${upperFirst(entity.name)}.json`);
-      const file = loadFile(configFile) as MemFsEditorFile;
-      file.contents = Buffer.from(JSON.stringify(entity, null, 2));
+    // The application config is merged with the one in memory, the deployments config with the one on the disk.
+    for (const [path, content] of Object.entries(destinationFiles)) {
+      const file = loadFile(join(destinationPath, path)) as MemFsEditorFile;
+      if (path === '.yo-rc.json' || path.endsWith('/.yo-rc.json')) {
+        const contents = path === '.yo-rc.json' ? (yoRcFileInMemory?.contents ?? file.contents) : file.contents;
+        file.contents = Buffer.from(JSON.stringify(mergeYoRcContent(contents ? JSON.parse(contents.toString()) : {}, content), null, 2));
+      } else {
+        file.contents = Buffer.from(JSON.stringify(content, null, 2));
+      }
       yield file;
     }
   });

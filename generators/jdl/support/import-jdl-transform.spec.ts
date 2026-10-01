@@ -64,4 +64,18 @@ describe('generator - jdl - importJDLTransform', () => {
       'generator-jhipster': { baseName: 'foo', myOption: true },
     });
   });
+
+  it('writes the deployments in the folder of their type', async () => {
+    const jdlStore = {
+      path: jdlStorePath,
+      contents: Buffer.from('application { config { baseName foo } }\ndeployment { deploymentType docker-compose appsFolders [foo] }'),
+    } as MemFsEditorFile;
+    const files: MemFsEditorFile[] = await Readable.from([jdlStore])
+      .compose(importJDLTransform({ destinationPath, jdlStorePath }))
+      .toArray();
+    const deployment = files.find(file => file.path === join(destinationPath, 'docker-compose', '.yo-rc.json'))!;
+    expect(JSON.parse(deployment.contents!.toString())).toMatchObject({
+      'generator-jhipster': { deploymentType: 'docker-compose', appsFolders: ['foo'] },
+    });
+  });
 });
