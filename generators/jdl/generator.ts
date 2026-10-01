@@ -19,7 +19,6 @@
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 
-import { upperFirst } from 'lodash-es';
 import { type Store as MemFs, create as createMemFs } from 'mem-fs';
 import { type MemFsEditor, type MemFsEditorFile, create as createMemFsEditor } from 'mem-fs-editor';
 import { isFilePending } from 'mem-fs-editor/state';
@@ -28,16 +27,17 @@ import { downloadJdlFile } from '../../cli/download.ts';
 import EnvironmentBuilder from '../../cli/environment-builder.ts';
 import { CLI_NAME } from '../../cli/utils.ts';
 import type { YoRcFileContent } from '../../lib/constants/yeoman.ts';
-import { type ApplicationWithEntities, createImporterFromContent } from '../../lib/jdl/jdl-importer.ts';
-import { normalizeBlueprintName } from '../../lib/utils/blueprint-name.ts';
+import { convertJDLToFiles } from '../../lib/jdl/convert-jdl-to-files.ts';
+import { applyStackConfig } from '../../lib/jdl/converters/ast-to-files/stack-config.ts';
+import { createJDLRuntime } from '../../lib/jdl-config/jdl-runtime.ts';
 import { mergeYoRcContent } from '../../lib/utils/yo-rc.ts';
 import BaseGenerator from '../base/index.ts';
 import { updateApplicationEntitiesTransform } from '../base-application/support/update-application-entities-transform.ts';
 import type { Options as BootstrapOptions } from '../bootstrap/types.d.ts';
-import { GENERATOR_JHIPSTER, JHIPSTER_CONFIG_DIR } from '../generator-constants.ts';
 import type { Options as GitOptions } from '../git/types.d.ts';
 
 import { allNewApplications, resolveJDLDefinitions } from './internal/index.ts';
+import { type JDLApplication, isDeploymentConfig, readGenerationTargets, toDestinationFiles } from './internal/jdl-files.ts';
 import type { Config as JdlConfig, Options as JdlOptions } from './types.ts';
 
 /**
@@ -50,7 +50,7 @@ const toJdlFile = (file: string): string => {
   return file;
 };
 
-type ApplicationWithEntitiesAndPath = ApplicationWithEntities & { folder?: string; sharedFs?: MemFs<MemFsEditorFile> };
+type ApplicationWithEntitiesAndPath = JDLApplication & { sharedFs?: MemFs<MemFsEditorFile> };
 
 export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
   jdlFiles?: string[];
@@ -70,10 +70,12 @@ export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
   createEnvBuilder = EnvironmentBuilder.createDefaultBuilder;
   existingProject?: boolean;
 
+  /** The json files of the jdl, by path relative to the destination root. */
+  files!: Record<string, Record<string, any>>;
   applications!: ApplicationWithEntitiesAndPath[];
-  exportedApplicationsWithEntities!: Record<string, ApplicationWithEntities>;
-  exportedEntities!: any[];
-  exportedDeployments!: any[];
+  /** The entities of a jdl without application. */
+  entityNames!: string[];
+  deploymentFolders!: string[];
 
   async beforeQueue() {
     if (!this.fromBlueprint) {
@@ -139,30 +141,28 @@ export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
         }
       },
       async parseJDL() {
-        const importer = createImporterFromContent(
-          this.jdlContents.join('\n'),
-          {
-            applicationName: this.options.baseName ?? (this.existingProject ? this.jhipsterConfig.baseName : undefined),
-            applicationType: this.options.applicationType ?? (this.existingProject ? this.jhipsterConfig.applicationType : undefined),
-            // Deployment configuration is written through the in-memory file system, like the application one.
-            skipDeploymentFileGeneration: true,
-          },
-          resolveJDLDefinitions(this.options),
+        const target = {
+          applicationName: this.options.baseName ?? (this.existingProject ? this.jhipsterConfig.baseName : undefined),
+          applicationType: this.options.applicationType ?? (this.existingProject ? this.jhipsterConfig.applicationType : undefined),
+        };
+        this.files = toDestinationFiles(
+          applyStackConfig(convertJDLToFiles(this.jdlContents.join('\n'), createJDLRuntime(resolveJDLDefinitions(this.options)))),
         );
+        const { applications, entityNames, deploymentFolders } = readGenerationTargets(this.files);
+        if (applications.length === 0 && entityNames.length > 0 && !target.applicationName) {
+          throw new Error(
+            'A jdl declaring entities without application is imported into an application: run it in the folder of one, or pass its base name.',
+          );
+        }
 
-        const importState = importer.import();
-
-        this.exportedDeployments = importState.exportedDeployments;
-        this.exportedEntities = importState.exportedEntities;
-        this.exportedApplicationsWithEntities = importState.exportedApplicationsWithEntities;
-
-        const applicationsWithEntities = Object.values(importState.exportedApplicationsWithEntities);
+        this.entityNames = entityNames;
+        this.deploymentFolders = deploymentFolders;
         this.applications =
-          applicationsWithEntities.length === 1 ?
-            applicationsWithEntities
+          applications.length === 1 ?
+            applications
           : [
-              ...applicationsWithEntities.filter((app: ApplicationWithEntitiesAndPath) => app.config.applicationType === 'gateway'),
-              ...applicationsWithEntities.filter((app: ApplicationWithEntitiesAndPath) => app.config.applicationType !== 'gateway'),
+              ...applications.filter(app => app.config.applicationType === 'gateway'),
+              ...applications.filter(app => app.config.applicationType !== 'gateway'),
             ];
       },
       configure() {
@@ -175,34 +175,19 @@ export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
         this.reproducible = allNew;
       },
       customizeApplication() {
-        for (const app of this.applications) {
-          app.config.entities = app.entities.map(entity => entity.name);
-        }
-        if (this.applications.length > 1) {
+        if (this.applications.length > 1 && !this.interactive && !this.jsonOnly && !this.ignoreApplication) {
           for (const app of this.applications) {
-            app.folder = app.config.baseName;
-            if (!this.interactive && !this.jsonOnly && !this.ignoreApplication) {
-              app.sharedFs = createMemFs();
-            }
+            app.sharedFs = createMemFs();
           }
         }
       },
       async generateJson() {
+        this.writeJDLFiles();
         if (this.applications.length === 0) {
-          this.writeConfig({ entities: this.exportedEntities });
           await this.env.sharedFs.pipeline(
             { refresh: true },
             updateApplicationEntitiesTransform({ destinationPath: this.destinationPath(), throwOnMissingConfig: false }),
           );
-        } else {
-          this.writeConfig(...this.applications.map(app => (this.ignoreApplication ? { ...app, config: undefined } : app)));
-        }
-
-        if (!this.ignoreDeployments) {
-          // Deployment configuration must be in place before the workspaces generator looks deployments up.
-          for (const deployment of this.exportedDeployments ?? []) {
-            this.writeDeploymentConfig(deployment[GENERATOR_JHIPSTER].deploymentType, deployment);
-          }
         }
       },
       async generate() {
@@ -214,9 +199,8 @@ export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
 
         if (this.ignoreApplication !== false && (this.ignoreApplication || this.applications.length === 0)) {
           if (this.applications.length === 0) {
-            const entities = this.exportedEntities;
             await this.composeWithJHipster(this.entitiesGenerator, {
-              generatorArgs: entities.map(entity => entity.name),
+              generatorArgs: this.entityNames,
               generatorOptions: {
                 ...generatorOptions,
                 // Generation should match entities command behavior.
@@ -226,7 +210,7 @@ export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
           } else {
             for (const app of this.applications) {
               await this.composeWithJHipster(this.entitiesGenerator, {
-                generatorArgs: app.entities.map(entity => entity.name),
+                generatorArgs: app.entityNames,
                 generatorOptions: {
                   ...generatorOptions,
                   destinationRoot: app.folder ? this.destinationPath(app.folder) : undefined,
@@ -239,7 +223,7 @@ export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
           await this.composeWithJHipster(this.workspacesGenerator as 'workspaces', {
             generatorOptions: {
               /** TODO types contains appsFolders which is not correctly handled, {@see file:../workspaces/command.ts} */
-              workspacesFolders: this.applications.map(app => app.folder!),
+              workspacesFolders: this.applications.map(app => app.folder),
               generateApplications: async () => this.runNonInteractive(this.applications, generatorOptions),
             } as any,
           });
@@ -258,25 +242,23 @@ export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
   get end() {
     return this.asEndTaskGroup({
       async generateDeployments() {
-        if (!this.exportedDeployments?.length) {
+        if (!this.deploymentFolders?.length) {
           this.log.info('No deployment configured');
           return;
         }
         if (this.ignoreDeployments) {
-          this.log.info(`Ignoring ${this.exportedDeployments.length} deployments`);
+          this.log.info(`Ignoring ${this.deploymentFolders.length} deployments`);
           return;
         }
 
-        this.log.info(`Generating ${this.exportedDeployments.length} deployments`);
-        for (const deployment of this.exportedDeployments) {
-          const deploymentConfig = deployment[GENERATOR_JHIPSTER];
-          const { deploymentType } = deploymentConfig;
-          this.log.debug(`Generating deployment: ${JSON.stringify(deploymentConfig, null, 2)}`);
+        this.log.info(`Generating ${this.deploymentFolders.length} deployments`);
+        for (const folder of this.deploymentFolders) {
+          this.log.debug(`Generating deployment in ${folder}`);
 
-          // The deployment generator delegates to the one of the deploymentType, in the folder named after it.
+          // The deployment generator delegates to the one of the deploymentType, in the folder of the deployment.
           await this.composeWithJHipster('deployment', {
             generatorOptions: {
-              destinationRoot: this.destinationPath(deploymentType),
+              destinationRoot: this.destinationPath(folder),
               force: true,
             },
           });
@@ -335,43 +317,26 @@ export default class JdlGenerator extends BaseGenerator<JdlConfig, JdlOptions> {
   }
 
   /**
-   * Writes the deployment `.yo-rc.json` through the in-memory file system, so that it goes through the commit
-   * pipeline like every other generated file.
+   * Writes the json files of the jdl, merged with the files written before: a `.yo-rc.json` keeps the config the jdl does
+   * not set, an entity keeps its changelog date; the files of an application with its own in-memory file system go to it.
+   * The applications config is left out with ignoreApplication, the deployments config with ignoreDeployments.
    */
-  writeDeploymentConfig(deploymentType: string, deployment: Record<string, any>) {
-    const configFile = this.destinationPath(deploymentType, '.yo-rc.json');
-    const oldConfig: YoRcFileContent = this.fs.readJSON(configFile, {}) as YoRcFileContent;
-    this.fs.writeJSON(configFile, mergeYoRcContent(oldConfig, deployment as YoRcFileContent));
-  }
-
-  writeConfig(...applications: Partial<ApplicationWithEntitiesAndPath>[]) {
-    for (const application of applications) {
-      const { folder = '', entities = [], sharedFs } = application;
-      let { config, namespaceConfigs } = application;
-
-      const appPath = folder ? `${folder}/` : folder;
+  writeJDLFiles() {
+    const sharedFsByFolder = new Map(this.applications.filter(app => app.sharedFs).map(app => [app.folder, app.sharedFs!]));
+    for (const [path, content] of Object.entries(this.files)) {
+      const isYoRc = path === '.yo-rc.json' || path.endsWith('/.yo-rc.json');
+      if (isYoRc && (isDeploymentConfig(content) ? this.ignoreDeployments : this.ignoreApplication)) continue;
+      const sharedFs = sharedFsByFolder.get(path.includes('/') ? path.slice(0, path.indexOf('/')) : '');
       const fs: MemFsEditor = sharedFs ? createMemFsEditor(sharedFs) : this.fs;
-      if (config) {
-        const configFile = this.destinationPath(`${appPath}.yo-rc.json`);
-        const oldConfig: YoRcFileContent = fs.readJSON(configFile, {}) as YoRcFileContent;
-        if (Array.isArray(config.blueprints)) {
-          config = {
-            ...config,
-            blueprints: config.blueprints.map(({ name, ...remaining }) => ({ ...remaining, name: normalizeBlueprintName(name) })),
-          };
-        }
-        if (namespaceConfigs) {
-          namespaceConfigs = Object.fromEntries(
-            Object.entries(namespaceConfigs).map(([ns, config]) => [normalizeBlueprintName(ns), config]),
-          );
-        }
-
-        fs.writeJSON(configFile, mergeYoRcContent(oldConfig, { ...namespaceConfigs, [GENERATOR_JHIPSTER]: config }));
-      }
-      for (const entity of entities) {
-        const configFile = this.destinationPath(`${appPath}${JHIPSTER_CONFIG_DIR}/${upperFirst(entity.name)}.json`);
-        const oldConfig: any = fs.readJSON(configFile, {});
-        fs.writeJSON(configFile, { ...oldConfig, ...entity });
+      const file = this.destinationPath(path);
+      if (isYoRc) {
+        fs.writeJSON(file, mergeYoRcContent(fs.readJSON(file, {}) as YoRcFileContent, content as YoRcFileContent));
+      } else {
+        const oldConfig: any = fs.readJSON(file, {});
+        // An entity written before keeps its changelog date, which the jdl may not set.
+        const changelogDate = content.annotations?.changelogDate ?? oldConfig.annotations?.changelogDate;
+        const annotations = changelogDate ? { ...content.annotations, changelogDate } : content.annotations;
+        fs.writeJSON(file, { ...oldConfig, ...content, ...(annotations ? { annotations } : {}) });
       }
     }
   }

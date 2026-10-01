@@ -4,10 +4,6 @@ exports[`generator - jdl --json-only option for two applications and entity jdl 
 {
   "jhipster/.jhipster/Foo.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster"
-  ],
   "fields": [],
   "name": "Foo",
   "relationships": []
@@ -30,10 +26,6 @@ exports[`generator - jdl --json-only option for two applications and entity jdl 
   },
   "jhipster2/.jhipster/Bar.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster2"
-  ],
   "fields": [],
   "name": "Bar",
   "relationships": []
@@ -76,10 +68,6 @@ exports[`generator - jdl for one application and entity jdl with --ignore-applic
 {
   ".jhipster/Foo.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster"
-  ],
   "fields": [],
   "name": "Foo",
   "relationships": []
@@ -94,10 +82,6 @@ exports[`generator - jdl for one application and entity jdl with valid jdl shoul
 {
   ".jhipster/Foo.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster"
-  ],
   "fields": [],
   "name": "Foo",
   "relationships": []
@@ -124,10 +108,6 @@ exports[`generator - jdl for two applications and entity jdl with --ignore-appli
 {
   "jhipster/.jhipster/Foo.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster"
-  ],
   "fields": [],
   "name": "Foo",
   "relationships": []
@@ -137,10 +117,6 @@ exports[`generator - jdl for two applications and entity jdl with --ignore-appli
   },
   "jhipster2/.jhipster/Bar.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster2"
-  ],
   "fields": [],
   "name": "Bar",
   "relationships": []
@@ -245,10 +221,6 @@ exports[`generator - jdl with a gateway generating json should generate expected
 {
   ".jhipster/Bar.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "gatewayApp"
-  ],
   "fields": [],
   "microserviceName": "ms",
   "name": "Bar",
@@ -280,10 +252,6 @@ exports[`generator - jdl with a microservices stack generating json should gener
 {
   "gatewayApp/.jhipster/Bar.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "gatewayApp"
-  ],
   "fields": [],
   "name": "Bar",
   "relationships": []
@@ -293,11 +261,6 @@ exports[`generator - jdl with a microservices stack generating json should gener
   },
   "gatewayApp/.jhipster/Foo.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster",
-    "gatewayApp"
-  ],
   "fields": [],
   "name": "Foo",
   "relationships": []
@@ -322,11 +285,6 @@ exports[`generator - jdl with a microservices stack generating json should gener
   },
   "jhipster/.jhipster/Foo.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster",
-    "gatewayApp"
-  ],
   "fields": [],
   "name": "Foo",
   "relationships": []

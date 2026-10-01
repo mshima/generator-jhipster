@@ -54,7 +54,7 @@ describe(`generator - ${generator}`, () => {
           inline: 'entity Foo {}',
           db: 'postgresql',
         }),
-      ).rejects.toThrow("The JDL object and its application's name are mandatory.");
+      ).rejects.toThrow('A jdl declaring entities without application is imported into an application');
     });
 
     describe('with valid parameters', () => {
@@ -128,6 +128,41 @@ describe(`generator - ${generator}`, () => {
     it('should compose with the generator of the deploymentType, through the deployment generator', () => {
       runResult.assertGeneratorComposedOnce(MOCKED_DOCKER_COMPOSE);
     });
+    it('should write the deployment config in the folder of the deploymentType', () => {
+      runResult.assertJsonFileContent('docker-compose/.yo-rc.json', {
+        'generator-jhipster': { deploymentType: 'docker-compose', appsFolders: ['foo'] },
+      });
+    });
+  });
+
+  describe('for deployment jdl with several applications', () => {
+    before(async () => {
+      await helpers
+        .runJHipster(generator)
+        .withMockedGenerators(mockedGenerators)
+        .withOptions({
+          inline: `application { config { baseName foo } }
+application { config { baseName bar } }
+deployment { deploymentType docker-compose
+ appsFolders [foo, bar] }`,
+        });
+    });
+
+    it('should write the deployment config in the folder of the deploymentType', () => {
+      runResult.assertJsonFileContent('docker-compose/.yo-rc.json', {
+        'generator-jhipster': { deploymentType: 'docker-compose', appsFolders: ['foo', 'bar'] },
+      });
+    });
+  });
+
+  describe('for a jdl declaring only deployments', () => {
+    before(async () => {
+      await helpers
+        .runJHipster(generator)
+        .withMockedGenerators(mockedGenerators)
+        .withOptions({ inline: 'deployment { deploymentType docker-compose\n appsFolders [foo] }' });
+    });
+
     it('should write the deployment config in the folder of the deploymentType', () => {
       runResult.assertJsonFileContent('docker-compose/.yo-rc.json', {
         'generator-jhipster': { deploymentType: 'docker-compose', appsFolders: ['foo'] },
@@ -418,6 +453,21 @@ describe(`generator - ${generator}`, () => {
           });
         });
       });
+
+      describe('in a microservice', () => {
+        before(async () => {
+          await helpers
+            .runJHipster(generator)
+            .withJHipsterConfig({ baseName: 'store', applicationType: 'microservice' })
+            .withOptions({ jsonOnly: true, inline: 'entity Foo\nentity Bar\nclientRootFolder Bar with shop' });
+        });
+
+        it('should write the entities as the jdl declares them, the server generator giving them the microservice', () => {
+          runResult.assertNoJsonFileContent('.jhipster/Foo.json', { microserviceName: 'store' });
+          runResult.assertNoJsonFileContent('.jhipster/Foo.json', { clientRootFolder: 'store' });
+          runResult.assertJsonFileContent('.jhipster/Bar.json', { clientRootFolder: 'shop' });
+        });
+      });
     });
 
     describe('for application jdl', () => {
@@ -620,9 +670,6 @@ relationship ManyToOne {
     "entityFalse": false,
     "entityZero": 0
   },
-  "applications": [
-    "jhipster"
-  ],
   "fields": [
     {
       "fieldName": "annotatedField",
@@ -655,10 +702,6 @@ relationship ManyToOne {
   },
   ".jhipster/RelatedEntity.json": {
     "contents": "{
-  "annotations": {},
-  "applications": [
-    "jhipster"
-  ],
   "fields": [],
   "name": "RelatedEntity",
   "relationships": [
