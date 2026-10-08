@@ -30,16 +30,6 @@ export function doesFileExist(file: string): boolean {
 }
 
 /**
- * Checks the directory exists.
- * @param directory the directory to check.
- * @returns whether the directory exists and is actually a directory.
- */
-export function doesDirectoryExist(directory: string): boolean {
-  const statObject = getStatObject(directory);
-  return statObject && statObject.isDirectory();
-}
-
-/**
  * Creates a directory, if it doesn't exist already.
  * @param directory the directory to create.
  * @throws WrongDirException if the directory to create exists and is a file.

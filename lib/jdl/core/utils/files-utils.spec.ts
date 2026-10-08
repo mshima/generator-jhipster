@@ -24,7 +24,7 @@ import path from 'node:path';
 import { getPackageRoot } from '../../../index.ts';
 import { getTestFile } from '../__test-support__/index.ts';
 
-import { createFolderIfItDoesNotExist, doesDirectoryExist, doesFileExist } from './file-utils.ts';
+import { createFolderIfItDoesNotExist, doesFileExist } from './file-utils.ts';
 
 describe('jdl - FileUtils', () => {
   describe('doesFileExist', () => {
@@ -43,26 +43,6 @@ describe('jdl - FileUtils', () => {
       describe('with a valid file path', () => {
         it('should return true', () => {
           expect(doesFileExist(getTestFile('MyEntity.json'))).toBe(true);
-        });
-      });
-    });
-  });
-  describe('doesDirectoryExist', () => {
-    describe('when checking a directory path', () => {
-      describe('with a nil directory path', () => {
-        it('return false', () => {
-          // @ts-expect-error
-          expect(doesDirectoryExist()).toBe(false);
-        });
-      });
-      describe('with an invalid directory path', () => {
-        it('should return false', () => {
-          expect(doesDirectoryExist(path.join(import.meta.dirname, 'invalid-folder'))).toBe(false);
-        });
-      });
-      describe('with a valid directory path', () => {
-        it('should return true', () => {
-          expect(doesDirectoryExist(import.meta.dirname)).toBe(true);
         });
       });
     });

@@ -20,11 +20,7 @@ import { camelCase, upperFirst } from 'lodash-es';
 
 import type { JDLRelationshipType } from '../parsing/relationship-types.ts';
 
-import { type RelationshipType, relationshipTypes } from './relationships.ts';
+import type { RelationshipType } from './relationships.ts';
 
 export const asJdlRelationshipType = (type: RelationshipType | JDLRelationshipType): JDLRelationshipType =>
   upperFirst(camelCase(type)) as JDLRelationshipType;
-
-export const relationshipTypeExists = (relationship: JDLRelationshipType) => Object.values(relationshipTypes).includes(relationship);
-
-export default relationshipTypes;

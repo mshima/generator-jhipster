@@ -19,14 +19,17 @@
 
 import { before, describe, expect, it } from 'esmocha';
 
-import { convertSingleContentToJDL } from '../../../../../lib/jdl/converters/json-to-jdl-converter.ts';
+import { filesToAst } from 'jdl-parser/jhipster';
+
 import { type ImportState, createImporterFromContent } from '../../../../../lib/jdl/jdl-importer.ts';
-import { getDefaultRuntime } from '../../../../../lib/jdl-config/jdl-runtime.ts';
+import { createJDLParserRuntime } from '../../../../jdl/internal/jdl-parser.ts';
 
 const optionName = 'routes';
 
 describe('generators - spring-cloud:gateway - jdl', () => {
-  const runtime = getDefaultRuntime();
+  /** The jdl of a .yo-rc.json, as the export-jdl generator writes it. */
+  const exportJDL = (config: Record<string, any>) =>
+    filesToAst({ '.yo-rc.json': { 'generator-jhipster': config } }, createJDLParserRuntime()).jdl;
 
   it('should not accept route and port', () => {
     expect(() => createImporterFromContent(`application { config { ${optionName} ["blog:123"] } }`)).toThrow(
@@ -97,7 +100,7 @@ describe('generators - spring-cloud:gateway - jdl', () => {
     let jdl: string;
 
     before(() => {
-      jdl = convertSingleContentToJDL({ 'generator-jhipster': { baseName: 'bar', [optionName]: [] } }, runtime);
+      jdl = exportJDL({ baseName: 'bar', [optionName]: [] });
     });
 
     it('should export a jdl it imports', () => {
@@ -109,12 +112,7 @@ describe('generators - spring-cloud:gateway - jdl', () => {
     let jdl: string;
 
     before(() => {
-      jdl = convertSingleContentToJDL(
-        {
-          'generator-jhipster': { baseName: 'bar', [optionName]: ['blog:blog_host:123', 'store:store_host', 'notification'] },
-        },
-        runtime,
-      );
+      jdl = exportJDL({ baseName: 'bar', [optionName]: ['blog:blog_host:123', 'store:store_host', 'notification'] });
     });
 
     it('should set expected value', () => {

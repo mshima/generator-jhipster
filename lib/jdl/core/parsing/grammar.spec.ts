@@ -23,17 +23,21 @@ import { APPLICATION_TYPE_MICROSERVICE } from '../../../core/application-types.t
 import { getDefaultJDLEntityConfig } from '../../../jdl-config/jdl-entity-config.ts';
 import { createJDLRuntime, getDefaultRuntime } from '../../../jdl-config/jdl-runtime.ts';
 import { getDefaultJDLValidationConfig } from '../../../jdl-config/jdl-validation-config.ts';
-import { relationshipTypes } from '../basic-types/index.ts';
 import { binaryOptions, unaryOptions, validations } from '../built-in-options/index.ts';
 import { parseFromContent as originalParseFromContent } from '../readers/jdl-reader.ts';
 import logger from '../utils/objects/logger.ts';
 
+import {
+  JDL_RELATIONSHIP_MANY_TO_MANY as MANY_TO_MANY,
+  JDL_RELATIONSHIP_MANY_TO_ONE as MANY_TO_ONE,
+  JDL_RELATIONSHIP_ONE_TO_MANY as ONE_TO_MANY,
+  JDL_RELATIONSHIP_ONE_TO_ONE as ONE_TO_ONE,
+} from './relationship-types.ts';
 import type { ParsedJDLApplications, ParsedJDLOption } from './types/parsed.ts';
 
 const runtime = getDefaultRuntime();
 const parseFromContent = (content: string) => originalParseFromContent(content, runtime);
 
-const { ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY, ONE_TO_ONE } = relationshipTypes;
 const {
   Validations: { MAX, MAXBYTES, MAXLENGTH, MIN, MINBYTES, MINLENGTH, PATTERN, REQUIRED, UNIQUE },
 } = validations;

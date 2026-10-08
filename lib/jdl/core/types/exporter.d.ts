@@ -38,17 +38,3 @@ export type PostProcessedJDLJSONApplication = JDLJSONApplication<
     microfrontends?: JDLJSONMicrofrontend[];
   } & JDLJSONApplicationContent
 >;
-
-export type RawJDLJSONApplication = JDLJSONApplication<
-  {
-    entityNames?: string;
-    blueprints?: string[];
-    microfrontends?: string[];
-  } & JDLJSONApplicationContent
->;
-
-export type JhipsterJSONJDLApplicationExporter = {
-  forSeveralApplications?: boolean;
-  name: string;
-  type: string;
-};
