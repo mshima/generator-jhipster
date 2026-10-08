@@ -698,7 +698,6 @@ relationship ManyToOne {
   },
   ".jhipster/RelatedEntity.json": {
     "contents": "{
-  "annotations": {},
   "applications": [
     "jhipster"
   ],

@@ -19,8 +19,6 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { ApplicationWithEntities } from '../../../lib/jdl/jdl-importer.ts';
-
 /**
  * Check if .yo-rc.json exists inside baseName folder.
  * @param {string} baseName
@@ -34,7 +32,7 @@ export const baseNameConfigExists = (baseName?: string) =>
  * @param {any} importState
  * @return {boolean}
  */
-export const allNewApplications = (applications: ApplicationWithEntities[]) => {
+export const allNewApplications = (applications: { config: { baseName?: string } }[]) => {
   if (applications.length < 2) return !baseNameConfigExists();
   return !applications.some(application => baseNameConfigExists(application.config.baseName));
 };
