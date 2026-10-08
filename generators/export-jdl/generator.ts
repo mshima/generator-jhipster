@@ -16,13 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import chalk from 'chalk';
 
-import { convertToJDL } from '../../lib/jdl/converters/json-to-jdl-converter.ts';
-import { createJDLRuntime, getDefaultRuntime } from '../../lib/jdl-config/jdl-runtime.ts';
+import chalk from 'chalk';
+import { filesToAst } from 'jdl-parser/jhipster';
+
 import { CommandCoreGenerator } from '../base-core/generator.ts';
 import CoreGenerator from '../base-core/index.ts';
-import { resolveJDLDefinitions } from '../jdl/internal/jdl-definitions.ts';
+import { createJDLParserRuntime, describeDiagnostic, readJDLJsonFiles, resolveJDLDefinitions } from '../jdl/internal/index.ts';
 
 import type command from './command.ts';
 
@@ -33,16 +33,19 @@ export default class extends CommandCoreGenerator<typeof command> {
   get [CoreGenerator.DEFAULT]() {
     return this.asAnyTaskGroup({
       convertToJDL() {
-        try {
-          const jdlDefinitions = resolveJDLDefinitions(this.options);
-          const runtime = jdlDefinitions ? createJDLRuntime(jdlDefinitions) : getDefaultRuntime();
-          const jdlObject = convertToJDL(runtime, this.destinationPath(), false);
-          if (jdlObject) {
-            this.jdlContent = jdlObject.toString();
-          }
-        } catch (error: unknown) {
-          throw new Error(`An error occurred while exporting to JDL: ${(error as Error).message}\n${error}`, { cause: error });
+        // The application of the destination, or the ones of its folders.
+        const files = readJDLJsonFiles(this.fs, this.destinationPath());
+        if (Object.keys(files).length === 0) {
+          return;
         }
+        const { jdl, diagnostics, errors } = filesToAst(files, createJDLParserRuntime(resolveJDLDefinitions(this.options)));
+        for (const diagnostic of diagnostics.filter(diagnostic => diagnostic.severity !== 'info')) {
+          this.log.warn(describeDiagnostic(diagnostic));
+        }
+        for (const { file, path, message } of errors) {
+          this.log.warn(`${file}${path.length > 0 ? ` ${path.join('.')}` : ''}: ${message}`);
+        }
+        this.jdlContent = jdl;
       },
     });
   }

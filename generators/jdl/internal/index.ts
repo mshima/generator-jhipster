@@ -19,3 +19,4 @@
 export * from './jdl-definitions.ts';
 export * from './utils.ts';
 export * from './jdl-parser.ts';
+export * from './jdl-files.ts';

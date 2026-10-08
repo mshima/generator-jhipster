@@ -5,31 +5,47 @@ exports[`generator - export-jdl exports entities to a JDL file with file argumen
   "custom-app.jdl": {
     "contents": "application {
   config {
-    applicationType monolith
-    authenticationType session
     baseName standard
-    buildTool gradle
-    cacheProvider ehcache
     creationTimestamp 1577836800000
+    packageName com.mycompany.myapp
+    serverPort 8080
+    authenticationType session
+    cacheProvider ehcache
+    enableHibernateCache true
+    websocket no
     databaseType sql
     devDatabaseType h2Memory
-    enableHibernateCache true
-    enableTranslation true
-    jhiPrefix jhi
-    jhipsterVersion "3.7.1"
-    languages [en]
-    nativeLanguage en
-    packageName com.mycompany.myapp
     prodDatabaseType postgresql
-    rememberMeKey "5f1100e7eae25e2abe32d7b2031ac1f2acc778d8"
     searchEngine no
-    serverPort 8080
+    buildTool gradle
+    rememberMeKey "5f1100e7eae25e2abe32d7b2031ac1f2acc778d8"
+    applicationType monolith
+    jhiPrefix jhi
+    enableTranslation true
+    nativeLanguage en
+    languages [en]
     skipClient true
     skipServer true
-    websocket no
+  }
+
+  config(jhipster) {
+    jhipsterVersion "3.7.1"
+    packageFolder "com/mycompany/myapp"
   }
 
   entities Country, Department, Employee, Job, JobHistory, Region, Task
+
+  noFluentMethod Department, Employee
+  dto Country, Department, Job, JobHistory, Region, Task with no
+  dto Employee with mapstruct
+  service Country, Department, Job, JobHistory, Region, Task with no
+  service Employee with serviceClass
+  pagination Country, Department, Region, Task with no
+  pagination Employee, JobHistory with infinite-scroll
+  pagination Job with pagination
+  microservice Employee with mymicroservice
+  search Employee with elasticsearch
+  angularSuffix Employee with myentities
 }
 
 entity Country (country) {
@@ -91,30 +107,24 @@ enum Language {
 }
 
 relationship OneToOne {
-  Country{region} to Region{country}
-  JobHistory{job} to Job
-  JobHistory{department} to Department
-  JobHistory{employee} to Employee
+  Country{region(id)} to Region{country}
+  Department{location(id)} to Location
 }
 relationship OneToMany {
-  Department{employee required} to @DestinationAnnotation Employee{department(foo)}
-  Employee{job} to Job{employee}
+  @DestinationAnnotation Department{employee required} to Employee{department(foo)}
+  Employee{job} to Job{employee(id)}
 }
 relationship ManyToOne {
-  Employee{manager} to Employee
+  Employee{manager(id)} to Employee
 }
 relationship ManyToMany {
   Job{task(title)} to Task{job required}
 }
-
-noFluentMethod Department, Employee
-dto Employee with mapstruct
-paginate Employee, JobHistory with infinite-scroll
-paginate Job with pagination
-service Employee with serviceClass
-search Employee with elasticsearch
-angularSuffix Employee with myentities
-microservice Employee with mymicroservice
+relationship OneToOne {
+  JobHistory{job(id)} to Job
+  JobHistory{department(id)} to Department
+  JobHistory{employee(id)} to Employee
+}
 ",
     "stateCleared": "modified",
   },
@@ -126,31 +136,47 @@ exports[`generator - export-jdl exports entities to a JDL file without argument 
   "standard.jdl": {
     "contents": "application {
   config {
-    applicationType monolith
-    authenticationType session
     baseName standard
-    buildTool gradle
-    cacheProvider ehcache
     creationTimestamp 1577836800000
+    packageName com.mycompany.myapp
+    serverPort 8080
+    authenticationType session
+    cacheProvider ehcache
+    enableHibernateCache true
+    websocket no
     databaseType sql
     devDatabaseType h2Memory
-    enableHibernateCache true
-    enableTranslation true
-    jhiPrefix jhi
-    jhipsterVersion "3.7.1"
-    languages [en]
-    nativeLanguage en
-    packageName com.mycompany.myapp
     prodDatabaseType postgresql
-    rememberMeKey "5f1100e7eae25e2abe32d7b2031ac1f2acc778d8"
     searchEngine no
-    serverPort 8080
+    buildTool gradle
+    rememberMeKey "5f1100e7eae25e2abe32d7b2031ac1f2acc778d8"
+    applicationType monolith
+    jhiPrefix jhi
+    enableTranslation true
+    nativeLanguage en
+    languages [en]
     skipClient true
     skipServer true
-    websocket no
+  }
+
+  config(jhipster) {
+    jhipsterVersion "3.7.1"
+    packageFolder "com/mycompany/myapp"
   }
 
   entities Country, Department, Employee, Job, JobHistory, Region, Task
+
+  noFluentMethod Department, Employee
+  dto Country, Department, Job, JobHistory, Region, Task with no
+  dto Employee with mapstruct
+  service Country, Department, Job, JobHistory, Region, Task with no
+  service Employee with serviceClass
+  pagination Country, Department, Region, Task with no
+  pagination Employee, JobHistory with infinite-scroll
+  pagination Job with pagination
+  microservice Employee with mymicroservice
+  search Employee with elasticsearch
+  angularSuffix Employee with myentities
 }
 
 entity Country (country) {
@@ -212,30 +238,24 @@ enum Language {
 }
 
 relationship OneToOne {
-  Country{region} to Region{country}
-  JobHistory{job} to Job
-  JobHistory{department} to Department
-  JobHistory{employee} to Employee
+  Country{region(id)} to Region{country}
+  Department{location(id)} to Location
 }
 relationship OneToMany {
-  Department{employee required} to @DestinationAnnotation Employee{department(foo)}
-  Employee{job} to Job{employee}
+  @DestinationAnnotation Department{employee required} to Employee{department(foo)}
+  Employee{job} to Job{employee(id)}
 }
 relationship ManyToOne {
-  Employee{manager} to Employee
+  Employee{manager(id)} to Employee
 }
 relationship ManyToMany {
   Job{task(title)} to Task{job required}
 }
-
-noFluentMethod Department, Employee
-dto Employee with mapstruct
-paginate Employee, JobHistory with infinite-scroll
-paginate Job with pagination
-service Employee with serviceClass
-search Employee with elasticsearch
-angularSuffix Employee with myentities
-microservice Employee with mymicroservice
+relationship OneToOne {
+  JobHistory{job(id)} to Job
+  JobHistory{department(id)} to Department
+  JobHistory{employee(id)} to Employee
+}
 ",
     "stateCleared": "modified",
   },
