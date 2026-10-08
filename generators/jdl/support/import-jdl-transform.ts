@@ -20,16 +20,22 @@
 import { join } from 'node:path';
 import { Duplex } from 'node:stream';
 
-import { upperFirst } from 'lodash-es';
 import { loadFile } from 'mem-fs';
 import type { MemFsEditorFile } from 'mem-fs-editor';
+import { resetFileState } from 'mem-fs-editor/state';
 import { Minimatch } from 'minimatch';
 
 import type { JDLApplicationConfig, JDLDefinitions } from '../../../lib/jdl/core/parsing/types/parsing.ts';
-import { createImporterFromContent } from '../../../lib/jdl/jdl-importer.ts';
 import { mergeYoRcContent } from '../../../lib/utils/yo-rc.ts';
 import { GENERATOR_JHIPSTER } from '../../generator-constants.ts';
 import { resolveJDLDefinitions } from '../internal/jdl-definitions.ts';
+import { convertJDL, createJDLParserRuntime } from '../internal/jdl-parser.ts';
+
+/**
+ * The root `.yo-rc.json` of the files of the jdl store, the parent of the folder of its application: the jdl as written
+ * and the files written from it, in memory only.
+ */
+export const jdlStoreRootYoRcPath = (destinationPath: string) => join(destinationPath, '..', '.yo-rc.json');
 
 export const importJDLTransform = ({
   destinationPath,
@@ -79,38 +85,36 @@ export const importJDLTransform = ({
     if (entityFields.length > 0) {
       throw new Error('Entities configuration files are not supported by jdlStore');
     }
-    const importer = createImporterFromContent(
+    const { ast, files: jdlFiles, rootYoRc } = convertJDL(
       jdlStoreContents.toString(),
-      undefined,
-      resolveJDLDefinitions({ jdlDefinitions, jdlDefinition }),
+      createJDLParserRuntime(resolveJDLDefinitions({ jdlDefinitions, jdlDefinition })),
     );
-    const importState = importer.import();
-    const applicationWithEntities = Object.values(importState.exportedApplicationsWithEntities);
-    if (applicationWithEntities.length !== 1) {
-      throw new Error(`JDL store supports only jdls with 1 application, found ${applicationWithEntities.length}`);
+    const applications = ast.body.filter(statement => statement.type === 'Application').length;
+    if (applications !== 1) {
+      throw new Error(`JDL store supports only jdls with 1 application, found ${applications}`);
     }
 
-    const { config, namespaceConfigs, entities } = applicationWithEntities[0];
-    const yoRcFile = loadFile(yoRcFilePath) as MemFsEditorFile;
-    const yoRcContents = yoRcFileInMemory?.contents ?? yoRcFile.contents;
-
-    yoRcFile.contents = Buffer.from(
-      JSON.stringify(
-        mergeYoRcContent(yoRcContents ? JSON.parse(yoRcContents.toString()) : {}, {
-          ...namespaceConfigs,
-          [GENERATOR_JHIPSTER]: config,
-        }),
-        null,
-        2,
-      ),
-    );
-
-    yield yoRcFile;
-
-    for (const entity of entities) {
-      const configFile = join(entitiesFolder, `${upperFirst(entity.name)}.json`);
-      const file = loadFile(configFile) as MemFsEditorFile;
-      file.contents = Buffer.from(JSON.stringify(entity, null, 2));
+    // The files of the application, the ones of the destination, without the deployments.
+    for (const [path, content] of Object.entries(jdlFiles)) {
+      if (content[GENERATOR_JHIPSTER]?.deploymentType) continue;
+      const filePath = join(destinationPath, path);
+      const file = loadFile(filePath) as MemFsEditorFile;
+      if (filePath === yoRcFilePath) {
+        const yoRcContents = yoRcFileInMemory?.contents ?? file.contents;
+        file.contents = Buffer.from(
+          JSON.stringify(mergeYoRcContent(yoRcContents ? JSON.parse(yoRcContents.toString()) : {}, content), null, 2),
+        );
+      } else {
+        file.contents = Buffer.from(JSON.stringify(content, null, 2));
+      }
       yield file;
+    }
+
+    // The jdl as written, for the export to merge the application into: in memory only, it is never committed.
+    if (rootYoRc) {
+      const rootYoRcFile = loadFile(jdlStoreRootYoRcPath(destinationPath)) as MemFsEditorFile;
+      rootYoRcFile.contents = Buffer.from(JSON.stringify(rootYoRc, null, 2));
+      resetFileState(rootYoRcFile);
+      yield rootYoRcFile;
     }
   });

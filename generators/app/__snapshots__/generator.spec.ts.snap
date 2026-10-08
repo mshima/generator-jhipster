@@ -81,6 +81,44 @@ Options:
 "
 `;
 
+exports[`generator - app jdlStore with a jdl store written by hand should keep the jdl as written in memory only 1`] = `
+{
+  "../.yo-rc.json": {},
+  ".yo-rc.json": {
+    "stateCleared": "modified",
+  },
+}
+`;
+
+exports[`generator - app jdlStore with a jdl store written by hand should merge the application into the jdl as written 1`] = `
+{
+  "app.jdl": {
+    "contents": "// The application
+application {
+  config {
+    baseName jhipster
+    // No server
+    skipServer true
+    skipClient true
+    testFrameworks [cypress]
+  }
+
+  config(jhipster) {
+    lastLiquibaseTimestamp 1577836860000
+  }
+
+  entities Foo
+}
+
+// The entity
+@ChangelogDate("20200101000100")
+entity Foo
+",
+    "stateCleared": "modified",
+  },
+}
+`;
+
 exports[`generator - app jdlStore with application and entities should match snapshot 1`] = `
 {
   ".yo-rc.json": {
@@ -97,8 +135,12 @@ exports[`generator - app jdlStore with application and entities should match sna
     "contents": "application {
   config {
     baseName jhipster
-    skipClient true
     skipServer true
+    skipClient true
+  }
+
+  config(jhipster) {
+    lastLiquibaseTimestamp 1577836920000
   }
 
   entities Foo, Bar
@@ -130,8 +172,8 @@ exports[`generator - app jdlStore with application should match snapshot 1`] = `
     "contents": "application {
   config {
     baseName jhipster
-    skipClient true
     skipServer true
+    skipClient true
   }
 }
 ",
@@ -180,9 +222,13 @@ exports[`generator - app jdlStore with incremental changelog application and ent
     "contents": "application {
   config {
     baseName jhipster
-    incrementalChangelog true
-    skipClient true
     skipServer true
+    skipClient true
+    incrementalChangelog true
+  }
+
+  config(jhipster) {
+    lastLiquibaseTimestamp 1577836920000
   }
 
   entities Foo, Bar

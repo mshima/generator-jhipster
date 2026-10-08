@@ -100,6 +100,40 @@ describe(`generator - ${helpers.commandName}`, () => {
       });
     });
 
+    describe('with a jdl store written by hand', () => {
+      before(async () => {
+        await helpers
+          .runJHipster()
+          .withJHipsterConfig({ jdlStore: 'app.jdl', skipServer: true, skipClient: true, testFrameworks: ['cypress'] })
+          .withFiles({
+            'app.jdl': `// The application
+application {
+  config {
+    baseName jhipster
+    // No server
+    skipServer true
+    skipClient true
+  }
+  entities Foo
+}
+
+// The entity
+entity Foo
+`,
+          })
+          .withOptions({ refreshOnCommit: true })
+          .withSkipWritingPriorities();
+      });
+
+      it('should merge the application into the jdl as written', () => {
+        expect(result.getSnapshot(file => file.path.endsWith('.jdl'))).toMatchSnapshot();
+      });
+
+      it('should keep the jdl as written in memory only', () => {
+        expect(result.getStateSnapshot(file => file.path.endsWith('.yo-rc.json'))).toMatchSnapshot();
+      });
+    });
+
     describe('with incremental changelog application and entities', () => {
       before(async () => {
         await helpers

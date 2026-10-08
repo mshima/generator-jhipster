@@ -21,16 +21,19 @@ import { basename, join } from 'node:path';
 import { Duplex } from 'node:stream';
 
 import type { ConflicterFile } from '@yeoman/conflicter';
+import { filesToAst } from 'jdl-parser/jhipster';
 import { loadFile } from 'mem-fs';
 import { setModifiedFileState } from 'mem-fs-editor/state';
 import { Minimatch } from 'minimatch';
 
-import { getJDLObjectFromSingleApplication } from '../../../lib/jdl/converters/json-to-jdl-converter.ts';
 import type { JDLApplicationConfig, JDLDefinitions } from '../../../lib/jdl/core/parsing/types/parsing.ts';
-import { createJDLRuntime, getDefaultRuntime } from '../../../lib/jdl-config/jdl-runtime.ts';
+import logger from '../../../lib/jdl/core/utils/objects/logger.ts';
 import type { Entity } from '../../../lib/jhipster/types/entity.ts';
 import { GENERATOR_JHIPSTER } from '../../generator-constants.ts';
 import { resolveJDLDefinitions } from '../internal/jdl-definitions.ts';
+import { createJDLParserRuntime } from '../internal/jdl-parser.ts';
+
+import { jdlStoreRootYoRcPath } from './import-jdl-transform.ts';
 
 export const exportJDLTransform = ({
   destinationPath,
@@ -52,13 +55,18 @@ export const exportJDLTransform = ({
   Duplex.from(async function* (files: AsyncGenerator<ConflicterFile>) {
     const definitions = resolveJDLDefinitions({ jdlDefinitions, jdlDefinition });
     const yoRcFilePath = join(destinationPath, '.yo-rc.json');
+    const rootYoRcFilePath = jdlStoreRootYoRcPath(destinationPath);
     const entitiesMatcher = new Minimatch(`${destinationPath}/.jhipster/*.json`);
     const entitiesFiles: ConflicterFile[] = [];
     const entitiesMap = new Map<string, Entity>();
 
     let yoRcFileInMemory: ConflicterFile | undefined;
     let jdlStoreFileInMemory: ConflicterFile | undefined;
+    let rootYoRc: Record<string, any> | undefined;
     for await (const file of files) {
+      if (file.path === rootYoRcFilePath && file.contents) {
+        rootYoRc = JSON.parse(file.contents.toString());
+      }
       if (file.path === yoRcFilePath) {
         yoRcFileInMemory = file;
       } else if (file.path === jdlStorePath) {
@@ -79,13 +87,20 @@ export const exportJDLTransform = ({
         const { jdlStore, jwtSecretKey, rememberMeKey, jhipsterVersion, creationTimestamp, incrementalChangelog, ...rest } =
           contents[GENERATOR_JHIPSTER];
 
-        const jdlObject = getJDLObjectFromSingleApplication(
-          { ...contents, [GENERATOR_JHIPSTER]: { ...rest, incrementalChangelog } },
-          definitions ? createJDLRuntime(definitions) : getDefaultRuntime(),
-          entitiesMap,
+        // The files of the application written as a jdl, merged into the jdl as written when the import kept it: the files
+        // then in the folder of the application, as the import got them.
+        const prefix = rootYoRc?.['#jdl'] && rest.baseName ? `${rest.baseName}/` : '';
+        const { jdl: jdlContents, errors } = filesToAst(
+          {
+            ...(prefix ? { '.yo-rc.json': rootYoRc } : {}),
+            [`${prefix}.yo-rc.json`]: { ...contents, [GENERATOR_JHIPSTER]: { ...rest, incrementalChangelog } },
+            ...Object.fromEntries([...entitiesMap].map(([name, entity]) => [`${prefix}.jhipster/${name}.json`, entity])),
+          },
+          createJDLParserRuntime(definitions),
         );
-
-        const jdlContents = jdlObject.toString();
+        for (const { file, path, message } of errors) {
+          logger.warn(`${file}${path.length > 0 ? ` ${path.join('.')}` : ''}: ${message}`);
+        }
 
         const jdlStoreFile = jdlStoreFileInMemory ?? (loadFile(jdlStorePath) as ConflicterFile);
         jdlStoreFile.contents = Buffer.from(jdlContents);
