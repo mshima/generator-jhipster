@@ -19,15 +19,12 @@
 
 import { describe, expect, it } from 'esmocha';
 
-// Only what `generator-jhipster/jdl` exports: what a tool reading a jdl has.
-import {
-  type JDLDefinitions,
-  buildJDLApplicationConfig,
-  createImporterFromContent,
-  createJDLRuntime,
-  getDefaultJDLDefinitions,
-  parseJDL,
-} from './index.ts';
+import { getDefaultJDLDefinitions } from '../jdl-config/jdl-runtime.ts';
+import { buildJDLApplicationConfig } from '../jdl-config/jhipster-jdl-config.ts';
+
+import type { JDLDefinitions } from './core/parsing/types/parsing.ts';
+// What `generator-jhipster/jdl` exports: the importer, with the definitions of a tool.
+import { createImporterFromContent } from './index.ts';
 
 const defaults = getDefaultJDLDefinitions();
 /** The JHipster entity options, and one more. */
@@ -37,18 +34,6 @@ const entity: JDLDefinitions['entity'] = {
 const importerConfiguration = { applicationName: 'jhipster', databaseType: 'sql' };
 
 describe('jdl - generator-jhipster/jdl', () => {
-  it('parses a jdl with the JHipster definitions', () => {
-    const { ast, diagnostics } = parseJDL('entity A\ndto A with mapstruct', createJDLRuntime());
-    expect(diagnostics).toEqual([]);
-    expect(ast?.entities.map(({ name }) => name)).toEqual(['A']);
-  });
-
-  it('parses a jdl with definitions of a tool', () => {
-    const content = 'entity A\naudited A';
-    expect(parseJDL(content, createJDLRuntime()).diagnostics.map(({ ruleId }) => ruleId)).toEqual(['syntax']);
-    expect(parseJDL(content, createJDLRuntime({ entity })).diagnostics).toEqual([]);
-  });
-
   it('imports a jdl with definitions, the JHipster ones completing the others', () => {
     const content = 'entity A\naudited A\ndto A with mapstruct';
     expect(() => createImporterFromContent(content, importerConfiguration).import()).toThrow(/audited/);
