@@ -18,14 +18,12 @@
  */
 
 import type { ApplicationType } from '../core/application-types.ts';
-import { getDefaultRuntime } from '../jdl-config/jdl-runtime.ts';
 
-import { type JDLFiles, astToFiles } from './converters/ast-to-files/ast-to-files.ts';
+import type { JDLFiles } from './converters/ast-to-files/ast-to-files.ts';
 import { errorLocation } from './core/parsing/location.ts';
 import { checkSemantics } from './core/parsing/semantic/index.ts';
 import type { ParsedJDLApplications } from './core/parsing/types/parsed.ts';
 import type { JDLRuntime } from './core/parsing/types/runtime.ts';
-import { parseFromContent } from './core/readers/jdl-reader.ts';
 import logger from './core/utils/objects/logger.ts';
 
 export type { JDLFiles };
@@ -49,20 +47,4 @@ export function checkSemanticErrors(content: ParsedJDLApplications, runtime: JDL
   if (errors.length > 0) {
     throw new Error(errors.map(error => `${error.message}${errorLocation(error.location)}`).join('\n'));
   }
-}
-
-/**
- * Converts a jdl to the json files of its applications, entities and deployments, by path relative to the folder holding
- * the applications, and the folder of the application the caller runs in (see `astToFiles`), after checking it: its errors
- * are thrown together, its warnings logged. The files hold what the jdl declares: `applyCompatibilityDefaults` adds the
- * values the generators still expect. It reads and writes no file, and depends on the jdl only.
- * @param runtime - the definitions the jdl is parsed and checked with (see `createJDLRuntime`).
- */
-export function convertJDLToFiles(jdlString: string, runtime: JDLRuntime = getDefaultRuntime()): JDLFiles {
-  if (!jdlString) {
-    throw new Error('A JDL content must be passed to be converted.');
-  }
-  const content = parseFromContent(jdlString, runtime);
-  checkSemanticErrors(content, runtime);
-  return astToFiles(content, runtime);
 }

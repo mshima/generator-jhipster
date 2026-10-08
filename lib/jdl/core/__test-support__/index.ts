@@ -22,21 +22,9 @@ import path from 'node:path';
 import { getDefaultRuntime } from '../../../jdl-config/jdl-runtime.ts';
 import { getDefaultJDLApplicationConfig } from '../../../jdl-config/jhipster-jdl-config.ts';
 import {
-  type JHipsterYoRcContentAndJDLWrapper,
-  convertApplicationsToJDL as originalConvertApplicationsToJDL,
-} from '../../converters/json-to-jdl-application-converter.ts';
-import { convertApplications as originalConvertApplications } from '../../converters/parsed-jdl-to-jdl-object/application-converter.ts';
-import {
-  type ParsedJDLRoot,
-  parseFromConfigurationObject as originalParseFromConfigurationObject,
-} from '../../converters/parsed-jdl-to-jdl-object/parsed-jdl-to-jdl-object-converter.ts';
-import {
   createImporterFromContent as originalCreateImporterFromContent,
   createImporterFromFiles as originalCreateImporterFromFiles,
 } from '../../jdl-importer.ts';
-import { createJDLApplication as originalCreateJDLApplication } from '../models/jdl-application-factory.ts';
-import type { ParsedJDLApplication } from '../parsing/types/parsed.ts';
-import type { JDLRuntime } from '../parsing/types/runtime.ts';
 import { parseFromContent as originalParseFromContent, parseFromFiles as originalParseFromFiles } from '../readers/jdl-reader.ts';
 
 const runtime = getDefaultRuntime();
@@ -46,15 +34,7 @@ export const createImporterFromContent = (content: any, configuration?: any) =>
 export const createImporterFromFiles = (files: any, configuration?: any) =>
   originalCreateImporterFromFiles(files, configuration, getDefaultJDLApplicationConfig());
 
-export const parseFromConfigurationObject = (configuration: ParsedJDLRoot) => originalParseFromConfigurationObject(configuration, runtime);
 export const parseFromFiles = (files: string[]) => originalParseFromFiles(files, runtime);
 export const parseFromContent = (content: string) => originalParseFromContent(content, runtime);
-
-export const convertApplications = (applications: ParsedJDLApplication[]) => originalConvertApplications(applications, runtime);
-export const createJDLApplication = (config: any, runtime: JDLRuntime, namespaceConfigs?: Record<string, Record<string, any>>) =>
-  originalCreateJDLApplication(config, runtime, namespaceConfigs);
-
-export const convertApplicationsToJDL = (applications: JHipsterYoRcContentAndJDLWrapper) =>
-  originalConvertApplicationsToJDL(applications, runtime);
 
 export const getTestFile = (...args: string[]) => path.join(import.meta.dirname, 'files', ...args);

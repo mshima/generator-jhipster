@@ -21,45 +21,16 @@ import { beforeEach, describe, expect, it } from 'esmocha';
 
 import helpers from 'yeoman-test';
 
-import { APPLICATION_TYPE_MONOLITH } from '../core/application-types.ts';
 import { getDefaultRuntime } from '../jdl-config/jdl-runtime.ts';
 
 import { astToFiles } from './converters/ast-to-files/ast-to-files.ts';
 import { applyCompatibilityDefaults } from './converters/ast-to-files/compatibility-defaults.ts';
-import exportToJDL from './converters/exporters/jdl-exporter.ts';
-import {
-  createImporterFromContent,
-  getTestFile,
-  parseFromConfigurationObject,
-  parseFromContent,
-  parseFromFiles,
-} from './core/__test-support__/index.ts';
+import { createImporterFromContent, parseFromContent } from './core/__test-support__/index.ts';
 import type { ApplicationWithEntities } from './jdl-importer.ts';
 
 describe('jdl - integration tests', () => {
   beforeEach(async () => {
     await helpers.prepareTemporaryDir();
-  });
-
-  describe('when parsing and exporting a JDL', () => {
-    let originalContent: ReturnType<typeof parseFromConfigurationObject>;
-    let writtenContent: ReturnType<typeof parseFromConfigurationObject>;
-
-    beforeEach(() => {
-      originalContent = parseFromConfigurationObject({
-        parsedContent: parseFromFiles([getTestFile('big_sample.jdl')]),
-        applicationType: APPLICATION_TYPE_MONOLITH,
-      });
-      exportToJDL(originalContent, 'exported.jdl');
-      writtenContent = parseFromConfigurationObject({
-        parsedContent: parseFromFiles(['exported.jdl']),
-        applicationType: APPLICATION_TYPE_MONOLITH,
-      });
-    });
-
-    it('should keep the same JDL content', () => {
-      expect(writtenContent.toString()).toBe(originalContent.toString());
-    });
   });
 
   describe('when parsing entities JDL', () => {
@@ -70,7 +41,6 @@ describe('jdl - integration tests', () => {
 
     describe('with annotations', () => {
       let result: Map<any, any[]>;
-      let convertedJdl: string;
       const jdl = `@BooleanTrue(true)
 @BooleanFalse(false)
 @Integer(1)
@@ -82,20 +52,10 @@ describe('jdl - integration tests', () => {
 @Unary
 entity A
 `;
-      const expectedJdl = jdl.replace('(true)', '').replace('(foo)', '("foo")');
-
       beforeEach(() => {
-        const jdlObject = parseFromConfigurationObject({
-          parsedContent: parseFromContent(jdl),
-          applicationType: APPLICATION_TYPE_MONOLITH,
-        });
         result = convertEntities(jdl);
-        convertedJdl = jdlObject.toString();
       });
 
-      it('stringified JDL should match original jdl', () => {
-        expect(convertedJdl).toEqual(expectedJdl);
-      });
       it('should result matching', () => {
         expect(result).toMatchInlineSnapshot(`
 Map {
@@ -190,7 +150,6 @@ Map {
 
     describe('with unidirectional relationship and annotation at destination', () => {
       let result: Map<any, any[]>;
-      let convertedJdl: string;
       const jdl = `entity A
 entity B
 
@@ -200,16 +159,7 @@ relationship ManyToOne {
 `;
 
       beforeEach(() => {
-        const jdlObject = parseFromConfigurationObject({
-          parsedContent: parseFromContent(jdl),
-          applicationType: APPLICATION_TYPE_MONOLITH,
-        });
         result = convertEntities(jdl);
-        convertedJdl = jdlObject.toString();
-      });
-
-      it('convert back to jdl', () => {
-        expect(convertedJdl).toBe(jdl);
       });
 
       it('should add relationship at one side', () => {

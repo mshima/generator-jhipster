@@ -17,15 +17,10 @@
  * limitations under the License.
  */
 
-import { type CstNode, EOF, type ILexingError, type ILexingResult, type IRecognitionException, type IToken } from 'chevrotain';
+import { type CstNode, EOF, type IRecognitionException } from 'chevrotain';
 
 import { buildJDLAstBuilderVisitor } from './jdl-ast-builder-visitor.ts';
-import performJDLPostParsingTasks from './jdl-post-parsing-tasks.ts';
-import { COMMENTS_GROUP } from './lexer/lexer.ts';
-import { tokenLocation } from './location.ts';
-import { checkSemantics } from './semantic/index.ts';
-import type { JDLDiagnostic } from './semantic/types.ts';
-import type { JDLLocation, ParsedJDLApplications } from './types/parsed.ts';
+import type { ParsedJDLApplications } from './types/parsed.ts';
 import type { JDLRuntime } from './types/runtime.ts';
 import performAdditionalSyntaxChecks from './validator.ts';
 
@@ -34,121 +29,6 @@ type ParseOptions = {
   /** Receives the warnings about what the jdl uses, a deprecated option for instance; `console.warn` by default. */
   onWarning?: (message: string) => void;
 };
-
-export type { JDLDiagnostic } from './semantic/types.ts';
-export type { JDLLocation } from './types/parsed.ts';
-
-export type JDLParseResult = {
-  /**
-   * The parsed jdl, whenever it lexes, even with parsing, syntax or semantic errors: after a parsing error it is what could
-   * be parsed, when that is enough to build it.
-   */
-  ast?: ParsedJDLApplications;
-  /** Every problem found, errors and warnings, in source order. */
-  diagnostics: JDLDiagnostic[];
-  /** The comments and directives, javadoc included, in source order: the AST keeps only the javadoc, as documentation. */
-  comments: JDLComment[];
-};
-
-export type JDLComment = {
-  /** `Line` is `// …`, `Block` is `/* … *\/` or a javadoc, `Directive` is a line starting with `#`. */
-  type: 'Line' | 'Block' | 'Directive';
-  /** The text without its delimiters. */
-  value: string;
-  location: JDLLocation;
-};
-
-const COMMENT_TYPES: Record<string, { type: JDLComment['type']; value: (image: string) => string }> = {
-  LINE_COMMENT: { type: 'Line', value: image => image.slice(2) },
-  BLOCK_COMMENT: { type: 'Block', value: image => image.slice(2, -2) },
-  JAVADOC: { type: 'Block', value: image => image.slice(2, -2) },
-  DIRECTIVE: { type: 'Directive', value: image => image.slice(1) },
-};
-
-const toComment = (token: IToken): JDLComment => {
-  const { type, value } = COMMENT_TYPES[token.tokenType.name];
-  return { type, value: value(token.image), location: tokenLocation(token) };
-};
-
-/** The comments of a lexed jdl; the javadoc is a token of the grammar, not of the comments group. */
-function getComments(lexResult: ILexingResult): JDLComment[] {
-  const comments = [...(lexResult.groups[COMMENTS_GROUP] ?? []), ...lexResult.tokens.filter(token => token.tokenType.name === 'JAVADOC')];
-  return comments.sort((a, b) => a.startOffset - b.startOffset).map(toComment);
-}
-
-/** The location of a token, none for one inserted by recovery or the end of the input. */
-const locationOfToken = (token: IToken): JDLLocation | undefined =>
-  Number.isNaN(token.startOffset) || token.tokenType === EOF ? undefined : tokenLocation(token);
-
-const lexingDiagnostic = (error: ILexingError): JDLDiagnostic => ({
-  ruleId: 'lexing',
-  severity: 'error',
-  message: error.message,
-  location: {
-    startOffset: error.offset,
-    endOffset: error.offset + error.length - 1,
-    startLine: error.line!,
-    startColumn: error.column!,
-    endLine: error.line!,
-    endColumn: error.column! + error.length - 1,
-  },
-});
-
-const parsingDiagnostic = (error: IRecognitionException): JDLDiagnostic => ({
-  ruleId: 'parsing',
-  severity: 'error',
-  message: unknownStatementMessage(error) ?? error.message,
-  location: locationOfToken(error.token),
-});
-
-/**
- * Parses a jdl without throwing: every problem is a diagnostic with its location, the lexing and parsing errors, the syntax
- * errors, the semantic ones and the warnings. The parser recovers from an error and reports every one; a jdl with parsing
- * errors is not checked further, the checks would report their consequences. A jdl that does not lex has no AST.
- */
-export function parseJDL(input: string, runtime: JDLRuntime, options?: Pick<ParseOptions, 'startRule'>): JDLParseResult {
-  const lexResult = runtime.lexer.tokenize(input);
-  const comments = getComments(lexResult);
-  if (lexResult.errors.length > 0) {
-    return { diagnostics: lexResult.errors.map(lexingDiagnostic), comments };
-  }
-  const { recoveringParser } = runtime;
-  recoveringParser.input = lexResult.tokens;
-  const startRule = options?.startRule ?? 'prog';
-  const cst = (recoveringParser as unknown as Record<string, () => CstNode>)[startRule]();
-  if (recoveringParser.errors.length > 0) {
-    // The CST has what could be parsed; the checks would report the consequences of the errors, only the errors are.
-    // A token is reported once: after an error in a statement, the parser may report the same token again.
-    const errors = recoveringParser.errors.filter(
-      (error, index, all) => all.findIndex(other => Object.is(other.token.startOffset, error.token.startOffset)) === index,
-    );
-    return { ast: buildRecoveredAst(cst, runtime), diagnostics: errors.map(parsingDiagnostic), comments };
-  }
-  const diagnostics: JDLDiagnostic[] = performAdditionalSyntaxChecks(cst, runtime).map(error => ({
-    ruleId: 'syntax',
-    severity: 'error',
-    message: error.message,
-    location: locationOfToken(error.token),
-  }));
-  const ast: ParsedJDLApplications = buildJDLAstBuilderVisitor(runtime, (message, location) =>
-    diagnostics.push({ ruleId: 'deprecated', severity: 'warning', message, location }),
-  ).visit(cst);
-  // The semantic rules are about a whole jdl.
-  if (startRule === 'prog') {
-    diagnostics.push(...checkSemantics(performJDLPostParsingTasks(ast), runtime));
-  }
-  diagnostics.sort((a, b) => (a.location?.startOffset ?? Infinity) - (b.location?.startOffset ?? Infinity));
-  return { ast, diagnostics, comments };
-}
-
-/** The AST of what could be parsed, none when the CST misses what the AST builder needs. */
-function buildRecoveredAst(cst: CstNode, runtime: JDLRuntime): ParsedJDLApplications | undefined {
-  try {
-    return buildJDLAstBuilderVisitor(runtime, () => {}).visit(cst);
-  } catch {
-    return undefined;
-  }
-}
 
 export function parse(input: string, runtime: JDLRuntime, options?: ParseOptions): ParsedJDLApplications {
   const cst = getCst(input, runtime, options);

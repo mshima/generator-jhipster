@@ -21,7 +21,7 @@ import { before, describe, expect, it } from 'esmocha';
 
 import { getDefaultRuntime } from '../../../jdl-config/jdl-runtime.ts';
 
-import { parseJDL } from './api.ts';
+import { parse } from './api.ts';
 import { type JDLNode, getKind, visitorKeys, walkJDL } from './nodes.ts';
 import type { JDLLocation, ParsedJDLApplications } from './types/parsed.ts';
 
@@ -79,9 +79,7 @@ describe('jdl - AST nodes', () => {
   const text = (location?: JDLLocation) => location && content.slice(location.startOffset, location.endOffset + 1);
 
   before(() => {
-    const result = parseJDL(content, getDefaultRuntime());
-    expect(result.diagnostics.filter(({ severity }) => severity === 'error')).toEqual([]);
-    ast = result.ast!;
+    ast = parse(content, getDefaultRuntime());
     visited = [];
     walkJDL(ast as JDLNode, { enter: (node, parent) => visited.push({ node, parent }) });
   });
