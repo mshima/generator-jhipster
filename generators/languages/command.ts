@@ -19,8 +19,8 @@
 import type { JHipsterCommandDefinition } from '../../lib/command/index.ts';
 import { LANGUAGE_PATTERN } from '../../lib/constants/jdl.ts';
 
-import entityProperties from './entity-properties.ts';
 import detectLanguage from './support/detect-language.ts';
+import templateProperties from './template-properties.ts';
 
 const command = {
   arguments: {
@@ -106,7 +106,7 @@ const command = {
       scope: 'generator',
     },
   },
-  entity: entityProperties,
+  entity: templateProperties.entity,
 } as const satisfies JHipsterCommandDefinition<any>;
 
 export default command;

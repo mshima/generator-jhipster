@@ -27,8 +27,8 @@ import type { Relationship as BaseApplicationRelationship } from '../base-applic
 import type { Entity as CommonEntity, Field as CommonField, Relationship as CommonRelationship } from '../common/types.ts';
 import type { Entity as LanguagesEntity, Field as LanguagesField, Relationship as LanguagesRelationship } from '../languages/types.d.ts';
 
-import type entityProperties from './entity-properties.ts';
 import { getTypescriptType } from './support/types-utils.ts';
+import type templateProperties from './template-properties.ts';
 
 // DerivedBooleanPropertiesOf<'fieldTsType', FieldTsType> &
 type ClientAddedFieldProperties = {
@@ -69,7 +69,7 @@ export interface Relationship extends CommonRelationship, LanguagesRelationship 
   propertyTsType?: string;
 }
 
-type ClientAddedEntityProperties = ExportEntityPropertiesFromConfigs<typeof entityProperties> & {
+type ClientAddedEntityProperties = ExportEntityPropertiesFromConfigs<(typeof templateProperties)['entity']> & {
   tsPrimaryKeySamples?: string[];
 };
 

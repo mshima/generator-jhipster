@@ -28,7 +28,7 @@ import type {
 import type { Entity as LanguagesEntity } from '../languages/types.ts';
 
 import command from './command.ts';
-import type entityProperties from './entity-properties.ts';
+import type templateProperties from './template-properties.ts';
 
 const { BIG_DECIMAL, DOUBLE, FLOAT, INSTANT, INTEGER, LOCAL_DATE, LONG, STRING, UUID, ZONED_DATE_TIME, TEXT_BLOB } = CommonDBTypes;
 const { BYTES, BYTE_BUFFER } = RelationalOnlyDBTypes;
@@ -58,7 +58,7 @@ export const mutateField = {
 
 export type { BaseApplicationRelationship as Relationship };
 
-type CommonAddedEntityProperties = ExportEntityPropertiesFromConfigs<typeof entityProperties>;
+type CommonAddedEntityProperties = ExportEntityPropertiesFromConfigs<(typeof templateProperties)['entity']>;
 
 type CommonCommandEntity = ExportEntityDerivedPropertiesFromCommand<typeof command>;
 
