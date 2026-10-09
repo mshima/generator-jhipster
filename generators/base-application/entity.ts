@@ -30,9 +30,9 @@ import type { MutateDataParam, MutateDataPropertiesWithRequiredProperties } from
 import { pluralize } from '../../lib/utils/string-utils.ts';
 import { formatDocAsApiDescription } from '../java/support/doc.ts';
 
-import type entityProperties from './entity-properties.ts';
 import { isFieldEnumType } from './internal/types/field-types.ts';
 import type { FakerWithRandexp } from './support/faker.ts';
+import type templateProperties from './template-properties.ts';
 
 type Property = {
   propertyName: string;
@@ -307,7 +307,7 @@ export type PrimaryKey<F extends Field = Field> = {
   ids: any[];
 };
 
-type BaseApplicationAddedEntityProperties = ExportEntityPropertiesFromConfigs<typeof entityProperties> & {
+type BaseApplicationAddedEntityProperties = ExportEntityPropertiesFromConfigs<(typeof templateProperties)['entity']> & {
   clientRootFolder: string;
 
   /** @experimental */

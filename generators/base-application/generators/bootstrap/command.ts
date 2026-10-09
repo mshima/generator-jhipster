@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 import type { JHipsterCommandDefinition } from '../../../../lib/command/types.ts';
-import entityProperties from '../../entity-properties.ts';
+import templateProperties from '../../template-properties.ts';
 
 const command = {
   configs: {},
-  entity: entityProperties,
+  entity: templateProperties.entity,
   import: ['base', 'jhipster:base-simple-application:bootstrap'],
 } as const satisfies JHipsterCommandDefinition;
 

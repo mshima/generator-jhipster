@@ -273,6 +273,14 @@ export type JHipsterRelationshipConfig = JHipsterEntityConfig;
 /** Map of the options of the relationships a command declares, keyed by their property in the relationship. */
 export type JHipsterRelationshipConfigs = Record<string, JHipsterRelationshipConfig>;
 
+/**
+ * The properties the templates of a generator use, by what they belong to; `entity` for now, the fields, the
+ * relationships and the application later.
+ */
+export type JHipsterTemplateProperties = {
+  readonly entity?: JHipsterEntityConfigs;
+};
+
 export type JHipsterCommandDefinition<ConfigContext = BaseCoreGenerator> = {
   readonly arguments?: JHipsterArguments;
   readonly configs?: JHipsterConfigs<ConfigContext>;

@@ -26,7 +26,7 @@ import type {
   Relationship as BaseApplicationRelationship,
 } from '../base-application/types.ts';
 
-import type entityProperties from './entity-properties.ts';
+import type templateProperties from './template-properties.ts';
 
 export type { BaseApplicationField as Field };
 
@@ -34,7 +34,7 @@ export interface Relationship extends BaseApplicationRelationship {
   propertyTranslationKey?: string;
 }
 
-type LanguagesAddedEntityProperties = ExportEntityPropertiesFromConfigs<typeof entityProperties>;
+type LanguagesAddedEntityProperties = ExportEntityPropertiesFromConfigs<(typeof templateProperties)['entity']>;
 
 export interface Entity<F extends BaseApplicationField = BaseApplicationField, R extends BaseApplicationRelationship = Relationship>
   extends BaseApplicationEntity<F, R>, LanguagesAddedEntityProperties {
