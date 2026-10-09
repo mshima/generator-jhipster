@@ -21,6 +21,7 @@ import type {
   ExportApplicationPropertiesFromCommand,
   ExportEntityConfigFromCommand,
   ExportEntityPropertiesFromCommand,
+  ExportEntityPropertiesFromConfigs,
   ExportFieldTypesFromCommand,
   ExportFieldValidationPropertiesFromCommand,
   ExportFieldValidationsFromCommand,
@@ -270,3 +271,35 @@ const _relationshipCommand = {
 }) satisfies ExportRelationshipConfigFromCommand<typeof _relationshipCommand>;
 ({ sideLeft: true, sideRight: false, sideAny: true }) satisfies ExportRelationshipDerivedPropertiesFromCommand<typeof _relationshipCommand>;
 ({}) satisfies ExportRelationshipConfigFromCommand<typeof _dummyCommand>;
+
+const _entityProperties = {
+  entityUrl: { type: String },
+  entityClientModelOnly: { type: Boolean, optional: true },
+  pagination: { choices: ['pagination', 'no'], jdl: { type: 'binary' } },
+} as const;
+
+type EntityProperties = ExportEntityPropertiesFromConfigs<typeof _entityProperties>;
+
+({ entityUrl: 'foo', paginationPagination: true, paginationNo: false, paginationAny: true }) satisfies EntityProperties;
+({
+  entityUrl: 'foo',
+  entityClientModelOnly: true,
+  paginationPagination: true,
+  paginationNo: false,
+  paginationAny: true,
+}) satisfies EntityProperties;
+
+({
+  paginationPagination: true,
+  paginationNo: false,
+  paginationAny: true,
+  // @ts-expect-error a computed property is set once prepared
+}) satisfies EntityProperties;
+
+({
+  // @ts-expect-error invalid value
+  entityUrl: 1,
+  paginationPagination: true,
+  paginationNo: false,
+  paginationAny: true,
+}) satisfies EntityProperties;

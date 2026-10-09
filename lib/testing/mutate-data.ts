@@ -18,16 +18,19 @@
  */
 import { type MutateDataParam, mutateData } from '../utils/object.ts';
 
+/** The mutation objects of a module, its `mutate*` exports, grouped by name without the phase suffix. */
 export const prepareMutationTest = (data: any) =>
-  Object.entries(data).reduce(
-    (acc, [name, value]) => {
-      const cleanupName = name.replace(/(Loading|Preparing)$/, '');
-      acc[cleanupName] ??= [];
-      acc[cleanupName].push(value);
-      return acc;
-    },
-    {} as Record<string, any[]>,
-  );
+  Object.entries(data)
+    .filter(([name]) => name.startsWith('mutate'))
+    .reduce(
+      (acc, [name, value]) => {
+        const cleanupName = name.replace(/(Loading|Preparing)$/, '');
+        acc[cleanupName] ??= [];
+        acc[cleanupName].push(value);
+        return acc;
+      },
+      {} as Record<string, any[]>,
+    );
 
 export const mutateMockedData = (...mutations: MutateDataParam<any>[]) => {
   const data = {};
