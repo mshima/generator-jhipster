@@ -19,7 +19,7 @@
 
 import { kebabCase, lowerFirst, snakeCase, startCase, upperFirst } from 'lodash-es';
 
-import type { DerivedBooleanPropertiesOf } from '../../lib/command/types.ts';
+import type { DerivedBooleanPropertiesOf, ExportEntityPropertiesFromConfigs } from '../../lib/command/types.ts';
 import { BlobTypes, type FieldType, fieldTypesValues } from '../../lib/jhipster/field-types.ts';
 import { type ValidationType, validationTypes } from '../../lib/jhipster/index.ts';
 import type { Entity as BaseEntity } from '../../lib/jhipster/types/entity.ts';
@@ -30,6 +30,7 @@ import type { MutateDataParam, MutateDataPropertiesWithRequiredProperties } from
 import { pluralize } from '../../lib/utils/string-utils.ts';
 import { formatDocAsApiDescription } from '../java/support/doc.ts';
 
+import type entityProperties from './entity-properties.ts';
 import { isFieldEnumType } from './internal/types/field-types.ts';
 import type { FakerWithRandexp } from './support/faker.ts';
 
@@ -306,10 +307,8 @@ export type PrimaryKey<F extends Field = Field> = {
   ids: any[];
 };
 
-type BaseApplicationAddedEntityProperties = {
+type BaseApplicationAddedEntityProperties = ExportEntityPropertiesFromConfigs<typeof entityProperties> & {
   clientRootFolder: string;
-  entityAuthority?: string;
-  entityReadAuthority?: string;
 
   /** @experimental */
   auditableEntity?: boolean;
@@ -319,16 +318,6 @@ type BaseApplicationAddedEntityProperties = {
   builtInAuthority?: boolean;
   adminEntity?: boolean;
   hasCyclicRequiredRelationship?: boolean;
-
-  entityNameCapitalized: string;
-  entityNameKebabCase: string;
-  entityNamePlural: string;
-  entityNamePluralizedAndSpinalCased: string;
-  entityInstancePlural: string;
-  entityInstance: string;
-
-  entityNameHumanized: string;
-  entityNamePluralHumanized: string;
 
   resetFakerSeed?(suffix?: string): void;
   generateFakeData?: (type?: 'csv' | 'cypress' | 'json-serializable' | 'ts') => any;

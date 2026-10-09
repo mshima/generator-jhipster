@@ -514,13 +514,26 @@ type ExplodeEntityChoicesToDerivedProperties<U extends ParsableEntityConfigs> =
   : never;
 
 /**
- * Extracts the entity options of command `C` as their values in the entity files.
+ * Extracts the entity options of command `C` as their values in the entity files, without the properties the
+ * generators compute.
  * @example
  * ```ts
  * type Config = ExportEntityConfigFromCommand<{ entity: { dto: { choices: ['mapstruct', 'no'] } } }>; // { dto?: 'mapstruct' | 'no' }
  * ```
  */
-export type ExportEntityConfigFromCommand<C extends ParsableCommand> = ResolveEntityConfigTypes<CommandEntityConfigs<C>>;
+export type ExportEntityConfigFromCommand<C extends ParsableCommand> =
+  EntityOptionConfigs<CommandEntityConfigs<C>> extends infer Options extends ParsableEntityConfigs ? ResolveEntityConfigTypes<Options>
+  : never;
+
+/** The options of `U`, without the properties the generators compute (a declared type and no jdl statement). */
+type EntityOptionConfigs<U extends ParsableEntityConfigs> = Pick<
+  U,
+  {
+    [K in keyof U]: U[K] extends { jdl: object } ? K
+    : U[K] extends { type: unknown } ? never
+    : K;
+  }[keyof U]
+>;
 
 /**
  * Extracts the flags derived from the choices of the entity options of command `C`, as the entities have them once

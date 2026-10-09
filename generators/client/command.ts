@@ -24,6 +24,7 @@ import { ALPHANUMERIC_PATTERN, ALPHANUMERIC_UNDERSCORE_PATTERN } from '../../lib
 import { APPLICATION_TYPE_GATEWAY, APPLICATION_TYPE_MICROSERVICE } from '../../lib/core/application-types.ts';
 import { clientFrameworkTypes, testFrameworkTypes } from '../../lib/jhipster/index.ts';
 
+import entityProperties from './entity-properties.ts';
 import { retrieveBootswatchThemes } from './internal/bootswatch.ts';
 
 const { CYPRESS, PLAYWRIGHT } = testFrameworkTypes;
@@ -247,6 +248,7 @@ const command = {
     },
   },
   entity: {
+    ...entityProperties,
     clientRootFolder: { description: 'Client folder of the entities', jdl: { type: 'binary' } },
   },
   import: ['common', 'angular', 'react', 'vue', 'cypress', 'playwright'],

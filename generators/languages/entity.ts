@@ -18,6 +18,7 @@
  */
 import { camelCase } from 'lodash-es';
 
+import type { ExportEntityPropertiesFromConfigs } from '../../lib/command/types.ts';
 import type { MutateDataParam, MutateDataPropertiesWithRequiredProperties } from '../../lib/utils/object.ts';
 import type {
   Entity as BaseApplicationEntity,
@@ -25,19 +26,15 @@ import type {
   Relationship as BaseApplicationRelationship,
 } from '../base-application/types.ts';
 
+import type entityProperties from './entity-properties.ts';
+
 export type { BaseApplicationField as Field };
 
 export interface Relationship extends BaseApplicationRelationship {
   propertyTranslationKey?: string;
 }
 
-type LanguagesAddedEntityProperties = {
-  /** i18n variant ex: 'male', 'female' when applied */
-  entityI18nVariant: string;
-  entityTranslationKey: string;
-  entityTranslationKeyMenu: string;
-  entityTranslationKeyMenuPath: string;
-};
+type LanguagesAddedEntityProperties = ExportEntityPropertiesFromConfigs<typeof entityProperties>;
 
 export interface Entity<F extends BaseApplicationField = BaseApplicationField, R extends BaseApplicationRelationship = Relationship>
   extends BaseApplicationEntity<F, R>, LanguagesAddedEntityProperties {

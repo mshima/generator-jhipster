@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 import { getEntityDerivedPropertyMutations } from '../../lib/command/mutations.ts';
-import type { ExportEntityDerivedPropertiesFromCommand } from '../../lib/command/types.ts';
+import type { ExportEntityDerivedPropertiesFromCommand, ExportEntityPropertiesFromConfigs } from '../../lib/command/types.ts';
 import { CommonDBTypes, RelationalOnlyDBTypes } from '../../lib/jhipster/field-types.ts';
 import type { MutateDataParam, MutateDataPropertiesWithRequiredProperties } from '../../lib/utils/object.ts';
 import type {
@@ -28,6 +28,7 @@ import type {
 import type { Entity as LanguagesEntity } from '../languages/types.ts';
 
 import command from './command.ts';
+import type entityProperties from './entity-properties.ts';
 
 const { BIG_DECIMAL, DOUBLE, FLOAT, INSTANT, INTEGER, LOCAL_DATE, LONG, STRING, UUID, ZONED_DATE_TIME, TEXT_BLOB } = CommonDBTypes;
 const { BYTES, BYTE_BUFFER } = RelationalOnlyDBTypes;
@@ -57,10 +58,7 @@ export const mutateField = {
 
 export type { BaseApplicationRelationship as Relationship };
 
-type CommonAddedEntityProperties = {
-  entityApiUrl: string;
-  entityApi: string;
-};
+type CommonAddedEntityProperties = ExportEntityPropertiesFromConfigs<typeof entityProperties>;
 
 type CommonCommandEntity = ExportEntityDerivedPropertiesFromCommand<typeof command>;
 

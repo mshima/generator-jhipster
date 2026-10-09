@@ -16,13 +16,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { JHipsterCommandDefinition } from '../../../../lib/command/types.ts';
-import entityProperties from '../../entity-properties.ts';
+import type { JHipsterEntityConfigs } from '../../lib/command/types.ts';
 
-const command = {
-  configs: {},
-  entity: entityProperties,
-  import: ['base', 'jhipster:base-simple-application:bootstrap'],
-} as const satisfies JHipsterCommandDefinition;
+/**
+ * The properties of the entities the common generator computes, declared as the options of a command: any of them may be
+ * set by the entity, in its file or with an annotation of the jdl.
+ */
+const entityProperties = {
+  entityApi: { description: 'Prefix of the API of the entity, the one of its microservice', type: String },
+  entityApiUrl: { description: 'Path of the API of the entity', type: String },
+} as const satisfies JHipsterEntityConfigs;
 
-export default command;
+export default entityProperties;

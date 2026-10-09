@@ -22,6 +22,8 @@ import type { JHipsterCommandDefinition } from '../../lib/command/index.ts';
 import { ALPHABETIC_LOWER_PATTERN, ALPHANUMERIC_PATTERN } from '../../lib/constants/jdl.ts';
 import { applicationTypesChoices } from '../../lib/core/application-types.ts';
 
+import entityProperties from './entity-properties.ts';
+
 const command = {
   configs: {
     defaultEnvironment: {
@@ -123,6 +125,7 @@ const command = {
     },
   },
   entity: {
+    ...entityProperties,
     skipClient: { description: 'Skip the client code of the entities', jdl: { type: 'unary' } },
     skipServer: { description: 'Skip the server code of the entities', jdl: { type: 'unary' } },
     readOnly: { description: 'Read only entities', jdl: { type: 'unary' } },
