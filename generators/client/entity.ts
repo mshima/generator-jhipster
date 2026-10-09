@@ -18,6 +18,7 @@
  */
 import { kebabCase, upperFirst } from 'lodash-es';
 
+import type { ExportEntityPropertiesFromConfigs, JHipsterEntityConfigs } from '../../lib/command/types.ts';
 import type { MutateDataParam, MutateDataPropertiesWithRequiredProperties } from '../../lib/utils/object.ts';
 import { normalizePathEnd } from '../../lib/utils/path.ts';
 import { pluralize } from '../../lib/utils/string-utils.ts';
@@ -67,31 +68,37 @@ export interface Relationship extends CommonRelationship, LanguagesRelationship 
   propertyTsType?: string;
 }
 
-type ClientAddedEntityProperties = {
-  entityFileName: string;
-  entityFolderName: string;
-  entityModelFileName: string;
-  entityPluralFileName: string;
-  entityServiceFileName: string;
+/**
+ * The properties of the entities the client generators compute, declared as the options of a command: any of them may be
+ * set by the entity, in its file or with an annotation of the jdl (`@EntityTsName(...)`).
+ */
+export const entityProperties = {
+  entityFileName: { description: 'Name of the files of the entity', type: String },
+  entityFolderName: { description: 'Folder of the files of the entity', type: String },
+  entityModelFileName: { description: 'Name of the model file of the entity', type: String },
+  entityPluralFileName: { description: 'Name of the files of the entity in plural', type: String },
+  entityServiceFileName: { description: 'Name of the service file of the entity', type: String },
 
-  /** Generate only the model at client side for relationships. */
-  entityClientModelOnly?: boolean;
-  entityTsName: string;
-  entityAngularName: string;
-  entityAngularNamePlural: string;
-  entityReactName: string;
-  entityStateName: string;
-  entityUrl: string;
-  entityPage?: string;
+  entityClientModelOnly: { description: 'Generate only the model at client side for relationships', type: Boolean, optional: true },
+  entityTsName: { description: 'Name of the entity in TypeScript', type: String },
+  entityAngularName: { description: 'Name of the entity in Angular', type: String },
+  entityAngularNamePlural: { description: 'Name of the entity in Angular in plural', type: String },
+  entityReactName: { description: 'Name of the entity in React', type: String },
+  entityStateName: { description: 'Name of the state of the entity', type: String },
+  entityUrl: { description: 'Url of the pages of the entity', type: String },
+  entityPage: { description: 'Page of the entity, in the microfrontend of its microservice', type: String, optional: true },
 
-  tsKeyType?: string;
-  tsSampleWithPartialData?: string;
-  tsSampleWithRequiredData?: string;
-  tsSampleWithFullData?: string;
-  tsSampleWithNewData?: string;
+  tsKeyType: { description: 'TypeScript type of the primary key', type: String, optional: true },
+  tsSampleWithPartialData: { description: 'Sample of the entity with some fields', type: String, optional: true },
+  tsSampleWithRequiredData: { description: 'Sample of the entity with the required fields', type: String, optional: true },
+  tsSampleWithFullData: { description: 'Sample of the entity with every field', type: String, optional: true },
+  tsSampleWithNewData: { description: 'Sample of a new entity', type: String, optional: true },
+
+  entityAngularJSSuffix: { description: 'Suffix of the names of the entity at client side, starting with a dash', type: String },
+} as const satisfies JHipsterEntityConfigs;
+
+type ClientAddedEntityProperties = ExportEntityPropertiesFromConfigs<typeof entityProperties> & {
   tsPrimaryKeySamples?: string[];
-
-  entityAngularJSSuffix: string;
 };
 
 export const mutateEntity = {

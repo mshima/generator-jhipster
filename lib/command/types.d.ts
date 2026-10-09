@@ -216,6 +216,14 @@ export type JHipsterConfigs<ConfigContext = any> = Record<string, JHipsterConfig
  */
 export type JHipsterEntityConfig = {
   readonly description?: string;
+  /**
+   * The type of the value of a property computed by the generators, `String`, `Boolean`, `Number` or `Array`: the
+   * generators set it once the entities are prepared, unless the entity sets it, in its file or with an annotation of
+   * the jdl. A property with a jdl option statement takes its type from it.
+   */
+  readonly type?: CommandConfigType | typeof Array;
+  /** A computed property the generators may leave unset. */
+  readonly optional?: boolean;
   /** The values a binary option accepts; a binary option without choices accepts any name. */
   readonly choices?: readonly string[];
   /** The value of the option for the entities the jdl does not set it on. */
@@ -282,6 +290,8 @@ export type ParsableCommand = {
 /** Minimal entity option shape used for type-level inference. */
 type ParsableEntityConfig = {
   readonly choices?: readonly string[];
+  readonly type?: CliSpecType;
+  readonly optional?: boolean;
   readonly jdl?: { readonly type: 'unary' | 'binary' };
 };
 
@@ -465,10 +475,24 @@ type CommandEntityConfigs<C extends ParsableCommand> =
  * binary one without choices.
  */
 type ResolveEntityConfigTypes<U extends ParsableEntityConfigs> = Simplify<{
-  -readonly [K in keyof U]?: U[K] extends { choices: readonly string[] } ? U[K]['choices'][number]
-  : U[K] extends { jdl: { type: 'unary' } } ? boolean
-  : U[K] extends { jdl: { type: 'binary' } } ? string
+  -readonly [K in keyof U]?: ResolveEntityConfigType<U[K]>;
+}>;
+
+/** The type of the value of an entity property: one of its choices, the one its jdl statement writes, or its declared type. */
+type ResolveEntityConfigType<Config extends ParsableEntityConfig> =
+  Config extends { choices: readonly string[] } ? Config['choices'][number]
+  : Config extends { jdl: { type: 'unary' } } ? boolean
+  : Config extends { jdl: { type: 'binary' } } ? string
+  : Config extends { type: infer Type } ? UnwrapPrimitive<UnwrapConstructor<Type>>
   : unknown;
+
+/** The properties of `U` the generators compute, a type and no jdl statement: required, unless declared optional. */
+type ComputedEntityProperties<U extends ParsableEntityConfigs> = Simplify<{
+  -readonly [
+    K in keyof U as U[K] extends { jdl: object } | { optional: true } ? never
+    : U[K] extends { type: unknown } ? K
+    : never
+  ]-?: ResolveEntityConfigType<U[K]>;
 }>;
 
 /**
@@ -520,8 +544,18 @@ export type ExportEntityDerivedPropertiesFromCommand<C extends ParsableCommand> 
  * // { dto?: 'mapstruct' | 'no'; dtoMapstruct: boolean; dtoNo: boolean; dtoAny: boolean }
  * ```
  */
-export type ExportEntityPropertiesFromCommand<C extends ParsableCommand> = Simplify<
-  ExportEntityConfigFromCommand<C> & ExportEntityDerivedPropertiesFromCommand<C>
+export type ExportEntityPropertiesFromCommand<C extends ParsableCommand> = ExportEntityPropertiesFromConfigs<CommandEntityConfigs<C>>;
+
+/**
+ * The properties of the entities declared in `U`, as the entities have them once prepared: the options, the flags
+ * derived from their choices, and the computed properties, set unless declared optional.
+ * @example
+ * ```ts
+ * type Entity = ExportEntityPropertiesFromConfigs<{ entityUrl: { type: StringConstructor } }>; // { entityUrl: string }
+ * ```
+ */
+export type ExportEntityPropertiesFromConfigs<U extends ParsableEntityConfigs> = Simplify<
+  ResolveEntityConfigTypes<U> & ExplodeEntityChoicesToDerivedProperties<U> & ComputedEntityProperties<U>
 >;
 
 /**
