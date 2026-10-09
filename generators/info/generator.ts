@@ -20,17 +20,15 @@
  * limitations under the License.
  */
 import chalk from 'chalk';
+import { filesToAst } from 'jdl-parser/jhipster';
 
-import JSONToJDLEntityConverter from '../../lib/jdl/converters/json-to-jdl-entity-converter.ts';
-import JSONToJDLOptionConverter from '../../lib/jdl/converters/json-to-jdl-option-converter.ts';
-import type { Entity } from '../../lib/jhipster/types/entity.ts';
-import { getEntitiesFromDir } from '../base-application/support/index.ts';
 import BaseCoreGenerator, {
   type Config as CoreConfig,
   type Features as CoreFeatures,
   type Options as CoreOptions,
 } from '../base-core/index.ts';
 import { JHIPSTER_CONFIG_DIR, YO_RC_FILE } from '../generator-constants.ts';
+import { createJDLParserRuntime, readJDLJsonFiles, resolveJDLDefinitions } from '../jdl/internal/index.ts';
 import { applicationsLookup } from '../workspaces/support/applications-lookup.ts';
 
 import { replaceSensitiveConfig } from './support/utils.ts';
@@ -123,7 +121,7 @@ export default class InfoGenerator extends BaseCoreGenerator<
         console.log('\n##### **JDL for the Entity configuration(s) `entityName.json` files generated in the `.jhipster` directory**\n');
         const jdl = this.generateJDLFromEntities();
         console.log('<details>\n<summary>JDL entity definitions</summary>\n');
-        console.log(`<pre>\n${jdl?.toString()}\n</pre>\n</details>\n`);
+        console.log(`<pre>\n${jdl}\n</pre>\n</details>\n`);
       },
     });
   }
@@ -141,25 +139,13 @@ export default class InfoGenerator extends BaseCoreGenerator<
   }
 
   /**
-   * @returns generated JDL from entities
+   * The jdl of the entities of the `.jhipster` folder, with jdl-parser; an entity of an old application without a name
+   * takes the one of its file.
    */
-  generateJDLFromEntities() {
-    let jdlObject;
-    const entities = new Map<string, Entity>();
-    try {
-      const foundEntities = getEntitiesFromDir(this.destinationPath(JHIPSTER_CONFIG_DIR));
-      for (const entity of foundEntities) {
-        const entityJson = this.readDestinationJSON(this.destinationPath(JHIPSTER_CONFIG_DIR, `${entity}.json`)) as Entity;
-        if (entityJson) {
-          entities.set(entity, entityJson);
-        }
-      }
-      jdlObject = JSONToJDLEntityConverter.convertEntitiesToJDL(entities);
-      JSONToJDLOptionConverter.convertServerOptionsToJDL({ 'generator-jhipster': this.config.getAll() }, jdlObject);
-    } catch (error) {
-      this.log.error('Error while parsing entities to JDL', error);
-      throw new Error('\nError while parsing entities to JDL\n', { cause: error });
-    }
-    return jdlObject;
+  generateJDLFromEntities(): string {
+    const files = Object.fromEntries(
+      Object.entries(readJDLJsonFiles(this.fs, this.destinationPath())).filter(([path]) => path.startsWith(`${JHIPSTER_CONFIG_DIR}/`)),
+    );
+    return filesToAst(files, createJDLParserRuntime(resolveJDLDefinitions(this.options))).jdl;
   }
 }

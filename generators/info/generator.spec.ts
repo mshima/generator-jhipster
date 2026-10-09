@@ -16,15 +16,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe } from 'esmocha';
+import { before, describe, expect, it } from 'esmocha';
 import { basename } from 'node:path';
 
+import { defaultHelpers as helpers, runResult } from '../../lib/testing/index.ts';
 import { shouldSupportFeatures } from '../../test/support/tests.ts';
 
 import Generator from './index.ts';
+import type InfoGenerator from './index.ts';
 
 const generator = basename(import.meta.dirname);
 
 describe(`generator - ${generator}`, () => {
   shouldSupportFeatures(Generator);
+
+  describe('generateJDLFromEntities', () => {
+    before(async () => {
+      await helpers
+        .runJHipster(generator)
+        .withJHipsterConfig()
+        .withFiles({
+          // An entity of an old application, without a name.
+          '.jhipster/Foo.json': {
+            fields: [{ fieldName: 'name', fieldType: 'String', fieldValidateRules: ['required'] }],
+            relationships: [],
+          },
+        })
+        .commitFiles()
+        .withOptions({ skipPriorities: ['initializing'] });
+    });
+
+    it('should give the jdl of the entities', () => {
+      expect((runResult.generator as unknown as InfoGenerator).generateJDLFromEntities()).toMatchInlineSnapshot(`
+"entity Foo {
+  name String required
+}
+"
+`);
+    });
+  });
 });
