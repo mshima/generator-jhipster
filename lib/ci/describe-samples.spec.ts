@@ -52,11 +52,10 @@ describe('ci samples groups', () => {
 
   describe('describeGithubSamples', () => {
     it('describes the samples of every group', async () => {
-      const samples = await describeGithubSamples({ samplesGroupFolder: valid, root: fixtures, cli: './cli/cli.cjs' });
+      const samples = await describeGithubSamples({ samplesGroupFolder: valid, root: fixtures });
       expect(
-        samples.map(({ name, command, config, generatorOptions, matrix, ...sample }) => ({
+        samples.map(({ name, config, generatorOptions, matrix, ...sample }) => ({
           name,
-          command,
           config,
           generatorOptions,
           os: matrix.os,
@@ -67,7 +66,6 @@ describe('ci samples groups', () => {
       ).toMatchInlineSnapshot(`
 [
   {
-    "command": "./cli/cli.cjs generate-sample 'custom-jdl'",
     "config": {
       "clientFramework": "vue",
     },
@@ -83,7 +81,6 @@ describe('ci samples groups', () => {
     "os": "ubuntu-latest",
   },
   {
-    "command": "./cli/cli.cjs generate-sample 'custom-yo-rc'",
     "config": {
       "clientFramework": "react",
     },
@@ -94,7 +91,6 @@ describe('ci samples groups', () => {
     "yoRcFile": "valid/files/app-yo-rc/.yo-rc.json",
   },
   {
-    "command": "./cli/cli.cjs generate-sample 'app-jdl'",
     "config": {
       "clientFramework": "vue",
     },
@@ -108,7 +104,6 @@ describe('ci samples groups', () => {
     "os": "ubuntu-latest",
   },
   {
-    "command": "./cli/cli.cjs generate-sample 'app-yo-rc'",
     "config": {
       "clientFramework": "react",
     },
@@ -119,7 +114,6 @@ describe('ci samples groups', () => {
     "yoRcFile": "valid/files/app-yo-rc/.yo-rc.json",
   },
   {
-    "command": "./cli/cli.cjs generate-sample 'inline-jdl'",
     "config": {
       "buildTool": "gradle",
     },
@@ -143,16 +137,13 @@ describe('ci samples groups', () => {
           workflow: group,
           jobName: `${name}-job`,
           generator: 'app',
-          command: 'custom',
           entityFiles: [],
           jdlEntityFiles: [],
           jdlSampleFiles: [],
           matrix: { os: matrix!.os, node: '', java: '' },
         }),
       });
-      expect(samples.map(({ name, jobName, command }) => ({ name, jobName, command }))).toEqual([
-        { name: 'inline-jdl', jobName: 'inline-jdl-job', command: 'custom' },
-      ]);
+      expect(samples.map(({ name, jobName }) => ({ name, jobName }))).toEqual([{ name: 'inline-jdl', jobName: 'inline-jdl-job' }]);
     });
   });
 });

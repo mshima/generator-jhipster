@@ -58,12 +58,9 @@ export type BaseSampleDescription = {
   jobName: string;
   disabled?: boolean;
   sonar?: boolean;
-  /** The command that generates the sample. */
-  command: string;
   /** The configuration of the application worth showing. */
   config?: Record<string, unknown>;
   generatorOptions?: Record<string, unknown>;
-  args?: string;
   environment?: string;
   war?: boolean;
   matrix: { os: string; node: string; java: string };
@@ -126,8 +123,6 @@ export type DescribeGithubSamplesOptions = {
   groups?: string[];
   /** The folder the described files are relative to. */
   root: string;
-  /** The command line of the generator, `jhipster` for generator-jhipster, the cli of a blueprint otherwise. */
-  cli?: string;
   /** Describes a sample the contract does not define, like a sample folder given with its arguments. */
   describeSample?: (sample: {
     name: string;
@@ -147,7 +142,6 @@ export const describeGithubSamplesGroup = ({
   group,
   samples,
   root,
-  cli = 'jhipster',
   describeSample,
 }: Omit<DescribeGithubSamplesOptions, 'groups'> & { group: string; samples: GitHubMatrixGroup }): SampleDescription[] => {
   const relativeToRoot = (file: string) => relative(root, file);
@@ -165,7 +159,6 @@ export const describeGithubSamplesGroup = ({
       workflow: group,
       jobName: name,
       disabled: item.disabled ? true : undefined,
-      command: `${cli} generate-sample '${name}'`,
       generatorOptions: item.generatorOptions,
       matrix: sampleMatrixOf(entry),
     };
@@ -241,13 +234,11 @@ export const formatSamplesList = (samples: SampleDescription[]): string =>
 
 export const formatSample = (sample: SampleDescription): string => {
   const lines = [`${sample.name} (${sample.workflow} workflow, job ${sample.jobName}${sample.disabled ? ', disabled' : ''})`];
-  lines.push(`command: ${sample.command}`);
   lines.push(`environment: ${sample.matrix.os}, node ${sample.matrix.node}, java ${sample.matrix.java}`);
   if (sample.environment || sample.war) {
     lines.push(`profile: ${sample.environment ?? ''}${sample.war ? ' (war)' : ''}`.trim());
   }
   if (sample.generatorOptions) lines.push(`generator options: ${JSON.stringify(sample.generatorOptions)}`);
-  if (sample.args) lines.push(`args: ${sample.args}`);
   const configurationFile = sample.generator === 'app' ? sample.yoRcFile : undefined;
   if (configurationFile || (sample.generator === 'jdl' && sample.jdl)) {
     lines.push('', `configuration${configurationFile ? ` (${configurationFile})` : ''}:`);
