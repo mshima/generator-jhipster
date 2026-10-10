@@ -32,10 +32,8 @@ import {
   sampleMatrixOf,
 } from '../../../lib/ci/index.ts';
 import { getPackageRoot } from '../../../lib/index.ts';
-import { entitiesSamplesDir } from '../../constants.ts';
-import { entitiesByType } from '../../generate-sample/support/copy-entity-samples.ts';
 import { getWorkflowNames, getWorkflowSamples, isDaily } from '../../generate-sample/support/get-workflow-samples.ts';
-import { type ResolvedSample, resolveSample } from '../../generate-sample/support/resolve-sample.ts';
+import { type ResolvedSample, groupWorkflowSample, resolveSample } from '../../generate-sample/support/resolve-sample.ts';
 import { workflowChoices } from '../../github-build-matrix/command.ts';
 import { buildDailyWorkflowMatrix, buildWorkflowMatrix } from '../../github-build-matrix/support/workflow-matrix.ts';
 
@@ -105,22 +103,9 @@ const describeGroupSamples = (workflow: string, samplesFolder: string): Promise<
     root: packageRoot,
     describeSample: ({ name, item, matrix }) => {
       if (item.jdl) return undefined;
-      const samplePath = item.sample ?? name;
-      const resolved = resolveSample(samplePath.replace(/^samples\//, ''));
-      const args = item.args ?? '';
-      const description = describeResolved(resolved, workflow, matrix, `jhipster generate-sample ${samplePath} ${args}`.trim());
-      if (description.generator === 'jdl') return { ...description, name, jobName: name, args: args || undefined };
-      return {
-        ...description,
-        name,
-        jobName: name,
-        args: args || undefined,
-        // Group samples generate from the `.yo-rc.json` folder and the args; the workflow entity sets do not apply.
-        entitiesSample: /--entities-sample (\S+)/.exec(args)?.[1],
-        entityFiles: [],
-        jdlEntity: undefined,
-        jdlEntityFiles: [],
-      };
+      // A sample generated from a `.yo-rc.json` folder, by its name only, like generate-sample resolves it.
+      const resolved = resolveSample(name, { sample: groupWorkflowSample(name, { group: workflow, sample: item }) });
+      return { ...describeResolved(resolved, workflow, matrix, `jhipster generate-sample ${name}`), name, jobName: name };
     },
   });
 
@@ -204,14 +189,9 @@ const copiedFilesOf = (sources: string[]): [string, string][] =>
 const copiedFilesOfSample = (sample: SampleDescription): [string, string][] => {
   if (sample.generator === 'jdl') return copiedFilesOf(sample.jdlSampleFiles);
   if (sample.generator !== 'app') return [];
-  // A sample of a group workflow gives its entity set by its arguments only.
-  const entityFiles =
-    sample.entityFiles.length > 0 ?
-      sample.entityFiles
-    : (entitiesByType[sample.entitiesSample ?? ''] ?? []).map(entity => relativeToRoot(join(entitiesSamplesDir, `${entity}.json`)));
   return [
     ...(sample.yoRcFile ? [['.yo-rc.json', sample.yoRcFile] as [string, string]] : []),
-    ...entityFiles.map(file => [`.jhipster/${basename(file)}`, file] as [string, string]),
+    ...sample.entityFiles.map(file => [`.jhipster/${basename(file)}`, file] as [string, string]),
     ...copiedFilesOf(sample.jdlEntityFiles),
   ];
 };
