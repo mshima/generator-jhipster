@@ -27,14 +27,16 @@ import {
   type SampleDescription,
   type WorkflowSample,
   convertToGitHubMatrix,
-  describeGithubSamples,
+  describeGithubSamplesGroup,
   readSampleConfig,
   sampleMatrixOf,
 } from '../../../lib/ci/index.ts';
 import { getPackageRoot } from '../../../lib/index.ts';
+import { githubSamplesGroupFolder } from '../../constants.ts';
 import { getWorkflowNames, getWorkflowSamples, isDaily } from '../../generate-sample/support/get-workflow-samples.ts';
 import { type ResolvedSample, groupWorkflowSample, resolveSample } from '../../generate-sample/support/resolve-sample.ts';
 import { workflowChoices } from '../../github-build-matrix/command.ts';
+import { samplesGroups } from '../../github-build-matrix/support/samples-groups.ts';
 import { buildDailyWorkflowMatrix, buildWorkflowMatrix } from '../../github-build-matrix/support/workflow-matrix.ts';
 
 export { type SampleDescription, formatSample, formatSamplesList } from '../../../lib/ci/index.ts';
@@ -95,11 +97,12 @@ const describeWorkflowSamples = (workflow: string): SampleDescription[] => {
   });
 };
 
-/** Samples of the group workflows (`github-build-matrix/samples/<workflow>.ts`), a sample folder given with its args. */
-const describeGroupSamples = (workflow: string, samplesFolder: string): Promise<SampleDescription[]> =>
-  describeGithubSamples({
-    samplesGroupFolder: samplesFolder,
-    groups: [workflow],
+/** Samples of the group workflows (`github-build-matrix/samples/<workflow>.ts`). */
+const describeGroupSamples = (workflow: string): SampleDescription[] =>
+  describeGithubSamplesGroup({
+    samplesGroupFolder: githubSamplesGroupFolder,
+    group: workflow,
+    samples: samplesGroups[workflow] ?? {},
     root: packageRoot,
     describeSample: ({ name, item, matrix }) => {
       if (item.jdl) return undefined;
@@ -118,27 +121,16 @@ export const WORKFLOWS = [...workflowChoices.filter(workflow => workflow !== 'ge
 /**
  * Describe the CI samples: what each job generates and the environment it runs on.
  */
-export const describeSamples = async ({
-  workflow,
-  samplesFolder,
-}: {
-  workflow?: string;
-  samplesFolder: string;
-}): Promise<SampleDescription[]> => {
+export const describeSamples = ({ workflow }: { workflow?: string } = {}): SampleDescription[] => {
   const workflows = workflow ? [workflow] : WORKFLOWS;
   const descriptions: SampleDescription[] = [];
   for (const currentWorkflow of workflows) {
     descriptions.push(
-      ...(JSON_WORKFLOWS.has(currentWorkflow) ?
-        describeWorkflowSamples(currentWorkflow)
-      : await describeGroupSamples(currentWorkflow, samplesFolder)),
+      ...(JSON_WORKFLOWS.has(currentWorkflow) ? describeWorkflowSamples(currentWorkflow) : describeGroupSamples(currentWorkflow)),
     );
   }
   return descriptions;
 };
-
-/** The folder of the samples groups of the group workflows. */
-const SAMPLES_FOLDER = join(import.meta.dirname, '../../github-build-matrix/samples/');
 
 /** A samples group, a workflow, with the names of its samples; an object, to grow with more data. */
 export type SampleGroupSummary = {
@@ -213,28 +205,26 @@ const summaryOf = (sample: SampleDescription): SampleSummary => ({
 });
 
 /** The samples of a samples group, a workflow, by name. */
-export const describeSampleGroup = async (group: string): Promise<SampleGroupDescription> => {
+export const describeSampleGroup = (group: string): SampleGroupDescription => {
   if (!WORKFLOWS.includes(group)) {
     throw new Error(`Samples group ${group} not found, expected one of ${WORKFLOWS.join(', ')}`);
   }
-  const samples = await describeSamples({ workflow: group, samplesFolder: SAMPLES_FOLDER });
+  const samples = describeSamples({ workflow: group });
   return { samples: Object.fromEntries(samples.map(sample => [sample.name, summaryOf(sample)])) };
 };
 
 /** The samples groups, the workflows, by name, with the names of their samples. */
-export const describeSampleGroups = async (): Promise<Record<string, SampleGroupSummary>> => {
+export const describeSampleGroups = (): Record<string, SampleGroupSummary> => {
   const groups: Record<string, SampleGroupSummary> = {};
   for (const name of WORKFLOWS) {
-    groups[name] = { samples: Object.keys((await describeSampleGroup(name)).samples) };
+    groups[name] = { samples: Object.keys(describeSampleGroup(name).samples) };
   }
   return groups;
 };
 
 /** A sample, by its name or its job name, the names being unique across the samples groups. */
-export const describeSample = async (name: string): Promise<SampleSummary> => {
-  const sample = (await describeSamples({ samplesFolder: SAMPLES_FOLDER })).find(
-    description => description.name === name || description.jobName === name,
-  );
+export const describeSample = (name: string): SampleSummary => {
+  const sample = describeSamples().find(description => description.name === name || description.jobName === name);
   if (!sample) {
     throw new Error(`Sample ${name} not found in the ${WORKFLOWS.join(', ')} samples groups`);
   }

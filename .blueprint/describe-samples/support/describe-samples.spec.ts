@@ -32,8 +32,8 @@ describe('describe-samples - support', () => {
   describe('describeSampleGroups', () => {
     let groups: Record<string, SampleGroupSummary>;
 
-    before(async () => {
-      groups = await describeSampleGroups();
+    before(() => {
+      groups = describeSampleGroups();
     });
 
     // A change of the samples groups, or of their samples, shows here.
@@ -43,26 +43,26 @@ describe('describe-samples - support', () => {
   });
 
   describe('describeSampleGroup', () => {
-    it('should match the samples of a group', async () => {
-      const group = await describeSampleGroup('angular');
+    it('should match the samples of a group', () => {
+      const group = describeSampleGroup('angular');
       expect(group).toMatchSnapshot({
         samples: Object.fromEntries(Object.entries(group.samples).map(([name, sample]) => [name, shapeOf(sample)])),
       });
     });
 
-    it('should fail for an unknown group', async () => {
-      await expect(describeSampleGroup('unknown')).rejects.toThrow(/Samples group unknown not found/);
+    it('should fail for an unknown group', () => {
+      expect(() => describeSampleGroup('unknown')).toThrow(/Samples group unknown not found/);
     });
   });
 
   describe('describeSample', () => {
-    it('should match a sample', async () => {
+    it('should match a sample', () => {
       // The files copied to the project shown in full.
-      expect(await describeSample('ng-default')).toMatchSnapshot();
+      expect(describeSample('ng-default')).toMatchSnapshot();
     });
 
-    it('should fail for an unknown sample', async () => {
-      await expect(describeSample('unknown')).rejects.toThrow(/Sample unknown not found/);
+    it('should fail for an unknown sample', () => {
+      expect(() => describeSample('unknown')).toThrow(/Sample unknown not found/);
     });
   });
 });

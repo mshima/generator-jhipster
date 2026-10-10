@@ -22,7 +22,7 @@ import { join, relative } from 'node:path';
 import { createImporterFromContent } from '../jdl/jdl-importer.ts';
 
 import { getGithubSamplesGroup, getGithubSamplesGroups } from './github-group.ts';
-import { type GitHubMatrix, type GitHubMatrixGroupItem, convertToGitHubMatrix } from './github-matrix.ts';
+import { type GitHubMatrix, type GitHubMatrixGroup, type GitHubMatrixGroupItem, convertToGitHubMatrix } from './github-matrix.ts';
 
 /** The `.yo-rc.json` keys worth showing in a sample description. */
 const CONFIG_KEYS = [
@@ -138,63 +138,75 @@ export type DescribeGithubSamplesOptions = {
 };
 
 /**
- * Describe the samples of the samples groups: a sample is generated from an inline `jdl`, or from the `jdl` or `yo-rc`
- * (`sample-type`) file `sample-file` (the sample name by default) of the `sample-folder` (the group by default) of the
- * samples groups folder.
+ * Describe the samples of a samples group already loaded: a sample is generated from an inline `jdl`, or from the `jdl`
+ * or `yo-rc` (`sample-type`) file `sample-file` (the sample name by default) of the `sample-folder` (the group by
+ * default) of the samples groups folder.
  */
-export const describeGithubSamples = async ({
+export const describeGithubSamplesGroup = ({
   samplesGroupFolder,
-  groups,
+  group,
+  samples,
   root,
   cli = 'jhipster',
   describeSample,
-}: DescribeGithubSamplesOptions): Promise<SampleDescription[]> => {
+}: Omit<DescribeGithubSamplesOptions, 'groups'> & { group: string; samples: GitHubMatrixGroup }): SampleDescription[] => {
   const relativeToRoot = (file: string) => relative(root, file);
+  const descriptions: SampleDescription[] = [];
+  const matrix = convertToGitHubMatrix(samples);
+  for (const [name, item] of Object.entries(samples)) {
+    const entry = matrix.include.find(candidate => candidate['job-name'] === name);
+    const custom = describeSample?.({ name, group, item, matrix: entry });
+    if (custom) {
+      descriptions.push(custom);
+      continue;
+    }
+    const base: BaseSampleDescription = {
+      name,
+      workflow: group,
+      jobName: name,
+      disabled: item.disabled ? true : undefined,
+      command: `${cli} generate-sample '${name}'`,
+      generatorOptions: item.generatorOptions,
+      matrix: sampleMatrixOf(entry),
+    };
+    const sampleFile = join(samplesGroupFolder, item['sample-folder'] ?? group, item['sample-file'] ?? name);
+    let description: SampleDescription;
+    if (item.jdl) {
+      description = { ...base, generator: 'jdl', jdl: item.jdl, jdlSampleFiles: [], config: readSampleJDLConfig(item.jdl) };
+    } else if (item['sample-type'] === 'jdl') {
+      description = {
+        ...base,
+        generator: 'jdl',
+        jdlSampleFiles: [relativeToRoot(`${sampleFile}.jdl`)],
+        config: readSampleJDLConfig(readFileSync(`${sampleFile}.jdl`, 'utf8')),
+      };
+    } else if (item['sample-type'] === 'yo-rc') {
+      description = {
+        ...base,
+        generator: 'app',
+        yoRcFile: relativeToRoot(join(sampleFile, '.yo-rc.json')),
+        config: readSampleConfig(join(sampleFile, '.yo-rc.json')),
+        entityFiles: [],
+        jdlEntityFiles: [],
+      };
+    } else {
+      throw new Error(`Sample ${name} of the ${group} samples group has no jdl, nor a jdl or yo-rc sample-type`);
+    }
+    descriptions.push(description);
+  }
+  return descriptions;
+};
+
+/** Describe the samples of the samples groups of a folder (see describeGithubSamplesGroup). */
+export const describeGithubSamples = async ({
+  samplesGroupFolder,
+  groups,
+  ...options
+}: DescribeGithubSamplesOptions): Promise<SampleDescription[]> => {
   const descriptions: SampleDescription[] = [];
   for (const group of groups ?? (await getGithubSamplesGroups(samplesGroupFolder))) {
     const { samples } = await getGithubSamplesGroup(samplesGroupFolder, group);
-    const matrix = convertToGitHubMatrix(samples);
-    for (const [name, item] of Object.entries(samples)) {
-      const entry = matrix.include.find(candidate => candidate['job-name'] === name);
-      const custom = describeSample?.({ name, group, item, matrix: entry });
-      if (custom) {
-        descriptions.push(custom);
-        continue;
-      }
-      const base: BaseSampleDescription = {
-        name,
-        workflow: group,
-        jobName: name,
-        disabled: item.disabled ? true : undefined,
-        command: `${cli} generate-sample '${name}'`,
-        generatorOptions: item.generatorOptions,
-        matrix: sampleMatrixOf(entry),
-      };
-      const sampleFile = join(samplesGroupFolder, item['sample-folder'] ?? group, item['sample-file'] ?? name);
-      let description: SampleDescription;
-      if (item.jdl) {
-        description = { ...base, generator: 'jdl', jdl: item.jdl, jdlSampleFiles: [], config: readSampleJDLConfig(item.jdl) };
-      } else if (item['sample-type'] === 'jdl') {
-        description = {
-          ...base,
-          generator: 'jdl',
-          jdlSampleFiles: [relativeToRoot(`${sampleFile}.jdl`)],
-          config: readSampleJDLConfig(readFileSync(`${sampleFile}.jdl`, 'utf8')),
-        };
-      } else if (item['sample-type'] === 'yo-rc') {
-        description = {
-          ...base,
-          generator: 'app',
-          yoRcFile: relativeToRoot(join(sampleFile, '.yo-rc.json')),
-          config: readSampleConfig(join(sampleFile, '.yo-rc.json')),
-          entityFiles: [],
-          jdlEntityFiles: [],
-        };
-      } else {
-        throw new Error(`Sample ${name} of the ${group} samples group has no jdl, nor a jdl or yo-rc sample-type`);
-      }
-      descriptions.push(description);
-    }
+    descriptions.push(...describeGithubSamplesGroup({ ...options, samplesGroupFolder, group, samples }));
   }
   return descriptions;
 };
