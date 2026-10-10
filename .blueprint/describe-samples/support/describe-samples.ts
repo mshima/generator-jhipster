@@ -16,7 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { relative } from 'node:path';
+import { statSync } from 'node:fs';
+import { basename, extname, join, relative } from 'node:path';
+
+import { globSync } from 'tinyglobby';
 
 import {
   type BaseSampleDescription,
@@ -29,6 +32,8 @@ import {
   sampleMatrixOf,
 } from '../../../lib/ci/index.ts';
 import { getPackageRoot } from '../../../lib/index.ts';
+import { entitiesSamplesDir } from '../../constants.ts';
+import { entitiesByType } from '../../generate-sample/support/copy-entity-samples.ts';
 import { getWorkflowNames, getWorkflowSamples, isDaily } from '../../generate-sample/support/get-workflow-samples.ts';
 import { type ResolvedSample, resolveSample } from '../../generate-sample/support/resolve-sample.ts';
 import { workflowChoices } from '../../github-build-matrix/command.ts';
@@ -145,4 +150,113 @@ export const describeSamples = async ({
     );
   }
   return descriptions;
+};
+
+/** The folder of the samples groups of the group workflows. */
+const SAMPLES_FOLDER = join(import.meta.dirname, '../../github-build-matrix/samples/');
+
+/** A samples group, a workflow, with the names of its samples; an object, to grow with more data. */
+export type SampleGroupSummary = {
+  samples: string[];
+};
+
+/** A sample: how to generate it, and the files generate-sample copies to the project, by destination. */
+export type SampleSummary = {
+  workflow: string;
+  jobName: string;
+  /** The command that generates the sample. */
+  command: string;
+  disabled?: boolean;
+  /** The files copied to the project but the jdl ones: the path in the project, relative to it, to the file of this repository. */
+  files: Record<string, string>;
+  /**
+   * The jdl the sample is generated from, by their name in the project: a file of this repository, copied, or the
+   * content of an inline jdl, given to the jdl generator.
+   */
+  jdls: Record<string, SampleJDL>;
+};
+
+/** A jdl of a sample: a file of this repository, or the content of an inline jdl. */
+export type SampleJDL = { file: string } | { content: string };
+
+/** The samples of a samples group by name; an object, to grow with more data. */
+export type SampleGroupDescription = {
+  samples: Record<string, SampleSummary>;
+};
+
+const isDirectory = (path: string): boolean => {
+  try {
+    return statSync(path).isDirectory();
+  } catch {
+    return false;
+  }
+};
+
+/** A jdl file copied by its name, or a folder copied with its content, by destination. */
+const copiedFilesOf = (sources: string[]): [string, string][] =>
+  sources.flatMap(source => {
+    const path = join(packageRoot, source);
+    if (!isDirectory(path)) return [[basename(source), source]];
+    return globSync('**', { cwd: path, dot: true }).map(file => [file, relativeToRoot(join(path, file))] as [string, string]);
+  });
+
+/** The files generate-sample copies to the project for a sample, by destination, the jdl ones included. */
+const copiedFilesOfSample = (sample: SampleDescription): [string, string][] => {
+  if (sample.generator === 'jdl') return copiedFilesOf(sample.jdlSampleFiles);
+  if (sample.generator !== 'app') return [];
+  // A sample of a group workflow gives its entity set by its arguments only.
+  const entityFiles =
+    sample.entityFiles.length > 0 ?
+      sample.entityFiles
+    : (entitiesByType[sample.entitiesSample ?? ''] ?? []).map(entity => relativeToRoot(join(entitiesSamplesDir, `${entity}.json`)));
+  return [
+    ...(sample.yoRcFile ? [['.yo-rc.json', sample.yoRcFile] as [string, string]] : []),
+    ...entityFiles.map(file => [`.jhipster/${basename(file)}`, file] as [string, string]),
+    ...copiedFilesOf(sample.jdlEntityFiles),
+  ];
+};
+
+const isJDL = ([destination]: [string, string]): boolean => extname(destination) === '.jdl';
+
+const summaryOf = (sample: SampleDescription): SampleSummary => ({
+  workflow: sample.workflow,
+  jobName: sample.jobName,
+  command: sample.command,
+  disabled: sample.disabled,
+  files: Object.fromEntries(copiedFilesOfSample(sample).filter(file => !isJDL(file))),
+  jdls: Object.fromEntries([
+    ...(sample.generator === 'jdl' && sample.jdl ? [[`${sample.name}.jdl`, { content: sample.jdl }] as [string, SampleJDL]] : []),
+    ...copiedFilesOfSample(sample)
+      .filter(isJDL)
+      .map(([destination, file]) => [destination, { file }] as [string, SampleJDL]),
+  ]),
+});
+
+/** The samples of a samples group, a workflow, by name. */
+export const describeSampleGroup = async (group: string): Promise<SampleGroupDescription> => {
+  if (!WORKFLOWS.includes(group)) {
+    throw new Error(`Samples group ${group} not found, expected one of ${WORKFLOWS.join(', ')}`);
+  }
+  const samples = await describeSamples({ workflow: group, samplesFolder: SAMPLES_FOLDER });
+  return { samples: Object.fromEntries(samples.map(sample => [sample.name, summaryOf(sample)])) };
+};
+
+/** The samples groups, the workflows, by name, with the names of their samples. */
+export const describeSampleGroups = async (): Promise<Record<string, SampleGroupSummary>> => {
+  const groups: Record<string, SampleGroupSummary> = {};
+  for (const name of WORKFLOWS) {
+    groups[name] = { samples: Object.keys((await describeSampleGroup(name)).samples) };
+  }
+  return groups;
+};
+
+/** A sample, by its name or its job name, the names being unique across the samples groups. */
+export const describeSample = async (name: string): Promise<SampleSummary> => {
+  const sample = (await describeSamples({ samplesFolder: SAMPLES_FOLDER })).find(
+    description => description.name === name || description.jobName === name,
+  );
+  if (!sample) {
+    throw new Error(`Sample ${name} not found in the ${WORKFLOWS.join(', ')} samples groups`);
+  }
+  return summaryOf(sample);
 };
