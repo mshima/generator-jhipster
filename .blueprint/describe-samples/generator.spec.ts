@@ -123,7 +123,8 @@ describe(`generator - ${generator}`, () => {
       const ngDefault = samples.find(sample => sample.name === 'ng-default')!;
       assert(ngDefault.generator === 'app');
       expect(ngDefault).toMatchObject({
-        jobName: expect.stringMatching(/^ng-default \(n.*\/j.*\)$/),
+        // The job name the sample defines, without the environment of the CI job.
+        jobName: 'ng-default',
         yoRcFile: '.blueprint/generate-sample/templates/test-integration/samples/ng-default/.yo-rc.json',
         config: expect.objectContaining({ clientFramework: 'angular', databaseType: 'sql' }),
         entitiesSample: 'sqlfull',

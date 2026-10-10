@@ -21,18 +21,13 @@ import { before, describe, expect, it } from 'esmocha';
 import { type SampleGroupSummary, describeSample, describeSampleGroup, describeSampleGroups } from './describe-samples.ts';
 
 describe('describe-samples - support', () => {
-  // The job name carries the node and java versions of the job: matched as a string, so a new version does not change the snapshot.
-  const jobName = expect.any(String);
-
   // The nested objects of the samples of a group, matched by their type only, so the snapshot shows their shape.
-  const shapeOf = (description: object) => ({
-    jobName,
-    ...Object.fromEntries(
+  const shapeOf = (description: object) =>
+    Object.fromEntries(
       Object.entries(description)
         .filter(([_key, value]) => value && typeof value === 'object')
         .map(([key, value]) => [key, expect.any(Array.isArray(value) ? Array : Object)]),
-    ),
-  });
+    );
 
   describe('describeSampleGroups', () => {
     let groups: Record<string, SampleGroupSummary>;
@@ -63,7 +58,7 @@ describe('describe-samples - support', () => {
   describe('describeSample', () => {
     it('should match a sample', () => {
       // The files copied to the project shown in full.
-      expect(describeSample('ng-default')).toMatchSnapshot({ jobName });
+      expect(describeSample('ng-default')).toMatchSnapshot();
     });
 
     it('should fail for an unknown sample', () => {

@@ -49,7 +49,7 @@ const describeResolved = (resolved: ResolvedSample, workflow: string, item: GitH
   const base: BaseSampleDescription = {
     name: resolved.name,
     workflow,
-    jobName: item?.['job-name'] ?? sample?.['job-name'] ?? resolved.name,
+    jobName: sample?.['job-name'] ?? resolved.name,
     disabled: sample?.disabled ? true : undefined,
     sonar: sample?.['sonar-analyse'] === 'true' ? true : undefined,
     generatorOptions: sample?.generatorOptions,
