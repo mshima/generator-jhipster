@@ -26,7 +26,13 @@ export const couchbaseFiles = asWriteFilesSection<JavaApplication>({
     {
       path: `${SERVER_MAIN_SRC_DIR}_package_/`,
       renameTo: moveToJavaPackageSrcDir,
-      templates: ['repository/JHipsterCouchbaseRepository.java', 'config/DatabaseConfiguration.java'],
+      templates: [
+        'repository/JHipsterCouchbaseRepository.java',
+        'config/DatabaseConfiguration.java',
+        'config/EntityKeyConverter.java',
+        'config/EntityKeysConverter.java',
+        'config/EntityReferencesMappingCouchbaseConverter.java',
+      ],
     },
     {
       condition: data => data.authenticationTypeSession && !data.reactive && data.generateUserManagement,
@@ -68,7 +74,7 @@ export const couchbaseFiles = asWriteFilesSection<JavaApplication>({
     {
       path: `${SERVER_TEST_SRC_DIR}_package_/`,
       renameTo: moveToJavaPackageTestDir,
-      templates: ['config/CouchbaseTestContainer.java'],
+      templates: ['config/CouchbaseTestContainer.java', 'config/EntityKeyConvertersTest.java'],
     },
   ],
 });

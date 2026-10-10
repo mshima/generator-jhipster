@@ -1,0 +1,153 @@
+<%#
+ Copyright 2013-2026 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+package <%- packageName %>.config;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.convert.ValueConverter;
+import org.springframework.data.couchbase.core.convert.CouchbaseCustomConversions;
+import org.springframework.data.couchbase.core.convert.MappingCouchbaseConverter;
+import org.springframework.data.couchbase.core.mapping.CouchbaseDocument;
+import org.springframework.data.couchbase.core.mapping.CouchbaseMappingContext;
+import org.springframework.data.couchbase.core.mapping.Field;
+
+class EntityKeyConvertersTest {
+
+    public static class Child {
+
+        @Id
+        private String id;
+
+        @Field
+        private String label;
+
+        @ValueConverter(EntityKeysConverter.class)
+        private Set<Parent> parents = new HashSet<>();
+
+        public Child() {}
+
+        Child(String id, String label) {
+            this.id = id;
+            this.label = label;
+        }
+    }
+
+    public static class Parent {
+
+        @Id
+        private String id;
+
+        @ValueConverter(EntityKeyConverter.class)
+        private Child child;
+
+        @ValueConverter(EntityKeysConverter.class)
+        private Set<Child> children = new HashSet<>();
+
+        public Parent() {}
+    }
+
+    private MappingCouchbaseConverter converter;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        converter = new EntityReferencesMappingCouchbaseConverter(
+            new CouchbaseMappingContext(),
+            "type",
+            new CouchbaseCustomConversions(List.of())
+        );
+        converter.afterPropertiesSet();
+    }
+
+    private Parent parent() {
+        Parent parent = new Parent();
+        parent.id = "p1";
+        parent.child = new Child("c1", "first");
+        parent.children = new HashSet<>(Set.of(new Child("c1", "first"), new Child("c2", "second")));
+        return parent;
+    }
+
+    @Test
+    void shouldStoreTheRelationshipsAsKeys() {
+        CouchbaseDocument document = new CouchbaseDocument();
+        converter.write(parent(), document);
+
+        assertThat(document.export()).containsEntry("child", "c1");
+        assertThat(document.export().get("children")).asInstanceOf(InstanceOfAssertFactories.LIST).containsExactlyInAnyOrder("c1", "c2");
+    }
+
+    @Test
+    void shouldNotWriteTheEntitiesOfTheRelationships() {
+        Parent parent = parent();
+        parent.children.forEach(child -> child.parents.add(parent));
+        CouchbaseDocument document = new CouchbaseDocument();
+        converter.write(parent, document);
+
+        assertThat(document.export().get("children")).asInstanceOf(InstanceOfAssertFactories.LIST).containsExactlyInAnyOrder("c1", "c2");
+
+        Child child = parent.children.iterator().next();
+        CouchbaseDocument childDocument = new CouchbaseDocument();
+        converter.write(child, childDocument);
+
+        assertThat(childDocument.export().get("parents")).asInstanceOf(InstanceOfAssertFactories.LIST).containsExactly("p1");
+    }
+
+    @Test
+    void shouldStoreAnEmptyCollectionAndNoKeyForAMissingEntity() {
+        Parent parent = new Parent();
+        parent.id = "p1";
+        CouchbaseDocument document = new CouchbaseDocument();
+        converter.write(parent, document);
+
+        assertThat(document.export().get("children")).asInstanceOf(InstanceOfAssertFactories.LIST).isEmpty();
+        assertThat(document.export()).doesNotContainKey("child");
+    }
+
+    @Test
+    void shouldReadTheKeysAsEntitiesWithTheirIds() {
+        CouchbaseDocument document = new CouchbaseDocument();
+        converter.write(parent(), document);
+
+        Parent read = converter.read(Parent.class, document);
+
+        assertThat(read.child.id).isEqualTo("c1");
+        assertThat(read.children).extracting(child -> child.id).containsExactlyInAnyOrder("c1", "c2");
+    }
+
+    @Test
+    void shouldReadTheEntitiesOfAJoinAsEntities() {
+        CouchbaseDocument document = new CouchbaseDocument();
+        document.put("id", "p1");
+        CouchbaseDocument child = new CouchbaseDocument();
+        child.put("id", "c1");
+        child.put("label", "first");
+        document.put("child", child);
+
+        Parent read = converter.read(Parent.class, document);
+
+        assertThat(read.child.id).isEqualTo("c1");
+        assertThat(read.child.label).isEqualTo("first");
+    }
+}

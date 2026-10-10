@@ -20,6 +20,10 @@
  This is a fragment file, it will be merged into the root template if available.
  EJS fragments will process % delimiter tags in the template and & delimiter tags during the merge process.
 -%>
+<%#
+ The relationships stored by the key of the other entity: the ones of the owner side, and the collections.
+-%>
+<%_ const keyRelationships = relationships.filter(relationship => !relationship.id && !relationship.otherEntity.embedded && (relationship.collection || relationship.ownerSide)); _%>
 <&_ if (fragment.staticImportSection) { -&>
 <%_ if (!embedded) { _%>
 import static <%- packageName %>.config.Constants.ID_DELIMITER;
@@ -37,9 +41,14 @@ import org.springframework.data.couchbase.repository.Collection;
 import org.springframework.data.annotation.TypeAlias;
 <%_ } _%>
 import org.springframework.data.couchbase.core.mapping.Field;
-<%_ if (relationships.length > 0) { _%>
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.stream.Collectors;
+<%_ if (keyRelationships.length > 0) { _%>
+import org.springframework.data.convert.ValueConverter;
+  <%_ if (keyRelationships.some(relationship => !relationship.collection)) { _%>
+import <%- packageName %>.config.EntityKeyConverter;
+  <%_ } _%>
+  <%_ if (keyRelationships.some(relationship => relationship.collection)) { _%>
+import <%- packageName %>.config.EntityKeysConverter;
+  <%_ } _%>
 <%_ } _%>
 <&_ } -&>
 
@@ -74,42 +83,12 @@ import java.util.stream.Collectors;
 <&_ } -&>
 <%_ } -%>
 
-<%_ /* for (const relationship of relationships) { _%>
+<%_ for (const relationship of keyRelationships) { _%>
 <&_ if (fragment.relationship<%- relationship.relationshipNameCapitalized %>AnnotationSection) { -&>
-  <%_ if (relationship.relationshipOneToMany) { _%>
-    <%_ if (!relationship.otherEntity.embedded) { _%>
-    @N1qlJoin(on = "lks.<%- relationship.relationshipFieldName %>=meta(rks).id", fetchType = FetchType.IMMEDIATE)
-    <%_ } _%>
-
-  <%_ } else if (relationship.relationshipManyToOne) { _%>
-    <%_ if (!relationship.otherEntity.embedded) { _%>
-    @N1qlJoin(on = "lks.<%- relationship.relationshipFieldName %>=meta(rks).id", fetchType = FetchType.IMMEDIATE)
-    <%_ } _%>
-  <%_ } else if (relationship.relationshipManyToMany) { _%>
-    @N1qlJoin(on = "lks.<%- relationship.relationshipFieldNamePlural %>=meta(rks).id", fetchType = FetchType.IMMEDIATE)
-  <%_ } else if (!relationship.otherEntity.embedded) { _%>
-    @N1qlJoin(on = "lks.<%- relationship.relationshipFieldName %>=meta(rks).id", fetchType = FetchType.IMMEDIATE)
-  <%_ } _%>
-
+    @ValueConverter(<%- relationship.collection ? 'EntityKeysConverter' : 'EntityKeyConverter' %>.class)
 <&_ } -&>
 <%_ } -%>
-<% Commented out until N1qlJoin support is fixed */ %>
 
-<&_ if (fragment.classAdditionalRelationshipsSection) { -&>
-<%_ for (const relationship of relationships) { _%>
-  <%_ if (!relationship.id && !relationship.otherEntity.embedded) { _%>
-    <%_ if (relationship.collection) { _%>
-    @JsonIgnore
-    @Field("<%- relationship.relationshipFieldNamePlural %>")
-    private Set<String> <%- relationship.relationshipFieldName %>Ids = new HashSet<>();
-    <%_ } else if (relationship.ownerSide) { _%>
-    @JsonIgnore
-    @Field("<%- relationship.relationshipFieldName %>")
-    private <%- relationship.otherEntity.primaryKey.type %> <%- relationship.relationshipFieldName %>Id;
-    <%_ } _%>
-  <%_ } _%>
-<%_ } _%>
-<&_ } -&>
 
 <%_ for (const relationship of relationships) { _%>
 <&_ if (fragment.relationship<%- relationship.relationshipNameCapitalized %>CustomSetSection) { -&>
@@ -132,11 +111,6 @@ import java.util.stream.Collectors;
         }
     <%_ } _%>
         this.<%- relationship.relationshipFieldNamePlural %> = <%- relationship.otherEntity.entityInstancePlural %>;
-    <%_ if (!relationship.otherEntity.embedded) { _%>
-        this.<%- relationship.relationshipFieldName %>Ids = <%- relationship.otherEntity.entityInstancePlural %>.stream()
-            .map(<%- relationship.otherEntity.persistClass %>::getId)
-            .collect(Collectors.toSet());
-    <%_ } _%>
     }
   <%_ } else if (!relationship.otherEntity.embedded) { _%>
     public void <%- relationship.propertyConsumerName %>(<%- relationship.otherEntity.persistClass %> <%- relationship.otherEntityName %>) {
@@ -157,7 +131,6 @@ import java.util.stream.Collectors;
         }
     <%_ } _%>
         this.<%- relationship.relationshipFieldName %> = <%- relationship.otherEntityName %>;
-        this.<%- relationship.relationshipFieldName %>Id = <%- relationship.otherEntityName %> != null ? <%- relationship.otherEntityName %>.<%- relationship.otherEntity.primaryKey.propertySupplierName %>() : null;
     }
   <%_ } _%>
 <&_ } -&>
@@ -168,9 +141,6 @@ import java.util.stream.Collectors;
     public <%- persistClass %> add<%- relationship.relationshipNameCapitalized %>(<%- relationship.otherEntity.persistClass %> <%- relationship.otherEntityName %>) {
         this.<%- relationship.relationshipFieldNamePlural %>.add(<%- relationship.otherEntityName %>);
   <%_ if (!relationship.otherEntity.embedded || embedded && relationship.ownerSide) { _%>
-    <%_ if (!relationship.otherEntity.embedded) { _%>
-        this.<%- relationship.relationshipFieldName %>Ids.add(<%- relationship.otherEntityName %>.<%- relationship.otherEntity.primaryKey.propertySupplierName %>());
-    <%_ } _%>
     <%_ if (relationship.otherRelationship) { _%>
       <%_ if (!relationship.otherRelationship.collection) { _%>
         <%- relationship.otherEntityName %>.<%- relationship.otherRelationship.propertyConsumerName %>(this);
@@ -189,9 +159,6 @@ import java.util.stream.Collectors;
     public <%- persistClass %> remove<%- relationship.relationshipNameCapitalized %>(<%- relationship.otherEntity.persistClass %> <%- relationship.otherEntityName %>) {
         this.<%- relationship.relationshipFieldNamePlural %>.remove(<%- relationship.otherEntityName %>);
   <%_ if (!relationship.otherEntity.embedded || embedded && relationship.ownerSide) { _%>
-    <%_ if (!relationship.otherEntity.embedded) { _%>
-        this.<%- relationship.relationshipFieldName %>Ids.remove(<%- relationship.otherEntityName %>.<%- relationship.otherEntity.primaryKey.propertySupplierName %>());
-    <%_ } _%>
     <%_ if (relationship.otherRelationship) { _%>
       <%_ if (!relationship.otherRelationship.collection) { _%>
         <%- relationship.otherEntityName %>.<%- relationship.otherRelationship.propertyConsumerName %>(null);

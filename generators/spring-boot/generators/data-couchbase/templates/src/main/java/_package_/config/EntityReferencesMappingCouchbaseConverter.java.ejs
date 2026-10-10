@@ -1,0 +1,62 @@
+<%#
+ Copyright 2013-2026 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+package <%- packageName %>.config;
+
+import org.springframework.data.convert.CustomConversions;
+import org.springframework.data.convert.PropertyValueConverter;
+import org.springframework.data.couchbase.core.convert.CouchbaseConversionContext;
+import org.springframework.data.couchbase.core.convert.MappingCouchbaseConverter;
+import org.springframework.data.couchbase.core.mapping.CouchbaseDocument;
+import org.springframework.data.couchbase.core.mapping.CouchbasePersistentEntity;
+import org.springframework.data.couchbase.core.mapping.CouchbasePersistentProperty;
+import org.springframework.data.mapping.context.MappingContext;
+import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
+
+/**
+ * Writes a collection with a value converter through that converter only: the entities of a relationship are stored as
+ * their keys, they are never written themselves.
+ * Spring Data writes each element of a collection as a document before the value converter of the collection runs, so
+ * writing an entity would also write the entities of its relationships, and theirs, without end when they refer back.
+ */
+public class EntityReferencesMappingCouchbaseConverter extends MappingCouchbaseConverter {
+
+    public EntityReferencesMappingCouchbaseConverter(
+        MappingContext<? extends CouchbasePersistentEntity<?>, CouchbasePersistentProperty> mappingContext,
+        String typeKey,
+        CustomConversions conversions
+    ) {
+        super(mappingContext, typeKey, conversions);
+    }
+
+    @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected void writePropertyInternal(
+        Object source,
+        CouchbaseDocument target,
+        CouchbasePersistentProperty prop,
+        ConvertingPropertyAccessor accessor
+    ) {
+        if (source != null && prop.isCollectionLike() && conversions.hasValueConverter(prop)) {
+            PropertyValueConverter converter = conversions.getPropertyValueConversions().getValueConverter(prop);
+            target.put(prop.getFieldName(), converter.write(source, new CouchbaseConversionContext(prop, this, accessor)));
+            return;
+        }
+        super.writePropertyInternal(source, target, prop, accessor);
+    }
+}
