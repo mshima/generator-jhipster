@@ -62,7 +62,7 @@ describe('describe-samples - support', () => {
     });
 
     it('should fail for an unknown sample', () => {
-      expect(() => describeSample('unknown')).toThrow(/Sample unknown not found/);
+      expect(() => describeSample('unknown')).toThrow(/^Sample unknown not found, expected one of .*\bng-default\b/);
     });
   });
 });

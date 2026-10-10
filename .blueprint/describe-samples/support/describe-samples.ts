@@ -214,9 +214,11 @@ export const describeSampleGroups = (): Record<string, SampleGroupSummary> => {
 
 /** A sample, by its name or its job name, the names being unique across the samples groups. */
 export const describeSample = (name: string): SampleSummary => {
-  const sample = describeSamples().find(description => description.name === name || description.jobName === name);
+  const samples = describeSamples();
+  const sample = samples.find(description => description.name === name || description.jobName === name);
   if (!sample) {
-    throw new Error(`Sample ${name} not found in the ${WORKFLOWS.join(', ')} samples groups`);
+    // The names, so the caller, an AI agent too, can correct the name by itself.
+    throw new Error(`Sample ${name} not found, expected one of ${samples.map(description => description.name).join(', ')}`);
   }
   return summaryOf(sample);
 };
