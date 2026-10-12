@@ -40,10 +40,12 @@ export default class ReactBootstrapGenerator extends ClientApplicationGenerator 
         });
       },
       translations({ application }) {
+        // The client files the callback edits are not written without the client.
+        if (application.skipClient) return;
+
         application.addLanguageCallbacks.push((_newLanguages, allLanguages) => {
-          const { enableTranslation, skipClient, clientSrcDir } = application;
-          // The client files the callback edits are not written without the client.
-          if (!enableTranslation || skipClient) return;
+          const { enableTranslation, clientSrcDir } = application;
+          if (!enableTranslation) return;
 
           const { ignoreNeedlesError: ignoreNonExisting } = this;
 
