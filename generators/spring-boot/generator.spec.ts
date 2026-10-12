@@ -25,7 +25,7 @@ import { createSecureContext } from 'node:tls';
 import { createReproducibleBase64Secret, createReproducibleSecret } from '../../lib/utils/secret.ts';
 import { PRIORITY_NAMES } from '../base-application/priorities.ts';
 import { asPostWritingTask } from '../base-application/support/task-type-inference.ts';
-import { SERVER_MAIN_SRC_DIR } from '../generator-constants.ts';
+import { SERVER_MAIN_SRC_DIR, SERVER_TEST_SRC_DIR } from '../generator-constants.ts';
 import { createKeyStore } from '../java/support/key-store-node-crypto.ts';
 import { filterBasicServerGenerators } from '../server/__test-support/index.ts';
 
@@ -250,6 +250,34 @@ describe(`generator - ${generator}`, () => {
       runResult.assertFileContent(mapper, 'target = "details", expression = "java(s.getId() + \\" | \\" + s.getName())"');
       runResult.assertFileContent(mapper, 'target = "bare", expression = "java(s.getId() + \\" | \\" + s.getName())"');
       runResult.assertFileContent(mapper, 'target = "doubled", expression = "java(s.getId() + \\" | \\" + s.getName())"');
+    });
+  });
+
+  describe('with a field pattern accepting few values', () => {
+    const entityNames = Array.from({ length: 20 }, (_, index) => `Digit${index}`);
+
+    before(async () => {
+      await helpers.runJHipster(generator).withJHipsterConfig(
+        { skipClient: true },
+        entityNames.map(name => ({
+          name,
+          changelogDate: '20160926101213',
+          fields: [{ fieldName: 'digit', fieldType: 'String', fieldValidateRules: ['pattern'], fieldValidateRulesPattern: '^\\d$' }],
+        })),
+      );
+    });
+
+    it('should give the resource tests two different values matching the pattern', () => {
+      for (const name of entityNames) {
+        const source = runResult.fs.read(`${SERVER_TEST_SRC_DIR}com/mycompany/myapp/web/rest/${name}ResourceIT.java`);
+        const defaultValue = /DEFAULT_DIGIT = "([^"]*)"/.exec(source)?.[1];
+        const updatedValue = /UPDATED_DIGIT = "([^"]*)"/.exec(source)?.[1];
+        expect({ name, defaultValue, updatedValue }).toMatchObject({
+          defaultValue: expect.stringMatching(/^\d$/),
+          updatedValue: expect.stringMatching(/^\d$/),
+        });
+        expect(updatedValue).not.toBe(defaultValue);
+      }
     });
   });
 
