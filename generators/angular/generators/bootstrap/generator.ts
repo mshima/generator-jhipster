@@ -46,8 +46,9 @@ export default class BootstrapGenerator extends AngularApplicationGenerator {
       },
       translations({ application }) {
         application.addLanguageCallbacks.push((_newLanguages, allLanguages) => {
-          const { enableTranslation, clientSrcDir } = application;
-          if (!enableTranslation) return;
+          const { enableTranslation, skipClient, clientSrcDir } = application;
+          // The client files the callback edits are not written without the client.
+          if (!enableTranslation || skipClient) return;
 
           const { ignoreNeedlesError: ignoreNonExisting } = this;
 

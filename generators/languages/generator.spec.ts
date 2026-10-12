@@ -56,4 +56,14 @@ describe(`generator - ${generator}`, () => {
       });
     });
   });
+  for (const clientFramework of ['angular', 'react', 'vue'] as const) {
+    describe(`with skipClient and ${clientFramework}`, () => {
+      before(() => helpers.runJHipster('app').withJHipsterConfig({ skipClient: true, clientFramework, enableTranslation: true }));
+      it('should not update the languages of the client', () => {
+        runResult.assertNoFile('src/main/webapp/app/shared/language/find-language-from-key.pipe.ts');
+        runResult.assertNoFile('src/main/webapp/app/config/translation.ts');
+        runResult.assertNoFile('src/main/webapp/app/shared/config/languages.ts');
+      });
+    });
+  }
 });

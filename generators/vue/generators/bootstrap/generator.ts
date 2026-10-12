@@ -42,8 +42,9 @@ export default class VueBootstrapGenerator extends VueApplicationGenerator {
       },
       translations({ application }) {
         application.addLanguageCallbacks.push((newLanguages, allLanguages) => {
-          const { enableTranslation, clientSrcDir, clientRootDir } = application;
-          if (!enableTranslation) return;
+          const { enableTranslation, skipClient, clientSrcDir, clientRootDir } = application;
+          // The client files the callback edits are not written without the client.
+          if (!enableTranslation || skipClient) return;
 
           const { ignoreNeedlesError: ignoreNonExisting } = this;
 
