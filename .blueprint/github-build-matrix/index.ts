@@ -19,3 +19,6 @@
 
 export { default } from './generator.ts';
 export { default as command } from './command.ts';
+// The matrix of the samples CI runs for the changes of a checkout, for the tools choosing the samples of a change.
+export { type BuildMatrixOptions, buildMatrix } from './support/build-matrix.ts';
+export { type Changes, detectChanges } from './support/git-changes.ts';
