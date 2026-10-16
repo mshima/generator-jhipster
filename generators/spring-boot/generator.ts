@@ -43,6 +43,7 @@ import cleanupTask from './cleanup.ts';
 import command from './command.ts';
 import { writeFiles as writeEntityFiles } from './entity-files.ts';
 import { serverFiles } from './files.ts';
+import { generateTestStringValues } from './internal/test-string-values.ts';
 import springBootDependencies from './resources/spring-boot-dependencies-4.ts';
 import type {
   Application as SpringBootApplication,
@@ -504,8 +505,17 @@ ${classProperties
 
   get preparingEachEntityField() {
     return this.asPreparingEachEntityFieldTaskGroup({
-      prepareEntity({ field }) {
+      prepareEntity({ entity, field }) {
         field.fieldJavaBuildSpecification = getSpecificationBuildForType(field.fieldType as FieldType);
+
+        if (field.fieldTypeString || field.blobContentTypeText) {
+          // Drawn when the tests are written, keeping the order of the fake values of the entity.
+          let javaTestStringValues: { defaultValue: string; updatedValue: string } | undefined;
+          Object.defineProperty(field, 'javaTestStringValues', {
+            configurable: true,
+            get: () => (javaTestStringValues ??= generateTestStringValues({ entityClass: entity.entityClass, field, log: this.log })),
+          });
+        }
 
         field.filterableField = !([TYPE_BYTES, TYPE_BYTE_BUFFER] as string[]).includes(field.fieldType) && !field.transient;
         if (field.filterableField) {

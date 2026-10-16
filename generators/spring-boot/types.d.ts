@@ -78,6 +78,8 @@ export type Field = ServerField &
 
     requiresPersistableImplementation?: boolean;
     fieldNameAsDatabaseColumn?: string;
+    /** The default and updated values of a String field in the tests of its REST resource, as Java string literals. */
+    javaTestStringValues?: { defaultValue: string; updatedValue: string };
   };
 
 export interface Relationship extends ServerRelationship, SpringBootAddedPropertyProperties, SpringBootProperty, JavaRelationship {
