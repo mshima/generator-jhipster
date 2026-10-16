@@ -505,17 +505,8 @@ ${classProperties
 
   get preparingEachEntityField() {
     return this.asPreparingEachEntityFieldTaskGroup({
-      prepareEntity({ entity, field }) {
+      prepareEntity({ field }) {
         field.fieldJavaBuildSpecification = getSpecificationBuildForType(field.fieldType as FieldType);
-
-        if (field.fieldTypeString || field.blobContentTypeText) {
-          // Drawn when the tests are written, keeping the order of the fake values of the entity.
-          let javaTestStringValues: { defaultValue: string; updatedValue: string } | undefined;
-          Object.defineProperty(field, 'javaTestStringValues', {
-            configurable: true,
-            get: () => (javaTestStringValues ??= generateTestStringValues({ entityClass: entity.entityClass, field, log: this.log })),
-          });
-        }
 
         field.filterableField = !([TYPE_BYTES, TYPE_BYTE_BUFFER] as string[]).includes(field.fieldType) && !field.transient;
         if (field.filterableField) {
@@ -592,6 +583,15 @@ ${classProperties
           primaryKey.javaValueGenerator = getJavaValueGeneratorForType(primaryKey.type);
           for (const field of primaryKey.fields) {
             field.fieldJavaValueGenerator = getJavaValueGeneratorForType(field.fieldType);
+          }
+        }
+      },
+      prepareResourceTestValues({ application, entity }) {
+        // Drawn with a seed of their own, like the Liquibase fake data, so that they do not depend on the other fake values.
+        entity.resetFakerSeed?.(`${application.baseName}-resource-test`);
+        for (const field of entity.fields) {
+          if (field.fieldTypeString || field.blobContentTypeText) {
+            field.javaTestStringValues = generateTestStringValues({ entityClass: entity.entityClass, field, log: this.log });
           }
         }
       },
