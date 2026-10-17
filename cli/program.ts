@@ -36,7 +36,7 @@ import { resolveDefaultCommand } from '../lib/resolver/default-command.ts';
 import { packageNameToNamespace } from '../lib/utils/index.ts';
 
 import SUB_GENERATORS from './commands.ts';
-import EnvironmentBuilder, { type PrepareOptions } from './environment-builder.ts';
+import EnvironmentBuilder, { type PrepareOptions, STRICT_MODES, type StrictMode } from './environment-builder.ts';
 import JHipsterCommand from './jhipster-command.ts';
 import logo from './logo.ts';
 import type { CliCommand } from './types.ts';
@@ -58,6 +58,11 @@ type BuildCommands = {
   defaultCommand?: string;
   entrypointGenerator?: string;
   silent?: boolean;
+  /**
+   * How strictly the cli, like the cli of a blueprint, is kept from changing the generation: `warn` by default, `error`
+   * the only mode of JHipster 10, where it can customize its logo, its name and its commands, not what they generate.
+   */
+  strict?: StrictMode;
   printLogo?: () => void | Promise<void>;
   printBlueprintLogo?: () => void | Promise<void>;
   createEnvBuilder: (options?: BaseEnvironmentOptions, prepareOptions?: PrepareOptions) => Promise<EnvironmentBuilder>;
@@ -83,6 +88,30 @@ type BuildJHipsterOptions = Partial<BuildCommands> & {
 export const printJHipsterLogo = () => {
   // eslint-disable-next-line no-console
   console.log(`\n${logo}`);
+};
+
+/** The options a command of the cli passes to the generators, which change the generation: none with the strict mode `error`. */
+const strictUseOptions = (cmdName: string, useOptions: Record<string, unknown>, strict: StrictMode): Record<string, unknown> => {
+  if (Object.keys(useOptions).length === 0 || strict === 'off') return useOptions;
+  if (strict === 'error') return {};
+  logger.warn(
+    `The command ${cmdName} passes the options ${Object.keys(useOptions).join(', ')} to the generators. It will not be supported in JHipster 10, see the strict option.`,
+  );
+  return useOptions;
+};
+
+/**
+ * The strict mode of the invocation: the `--strict` flag, resolved from argv before commander parses, the one of the cli
+ * otherwise, `warn` by default.
+ */
+export const resolveStrictMode = (argv: string[] = process.argv, defaultMode: StrictMode = 'warn'): StrictMode => {
+  const index = argv.findIndex(argument => argument === '--strict' || argument.startsWith('--strict='));
+  if (index === -1) return defaultMode;
+  const value = argv[index].includes('=') ? argv[index].split('=')[1] : argv[index + 1];
+  if (!STRICT_MODES.includes(value as StrictMode)) {
+    throw new Error(`Invalid strict mode ${value}, expected one of ${STRICT_MODES.join(', ')}.`);
+  }
+  return value as StrictMode;
 };
 
 /** Add the arguments, the usage and the options of a resolved command, and keep the configs of its generators. */
@@ -122,6 +151,10 @@ export const createProgram = ({
       .option(
         '--blueprints <value>',
         'A comma separated list of one or more generator blueprints to use for the sub generators, e.g. --blueprints kotlin,vuejs',
+      )
+      .option(
+        '--strict <mode>',
+        `How strictly the cli is kept from changing the generation: ${STRICT_MODES.join(', ')}, warn by default, error in JHipster 10`,
       )
       .option('--force-insight', 'Force insight')
       .option('--no-insight', 'Disable insight')
@@ -187,8 +220,20 @@ export const buildCommands = ({
   printBlueprintLogo = () => {},
   createEnvBuilder,
   silent,
-  getJDLDefinitions = ({ commandsConfigs }) => ({ application: buildJDLApplicationConfig(commandsConfigs) }),
+  strict = 'warn',
+  getJDLDefinitions: customGetJDLDefinitions,
 }: BuildCommands) => {
+  // The jdl definitions change the generation: the ones of the configs of the commands, blueprint ones included.
+  if (customGetJDLDefinitions && strict === 'error') {
+    throw new Error('A cli customizing the jdl definitions (getJDLDefinitions) is not supported with the strict option error.');
+  }
+  if (customGetJDLDefinitions && strict === 'warn') {
+    logger.warn(
+      'The cli customizes the jdl definitions (getJDLDefinitions). It will not be supported in JHipster 10, see the strict option.',
+    );
+  }
+  const getJDLDefinitions: NonNullable<BuildCommands['getJDLDefinitions']> =
+    customGetJDLDefinitions ?? (({ commandsConfigs }) => ({ application: buildJDLApplicationConfig(commandsConfigs) }));
   defaultCommand ??= resolveDefaultCommand();
   /* create commands */
   Object.entries(commands).forEach(([cmdName, opts]) => {
@@ -279,7 +324,7 @@ export const buildCommands = ({
         const options = {
           ...program.opts(),
           ...cmdOptions,
-          ...useOptions,
+          ...strictUseOptions(cmdName, useOptions, strict),
           commandName: cmdName,
           entrypointGenerator,
           blueprints: envBuilder?.getBlueprintsOption(),
@@ -360,20 +405,33 @@ export const buildJHipster = async ({
   commands,
   devBlueprintPath,
   env,
+  strict,
   ...buildOptions
 }: BuildJHipsterOptions = {}) => {
+  strict = resolveStrictMode(process.argv, strict);
+  // The environment and the generators it finds change the generation: the cli can only declare them.
+  const customizations = [...(createEnvBuilder ? ['createEnvBuilder'] : []), ...(lookups?.length ? ['lookups'] : [])];
+  if (customizations.length > 0 && strict === 'error') {
+    throw new Error(`A cli customizing the environment (${customizations.join(', ')}) is not supported with the strict option error.`);
+  }
+  if (customizations.length > 0 && strict === 'warn') {
+    logger.warn(
+      `The cli customizes the environment (${customizations.join(', ')}). It will not be supported in JHipster 10, see the strict option.`,
+    );
+  }
   createEnvBuilder ??= async (options, prepareOptions) =>
-    EnvironmentBuilder.create(options).prepare({ blueprints, lookups, devBlueprintPath, ...prepareOptions });
+    EnvironmentBuilder.create(options).prepare({ blueprints, lookups, devBlueprintPath, strict, ...prepareOptions });
   if (env) {
     commands = { ...SUB_GENERATORS, ...commands };
   } else {
-    envBuilder ??= await createEnvBuilder(undefined, { disableBlueprints: shouldDisableBlueprints() });
+    envBuilder ??= await createEnvBuilder(undefined, { disableBlueprints: shouldDisableBlueprints(), strict });
     env ??= envBuilder.getEnvironment();
     commands = { ...SUB_GENERATORS, ...(await envBuilder.getBlueprintCommands()), ...commands };
   }
 
   buildCommands({
     ...buildOptions,
+    strict,
     program,
     commands,
     envBuilder,

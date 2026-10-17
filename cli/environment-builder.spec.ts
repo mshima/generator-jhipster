@@ -478,4 +478,44 @@ describe('cli - EnvironmentBuilder', () => {
       });
     });
   });
+
+  describe('strict', () => {
+    describe('with a blueprint the cli passes', () => {
+      it('should not pass it to the generators with the mode error', () => {
+        const envBuilder = EnvironmentBuilder.create()._loadBlueprints({ 'generator-jhipster-foo': '1.0.0' });
+        envBuilder.strict = 'error';
+        expect(envBuilder.getBlueprintsOption()).toBe('');
+      });
+      it('should pass it to the generators with a warning with the mode warn', () => {
+        const warn = esmocha.spyOn(console, 'warn').mockImplementation(() => {});
+        const envBuilder = EnvironmentBuilder.create()._loadBlueprints({ 'generator-jhipster-foo': '1.0.0' });
+        expect(envBuilder.getBlueprintsOption()).toBe('generator-jhipster-foo@1.0.0');
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('generator-jhipster-foo'));
+        warn.mockRestore();
+      });
+    });
+
+    describe('with shared options', () => {
+      let oldArgv: string[];
+
+      before(async () => {
+        await helpers
+          .prepareTemporaryDir()
+          .withFiles(createBlueprintFiles('generator-jhipster-cli', { files: cliBlueprintFiles }))
+          .commitFiles();
+        oldArgv = process.argv;
+        process.argv = ['--blueprints', 'cli'];
+      });
+      after(() => {
+        process.argv = oldArgv;
+      });
+
+      it('should reject them with the mode error', async () => {
+        // @ts-expect-error private
+        const envBuilder = await EnvironmentBuilder.create()._loadBlueprints()._lookupBlueprints({ localOnly: true });
+        envBuilder.strict = 'error';
+        await expect(envBuilder._loadSharedOptions()).rejects.toThrow(/Shared options \(fooBar\)/);
+      });
+    });
+  });
 });

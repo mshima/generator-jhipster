@@ -49,9 +49,23 @@ const blueprintCommandsFile = (packagePath: string | undefined): string | undefi
 type EnvironmentOptions = ConstructorParameters<typeof Environment>[0];
 
 /**
+ * How strictly a cli customizing JHipster, like the cli of a blueprint, is kept from changing the generation: `off` allows
+ * it, `warn` warns when it does, `error` keeps it from it. `error` will be the only mode in JHipster 10.
+ */
+export type StrictMode = 'off' | 'warn' | 'error';
+
+export const STRICT_MODES: readonly StrictMode[] = ['off', 'warn', 'error'];
+
+const strictWarning = (message: string) =>
+  // eslint-disable-next-line no-console
+  console.warn(`${chalk.yellow.bold('WARNING!')} ${message} It will not be supported in JHipster 10, see the strict option.`);
+
+/**
  * Options used to lookup and load generators, blueprints and shared options.
  */
 export type PrepareOptions = {
+  /** How strictly the cli is kept from changing the generation, `warn` by default. */
+  strict?: StrictMode;
   blueprints?: Record<string, string | undefined>;
   lookups?: Parameters<Environment['lookup']>[0][];
   devBlueprintPath?: string;
@@ -80,6 +94,9 @@ export default class EnvironmentBuilder {
   localBlueprintExists?: boolean;
   disableBlueprints?: boolean;
   _blueprintsWithVersion: Record<string, string | undefined> = {};
+  /** The blueprints the cli passed, which the project does not declare. */
+  _cliBlueprints: string[] = [];
+  strict: StrictMode = 'warn';
 
   /**
    * Creates a new EnvironmentBuilder with a new Environment.
@@ -140,8 +157,15 @@ export default class EnvironmentBuilder {
     return this.store;
   }
 
-  async prepare({ blueprints, lookups, devBlueprintPath = jhipsterDevBlueprintPath, disableBlueprints = false }: PrepareOptions = {}) {
+  async prepare({
+    blueprints,
+    lookups,
+    devBlueprintPath = jhipsterDevBlueprintPath,
+    disableBlueprints = false,
+    strict = 'warn',
+  }: PrepareOptions = {}) {
     this.disableBlueprints = disableBlueprints;
+    this.strict = strict;
     const devBlueprintEnabled = devBlueprintPath && existsSync(devBlueprintPath);
     this.env.sharedOptions.devBlueprintEnabled = devBlueprintEnabled;
     this.devBlueprintPath = devBlueprintEnabled ? devBlueprintPath : undefined;
@@ -175,9 +199,16 @@ export default class EnvironmentBuilder {
    * @return {String}
    */
   getBlueprintsOption() {
-    return Object.entries(this._blueprintsWithVersion)
-      .map(([packageName, packageVersion]) => (packageVersion ? `${packageName}@${packageVersion}` : packageName))
-      .join(',');
+    let blueprints = Object.entries(this._blueprintsWithVersion);
+    // A blueprint the cli passed changes the generation: the project declares the blueprints it is generated with.
+    if (this._cliBlueprints.length > 0) {
+      if (this.strict === 'error') {
+        blueprints = blueprints.filter(([packageName]) => !this._cliBlueprints.includes(packageName));
+      } else if (this.strict === 'warn') {
+        strictWarning(`The cli passes the blueprints ${this._cliBlueprints.join(', ')} to the generators.`);
+      }
+    }
+    return blueprints.map(([packageName, packageVersion]) => (packageVersion ? `${packageName}@${packageVersion}` : packageName)).join(',');
   }
 
   async updateJHipsterGenerators() {
@@ -276,8 +307,10 @@ export default class EnvironmentBuilder {
       this._blueprintsWithVersion = {};
       return this;
     }
+    const declaredBlueprints = this._getAllBlueprintsWithVersion();
+    this._cliBlueprints = Object.keys(blueprints ?? {}).filter(name => !(name in declaredBlueprints));
     this._blueprintsWithVersion = {
-      ...this._getAllBlueprintsWithVersion(),
+      ...declaredBlueprints,
       ...blueprints,
     };
     return this;
@@ -313,6 +346,15 @@ export default class EnvironmentBuilder {
     const blueprintsPackagePath = await this._getBlueprintPackagePaths();
     if (blueprintsPackagePath) {
       const sharedOptions = (await this._getSharedOptions(blueprintsPackagePath)) ?? {};
+      // Shared options change the generation of every generator.
+      if (Object.keys(sharedOptions).length > 0) {
+        if (this.strict === 'error') {
+          throw new Error(`Shared options (${Object.keys(sharedOptions).join(', ')}) are not supported with the strict option error.`);
+        }
+        if (this.strict === 'warn') {
+          strictWarning(`Shared options (${Object.keys(sharedOptions).join(', ')}) are passed to every generator.`);
+        }
+      }
       // Env will forward sharedOptions to every generator
       Object.assign(this.env.sharedOptions, sharedOptions);
     }
