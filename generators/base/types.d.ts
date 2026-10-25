@@ -44,12 +44,14 @@ export type Control = {
 export type Config = CoreConfig &
   ExportStoragePropertiesFromCommand<typeof Command> & {
     jhipsterVersion?: string;
+    /** What to install to generate again with the generator-jhipster that generated, when it is not `jhipsterVersion`. */
+    jhipsterInstall?: string;
     /** The last changelog date given to an entity, as a timestamp, see `nextTimestamp`. */
     lastChangelogTimestamp?: number;
     /** @deprecated The former name of `lastChangelogTimestamp`, read from the projects that have it. */
     lastLiquibaseTimestamp?: number;
     creationTimestamp?: number;
-    blueprints?: { name: string; version?: string }[];
+    blueprints?: { name: string; version?: string; install?: string }[];
   };
 
 export type Options = CoreOptions &

@@ -133,6 +133,7 @@ exports[`generator - react:bootstrap bootstrapping default config should prepare
   "jhiPrefix": "jhi",
   "jhiPrefixCapitalized": "Jhi",
   "jhiPrefixDashed": "jhi",
+  "jhipsterInstall": undefined,
   "jhipsterPackageJson": Any<Object>,
   "jhipsterVersion": "JHIPSTER_VERSION",
   "jwtSecretKey": undefined,

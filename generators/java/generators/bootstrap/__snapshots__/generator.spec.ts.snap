@@ -163,6 +163,7 @@ exports[`generator - java:bootstrap bootstrapping default config should prepare 
   "jhiPrefixDashed": "jhi",
   "jhiTablePrefix": "jhi",
   "jhipsterDependenciesVersion": "JHIPSTER_DEPENDENCIES_VERSION",
+  "jhipsterInstall": undefined,
   "jhipsterPackageJson": Any<Object>,
   "jhipsterVersion": "JHIPSTER_VERSION",
   "jwtSecretKey": undefined,

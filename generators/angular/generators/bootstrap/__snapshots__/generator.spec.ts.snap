@@ -172,6 +172,7 @@ exports[`generator - angular:bootstrap bootstrapping default config should prepa
   "jhiPrefix": "jhi",
   "jhiPrefixCapitalized": "Jhi",
   "jhiPrefixDashed": "jhi",
+  "jhipsterInstall": undefined,
   "jhipsterPackageJson": Any<Object>,
   "jhipsterVersion": "JHIPSTER_VERSION",
   "jwtSecretKey": undefined,

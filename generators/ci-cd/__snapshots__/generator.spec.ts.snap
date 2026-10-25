@@ -270,6 +270,7 @@ exports[`generator - ci-cd cli with multiples values should match context snapsh
   "jhiPrefixDashed": "jhi",
   "jhiTablePrefix": "jhi",
   "jhipsterDependenciesVersion": "JHIPSTER_DEPENDENCIES_VERSION",
+  "jhipsterInstall": undefined,
   "jhipsterPackageJson": Any<Object>,
   "jhipsterVersion": "JHIPSTER_VERSION",
   "jwtSecretKey": undefined,

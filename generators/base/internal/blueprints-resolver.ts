@@ -25,6 +25,7 @@ import semver from 'semver';
 import type { PackageJson } from 'type-fest';
 
 import { packageJson } from '../../../lib/index.ts';
+import { type PackageVersions, getPackageVersions } from '../../../lib/package-versions.ts';
 import { packageNameToNamespace } from '../../../lib/utils/index.ts';
 import type CoreGenerator from '../../base-core/index.ts';
 import { CONTEXT_DATA_BLUEPRINTS_TO_COMPOSE } from '../support/constants.ts';
@@ -109,7 +110,13 @@ export class BlueprintsResolver {
 
     if (blueprints.length > 0) {
       blueprints.forEach(blueprint => {
-        blueprint.version = this.#findBlueprintVersion(blueprint.name) ?? blueprint.version;
+        const { version, install } = this.#findBlueprintVersions(blueprint.name);
+        blueprint.version = version ?? blueprint.version;
+        if (install) {
+          blueprint.install = install;
+        } else {
+          delete blueprint.install;
+        }
       });
       this.#generator.config.set('blueprints', blueprints);
     }
@@ -149,15 +156,16 @@ export class BlueprintsResolver {
   }
 
   /**
-   * Try to retrieve the version of the blueprint used.
+   * Try to retrieve the versions of the blueprint used: the version of its API, and what to install when it is not
+   * that version, like a checkout.
    */
-  #findBlueprintVersion(blueprintPkgName: string): string | undefined {
-    const blueprintPackageJson = this.#findBlueprintPackageJson(blueprintPkgName);
-    if (!blueprintPackageJson?.version) {
+  #findBlueprintVersions(blueprintPkgName: string): PackageVersions {
+    const blueprintPackagePath = this.#env.getPackagePath(packageNameToNamespace(blueprintPkgName));
+    const versions = blueprintPackagePath ? getPackageVersions(blueprintPackagePath, { name: blueprintPkgName }) : {};
+    if (!versions.version) {
       this.#log.warn(`Could not retrieve version of blueprint '${blueprintPkgName}'`);
-      return undefined;
     }
-    return blueprintPackageJson.version;
+    return versions;
   }
 
   #checkJHipsterBlueprintVersion(blueprintPkgName: string) {

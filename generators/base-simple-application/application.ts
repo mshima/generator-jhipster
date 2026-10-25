@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { packageJson } from '../../lib/index.ts';
+import { getJHipsterInstall, packageJson } from '../../lib/index.ts';
 import { type MutateDataParam, type MutateDataPropertiesWithRequiredProperties, finalizeDefault } from '../../lib/utils/object.ts';
 import { kebabCase, upperFirst } from '../../lib/utils/string-utils.ts';
 import type { WriteContext } from '../base-core/api.ts';
@@ -26,6 +26,8 @@ export type BaseSimpleApplicationLoadingAddedApplicationProperties = WriteContex
 
 export type BaseSimpleApplicationPreparingAddedApplicationProperties = {
   jhipsterVersion: string;
+  /** What to install to generate again with this generator-jhipster, when it is not `jhipsterVersion`. */
+  jhipsterInstall?: string;
   documentationArchiveUrl: string;
 
   jhiPrefix: string;
@@ -72,10 +74,14 @@ export const mutateApplicationLoading = {
   BaseSimpleApplicationLoadingAddedApplicationProperties
 >;
 
+const jhipsterInstall = getJHipsterInstall();
+
 export const mutateApplicationPreparing = {
   __override__: false,
 
   jhipsterVersion: packageJson.version,
+  // The install of this generator-jhipster, not of another version like the placeholder of the tests.
+  jhipsterInstall: ({ jhipsterVersion }) => (jhipsterVersion === packageJson.version ? jhipsterInstall : undefined),
   jhiPrefix: 'jhi',
   jhiPrefixCapitalized: ({ jhiPrefix }) => upperFirst(jhiPrefix),
   jhiPrefixDashed: ({ jhiPrefix }) => kebabCase(jhiPrefix),
