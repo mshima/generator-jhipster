@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 
 import packageJson from '../package.json' with { type: 'json' };
@@ -35,3 +36,14 @@ export const getSourceRoot = (relativePath?: string) => {
 };
 
 export { packageJson };
+
+/**
+ * The package generator-jhipster is published as when it is not `generator-jhipster` (a build published under another
+ * name), with the version npm installs, like `@mshima/generator-jhipster@0.0.4`: the version of the package.json at the
+ * root of the package, not the internal one of the build (`packageJson`). Undefined for `generator-jhipster`.
+ */
+export const getJHipsterPackage = (): string | undefined => {
+  if (packageJson.name === 'generator-jhipster') return undefined;
+  const { name, version } = JSON.parse(readFileSync(getPackageRoot('package.json'), 'utf8'));
+  return `${name}@${version}`;
+};

@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { getJHipsterPackage } from '../../lib/index.ts';
 import type { MutateDataParam, MutateDataPropertiesWithRequiredProperties } from '../../lib/utils/object.ts';
 import { kebabCase, upperFirst } from '../../lib/utils/string-utils.ts';
 import packageJson from '../../package.json' with { type: 'json' };
@@ -26,6 +27,8 @@ export type BaseSimpleApplicationLoadingAddedApplicationProperties = WriteContex
 
 export type BaseSimpleApplicationPreparingAddedApplicationProperties = {
   jhipsterVersion: string;
+  /** The package generator-jhipster is published as, with its version, when it is not `generator-jhipster`. */
+  jhipsterPackage?: string;
   documentationArchiveUrl: string;
 
   jhiPrefix: string;
@@ -72,10 +75,14 @@ export const mutateApplicationLoading = {
   BaseSimpleApplicationLoadingAddedApplicationProperties
 >;
 
+const jhipsterPackage = getJHipsterPackage();
+
 export const mutateApplicationPreparing = {
   __override__: false,
 
   jhipsterVersion: packageJson.version,
+  // Only when generator-jhipster is published under another name.
+  ...(jhipsterPackage ? { jhipsterPackage } : {}),
   jhiPrefix: 'jhi',
   jhiPrefixCapitalized: ({ jhiPrefix }) => upperFirst(jhiPrefix),
   jhiPrefixDashed: ({ jhiPrefix }) => kebabCase(jhiPrefix),

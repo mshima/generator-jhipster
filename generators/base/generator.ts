@@ -22,11 +22,11 @@ import { rm } from 'node:fs/promises';
 import { relative } from 'node:path';
 
 import chalk from 'chalk';
-import { lt as semverLessThan } from 'semver';
+import { lt as semverLessThan, valid as semverValid } from 'semver';
 import type { PackageJson } from 'type-fest';
 
 import type { ExportGeneratorOptionsFromCommand, ExportStoragePropertiesFromCommand, ParsableCommand } from '../../lib/command/types.ts';
-import { packageJson } from '../../lib/index.ts';
+import { getJHipsterPackage, packageJson } from '../../lib/index.ts';
 import { requireGeneratorCommand } from '../../lib/resolver/generator-command.ts';
 import { normalizeBlueprintName } from '../../lib/utils/blueprint-name.ts';
 import { packageNameToNamespace } from '../../lib/utils/index.ts';
@@ -154,6 +154,8 @@ export default class BaseGenerator<
       }
       if (!this.fromBlueprint && !this.delegateToBlueprint && storeJHipsterVersion && !this.options.reproducibleTests) {
         this.jhipsterConfig.jhipsterVersion = packageJson.version;
+        // The package to install to regenerate the project, when generator-jhipster is published under another name.
+        this.jhipsterConfig.jhipsterPackage = getJHipsterPackage();
       }
       if ((this.fromBlueprint || !this.delegateToBlueprint) && queueCommandTasks) {
         this._queueCurrentJHipsterCommandTasks();
@@ -204,7 +206,7 @@ export default class BaseGenerator<
     const generator = this;
     return this.getContextData<Control>('jhipster:control', {
       factory: () => {
-        let jhipsterOldVersion: string | null;
+        let jhipsterOldVersion: string | null | undefined;
         const customizeRemoveFiles: ((file: string) => string | undefined)[] = [];
 
         const collectCleanupFiles = (cleanup: CleanupArgumentType) =>
@@ -235,10 +237,14 @@ export default class BaseGenerator<
             }
           },
           get jhipsterOldVersion(): string | null {
-            jhipsterOldVersion ??=
-              existsSync(generator.config.path) ?
-                (JSON.parse(readFileSync(generator.config.path, 'utf-8'))[GENERATOR_JHIPSTER]?.jhipsterVersion ?? null)
-              : null;
+            if (jhipsterOldVersion === undefined) {
+              const recorded: unknown =
+                existsSync(generator.config.path) ?
+                  JSON.parse(readFileSync(generator.config.path, 'utf-8'))[GENERATOR_JHIPSTER]?.jhipsterVersion
+                : undefined;
+              // A recorded value that is not a version, like a git url or a path, is ignored: the versions compared are semver.
+              jhipsterOldVersion = typeof recorded === 'string' && semverValid(recorded) ? recorded : null;
+            }
             return jhipsterOldVersion;
           },
           /** Whether `docker compose` is installed, see `isDockerComposeAvailable`: detected when read, once for the process. */

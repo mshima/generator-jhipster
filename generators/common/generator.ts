@@ -235,7 +235,8 @@ export default class CommonGenerator extends BaseApplicationGenerator<
 
         this.packageJson.merge({
           devDependencies: {
-            'generator-jhipster': application.jhipsterVersion,
+            // An npm alias when generator-jhipster is published under another name, installable as generator-jhipster.
+            'generator-jhipster': application.jhipsterPackage ? `npm:${application.jhipsterPackage}` : application.jhipsterVersion,
             ...Object.fromEntries((this.jhipsterConfig.blueprints ?? []).map(blueprint => [blueprint.name, blueprint.version])),
           },
         });

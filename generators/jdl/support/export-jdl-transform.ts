@@ -76,8 +76,16 @@ export const exportJDLTransform = ({
     if (yoRcContents) {
       const contents = JSON.parse(yoRcContents.toString());
       if (contents[GENERATOR_JHIPSTER]?.jdlStore) {
-        const { jdlStore, jwtSecretKey, rememberMeKey, jhipsterVersion, creationTimestamp, incrementalChangelog, ...rest } =
-          contents[GENERATOR_JHIPSTER];
+        const {
+          jdlStore,
+          jwtSecretKey,
+          rememberMeKey,
+          jhipsterVersion,
+          jhipsterPackage,
+          creationTimestamp,
+          incrementalChangelog,
+          ...rest
+        } = contents[GENERATOR_JHIPSTER];
 
         const jdlObject = getJDLObjectFromSingleApplication(
           { ...contents, [GENERATOR_JHIPSTER]: { ...rest, incrementalChangelog } },
@@ -94,7 +102,11 @@ export const exportJDLTransform = ({
         yield jdlStoreFile;
 
         yoRcFile.contents = Buffer.from(
-          JSON.stringify({ [GENERATOR_JHIPSTER]: { jdlStore, jwtSecretKey, rememberMeKey, jhipsterVersion, creationTimestamp } }, null, 2),
+          JSON.stringify(
+            { [GENERATOR_JHIPSTER]: { jdlStore, jwtSecretKey, rememberMeKey, jhipsterVersion, jhipsterPackage, creationTimestamp } },
+            null,
+            2,
+          ),
         );
         setModifiedFileState(yoRcFile);
         yoRcFile.conflicter = 'force';

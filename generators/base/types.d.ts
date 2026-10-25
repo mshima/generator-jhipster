@@ -44,6 +44,8 @@ export type Control = {
 export type Config = CoreConfig &
   ExportStoragePropertiesFromCommand<typeof Command> & {
     jhipsterVersion?: string;
+    /** The package generator-jhipster is published as, with its version, when it is not `generator-jhipster`. */
+    jhipsterPackage?: string;
     lastLiquibaseTimestamp?: number;
     creationTimestamp?: number;
     blueprints?: { name: string; version?: string }[];
