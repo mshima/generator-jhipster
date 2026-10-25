@@ -50,6 +50,7 @@ exports[`generator - javascript-simple-application:bootstrap bootstrapping defau
   "jhiPrefix": "jhi",
   "jhiPrefixCapitalized": "Jhi",
   "jhiPrefixDashed": "jhi",
+  "jhipsterInstall": undefined,
   "jhipsterPackageJson": Any<Object>,
   "jhipsterVersion": "JHIPSTER_VERSION",
   "languages": Any<Array>,

@@ -20,7 +20,10 @@ import { normalizeBlueprintName } from '../../../lib/utils/blueprint-name.ts';
 
 export type Blueprint = {
   name: string;
+  /** The version of the API of the blueprint. */
   version?: string;
+  /** What to install when it is not `version`: a git reference of a checkout, a path, an npm alias. */
+  install?: string;
 };
 
 /**
@@ -68,16 +71,18 @@ export function mergeBlueprints(...blueprintsToMerge: Blueprint[][]): Blueprint[
  * @returns {Blueprint[]} an array that contains the info for each blueprint
  */
 export function removeBlueprintDuplicates(blueprints: Blueprint[]): Blueprint[] {
-  const uniqueBlueprints = new Map();
+  const uniqueBlueprints = new Map<string, Blueprint>();
   blueprints.forEach(blueprintToAdd => {
-    if (uniqueBlueprints.get(blueprintToAdd.name) === undefined) {
-      uniqueBlueprints.set(blueprintToAdd.name, blueprintToAdd.version);
+    // The first one with a version wins.
+    if (uniqueBlueprints.get(blueprintToAdd.name)?.version === undefined) {
+      uniqueBlueprints.set(blueprintToAdd.name, blueprintToAdd);
     }
   });
-  return [...uniqueBlueprints].map(([name, version]) => {
-    if (version === undefined) return { name };
-    return { name, version };
-  });
+  return [...uniqueBlueprints.values()].map(({ name, version, install }) => ({
+    name,
+    ...(version === undefined ? {} : { version }),
+    ...(install === undefined ? {} : { install }),
+  }));
 }
 
 /**
