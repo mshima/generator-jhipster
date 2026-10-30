@@ -100,13 +100,15 @@ const baseConfig: Config = {
 
 /**
  * Config applied to the TypeScript files in generation process, after the base config.
- * The dot notation of a TypeScript file depends on its types, like `noPropertyAccessFromIndexSignature`: it belongs to
- * a type aware lint, like `@typescript-eslint/dot-notation`.
+ * The dot notation of a TypeScript file depends on its types: `@typescript-eslint/dot-notation` replaces the core rule
+ * and keeps the bracket notation of an index signature, which `noPropertyAccessFromIndexSignature` requires.
+ * It needs type information, like a parser providing the program of the file.
  */
 export const typescriptConfig: Config = {
   files: ['**/*.{ts,tsx,mts,cts}'],
   rules: {
     'dot-notation': 'off',
+    '@typescript-eslint/dot-notation': ['error', { allowIndexSignaturePropertyAccess: true }],
   },
 } as const satisfies Config;
 

@@ -49,12 +49,12 @@ export const foo = 'bar';
 `);
     });
 
-    it('should apply the dot notation to a JavaScript file only', async () => {
-      const files = ['foo.js', 'foo.ts'].map(path => ({
-        path,
-        contents: Buffer.from(`export const foo = (bar) => bar['baz'];
-`),
-      }));
+    it('should apply the dot notation of the types to a TypeScript file', async () => {
+      const contents = `const index: Record<string, string> = {};
+const object = { baz: 'baz' };
+export const foo = [index['baz'], object['baz']];
+`;
+      const files = ['foo.js', 'foo.ts'].map(path => ({ path, contents: Buffer.from(contents) }));
       for (const file of files) setModifiedFileState(file);
       await pipeline(
         Readable.from(files),
@@ -62,10 +62,8 @@ export const foo = 'bar';
         transform(() => undefined),
       );
       expect(files.map(file => file.contents.toString())).toEqual([
-        `export const foo = (bar) => bar.baz;
-`,
-        `export const foo = (bar) => bar['baz'];
-`,
+        contents.replace("index['baz'], object['baz']", 'index.baz, object.baz'),
+        contents.replace("object['baz']", 'object.baz'),
       ]);
     });
 
