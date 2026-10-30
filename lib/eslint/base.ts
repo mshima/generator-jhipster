@@ -98,4 +98,16 @@ const baseConfig: Config = {
   },
 } as const satisfies Config;
 
+/**
+ * Config applied to the TypeScript files in generation process, after the base config.
+ * The dot notation of a TypeScript file depends on its types, like `noPropertyAccessFromIndexSignature`: it belongs to
+ * a type aware lint, like `@typescript-eslint/dot-notation`.
+ */
+export const typescriptConfig: Config = {
+  files: ['**/*.{ts,tsx,mts,cts}'],
+  rules: {
+    'dot-notation': 'off',
+  },
+} as const satisfies Config;
+
 export default baseConfig;

@@ -367,7 +367,14 @@ export default class BootstrapGenerator extends CommandBaseGenerator<typeof comm
       if (!this.skipPrettier) {
         const ignoreErrors = this.options.ignoreErrors || this.upgradeCommand;
         if (!this.skipEslint) {
-          transformStreams.push(await createESLintTransform.call(this, { ignoreErrors, cwd: this.destinationPath() }));
+          transformStreams.push(
+            await createESLintTransform.call(this, {
+              ignoreErrors,
+              cwd: this.destinationPath(),
+              // The files written with the `skipEslint` editor metadata, see `editorMetadata` at base-core.
+              filter: file => !file.editorMetadata?.skipEslint,
+            }),
+          );
         }
         transformStreams.push(
           await createPrettierTransform.call(this, {

@@ -19,11 +19,11 @@
 
 import type { Config } from 'eslint/config';
 
-import base from './base.ts';
+import base, { typescriptConfig as typescript } from './base.ts';
 import plugin from './plugin.ts';
 import recommended from './recommended.ts';
 
-const configs: { recommended: Config; base: Config } = { recommended, base };
+const configs: { recommended: Config; base: Config; typescript: Config } = { recommended, base, typescript };
 
 export { plugin };
 

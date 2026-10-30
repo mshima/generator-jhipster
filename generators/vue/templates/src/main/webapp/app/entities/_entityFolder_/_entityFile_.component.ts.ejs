@@ -132,7 +132,7 @@ export default defineComponent({
         queryCount.value = totalItems.value;
 <%_ } _%>
 <%_ if (paginationInfiniteScroll) { _%>
-        links.value = dataUtils.parseLinks(res.headers?.['link']);
+        links.value = dataUtils.parseLinks(res.headers?.link);
         <%- entityInstancePlural %>.value.push(...(res.data ?? []));
 <%_ } else { _%>
         <%- entityInstancePlural %>.value = res.data;

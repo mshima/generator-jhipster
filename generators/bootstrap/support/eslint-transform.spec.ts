@@ -49,6 +49,40 @@ export const foo = 'bar';
 `);
     });
 
+    it('should apply the dot notation to a JavaScript file only', async () => {
+      const files = ['foo.js', 'foo.ts'].map(path => ({
+        path,
+        contents: Buffer.from(`export const foo = (bar) => bar['baz'];
+`),
+      }));
+      for (const file of files) setModifiedFileState(file);
+      await pipeline(
+        Readable.from(files),
+        await createESLintTransform(),
+        transform(() => undefined),
+      );
+      expect(files.map(file => file.contents.toString())).toEqual([
+        `export const foo = (bar) => bar.baz;
+`,
+        `export const foo = (bar) => bar['baz'];
+`,
+      ]);
+    });
+
+    it('should not lint the files the filter rejects', async () => {
+      const contents = `import { Foo } from 'bar';
+export const foo = 'bar';
+`;
+      const file = { path: 'foo.ts', contents: Buffer.from(contents), editorMetadata: { skipEslint: true } };
+      setModifiedFileState(file);
+      await pipeline(
+        Readable.from([file]),
+        await createESLintTransform({ filter: file => !file.editorMetadata?.skipEslint }),
+        transform(() => undefined),
+      );
+      expect(file.contents.toString()).toBe(contents);
+    });
+
     it('should order an import block needing more than one lint of fixes', async () => {
       const modules = Array.from({ length: 30 }, (_, index) => `module${String(index).padStart(2, '0')}`);
       const file = {

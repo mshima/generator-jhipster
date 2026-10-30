@@ -60,7 +60,7 @@ export default async ({
         { files: [`**/*.{${extensions}}`] },
         ts.configs.base,
         ...additionalConfig,
-        config ? JSON.parse(config) : jhipster.base,
+        ...(config ? [JSON.parse(config)] : [jhipster.base, jhipster.typescript]),
         {
           linterOptions: {
             reportUnusedDisableDirectives: 'off',

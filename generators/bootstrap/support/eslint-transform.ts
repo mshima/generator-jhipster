@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type { MemFsEditorFile } from 'mem-fs-editor';
 import { isFileStateModified } from 'mem-fs-editor/state';
 import { Minimatch } from 'minimatch';
 import { passthrough } from 'p-transform';
@@ -41,9 +42,14 @@ let eslintPool: Piscina<Parameters<typeof eslintWorker>[0], ReturnType<typeof es
 
 export const createESLintTransform = async function (
   this: BaseGenerator | void,
-  transformOptions: { ignoreErrors?: boolean; poolOptions?: PoolOptions } & Partial<Parameters<typeof eslintWorker>[0]> = {},
+  transformOptions: {
+    ignoreErrors?: boolean;
+    poolOptions?: PoolOptions;
+    /** Lints only the files it accepts. */
+    filter?: (file: MemFsEditorFile) => boolean;
+  } & Partial<Parameters<typeof eslintWorker>[0]> = {},
 ) {
-  const { extensions = 'js,cjs,mjs,ts,cts,mts,jsx,tsx,java', ignoreErrors, cwd, poolOptions, recreateEslint } = transformOptions;
+  const { extensions = 'js,cjs,mjs,ts,cts,mts,jsx,tsx,java', ignoreErrors, cwd, poolOptions, recreateEslint, filter } = transformOptions;
   const minimatch = new Minimatch(`**/*.{${extensions}}`, { dot: true });
 
   const workerModule = new URL(`./eslint-worker.${useTsFile ? 'ts' : 'js'}`, import.meta.url);
@@ -52,7 +58,7 @@ export const createESLintTransform = async function (
 
   return passthrough(
     async file => {
-      if (!minimatch.match(file.path) || !isFileStateModified(file)) {
+      if (!minimatch.match(file.path) || !isFileStateModified(file) || (filter && !filter(file))) {
         return;
       }
       const fileContents = file.contents.toString();

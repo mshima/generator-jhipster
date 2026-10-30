@@ -20,6 +20,8 @@ export type EditorMetadata = {
   gitRoot?: string;
   /** Remove the `jhipster-needle-` lines from the file when committing. */
   removeNeedles?: boolean;
+  /** Do not lint the file with ESLint when committing, like a file of a project with its own lint. It is still formatted by prettier. */
+  skipEslint?: boolean;
   /** Format the file with prettier when committing, even if its extension is not one prettier formats by default. */
   prettier?: boolean;
   /** A write once file (`override` false): written from its template when it does not exist, written back as it is otherwise. */

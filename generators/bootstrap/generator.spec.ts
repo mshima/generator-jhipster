@@ -130,6 +130,35 @@ describe(`generator - ${generator}`, () => {
     });
   });
 
+  describe('skipEslint editor metadata', () => {
+    // Formatted by prettier, without a config of the project.
+    const content = 'import { foo } from "foo";\n\nexport const bar = "bar";\n';
+
+    class SkipEslintGenerator extends BaseGenerator {
+      get [BaseGenerator.WRITING]() {
+        return this.asWritingTaskGroup({
+          write() {
+            this.writeDestination('flagged.ts', content, { metadata: { skipEslint: true } });
+            this.writeDestination('not-flagged.ts', content);
+          },
+        });
+      }
+    }
+
+    before(async () => {
+      // The tests skip eslint by default.
+      await basicHelpers.run(SkipEslintGenerator).withOptions({ skipEslint: false }).withJHipsterGenerators();
+    });
+
+    it('does not lint files written with the skipEslint metadata', () => {
+      result.assertEqualsFileContent('flagged.ts', content);
+    });
+
+    it('lints the other files', () => {
+      result.assertEqualsFileContent('not-flagged.ts', 'export const bar = "bar";\n');
+    });
+  });
+
   describe('exportApplication', () => {
     class WriteGenerator extends BaseGenerator {
       get [BaseGenerator.WRITING]() {
