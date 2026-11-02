@@ -21,6 +21,7 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import { isOfficialApplicationType } from '../../lib/core/application-types.ts';
 import { packageJson } from '../../lib/index.ts';
+import { allowGitInNpmrc, isGitInstall } from '../../lib/package-versions.ts';
 import BaseWorkspacesGenerator from '../base-workspaces/index.ts';
 import { GENERATOR_JHIPSTER } from '../generator-constants.ts';
 import type { Config as GitConfig, Options as GitOptions } from '../git/types.d.ts';
@@ -250,6 +251,7 @@ export default class WorkspacesGenerator extends BaseWorkspacesGenerator<any, Wo
         });
 
         // Copy overrides from workspaces
+        let gitDependencies = false;
         for (const appFolder of this.workspacesConfig.appsFolders) {
           const { allowScripts, overrides, dependencies, devDependencies } =
             this.readDestinationJSON(this.destinationPath(appFolder, 'package.json')) ?? ({} as any);
@@ -285,6 +287,13 @@ export default class WorkspacesGenerator extends BaseWorkspacesGenerator<any, Wo
               this.packageJson.merge({ allowScripts });
             }
           }
+          gitDependencies ||= Object.values({ ...dependencies, ...devDependencies }).some(
+            install => typeof install === 'string' && isGitInstall(install),
+          );
+        }
+        // npm reads the allow-git of the root of the workspaces, not of their packages.
+        if (gitDependencies) {
+          this.editFile('.npmrc', { create: true }, allowGitInNpmrc);
         }
 
         if (applications.some(app => app.backendTypeJavaAny)) {

@@ -22,7 +22,7 @@ import { mkdirSync, mkdtempSync, realpathSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { getPackageVersions, toGitInstall } from './package-versions.ts';
+import { allowGitInNpmrc, getPackageVersions, isGitInstall, toGitInstall } from './package-versions.ts';
 
 const commit = '0123456789abcdef0123456789abcdef01234567';
 
@@ -48,6 +48,26 @@ describe('lib > package-versions', () => {
       ['git@gitlab.com:owner/repo.git', 'git+ssh://git@gitlab.com/owner/repo.git'],
     ])('should give the install of %s at a commit', (url, install) => {
       expect(toGitInstall(url, commit)).toBe(`${install}#${commit}`);
+    });
+  });
+
+  describe('isGitInstall', () => {
+    it('should tell a git dependency', () => {
+      expect(
+        ['github:owner/repo#abc', 'git+https://gitlab.com/owner/repo.git#abc', 'git+ssh://git@host/repo.git#abc'].map(isGitInstall),
+      ).toEqual([true, true, true]);
+      expect(['1.2.3', 'npm:@mshima/generator-jhipster@0.0.11', '/path/to/checkout'].map(isGitInstall)).toEqual([false, false, false]);
+    });
+  });
+
+  describe('allowGitInNpmrc', () => {
+    it('should allow the git dependencies of the package.json', () => {
+      expect(allowGitInNpmrc()).toBe('allow-git=root\n');
+      expect(allowGitInNpmrc('registry=x')).toBe('registry=x\nallow-git=root\n');
+    });
+
+    it('should keep the allow-git of the npmrc', () => {
+      expect(allowGitInNpmrc('allow-git=all\n')).toBe('allow-git=all\n');
     });
   });
 

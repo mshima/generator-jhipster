@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { allowGitInNpmrc, isGitInstall } from '../../lib/package-versions.ts';
 import BaseApplicationGenerator from '../base-application/index.ts';
 import { type PropertiesFileLines, editPropertiesFileCallback } from '../base-core/support/index.ts';
 
@@ -233,15 +234,17 @@ export default class CommonGenerator extends BaseApplicationGenerator<
       addJHipsterDependencies({ application }) {
         if (application.skipJhipsterDependencies) return;
 
-        this.packageJson.merge({
-          devDependencies: {
-            // What generated: an npm alias of a build published under another name, a git reference of a checkout.
-            'generator-jhipster': application.jhipsterInstall ?? application.jhipsterVersion,
-            ...Object.fromEntries(
-              (this.jhipsterConfig.blueprints ?? []).map(blueprint => [blueprint.name, blueprint.install ?? blueprint.version]),
-            ),
-          },
-        });
+        // What generated: an npm alias of a build published under another name, a git reference of a checkout.
+        const devDependencies = {
+          'generator-jhipster': application.jhipsterInstall ?? application.jhipsterVersion,
+          ...Object.fromEntries(
+            (this.jhipsterConfig.blueprints ?? []).map(blueprint => [blueprint.name, blueprint.install ?? blueprint.version]),
+          ),
+        };
+        this.packageJson.merge({ devDependencies });
+        if (Object.values(devDependencies).some(install => install && isGitInstall(install))) {
+          this.editFile('.npmrc', { create: true }, allowGitInNpmrc);
+        }
       },
     });
   }
