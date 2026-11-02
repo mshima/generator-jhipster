@@ -57,6 +57,37 @@ describe(`generator - ${generator}`, () => {
     });
   });
 
+  describe('with an application with a git dependency', () => {
+    it('allows the git dependencies in the .npmrc of the root, which npm reads for the workspaces', async () => {
+      await helpers
+        .runJHipster(generator)
+        .withOptions({ workspaces: true, monorepository: true, workspacesFolders: ['gateway', 'mobile'] })
+        .withJHipsterConfig({ baseName: 'workspaces' })
+        .withWorkspaceApplicationAtFolder('gateway', { baseName: 'gateway', applicationType: 'gateway' })
+        .withWorkspaceApplicationAtFolder('mobile', { baseName: 'mobile', applicationType: 'expo' })
+        .withFiles({
+          'mobile/package.json': {
+            name: 'mobile',
+            devDependencies: { 'generator-jhipster-foo': 'github:owner/generator-jhipster-foo#abc' },
+          },
+        });
+
+      result.assertFileContent('.npmrc', 'allow-git=root');
+    });
+
+    it('writes no .npmrc without one', async () => {
+      await helpers
+        .runJHipster(generator)
+        .withOptions({ workspaces: true, monorepository: true, workspacesFolders: ['gateway', 'mobile'] })
+        .withJHipsterConfig({ baseName: 'workspaces' })
+        .withWorkspaceApplicationAtFolder('gateway', { baseName: 'gateway', applicationType: 'gateway' })
+        .withWorkspaceApplicationAtFolder('mobile', { baseName: 'mobile', applicationType: 'expo' })
+        .withFiles({ 'mobile/package.json': { name: 'mobile', devDependencies: { 'generator-jhipster-foo': '1.0.0' } } });
+
+      result.assertNoFile('.npmrc');
+    });
+  });
+
   describe('with an application of a type of a blueprint', () => {
     it('keeps the application with a package.json in the workspaces', async () => {
       await helpers

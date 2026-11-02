@@ -50,6 +50,16 @@ export const toGitInstall = (url: string, commit: string): string => {
   return `git+${gitUrl}#${commit}`;
 };
 
+/** Whether an install spec is a git dependency, which npm 12 installs only when its allow-git config allows it. */
+export const isGitInstall = (install: string): boolean => /^(?:git\+|git:|github:|gitlab:|bitbucket:|gist:)/.test(install);
+
+/**
+ * The npmrc with git dependencies allowed for the package.json of the project (allow-git=root, the workspaces
+ * included), unless it sets allow-git itself.
+ */
+export const allowGitInNpmrc = (npmrc = ''): string =>
+  /^\s*allow-git\s*=/m.test(npmrc) ? npmrc : `${npmrc}${npmrc && !npmrc.endsWith('\n') ? '\n' : ''}allow-git=root\n`;
+
 /**
  * The install of a checkout: its commit at a remote that has it (origin first), or its path when it has uncommitted
  * changes or no remote has its commit.

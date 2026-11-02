@@ -138,6 +138,30 @@ describe(`generator - ${generator}`, () => {
       it('should add generator-jhipster to package.json', () => {
         runResult.assertFileContent('package.json', 'generator-jhipster');
       });
+
+      it('should write no .npmrc', () => {
+        runResult.assertNoFile('.npmrc');
+      });
+    });
+
+    describe('with generator-jhipster installed from git', () => {
+      before(async () => {
+        await helpers
+          .runJHipster(generator)
+          .withJHipsterConfig({ jhipsterInstall: 'github:jhipster/generator-jhipster#abc' })
+          .withFiles({ '.npmrc': 'registry=https://registry.example.com/\n' })
+          .withMockedGenerators(mockedGenerators);
+      });
+
+      it('should add it to package.json', () => {
+        runResult.assertJsonFileContent('package.json', {
+          devDependencies: { 'generator-jhipster': 'github:jhipster/generator-jhipster#abc' },
+        });
+      });
+
+      it('should allow the git dependencies of the package.json in the .npmrc, keeping its content', () => {
+        runResult.assertFileContent('.npmrc', 'registry=https://registry.example.com/\nallow-git=root\n');
+      });
     });
     describe('Custom prettier', () => {
       before(async () => {
