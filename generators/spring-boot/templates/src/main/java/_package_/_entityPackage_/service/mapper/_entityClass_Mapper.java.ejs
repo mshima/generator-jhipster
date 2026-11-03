@@ -33,8 +33,7 @@ _%>
 <%_ for (const a of otherEntitiesFields) { _%>
   <%_ a.collection = a.collection || otherEntitiesFields.some(b => a.otherEntity === b.otherEntity && a.relatedField.fieldName === b.relatedField.fieldName && b.collection === true); _%>
 <%_ } _%>
-<%_ const sameMapper = (a, b) => a.otherEntity === b.otherEntity && a.collection === b.collection && a.relatedField.fieldName === b.relatedField.fieldName; _%>
-<%_ otherEntitiesFields = otherEntitiesFields.filter((a, index) => otherEntitiesFields.findIndex(b => sameMapper(a, b)) === index); _%>
+<%_ otherEntitiesFields = otherEntitiesFields.filter((a, index) => otherEntitiesFields.findIndex(b => a.otherEntity === b.otherEntity && a.collection === b.collection && a.relatedField.fieldName === b.relatedField.fieldName) === index); _%>
 
 <%_ if (dtoRelationships.some(r => r.collection)) { _%>
 import java.util.Set;

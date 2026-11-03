@@ -42,6 +42,8 @@ import static <%- packageName %>.web.rest.TestUtil.convertObjectToPartialUpdateB
       )
       .map(relationship => ({
         relationship,
+        relatedVariable: `related${relationship.relationshipNameCapitalized}`,
+        relatedRepository: `${relationship.otherEntity.persistInstance}Repository`,
         observedField: relationship.otherEntity.fields.find(
           field => !field.id && !field.transient && !field.mapstructExpression && (field.fieldTypeString || field.fieldTypeInteger || field.fieldTypeLong || field.fieldTypeUUID),
         ),
@@ -1758,36 +1760,23 @@ import <%- entityAbsolutePackage %>.domain.enumeration.<%- field.fieldType %>;
   <%_ } _%>
     }
 
-  <%_ const prepareFieldForPatchTest = (field, random) => {
-        const includeField = random ? faker.datatype.boolean() : true;
-        const fieldNameUnderscoreUppercased = field.fieldNameUnderscored.toUpperCase();
-        const updateWithValue = includeField ? `UPDATED_${fieldNameUnderscoreUppercased}` : 'null';
-        const testWithConstant = includeField ? `UPDATED_${fieldNameUnderscoreUppercased}` : `DEFAULT_${fieldNameUnderscoreUppercased}`;
-        return { includeField, updateWithValue, testWithConstant, ...field };
-      };
-  _%>
   <%_ if (noCascadeRelationships.length > 0) { _%>
-    <%_ const relatedVariable = relationship => `related${relationship.relationshipNameCapitalized}`;
-        const relatedRepository = relationship => `${relationship.otherEntity.persistInstance}Repository`;
-        const relatedId = relationship => `${relatedVariable(relationship)}.${relationship.otherEntity.primaryKey.propertySupplierName}()`;
-        const relationshipJson = relationship => relationship.collection ? `om.createArrayNode().add(${relatedVariable(relationship)}Json)` : `${relatedVariable(relationship)}Json`;
-    _%>
 
     @Test<%- transactionalAnnotation %>
     void shouldNotUpdateRelatedEntitiesThrough<%- entityClass %>() throws Exception {
         // Persist the related entities and a <%- entityInstance %> related to them
-    <%_ for (const { relationship, observedField } of noCascadeRelationships) { _%>
-        var <%- relatedVariable(relationship) %> = <%- createEntityPrefix %><%- relationship.otherEntity.entityNameCapitalized %>ResourceIT.createEntity(<%- (databaseTypeSql && relationship.otherEntity.anyRelationshipIsRequired) ? entityManagerVariable : '' %>)<%- createEntityPostfix %>;
+    <%_ for (const { relationship, observedField, relatedVariable, relatedRepository } of noCascadeRelationships) { _%>
+        var <%- relatedVariable %> = <%- createEntityPrefix %><%- relationship.otherEntity.entityNameCapitalized %>ResourceIT.createEntity(<%- (databaseTypeSql && relationship.otherEntity.anyRelationshipIsRequired) ? entityManagerVariable : '' %>)<%- createEntityPostfix %>;
       <%_ for (const { property, value } of noCascadeFakeValues.get(relationship)) { _%>
-        <%- relatedVariable(relationship) %>.<%- property %>(<%- value %>);
+        <%- relatedVariable %>.<%- property %>(<%- value %>);
       <%_ } _%>
       <%_ if (databaseTypeSql && !reactive) { _%>
-        em.persist(<%- relatedVariable(relationship) %>);
+        em.persist(<%- relatedVariable %>);
       <%_ } else if (!databaseTypeSql) { _%>
-        <%- relatedVariable(relationship) %> = <%- relatedRepository(relationship) %>.save(<%- relatedVariable(relationship) %>)<%- callBlock %>;
+        <%- relatedVariable %> = <%- relatedRepository %>.save(<%- relatedVariable %>)<%- callBlock %>;
       <%_ } _%>
-        var <%- relatedVariable(relationship) %>Value = <%- relatedVariable(relationship) %>.<%- observedField.propertySupplierName %>();
-        <%- persistInstance %>.<%- relationship.propertyConsumerName %>(<%- relationship.collection ? `new HashSet<>(Set.of(${relatedVariable(relationship)}))` : relatedVariable(relationship) %>);
+        var <%- relatedVariable %>Value = <%- relatedVariable %>.<%- observedField.propertySupplierName %>();
+        <%- persistInstance %>.<%- relationship.propertyConsumerName %>(<%- relationship.collection ? `new HashSet<>(Set.of(${relatedVariable}))` : relatedVariable %>);
     <%_ } _%>
     <%_ if (databaseTypeSql && !reactive) { _%>
         em.flush();
@@ -1800,15 +1789,15 @@ import <%- entityAbsolutePackage %>.domain.enumeration.<%- field.fieldType %>;
         inserted<%- persistClass %> = <%- entityInstance %>Repository.<%- saveMethod %>(<%- persistInstance %>)<%- callBlock %>;
 
         // Each nested related object carries another value, which must stay in the request
-    <%_ for (const { relationship, observedField } of noCascadeRelationships) { _%>
-        var <%- relatedVariable(relationship) %>Json = om.createObjectNode();
-        <%- relatedVariable(relationship) %>Json.set("<%- relationship.otherEntity.primaryKey.name %>", om.valueToTree(<%- relatedId(relationship) %>));
-        <%- relatedVariable(relationship) %>Json.set("<%- observedField.propertyName %>", om.valueToTree(get<%- relationship.otherEntity.persistClass %>Sample2().<%- observedField.propertySupplierName %>()));
+    <%_ for (const { relationship, observedField, relatedVariable } of noCascadeRelationships) { _%>
+        var <%- relatedVariable %>Json = om.createObjectNode();
+        <%- relatedVariable %>Json.set("<%- relationship.otherEntity.primaryKey.name %>", om.valueToTree(<%- relatedVariable %>.<%- relationship.otherEntity.primaryKey.propertySupplierName %>()));
+        <%- relatedVariable %>Json.set("<%- observedField.propertyName %>", om.valueToTree(get<%- relationship.otherEntity.persistClass %>Sample2().<%- observedField.propertySupplierName %>()));
     <%_ } _%>
 
         ObjectNode updateJson = om.valueToTree(<%- dtoMapstruct ? `${entityInstance}Mapper.toDto(inserted${persistClass})` : `inserted${persistClass}` %>);
-    <%_ for (const { relationship } of noCascadeRelationships) { _%>
-        updateJson.set("<%- relationship.propertyName %>", <%- relationshipJson(relationship) %>);
+    <%_ for (const { relationship, relatedVariable } of noCascadeRelationships) { _%>
+        updateJson.set("<%- relationship.propertyName %>", <%- relationship.collection ? `om.createArrayNode().add(${relatedVariable}Json)` : `${relatedVariable}Json` %>);
     <%_ } _%>
     <%_ if (reactive) { _%>
         webTestClient.put().uri(ENTITY_API_URL_ID, inserted<%- persistClass %>.<%- primaryKey.propertySupplierName %>())
@@ -1826,8 +1815,8 @@ import <%- entityAbsolutePackage %>.domain.enumeration.<%- field.fieldType %>;
 
         var patchJson = om.createObjectNode();
         patchJson.set("<%- primaryKey.name %>", om.valueToTree(inserted<%- persistClass %>.<%- primaryKey.propertySupplierName %>()));
-    <%_ for (const { relationship } of noCascadeRelationships) { _%>
-        patchJson.set("<%- relationship.propertyName %>", <%- relationshipJson(relationship) %>);
+    <%_ for (const { relationship, relatedVariable } of noCascadeRelationships) { _%>
+        patchJson.set("<%- relationship.propertyName %>", <%- relationship.collection ? `om.createArrayNode().add(${relatedVariable}Json)` : `${relatedVariable}Json` %>);
     <%_ } _%>
     <%_ if (reactive) { _%>
         webTestClient.patch().uri(ENTITY_API_URL_ID, inserted<%- persistClass %>.<%- primaryKey.propertySupplierName %>())
@@ -1850,8 +1839,8 @@ import <%- entityAbsolutePackage %>.domain.enumeration.<%- field.fieldType %>;
     <%_ if (databaseTypeCouchbase) { _%>
         SecurityContextHolder.setContext(TestSecurityContextHolder.getContext());
     <%_ } _%>
-    <%_ for (const { relationship, observedField } of noCascadeRelationships) { _%>
-        assertThat(<%- relatedRepository(relationship) %>.findById(<%- relatedId(relationship) %>)<%- reactive ? '.block()' : '.orElseThrow()' %>.<%- observedField.propertySupplierName %>()).isEqualTo(<%- relatedVariable(relationship) %>Value);
+    <%_ for (const { relationship, observedField, relatedVariable, relatedRepository } of noCascadeRelationships) { _%>
+        assertThat(<%- relatedRepository %>.findById(<%- relatedVariable %>.<%- relationship.otherEntity.primaryKey.propertySupplierName %>())<%- reactive ? '.block()' : '.orElseThrow()' %>.<%- observedField.propertySupplierName %>()).isEqualTo(<%- relatedVariable %>Value);
     <%_ } _%>
     <%_ if (!databaseTypeSql || reactive) { _%>
         // The entities the test created are removed; the ones of a transactional test go with its rollback.
@@ -1859,8 +1848,8 @@ import <%- entityAbsolutePackage %>.domain.enumeration.<%- field.fieldType %>;
         <%- entityInstance %>Repository.delete(inserted<%- persistClass %>)<%- callBlock %>;
         inserted<%- persistClass %> = null;
       <%_ } _%>
-      <%_ for (const { relationship } of noCascadeRelationships) { _%>
-        <%- relatedRepository(relationship) %>.delete(<%- relatedVariable(relationship) %>)<%- callBlock %>;
+      <%_ for (const { relatedVariable, relatedRepository } of noCascadeRelationships) { _%>
+        <%- relatedRepository %>.delete(<%- relatedVariable %>)<%- callBlock %>;
       <%_ } _%>
     <%_ } _%>
     }
@@ -1876,7 +1865,14 @@ import <%- entityAbsolutePackage %>.domain.enumeration.<%- field.fieldType %>;
   <%_ } _%>
         inserted<%- persistClass %> = <%- entityInstance %>Repository.<%- saveMethod %>(<%- persistInstance %>)<%- callBlock %>;
 
-  <%_ const fieldsToIncludeInPartialPatchTest = fieldsToTest.map(field => prepareFieldForPatchTest(field, true)); _%>
+  <%_ const fieldsToIncludeInPartialPatchTest = fieldsToTest.map((field) => {
+        const includeField = faker.datatype.boolean();
+        const fieldNameUnderscoreUppercased = field.fieldNameUnderscored.toUpperCase();
+        const updateWithValue = includeField ? `UPDATED_${fieldNameUnderscoreUppercased}` : 'null';
+        const testWithConstant = includeField ? `UPDATED_${fieldNameUnderscoreUppercased}` : `DEFAULT_${fieldNameUnderscoreUppercased}`;
+        return { includeField, updateWithValue, testWithConstant, ...field };
+      });
+  _%>
 <%- include('/_global_partials_entity_/it_patch_update.partial.java.ejs', { fields: fieldsToIncludeInPartialPatchTest, saveMethod, callBlock, callListBlock }) -%>
 
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
@@ -1896,7 +1892,11 @@ import <%- entityAbsolutePackage %>.domain.enumeration.<%- field.fieldType %>;
   <%_ } _%>
         inserted<%- persistClass %> = <%- entityInstance %>Repository.<%- saveMethod %>(<%- persistInstance %>)<%- callBlock %>;
 
-  <%_ const fieldsToIncludeInFullPatchTest = fieldsToTest.map(field => prepareFieldForPatchTest(field, false)); _%>
+  <%_ const fieldsToIncludeInFullPatchTest = fieldsToTest.map((field) => {
+        const fieldNameUnderscoreUppercased = field.fieldNameUnderscored.toUpperCase();
+        return { includeField: true, updateWithValue: `UPDATED_${fieldNameUnderscoreUppercased}`, testWithConstant: `UPDATED_${fieldNameUnderscoreUppercased}`, ...field };
+      });
+  _%>
 <%- include('/_global_partials_entity_/it_patch_update.partial.java.ejs', { fields: fieldsToIncludeInFullPatchTest, saveMethod, callBlock, callListBlock }) -%>
 
         assertSameRepositoryCount(databaseSizeBeforeUpdate);

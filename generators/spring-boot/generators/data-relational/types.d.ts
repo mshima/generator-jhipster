@@ -46,6 +46,8 @@ export type Field = SpringBootField & {
 
 export interface Relationship extends SpringBootRelationship {
   relationshipSqlSafeName?: string;
+  /** The constant of the join table of the relationship in the reactive repository. */
+  reactiveJoinTableConstant?: string;
 }
 
 export interface Entity<F extends SpringBootField = SpringBootField, R extends Relationship = Relationship> extends SpringBootEntity<F, R> {

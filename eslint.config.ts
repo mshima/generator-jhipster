@@ -175,6 +175,13 @@ export default defineConfig(
         '@stylistic/quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: 'never' }],
         '@stylistic/comma-dangle': ['error', 'always-multiline'],
         '@stylistic/no-mixed-operators': 'off',
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: 'FunctionDeclaration, VariableDeclarator > :matches(ArrowFunctionExpression, FunctionExpression)',
+            message: 'Templates must not declare functions: derive the values in a preparing task of the generator.',
+          },
+        ],
       },
     },
   ),

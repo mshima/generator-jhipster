@@ -131,6 +131,7 @@ export default class SqlGenerator extends BaseApplicationGenerator<
         if (application.reactive) {
           relationship.relationshipSqlSafeName =
             isReservedTableName(relationship.relationshipName, SQL) ? `e_${relationship.relationshipName}` : relationship.relationshipName;
+          relationship.reactiveJoinTableConstant = `${relationship.relationshipName.replace(/[A-Z]/g, letter => `_${letter}`).toUpperCase()}_JOIN_TABLE`;
         }
       },
     });
