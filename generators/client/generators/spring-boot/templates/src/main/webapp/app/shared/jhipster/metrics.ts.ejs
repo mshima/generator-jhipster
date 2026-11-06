@@ -1,0 +1,315 @@
+<%#
+ Copyright 2013-2026 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+/** The times of the jhimetrics endpoint: the percentiles by their quantile. */
+interface TimerResponse {
+  '0.0': number;
+  '1.0': number;
+  max: number;
+  totalTime: number;
+  mean: number;
+  '0.5': number;
+  count: number;
+  '0.99': number;
+  '0.75': number;
+  '0.95': number;
+}
+
+/** The response of the jhimetrics endpoint. */
+export interface MetricsResponse {
+  jvm: Record<string, MemoryMetrics>;
+  databases: {
+    min?: { value: number };
+    idle?: { value: number };
+    max?: { value: number };
+    usage?: TimerResponse;
+    pending?: { value: number };
+    active?: { value: number };
+    acquire?: TimerResponse;
+    creation?: TimerResponse;
+    connections?: { value: number };
+  };
+  'http.server.requests'?: {
+    all: {
+      count: number;
+    };
+    percode: Record<string, RequestStats>;
+  };
+  cache: Record<
+    string,
+    {
+      'cache.gets.miss': number;
+      'cache.puts': number;
+      'cache.gets.hit': number;
+      'cache.removals': number;
+      'cache.evictions': number;
+    }
+  >;
+  garbageCollector?: {
+    'jvm.gc.max.data.size': number;
+    'jvm.gc.pause': TimerResponse;
+    'jvm.gc.memory.promoted': number;
+    'jvm.gc.memory.allocated': number;
+    classesLoaded: number;
+    'jvm.gc.live.data.size': number;
+    classesUnloaded: number;
+  };
+  services: Record<string, Record<string, RequestStats>>;
+  processMetrics: {
+    'system.cpu.usage': number;
+    'system.cpu.count': number;
+    'system.load.average.1m'?: number;
+    'process.cpu.usage': number;
+    'process.files.max'?: number;
+    'process.files.open'?: number;
+    'process.start.time': number;
+    'process.uptime': number;
+  };
+}
+
+export interface MemoryMetrics {
+  committed: number;
+  max: number;
+  used: number;
+}
+
+export interface RequestStats {
+  max: number;
+  mean: number;
+  count: number;
+}
+
+export interface Timing {
+  count: number;
+  mean: number;
+  min: number;
+  p50: number;
+  p75: number;
+  p95: number;
+  p99: number;
+  max: number;
+}
+
+export interface SystemMetrics {
+  uptime: number;
+  startTime: number;
+  processCpuUsage: number;
+  cpuUsage: number;
+  cpuCount: number;
+  loadAverage?: number;
+  filesMax?: number;
+  filesOpen?: number;
+}
+
+export interface GarbageCollectorMetrics {
+  liveDataSize: number;
+  maxDataSize: number;
+  memoryPromoted: number;
+  memoryAllocated: number;
+  classesLoaded: number;
+  classesUnloaded: number;
+  pause: Timing;
+}
+
+export interface RequestMetrics {
+  total: number;
+  byStatusCode: Record<string, RequestStats>;
+}
+
+/** The requests of each endpoint url, by HTTP method. */
+export type EndpointMetrics = Record<string, Record<string, RequestStats>>;
+
+export interface CacheMetrics {
+  hits: number;
+  misses: number;
+  puts: number;
+  removals: number;
+  evictions: number;
+}
+
+export interface DatasourceMetrics {
+  active: number;
+  min: number;
+  max: number;
+  idle: number;
+  acquire: Timing;
+  creation: Timing;
+  usage: Timing;
+}
+
+/** The model of the metrics page. */
+export interface MetricsModel {
+  memory: Record<string, MemoryMetrics>;
+  system: SystemMetrics;
+  garbageCollector?: GarbageCollectorMetrics;
+  requests?: RequestMetrics;
+  endpoints: EndpointMetrics;
+  caches: Record<string, CacheMetrics>;
+  datasource?: DatasourceMetrics;
+}
+
+const toTiming = (timer: TimerResponse): Timing => ({
+  count: timer.count,
+  mean: timer.mean,
+  min: timer['0.0'],
+  p50: timer['0.5'],
+  p75: timer['0.75'],
+  p95: timer['0.95'],
+  p99: timer['0.99'],
+  max: timer.max,
+});
+
+const toSystemMetrics = (processMetrics: MetricsResponse['processMetrics']): SystemMetrics => ({
+  uptime: processMetrics['process.uptime'],
+  startTime: processMetrics['process.start.time'],
+  processCpuUsage: processMetrics['process.cpu.usage'],
+  cpuUsage: processMetrics['system.cpu.usage'],
+  cpuCount: processMetrics['system.cpu.count'],
+  loadAverage: processMetrics['system.load.average.1m'],
+  filesMax: processMetrics['process.files.max'],
+  filesOpen: processMetrics['process.files.open'],
+});
+
+const toGarbageCollectorMetrics = (garbageCollector: NonNullable<MetricsResponse['garbageCollector']>): GarbageCollectorMetrics => ({
+  liveDataSize: garbageCollector['jvm.gc.live.data.size'],
+  maxDataSize: garbageCollector['jvm.gc.max.data.size'],
+  memoryPromoted: garbageCollector['jvm.gc.memory.promoted'],
+  memoryAllocated: garbageCollector['jvm.gc.memory.allocated'],
+  classesLoaded: garbageCollector.classesLoaded,
+  classesUnloaded: garbageCollector.classesUnloaded,
+  pause: toTiming(garbageCollector['jvm.gc.pause']),
+});
+
+const toCacheMetrics = (cache: MetricsResponse['cache'][string]): CacheMetrics => ({
+  hits: cache['cache.gets.hit'],
+  misses: cache['cache.gets.miss'],
+  puts: cache['cache.puts'],
+  removals: cache['cache.removals'],
+  evictions: cache['cache.evictions'],
+});
+
+const toDatasourceMetrics = ({ active, min, max, idle, acquire, creation, usage }: MetricsResponse['databases']): DatasourceMetrics | undefined =>
+  active && min && max && idle && acquire && creation && usage
+    ? {
+        active: active.value,
+        min: min.value,
+        max: max.value,
+        idle: idle.value,
+        acquire: toTiming(acquire),
+        creation: toTiming(creation),
+        usage: toTiming(usage),
+      }
+    : undefined;
+
+/** Converts the response of the jhimetrics endpoint to the model of the metrics page. */
+export const toMetricsModel = (response: MetricsResponse): MetricsModel => {
+  const { jvm, processMetrics, garbageCollector, 'http.server.requests': requests, services, cache, databases } = response;
+  return {
+    memory: jvm,
+    system: toSystemMetrics(processMetrics),
+    garbageCollector: garbageCollector && toGarbageCollectorMetrics(garbageCollector),
+    requests: requests && { total: requests.all.count, byStatusCode: requests.percode },
+    endpoints: services,
+    caches: Object.fromEntries(Object.entries(cache).map(([name, metrics]) => [name, toCacheMetrics(metrics)])),
+    datasource: toDatasourceMetrics(databases),
+  };
+};
+
+export interface ThreadDump {
+  threads: Thread[];
+}
+
+export interface Thread {
+  threadName: string;
+  threadId: number;
+  blockedTime: number;
+  blockedCount: number;
+  waitedTime: number;
+  waitedCount: number;
+  lockName: string | null;
+  lockOwnerId: number;
+  lockOwnerName: string | null;
+  daemon: boolean;
+  inNative: boolean;
+  suspended: boolean;
+  threadState: ThreadState;
+  priority: number;
+  stackTrace: StackTrace[];
+  lockedMonitors: LockedMonitor[];
+  lockedSynchronizers: string[];
+  lockInfo: LockInfo | null;
+  // custom field for showing-hiding thread dump
+  showThreadDump?: boolean;
+}
+
+export interface LockInfo {
+  className: string;
+  identityHashCode: number;
+}
+
+export interface LockedMonitor {
+  className: string;
+  identityHashCode: number;
+  lockedStackDepth: number;
+  lockedStackFrame: StackTrace;
+}
+
+export interface StackTrace {
+  classLoaderName: string | null;
+  moduleName: string | null;
+  moduleVersion: string | null;
+  methodName: string;
+  fileName: string;
+  lineNumber: number;
+  className: string;
+  nativeMethod: boolean;
+}
+
+export const ThreadState = {
+  Runnable: 'RUNNABLE',
+  TimedWaiting: 'TIMED_WAITING',
+  Waiting: 'WAITING',
+  Blocked: 'BLOCKED',
+  New: 'NEW',
+} as const;
+
+export type ThreadState = (typeof ThreadState)[keyof typeof ThreadState];
+
+export type ThreadStats = {
+  threadDumpAll: number;
+  threadDumpRunnable: number;
+  threadDumpTimedWaiting: number;
+  threadDumpWaiting: number;
+  threadDumpBlocked: number;
+};
+
+/** Counts the threads of a thread dump by state. */
+export const toThreadStats = (threads: Thread[] = []): ThreadStats => {
+  const count = (state: ThreadState): number => threads.filter(thread => thread.threadState === state).length;
+  const threadDumpRunnable = count(ThreadState.Runnable);
+  const threadDumpTimedWaiting = count(ThreadState.TimedWaiting);
+  const threadDumpWaiting = count(ThreadState.Waiting);
+  const threadDumpBlocked = count(ThreadState.Blocked);
+  return {
+    threadDumpAll: threadDumpRunnable + threadDumpTimedWaiting + threadDumpWaiting + threadDumpBlocked,
+    threadDumpRunnable,
+    threadDumpTimedWaiting,
+    threadDumpWaiting,
+    threadDumpBlocked,
+  };
+};

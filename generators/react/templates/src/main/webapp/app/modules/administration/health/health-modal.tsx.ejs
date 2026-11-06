@@ -19,21 +19,19 @@
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Table } from 'react-bootstrap';
 import { Translate } from 'react-jhipster';
 
-const formatDiskSpaceOutput = rawValue => {
-  // Should display storage space in a human-readable unit
-  const val = rawValue / 1073741824;
-  if (val > 1) {
-    // Value
-    return val.toFixed(2) + ' GB';
-  }
-  return (rawValue / 1048576).toFixed(2) + ' MB';
+import { type HealthIndicator } from 'app/shared/jhipster/health';
+
+type HealthModalProps = {
+  handleClose: () => void;
+  healthObject?: HealthIndicator;
+  showModal: boolean;
 };
 
-const HealthModal = ({ handleClose, healthObject, showModal }) => {
-  const data = healthObject.details || {};
+const HealthModal = ({ handleClose, healthObject, showModal }: HealthModalProps) => {
+  const data = healthObject?.details ?? {};
   return (
     <Modal show={showModal} onHide={handleClose}>
-      <ModalHeader closeButton>{healthObject.name}</ModalHeader>
+      <ModalHeader closeButton>{healthObject?.name}</ModalHeader>
       <ModalBody>
         <Table bordered>
           <thead>
@@ -47,14 +45,22 @@ const HealthModal = ({ handleClose, healthObject, showModal }) => {
             </tr>
           </thead>
           <tbody>
-            {Object.keys(data).map((key, index) => (
-              <tr key={index}>
+            {Object.entries(data).map(([key, value]) => (
+              <tr key={key}>
                 <td>{key}</td>
-                <td>{healthObject.name === 'diskSpace' ? formatDiskSpaceOutput(data[key]) : JSON.stringify(data[key])}</td>
+                <td>{value}</td>
               </tr>
             ))}
           </tbody>
         </Table>
+        {healthObject?.error && (
+          <>
+            <h4>
+              <Translate contentKey="health.details.error">Error</Translate>
+            </h4>
+            <pre>{healthObject.error}</pre>
+          </>
+        )}
       </ModalBody>
       <ModalFooter>
         <Button variant="primary" onClick={handleClose}>

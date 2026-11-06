@@ -36,7 +36,7 @@ describe('Health Component', () => {
   let health: HealthComponentType;
 
   beforeEach(() => {
-    axiosStub.get.mockResolvedValue({});
+    axiosStub.get.mockResolvedValue({ data: { status: 'UP' } });
     const wrapper = shallowMount(Health, {
       global: {
         stubs: {
@@ -55,24 +55,6 @@ describe('Health Component', () => {
     health = wrapper.vm;
   });
 
-  describe('baseName and subSystemName', () => {
-    it('should return the basename when it has no sub system', () => {
-      expect(health.baseName('base')).toBe('base');
-    });
-
-    it('should return the basename when it has sub systems', () => {
-      expect(health.baseName('base.subsystem.system')).toBe('base');
-    });
-
-    it('should return the sub system name', () => {
-      expect(health.subSystemName('subsystem')).toBe('');
-    });
-
-    it('should return the subsystem when it has multiple keys', () => {
-      expect(health.subSystemName('subsystem.subsystem.system')).toBe(' - subsystem.system');
-    });
-  });
-
   describe('getBadgeClass', () => {
     it('should get badge class', () => {
       const upBadgeClass = health.getBadgeClass('UP');
@@ -85,7 +67,7 @@ describe('Health Component', () => {
   describe('refresh', () => {
     it('should call refresh on init', async () => {
       // GIVEN
-      axiosStub.get.mockResolvedValue({});
+      axiosStub.get.mockResolvedValue({ data: { status: 'UP' } });
 
       // WHEN
       health.refresh();
@@ -119,7 +101,6 @@ describe('Health Component', () => {
       await vi.waitFor(() => expect(health.updatingHealth).toEqual(false));
 
       // THEN
-      expect(health.healthData).toEqual(new HealthService().transformHealthData(data));
       expect(health.healthData).toContainEqual(expect.objectContaining({ name: 'db', status: 'DOWN' }));
     });
   });
@@ -139,7 +120,7 @@ describe('Health view', () => {
   it('should list the health of the components and show their details', async () => {
     // GIVEN
     const get = vi.spyOn(axios, 'get').mockResolvedValue({
-      data: { components: { db: { status: 'UP', details: { database: 'H2' } }, mail: { status: 'DOWN', error: 'failed' }, ping: { status: 'UP' } } },
+      data: { components: { db: { status: 'UP', details: { database: 'H2' } }, mail: { status: 'DOWN', details: { error: 'failed' } }, ping: { status: 'UP' } } },
     });
     const wrapper = shallowMount(Health, {
       global: {

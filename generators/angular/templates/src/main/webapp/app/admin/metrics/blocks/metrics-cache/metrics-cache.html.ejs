@@ -39,21 +39,21 @@
         @for (entry of cacheMetricsRef | keyvalue; track entry.key) {
           <tr>
             <td>{{ entry.key }}</td>
-            <td class="text-end">{{ entry.value['cache.gets.hit'] }}</td>
-            <td class="text-end">{{ entry.value['cache.gets.miss'] }}</td>
-            <td class="text-end">{{ entry.value['cache.gets.hit'] + entry.value['cache.gets.miss'] }}</td>
-            <td class="text-end">{{ entry.value['cache.puts'] }}</td>
-            <td class="text-end">{{ entry.value['cache.removals'] }}</td>
-            <td class="text-end">{{ entry.value['cache.evictions'] }}</td>
+            <td class="text-end">{{ entry.value.hits }}</td>
+            <td class="text-end">{{ entry.value.misses }}</td>
+            <td class="text-end">{{ entry.value.hits + entry.value.misses }}</td>
+            <td class="text-end">{{ entry.value.puts }}</td>
+            <td class="text-end">{{ entry.value.removals }}</td>
+            <td class="text-end">{{ entry.value.evictions }}</td>
             <td class="text-end">
               {{
-                filterNaN((100 * entry.value['cache.gets.hit']) / (entry.value['cache.gets.hit'] + entry.value['cache.gets.miss']))
+                filterNaN((100 * entry.value.hits) / (entry.value.hits + entry.value.misses))
                   | number: '1.0-4'
               }}
             </td>
             <td class="text-end">
               {{
-                filterNaN((100 * entry.value['cache.gets.miss']) / (entry.value['cache.gets.hit'] + entry.value['cache.gets.miss']))
+                filterNaN((100 * entry.value.misses) / (entry.value.hits + entry.value.misses))
                   | number: '1.0-4'
               }}
             </td>

@@ -21,7 +21,7 @@ import { Component, input } from '@angular/core';
 
 import { NgbProgressbar } from '@ng-bootstrap/ng-bootstrap/progressbar';
 
-import { ProcessMetrics } from 'app/admin/metrics/metrics.model';
+import { SystemMetrics } from 'app/shared/jhipster/metrics';
 
 const MILLISECONDS_PER_UNIT = {
   year: 31557600000,
@@ -41,7 +41,7 @@ export class MetricsSystem {
   /**
    * Object containing process related metrics
    */
-  readonly systemMetrics = input<ProcessMetrics>();
+  readonly systemMetrics = input<SystemMetrics>();
 
   /**
    * Boolean field saying if the metrics are in the process of being updated

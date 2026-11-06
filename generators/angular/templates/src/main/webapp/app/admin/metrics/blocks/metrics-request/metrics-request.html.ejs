@@ -30,12 +30,12 @@
       </tr>
     </thead>
     <tbody>
-      @for (entry of requestMetricsRef['percode'] | keyvalue; track entry.key) {
+      @for (entry of requestMetricsRef.byStatusCode | keyvalue; track entry.key) {
         <tr>
           <td>{{ entry.key }}</td>
           <td>
             <ngb-progressbar
-              [max]="requestMetricsRef['all'].count"
+              [max]="requestMetricsRef.total"
               [value]="entry.value.count"
               [striped]="true"
               [animated]="false"

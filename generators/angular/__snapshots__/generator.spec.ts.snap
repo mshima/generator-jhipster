@@ -3958,9 +3958,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
   "clientRoot/src/app/admin/configuration/configuration.html": {
     "stateCleared": "modified",
   },
-  "clientRoot/src/app/admin/configuration/configuration.model.ts": {
-    "stateCleared": "modified",
-  },
   "clientRoot/src/app/admin/configuration/configuration.service.spec.ts": {
     "stateCleared": "modified",
   },
@@ -3997,9 +3994,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
   "clientRoot/src/app/admin/health/health.html": {
     "stateCleared": "modified",
   },
-  "clientRoot/src/app/admin/health/health.model.ts": {
-    "stateCleared": "modified",
-  },
   "clientRoot/src/app/admin/health/health.service.spec.ts": {
     "stateCleared": "modified",
   },
@@ -4019,9 +4013,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
     "stateCleared": "modified",
   },
   "clientRoot/src/app/admin/health/modal/health-modal.ts": {
-    "stateCleared": "modified",
-  },
-  "clientRoot/src/app/admin/logs/log.model.ts": {
     "stateCleared": "modified",
   },
   "clientRoot/src/app/admin/logs/logs.html": {
@@ -4097,9 +4088,6 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
     "stateCleared": "modified",
   },
   "clientRoot/src/app/admin/metrics/metrics.html": {
-    "stateCleared": "modified",
-  },
-  "clientRoot/src/app/admin/metrics/metrics.model.ts": {
     "stateCleared": "modified",
   },
   "clientRoot/src/app/admin/metrics/metrics.service.spec.ts": {
@@ -4636,6 +4624,12 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
   "clientRoot/src/app/shared/filter/index.ts": {
     "stateCleared": "modified",
   },
+  "clientRoot/src/app/shared/jhipster/configuration.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/src/app/shared/jhipster/configuration.ts": {
+    "stateCleared": "modified",
+  },
   "clientRoot/src/app/shared/jhipster/constants.ts": {
     "stateCleared": "modified",
   },
@@ -4648,7 +4642,25 @@ exports[`generator - angular gateway-oauth2-withAdminUi(true)-skipJhipsterDepend
   "clientRoot/src/app/shared/jhipster/headers.ts": {
     "stateCleared": "modified",
   },
+  "clientRoot/src/app/shared/jhipster/health.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/src/app/shared/jhipster/health.ts": {
+    "stateCleared": "modified",
+  },
   "clientRoot/src/app/shared/jhipster/link-header.ts": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/src/app/shared/jhipster/logs.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/src/app/shared/jhipster/logs.ts": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/src/app/shared/jhipster/metrics.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "clientRoot/src/app/shared/jhipster/metrics.ts": {
     "stateCleared": "modified",
   },
   "clientRoot/src/app/shared/jhipster/pagination.spec.ts": {
@@ -6378,9 +6390,6 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
   "src/main/webapp/app/admin/configuration/configuration.html": {
     "stateCleared": "modified",
   },
-  "src/main/webapp/app/admin/configuration/configuration.model.ts": {
-    "stateCleared": "modified",
-  },
   "src/main/webapp/app/admin/configuration/configuration.service.spec.ts": {
     "stateCleared": "modified",
   },
@@ -6394,9 +6403,6 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/health/health.html": {
-    "stateCleared": "modified",
-  },
-  "src/main/webapp/app/admin/health/health.model.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/health/health.service.spec.ts": {
@@ -6418,9 +6424,6 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/health/modal/health-modal.ts": {
-    "stateCleared": "modified",
-  },
-  "src/main/webapp/app/admin/logs/log.model.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/logs/logs.html": {
@@ -6496,9 +6499,6 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/metrics/metrics.html": {
-    "stateCleared": "modified",
-  },
-  "src/main/webapp/app/admin/metrics/metrics.model.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/metrics/metrics.service.spec.ts": {
@@ -6969,6 +6969,12 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
   "src/main/webapp/app/shared/filter/index.ts": {
     "stateCleared": "modified",
   },
+  "src/main/webapp/app/shared/jhipster/configuration.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/configuration.ts": {
+    "stateCleared": "modified",
+  },
   "src/main/webapp/app/shared/jhipster/constants.ts": {
     "stateCleared": "modified",
   },
@@ -6981,7 +6987,25 @@ exports[`generator - angular microservice-oauth2-withAdminUi(true)-skipJhipsterD
   "src/main/webapp/app/shared/jhipster/headers.ts": {
     "stateCleared": "modified",
   },
+  "src/main/webapp/app/shared/jhipster/health.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/health.ts": {
+    "stateCleared": "modified",
+  },
   "src/main/webapp/app/shared/jhipster/link-header.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/logs.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/logs.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/metrics.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/metrics.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/shared/jhipster/pagination.spec.ts": {
@@ -7723,9 +7747,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
   "src/main/webapp/app/admin/configuration/configuration.html": {
     "stateCleared": "modified",
   },
-  "src/main/webapp/app/admin/configuration/configuration.model.ts": {
-    "stateCleared": "modified",
-  },
   "src/main/webapp/app/admin/configuration/configuration.service.spec.ts": {
     "stateCleared": "modified",
   },
@@ -7750,9 +7771,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
   "src/main/webapp/app/admin/health/health.html": {
     "stateCleared": "modified",
   },
-  "src/main/webapp/app/admin/health/health.model.ts": {
-    "stateCleared": "modified",
-  },
   "src/main/webapp/app/admin/health/health.service.spec.ts": {
     "stateCleared": "modified",
   },
@@ -7772,9 +7790,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/health/modal/health-modal.ts": {
-    "stateCleared": "modified",
-  },
-  "src/main/webapp/app/admin/logs/log.model.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/logs/logs.html": {
@@ -7850,9 +7865,6 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/metrics/metrics.html": {
-    "stateCleared": "modified",
-  },
-  "src/main/webapp/app/admin/metrics/metrics.model.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/admin/metrics/metrics.service.spec.ts": {
@@ -8467,6 +8479,12 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
   "src/main/webapp/app/shared/filter/index.ts": {
     "stateCleared": "modified",
   },
+  "src/main/webapp/app/shared/jhipster/configuration.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/configuration.ts": {
+    "stateCleared": "modified",
+  },
   "src/main/webapp/app/shared/jhipster/constants.ts": {
     "stateCleared": "modified",
   },
@@ -8479,7 +8497,25 @@ exports[`generator - angular monolith-jwt-skipUserManagement(false)-withAdminUi(
   "src/main/webapp/app/shared/jhipster/headers.ts": {
     "stateCleared": "modified",
   },
+  "src/main/webapp/app/shared/jhipster/health.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/health.ts": {
+    "stateCleared": "modified",
+  },
   "src/main/webapp/app/shared/jhipster/link-header.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/logs.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/logs.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/metrics.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/main/webapp/app/shared/jhipster/metrics.ts": {
     "stateCleared": "modified",
   },
   "src/main/webapp/app/shared/jhipster/pagination.spec.ts": {

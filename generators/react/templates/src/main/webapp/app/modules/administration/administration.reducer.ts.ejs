@@ -20,6 +20,19 @@ import { createAsyncThunk, createSlice, isPending, isRejected } from '@reduxjs/t
 import axios from 'axios';
 
 import { AppThunk } from 'app/config/store';
+<%_ if (withAdminUi) { _%>
+import {
+  type Bean,
+  type ConfigProps,
+  type Env,
+  type PropertySource,
+  toBeans,
+  toPropertySources,
+} from 'app/shared/jhipster/configuration';
+import { type HealthResponse, toHealthModel } from 'app/shared/jhipster/health';
+import { type Log, type LoggersResponse, toLogs } from 'app/shared/jhipster/logs';
+import { type MetricsResponse } from 'app/shared/jhipster/metrics';
+<%_ } _%>
 import { serializeAxiosError } from 'app/shared/reducers/reducer.utils';
 
 const initialState = {
@@ -32,14 +45,14 @@ const initialState = {
 <%_ } _%>
 <%_ if (withAdminUi) { _%>
   logs: {
-    loggers: [] as any[],
+    loggers: [] as Log[],
   },
   health: {} as any,
   metrics: {} as any,
   threadDump: [],
   configuration: {
-    configProps: {} as any,
-    env: {} as any,
+    beans: [] as Bean[],
+    propertySources: [] as PropertySource[],
   },
 <%_ } _%>
 <%_ if (communicationSpringWebsocket) { _%>
@@ -60,11 +73,11 @@ export const getGatewayRoutes = createAsyncThunk('administration/fetch_gateway_r
 <%_ } _%>
 
 <%_ if (withAdminUi) { _%>
-export const getSystemHealth = createAsyncThunk('administration/fetch_health', async () => axios.get<any>('management/health'), {
+export const getSystemHealth = createAsyncThunk('administration/fetch_health', async () => axios.get<HealthResponse>('management/health'), {
   serializeError: serializeAxiosError,
 });
 
-export const getSystemMetrics = createAsyncThunk('administration/fetch_metrics', async () => axios.get<any>('management/jhimetrics'), {
+export const getSystemMetrics = createAsyncThunk('administration/fetch_metrics', async () => axios.get<MetricsResponse>('management/jhimetrics'), {
   serializeError: serializeAxiosError,
 });
 
@@ -136,7 +149,7 @@ export const AdministrationSlice = createSlice({
   <%_ if (withAdminUi) { _%>
       .addCase(getSystemHealth.fulfilled, (state, action) => {
         state.loading = false;
-        state.health = action.payload.data;
+        state.health = toHealthModel(action.payload.data);
       })
       .addCase(getSystemMetrics.fulfilled, (state, action) => {
         state.loading = false;
@@ -149,21 +162,21 @@ export const AdministrationSlice = createSlice({
       .addCase(getLoggers.fulfilled, (state, action) => {
         state.loading = false;
         state.logs = {
-          loggers: action.payload.data.loggers,
+          loggers: toLogs(action.payload.data),
         };
       })
       .addCase(getConfigurations.fulfilled, (state, action) => {
         state.loading = false;
         state.configuration = {
           ...state.configuration,
-          configProps: action.payload.data,
+          beans: toBeans(action.payload.data),
         };
       })
       .addCase(getEnv.fulfilled, (state, action) => {
         state.loading = false;
         state.configuration = {
           ...state.configuration,
-          env: action.payload.data,
+          propertySources: toPropertySources(action.payload.data),
         };
       })
   <%_ } _%>

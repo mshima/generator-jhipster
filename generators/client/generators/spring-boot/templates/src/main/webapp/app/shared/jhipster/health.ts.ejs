@@ -1,0 +1,91 @@
+<%#
+ Copyright 2013-2026 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+export type HealthStatus = 'UP' | 'DOWN' | 'UNKNOWN' | 'OUT_OF_SERVICE';
+
+/** A component of the health response, named by the backend. */
+export interface HealthComponent {
+  status: HealthStatus;
+  details?: Record<string, unknown>;
+  components?: Record<string, HealthComponent>;
+}
+
+/** The response of the health endpoint. */
+export interface HealthResponse {
+  status: HealthStatus;
+  components?: Record<string, HealthComponent>;
+}
+
+/** A row of the health page. */
+export interface HealthIndicator {
+  /** The path of the component, like `db.primary`. */
+  name: string;
+  /** The first part of the name, like `db`. */
+  baseName: string;
+  /** The remainder of the name ready to be shown, like ` - primary`. */
+  subSystemName: string;
+  status: HealthStatus;
+  error?: string;
+  details?: Record<string, string>;
+}
+
+export interface HealthModel {
+  status: HealthStatus;
+  indicators: HealthIndicator[];
+}
+
+const readableValue = (value: unknown): string => (typeof value === 'string' ? value : JSON.stringify(value));
+
+const readableBytes = (value: unknown): string => {
+  if (typeof value !== 'number') {
+    return readableValue(value);
+  }
+  const gigabytes = value / 1073741824;
+  return gigabytes > 1 ? `${gigabytes.toFixed(2)} GB` : `${(value / 1048576).toFixed(2)} MB`;
+};
+
+/** The indicators whose details are not shown as they came, by base name. */
+const detailFormatters: Record<string, (value: unknown) => string> = {
+  diskSpace: readableBytes,
+};
+
+const toIndicator = (name: string, { status, details: { error, ...details } = {} }: HealthComponent): HealthIndicator => {
+  const [baseName, ...subSystem] = name.split('.');
+  const format = detailFormatters[baseName] ?? readableValue;
+  const entries = Object.entries(details);
+  return {
+    name,
+    baseName,
+    subSystemName: subSystem.length > 0 ? ` - ${subSystem.join('.')}` : '',
+    status,
+    ...(error === undefined ? {} : { error: readableValue(error) }),
+    ...(entries.length > 0 ? { details: Object.fromEntries(entries.map(([key, value]) => [key, format(value)])) } : {}),
+  };
+};
+
+const toIndicators = (components: Record<string, HealthComponent> = {}, path?: string): HealthIndicator[] =>
+  Object.entries(components).flatMap(([key, component]) => {
+    const name = path ? `${path}.${key}` : key;
+    const indicator = toIndicator(name, component);
+    const children = toIndicators(component.components, name);
+    // A component with sub-components is a row only when it has something to tell.
+    return children.length === 0 || indicator.details || indicator.error ? [indicator, ...children] : children;
+  });
+
+/** Converts the response of the health endpoint to the model of the health page. */
+export const toHealthModel = ({ status, components }: HealthResponse): HealthModel => ({ status, indicators: toIndicators(components) });

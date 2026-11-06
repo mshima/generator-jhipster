@@ -33,7 +33,7 @@ import { MetricsEndpointsRequests } from './blocks/metrics-endpoints-requests/me
 import { MetricsGarbageCollector } from './blocks/metrics-garbagecollector/metrics-garbagecollector';
 import { MetricsRequest } from './blocks/metrics-request/metrics-request';
 import { MetricsSystem } from './blocks/metrics-system/metrics-system';
-import { MetricsModel, Thread } from './metrics.model';
+import { MetricsModel, Thread } from 'app/shared/jhipster/metrics';
 import { MetricsService } from './metrics.service';
 
 @Component({
@@ -72,10 +72,5 @@ export default class Metrics implements OnInit {
       this.threads.set(threadDump.threads);
       this.updatingMetrics.set(false);
     });
-  }
-
-  metricsKeyExistsAndObjectNotEmpty(key: keyof MetricsModel): boolean {
-    const value = this.metrics()?.[key];
-    return Boolean(value && Object.keys(value).length > 0);
   }
 }

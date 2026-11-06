@@ -19,7 +19,7 @@
 <div class="modal-header">
 @if (health) {
   <h4 class="modal-title" id="showHealthLabel">
-    __jhiTranslateTagEnum__('health.indicator', { "value": "health.key", "fallback": "health.key" })
+    <span>__jhiTranslateTagEnum__('health.indicator', { "value": "health.baseName", "fallback": "health.baseName" })</span>{{ health.subSystemName }}
   </h4>
 }
 
@@ -29,7 +29,7 @@
 </div>
 
 <div class="modal-body pad">
-@if (health) {
+@if (health?.details; as details) {
   <div>
     <h5>__jhiTranslateTag__('health.details.properties')</h5>
 
@@ -42,15 +42,21 @@
           </tr>
         </thead>
         <tbody>
-        @for (healthDetail of health.value.details! | keyvalue; track healthDetail.key) {
+        @for (healthDetail of details | keyvalue; track healthDetail.key) {
           <tr>
             <td class="text-start">{{ healthDetail.key }}</td>
-            <td class="text-start">{{ readableValue(healthDetail.value) }}</td>
+            <td class="text-start">{{ healthDetail.value }}</td>
           </tr>
         }
         </tbody>
       </table>
     </div>
+  </div>
+}
+@if (health?.error; as error) {
+  <div>
+    <h4>__jhiTranslateTag__('health.details.error')</h4>
+    <pre>{{ error }}</pre>
   </div>
 }
 </div>

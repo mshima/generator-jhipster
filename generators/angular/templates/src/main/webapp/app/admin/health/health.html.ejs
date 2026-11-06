@@ -36,23 +36,23 @@
       </thead>
     @if (health(); as health) {
       <tbody>
-      @for (componentHealth of health.components | keyvalue; track componentHealth.key) {
+      @for (indicator of health.indicators; track indicator.name) {
         <tr>
           <td>
-            __jhiTranslateTagEnum__('health.indicator', { "value": "componentHealth.key", "fallback": "componentHealth.key" })
+            <span>__jhiTranslateTagEnum__('health.indicator', { "value": "indicator.baseName", "fallback": "indicator.baseName" })</span>{{ indicator.subSystemName }}
           </td>
           <td class="text-center">
             <span
               class="badge"
-              [class]="getBadgeClass(componentHealth.value!.status)"
+              [class]="getBadgeClass(indicator.status)"
             >
-              __jhiTranslateTagEnum__('health.status', { "value": "componentHealth.value?.status ?? 'UNKNOWN'" })
+              __jhiTranslateTagEnum__('health.status', { "value": "indicator.status" })
             </span>
           </td>
           <td class="text-center">
-          @if (componentHealth.value?.details) {
+          @if (indicator.details || indicator.error) {
             <a class="hand"
-              (click)="showHealth({ key: componentHealth.key, value: componentHealth.value })">
+              (click)="showHealth(indicator)">
               <fa-icon icon="eye" />
             </a>
           }

@@ -1,0 +1,144 @@
+<%#
+ Copyright 2013-2026 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import { describe, expect, it } from 'vitest';
+
+import { type MetricsResponse, type Thread, toMetricsModel, toThreadStats } from './metrics';
+
+const timer = { '0.0': 1, '0.5': 2, '0.75': 3, '0.95': 4, '0.99': 5, '1.0': 6, max: 7, mean: 8, count: 9, totalTime: 10 };
+const timing = { min: 1, p50: 2, p75: 3, p95: 4, p99: 5, max: 7, mean: 8, count: 9 };
+
+const response: MetricsResponse = {
+  jvm: { Metaspace: { committed: 1, max: -1, used: 2 } },
+  processMetrics: {
+    'process.uptime': 1,
+    'process.start.time': 2,
+    'process.cpu.usage': 3,
+    'system.cpu.usage': 4,
+    'system.cpu.count': 5,
+    'system.load.average.1m': 6,
+    'process.files.max': 7,
+    'process.files.open': 8,
+  },
+  services: { '/api/users': { GET: { count: 1, mean: 2, max: 3 } } },
+  cache: {},
+  databases: {},
+};
+
+describe('metrics', () => {
+  describe('toMetricsModel', () => {
+    it('should convert the memory, the system and the endpoints', () => {
+      expect(toMetricsModel(response)).toEqual({
+        memory: response.jvm,
+        system: { uptime: 1, startTime: 2, processCpuUsage: 3, cpuUsage: 4, cpuCount: 5, loadAverage: 6, filesMax: 7, filesOpen: 8 },
+        endpoints: response.services,
+        caches: {},
+      });
+    });
+
+    it('should leave out the groups the response does not have', () => {
+      const { garbageCollector, requests, datasource } = toMetricsModel(response);
+
+      expect(garbageCollector).toBeUndefined();
+      expect(requests).toBeUndefined();
+      expect(datasource).toBeUndefined();
+    });
+
+    it('should convert the garbage collector', () => {
+      const { garbageCollector } = toMetricsModel({
+        ...response,
+        garbageCollector: {
+          'jvm.gc.live.data.size': 1,
+          'jvm.gc.max.data.size': 2,
+          'jvm.gc.memory.promoted': 3,
+          'jvm.gc.memory.allocated': 4,
+          classesLoaded: 5,
+          classesUnloaded: 6,
+          'jvm.gc.pause': timer,
+        },
+      });
+
+      expect(garbageCollector).toEqual({
+        liveDataSize: 1,
+        maxDataSize: 2,
+        memoryPromoted: 3,
+        memoryAllocated: 4,
+        classesLoaded: 5,
+        classesUnloaded: 6,
+        pause: timing,
+      });
+    });
+
+    it('should convert the requests', () => {
+      const percode = { 200: { count: 1, mean: 2, max: 3 } };
+      const { requests } = toMetricsModel({ ...response, 'http.server.requests': { all: { count: 1 }, percode } });
+
+      expect(requests).toEqual({ total: 1, byStatusCode: percode });
+    });
+
+    it('should convert the caches', () => {
+      const { caches } = toMetricsModel({
+        ...response,
+        cache: { users: { 'cache.gets.hit': 1, 'cache.gets.miss': 2, 'cache.puts': 3, 'cache.removals': 4, 'cache.evictions': 5 } },
+      });
+
+      expect(caches).toEqual({ users: { hits: 1, misses: 2, puts: 3, removals: 4, evictions: 5 } });
+    });
+
+    it('should convert the datasource', () => {
+      const { datasource } = toMetricsModel({
+        ...response,
+        databases: {
+          active: { value: 1 },
+          min: { value: 2 },
+          max: { value: 3 },
+          idle: { value: 4 },
+          acquire: timer,
+          creation: timer,
+          usage: timer,
+        },
+      });
+
+      expect(datasource).toEqual({ active: 1, min: 2, max: 3, idle: 4, acquire: timing, creation: timing, usage: timing });
+    });
+  });
+
+  describe('toThreadStats', () => {
+    it('should count nothing without threads', () => {
+      expect(toThreadStats()).toEqual({
+        threadDumpAll: 0,
+        threadDumpRunnable: 0,
+        threadDumpTimedWaiting: 0,
+        threadDumpWaiting: 0,
+        threadDumpBlocked: 0,
+      });
+    });
+
+    it('should count the threads by state leaving out the new ones', () => {
+      const states = ['RUNNABLE', 'RUNNABLE', 'WAITING', 'TIMED_WAITING', 'BLOCKED', 'NEW'];
+
+      expect(toThreadStats(states.map(threadState => ({ threadState }) as Thread))).toEqual({
+        threadDumpAll: 5,
+        threadDumpRunnable: 2,
+        threadDumpTimedWaiting: 1,
+        threadDumpWaiting: 1,
+        threadDumpBlocked: 1,
+      });
+    });
+  });
+});

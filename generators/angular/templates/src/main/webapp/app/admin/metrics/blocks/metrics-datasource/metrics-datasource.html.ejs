@@ -25,8 +25,8 @@
       <thead>
         <tr>
           <th scope="col">
-            <span>__jhiTranslateTag__('metrics.datasource.usage')</span> (active: {{ datasourceMetricsRef.active.value }}, min:
-            {{ datasourceMetricsRef.min.value }}, max: {{ datasourceMetricsRef.max.value }}, idle: {{ datasourceMetricsRef.idle.value }})
+            <span>__jhiTranslateTag__('metrics.datasource.usage')</span> (active: {{ datasourceMetricsRef.active }}, min:
+            {{ datasourceMetricsRef.min }}, max: {{ datasourceMetricsRef.max }}, idle: {{ datasourceMetricsRef.idle }})
           </th>
           <th scope="col" class="text-end">__jhiTranslateTag__('metrics.datasource.count')</th>
           <th scope="col" class="text-end">__jhiTranslateTag__('metrics.datasource.mean')</th>
@@ -44,11 +44,11 @@
           @let acquire = datasourceMetricsRef.acquire;
           <td class="text-end">{{ acquire.count }}</td>
           <td class="text-end">{{ filterNaN(acquire.mean) | number: '1.0-2' }}</td>
-          <td class="text-end">{{ acquire['0.0'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ acquire['0.5'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ acquire['0.75'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ acquire['0.95'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ acquire['0.99'] | number: '1.0-3' }}</td>
+          <td class="text-end">{{ acquire.min | number: '1.0-3' }}</td>
+          <td class="text-end">{{ acquire.p50 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ acquire.p75 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ acquire.p95 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ acquire.p99 | number: '1.0-3' }}</td>
           <td class="text-end">{{ filterNaN(acquire.max) | number: '1.0-2' }}</td>
         </tr>
         <tr>
@@ -56,11 +56,11 @@
           @let creation = datasourceMetricsRef.creation;
           <td class="text-end">{{ creation.count }}</td>
           <td class="text-end">{{ filterNaN(creation.mean) | number: '1.0-2' }}</td>
-          <td class="text-end">{{ creation['0.0'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ creation['0.5'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ creation['0.75'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ creation['0.95'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ creation['0.99'] | number: '1.0-3' }}</td>
+          <td class="text-end">{{ creation.min | number: '1.0-3' }}</td>
+          <td class="text-end">{{ creation.p50 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ creation.p75 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ creation.p95 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ creation.p99 | number: '1.0-3' }}</td>
           <td class="text-end">{{ filterNaN(creation.max) | number: '1.0-2' }}</td>
         </tr>
         <tr>
@@ -68,11 +68,11 @@
           @let usage = datasourceMetricsRef.usage;
           <td class="text-end">{{ usage.count }}</td>
           <td class="text-end">{{ filterNaN(usage.mean) | number: '1.0-2' }}</td>
-          <td class="text-end">{{ usage['0.0'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ usage['0.5'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ usage['0.75'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ usage['0.95'] | number: '1.0-3' }}</td>
-          <td class="text-end">{{ usage['0.99'] | number: '1.0-3' }}</td>
+          <td class="text-end">{{ usage.min | number: '1.0-3' }}</td>
+          <td class="text-end">{{ usage.p50 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ usage.p75 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ usage.p95 | number: '1.0-3' }}</td>
+          <td class="text-end">{{ usage.p99 | number: '1.0-3' }}</td>
           <td class="text-end">{{ filterNaN(usage.max) | number: '1.0-2' }}</td>
         </tr>
       </tbody>

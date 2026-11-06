@@ -11,9 +11,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in currentHealth.details.details" :key="index">
+            <tr v-for="(item, index) in currentHealth.details" :key="index">
               <td class="text-start">{{ index }}</td>
-              <td class="text-start">{{ readableValue(item) }}</td>
+              <td class="text-start">{{ item }}</td>
             </tr>
           </tbody>
         </table>
@@ -31,33 +31,16 @@
 import { useI18n } from 'vue-i18n';
 <%_ } _%>
 
-import { type HealthData } from './health.service';
+import { type HealthIndicator } from '@/shared/jhipster/health';
 
 defineOptions({ name: '<%- jhiPrefixCapitalized %>HealthModal' });
 
-const props = withDefaults(defineProps<{ currentHealth?: HealthData | null }>(), {
-  currentHealth: () => ({}) as HealthData,
+withDefaults(defineProps<{ currentHealth?: HealthIndicator | null }>(), {
+  currentHealth: () => ({}) as HealthIndicator,
 });
 
 <%_ if (enableTranslation) { _%>
 const { t: t$ } = useI18n();
 <%_ } _%>
-
-const readableValue = (value: unknown): string => {
-  if (props.currentHealth?.name === 'diskSpace') {
-    // Should display storage space in a human-readable unit
-    const val = Number(value) / 1073741824;
-    if (val > 1) {
-      // Value
-      return `${val.toFixed(2)} GB`;
-    }
-    return `${(Number(value) / 1048576).toFixed(2)} MB`;
-  }
-
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-  return String(value);
-};
 
 </script>

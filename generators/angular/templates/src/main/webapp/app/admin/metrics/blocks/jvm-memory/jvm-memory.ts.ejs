@@ -21,7 +21,7 @@ import { Component, input } from '@angular/core';
 
 import { NgbProgressbar } from '@ng-bootstrap/ng-bootstrap/progressbar';
 
-import { JvmMetrics } from 'app/admin/metrics/metrics.model';
+import { MemoryMetrics } from 'app/shared/jhipster/metrics';
 <%_ if (enableTranslation) { _%>
 import { TranslateDirective } from 'app/shared/language';
 <%_ } _%>
@@ -35,7 +35,7 @@ export class JvmMemory {
   /**
    * Object containing all JVM memory metrics
    */
-  readonly jvmMemoryMetrics = input<Record<string, JvmMetrics>>();
+  readonly jvmMemoryMetrics = input<Record<string, MemoryMetrics>>();
 
   /**
    * Boolean field saying if the metrics are in the process of being updated

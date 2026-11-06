@@ -21,6 +21,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { serverApiUrl } from 'app/config';
+import { HealthResponse, toHealthModel } from 'app/shared/jhipster/health';
 
 import { HealthService } from './health.service';
 
@@ -46,7 +47,8 @@ describe('HealthService Service', () => {
       // GIVEN
       let expectedResult;
       const checkHealth = {
-        components: [],
+        status: 'UP',
+        components: { ping: { status: 'UP' } },
       };
 
       // WHEN
@@ -60,7 +62,7 @@ describe('HealthService Service', () => {
       testRequest.flush(checkHealth);
 
       // THEN
-      expect(expectedResult).toEqual(checkHealth);
+      expect(expectedResult).toEqual(toHealthModel(checkHealth as HealthResponse));
     });
   });
 });

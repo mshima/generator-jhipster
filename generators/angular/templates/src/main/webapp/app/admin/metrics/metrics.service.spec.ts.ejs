@@ -20,7 +20,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { ThreadDump, ThreadState } from './metrics.model';
+import { MetricsResponse, ThreadDump, ThreadState, toMetricsModel } from 'app/shared/jhipster/metrics';
 import { MetricsService } from './metrics.service';
 
 describe('Metrics Service', () => {
@@ -44,13 +44,11 @@ describe('Metrics Service', () => {
       let expectedResult;
       const metrics = {
         jvm: {},
-        'http.server.requests': {},
         cache: {},
         services: {},
         databases: {},
-        garbageCollector: {},
         processMetrics: {},
-      };
+      } as MetricsResponse;
 
       service.getMetrics().subscribe(received => {
         expectedResult = received;
@@ -58,7 +56,7 @@ describe('Metrics Service', () => {
 
       const req = httpMock.expectOne({ method: 'GET' });
       req.flush(metrics);
-      expect(expectedResult).toEqual(metrics);
+      expect(expectedResult).toEqual(toMetricsModel(metrics));
     });
 
     it('should return Thread Dump', () => {

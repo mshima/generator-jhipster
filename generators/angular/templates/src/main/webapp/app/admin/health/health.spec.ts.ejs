@@ -25,8 +25,9 @@ import { provideTranslateService } from '@ngx-translate/core';
 <%_ } _%>
 import { of, throwError } from 'rxjs';
 
+import { HealthModel, HealthResponse, toHealthModel } from 'app/shared/jhipster/health';
+
 import Health from './health';
-import { HealthModel } from './health.model';
 import { HealthService } from './health.service';
 
 describe('Health', () => {
@@ -60,7 +61,7 @@ describe('Health', () => {
   describe('refresh', () => {
     it('should call refresh on init', () => {
       // GIVEN
-      const health: HealthModel = { status: 'UP', components: { mail: { status: 'UP', details: { mailDetail: 'mail' } } } };
+      const health: HealthModel = toHealthModel({ status: 'UP', components: { mail: { status: 'UP', details: { mailDetail: 'mail' } } } });
       vi.spyOn(service, 'checkHealth').mockReturnValue(of(health));
 
       // WHEN
@@ -73,7 +74,7 @@ describe('Health', () => {
 
     it('should handle a 503 on refreshing health data', () => {
       // GIVEN
-      const health: HealthModel = { status: 'DOWN', components: { mail: { status: 'DOWN' } } };
+      const health: HealthResponse = { status: 'DOWN', components: { mail: { status: 'DOWN' } } };
       vi.spyOn(service, 'checkHealth').mockReturnValue(throwError(() => new HttpErrorResponse({ status: 503, error: health })));
 
       // WHEN
@@ -81,7 +82,7 @@ describe('Health', () => {
 
       // THEN
       expect(service.checkHealth).toHaveBeenCalled();
-      expect(comp.health()).toEqual(health);
+      expect(comp.health()).toEqual(toHealthModel(health));
     });
   });
 });

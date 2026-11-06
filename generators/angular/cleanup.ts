@@ -97,6 +97,10 @@ export default asWritingTask<AngularEntity, AngularApplication>(function cleanup
     this.removeFile(`${application.clientSrcDir}app/account/password/password-strength-bar.scss`);
     this.removeFile(`${application.clientSrcDir}app/admin/docs/docs.scss`);
     this.removeFile(`${application.clientSrcDir}app/home/home.scss`);
+    this.removeFile(`${application.clientSrcDir}app/admin/configuration/configuration.model.ts`);
+    this.removeFile(`${application.clientSrcDir}app/admin/health/health.model.ts`);
+    this.removeFile(`${application.clientSrcDir}app/admin/logs/log.model.ts`);
+    this.removeFile(`${application.clientSrcDir}app/admin/metrics/metrics.model.ts`);
     this.removeFile(`${application.clientSrcDir}app/layouts/navbar/navbar.scss`);
     this.removeFile(`${application.clientSrcDir}app/layouts/profiles/page-ribbon.scss`);
     this.removeFile(`${application.clientSrcDir}app/admin/audits/audit-application.model.ts`);
@@ -406,5 +410,9 @@ export default asWritingTask<AngularEntity, AngularApplication>(function cleanup
   }
   if (control.isJhipsterVersionLessThan('9.5.0')) {
     this.removeFile(`${application.clientSrcDir}app/home/home.scss`);
+    this.removeFile(`${application.clientSrcDir}app/admin/configuration/configuration.model.ts`);
+    this.removeFile(`${application.clientSrcDir}app/admin/health/health.model.ts`);
+    this.removeFile(`${application.clientSrcDir}app/admin/logs/log.model.ts`);
+    this.removeFile(`${application.clientSrcDir}app/admin/metrics/metrics.model.ts`);
   }
 });

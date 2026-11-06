@@ -17,7 +17,7 @@
         </thead>
         <tbody>
           <tr v-for="health of healthData" :key="health.name">
-            <td><%- enableTranslation ? '<span />{{ t$(\'health.indicator.\' + baseName(health.name)) }}' : '<span class="text-capitalize">{{ baseName(health.name) }}</span>' %> {{ subSystemName(health.name) }}</td>
+            <td><%- enableTranslation ? '<span />{{ t$(\'health.indicator.\' + health.baseName) }}' : '<span class="text-capitalize">{{ health.baseName }}</span>' %> {{ health.subSystemName }}</td>
             <td class="text-center">
               <span class="badge" :class="getBadgeClass(health.status)"><%- enableTranslation ? '{{ t$(\'health.status.\' + health.status) }}' : '{{ health.status }}' %></span>
             </td>
@@ -34,11 +34,11 @@
       <template #title>
         <h4 v-if="currentHealth" class="modal-title" id="showHealthLabel">
 <%_ if (enableTranslation) { _%>
-          <span>{{ t$('health.indicator.' + baseName(currentHealth.name)) }}</span>
+          <span>{{ t$('health.indicator.' + currentHealth.baseName) }}</span>
 <%_ } else { _%>
-          <span class="text-capitalize">{{ baseName(currentHealth.name) }}</span>
+          <span class="text-capitalize">{{ currentHealth.baseName }}</span>
 <%_ } _%>
-          {{ subSystemName(currentHealth.name) }}
+          {{ currentHealth.subSystemName }}
         </h4>
       </template>
       <HealthModal :current-health="currentHealth"></HealthModal>
@@ -52,8 +52,10 @@ import { type Ref, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 <%_ } _%>
 
+import { type HealthIndicator, toHealthModel } from '@/shared/jhipster/health';
+
 import HealthModal from './health-modal.vue';
-import HealthService, { type HealthData, healthServiceKey } from './health.service';
+import HealthService, { healthServiceKey } from './health.service';
 
 defineOptions({ name: '<%- jhiPrefixCapitalized %>Health' });
 
@@ -62,34 +64,32 @@ const healthService = inject(healthServiceKey, () => new HealthService(), true);
 const { t: t$ } = useI18n();
 <%_ } _%>
 
-const healthData: Ref<HealthData[] | null> = ref(null);
-const currentHealth: Ref<HealthData | null> = ref(null);
+const healthData: Ref<HealthIndicator[] | null> = ref(null);
+const currentHealth: Ref<HealthIndicator | null> = ref(null);
 const updatingHealth = ref(false);
 
 const healthModal = ref<{ show: () => void } | null>(null);
 
-const baseName = (name: string): string | undefined => healthService.getBaseName(name);
 const getBadgeClass = (statusState: unknown): string => (statusState === 'UP' ? 'bg-success' : 'bg-danger');
 const refresh = (): void => {
   updatingHealth.value = true;
   healthService
     .checkHealth()
     .then(res => {
-      healthData.value = healthService.transformHealthData(res.data);
+      healthData.value = toHealthModel(res.data).indicators;
       updatingHealth.value = false;
     })
     .catch(error => {
       if (error.response?.status === 503) {
-        healthData.value = healthService.transformHealthData(error.response.data);
+        healthData.value = toHealthModel(error.response.data).indicators;
       }
       updatingHealth.value = false;
     });
 };
-const showHealth = (health: HealthData): void => {
+const showHealth = (health: HealthIndicator): void => {
   currentHealth.value = health;
   healthModal.value?.show();
 };
-const subSystemName = (name: string): string | undefined => healthService.getSubSystemName(name);
 
 onMounted(() => {
   refresh();

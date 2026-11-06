@@ -24,12 +24,13 @@ import { faEye, faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { type HealthIndicator } from 'app/shared/jhipster/health';
 import { getSystemHealth } from '../administration.reducer';
 
 import HealthModal from './health-modal';
 
 export const HealthPage = () => {
-  const [healthObject, setHealthObject] = useState({});
+  const [healthObject, setHealthObject] = useState<HealthIndicator>();
   const [showModal, setShowModal] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -46,9 +47,9 @@ export const HealthPage = () => {
     }
   };
 
-  const getSystemHealthInfo = (name, healthObj) => () => {
+  const getSystemHealthInfo = (indicator: HealthIndicator) => () => {
     setShowModal(true);
-    setHealthObject({ ...healthObj, name });
+    setHealthObject(indicator);
   };
 
   const getBadgeType = (status: string) => (status === 'UP' ? 'success' : 'danger');
@@ -57,7 +58,7 @@ export const HealthPage = () => {
 
   const renderModal = () => <HealthModal healthObject={healthObject} handleClose={handleClose} showModal={showModal} />;
 
-  const data = health?.components || {};
+  const indicators: HealthIndicator[] = health?.indicators ?? [];
 
   return (
     <div>
@@ -88,30 +89,31 @@ export const HealthPage = () => {
           </tr>
         </thead>
         <tbody>
-          {Object.keys(data).map(
-            (configPropKey, configPropIndex) =>
-              configPropKey !== 'status' && (
-                <tr key={configPropIndex}>
+          {indicators.map(indicator => (
+            <tr key={indicator.name}>
 <%_ if (enableTranslation) { _%>
-                  <td>
-                    <Translate contentKey={`health.indicator.${configPropKey}`}>{configPropKey}</Translate>
-                  </td>
+              <td>
+                <Translate contentKey={`health.indicator.${indicator.baseName}`}>{indicator.baseName}</Translate>
+                {indicator.subSystemName}
+              </td>
 <%_ } else { _%>
-                  <td className="text-capitalize">{configPropKey}</td>
+              <td>
+                <span className="text-capitalize">{indicator.baseName}</span>
+                {indicator.subSystemName}
+              </td>
 <%_ } _%>
-                  <td className="text-center">
-                    <Badge bg={getBadgeType(data[configPropKey].status)}>{data[configPropKey].status}</Badge>
-                  </td>
-                  <td className="text-center">
-                    {data[configPropKey].details && (
-                      <a className="hand" onClick={getSystemHealthInfo(configPropKey, data[configPropKey])}>
-                        <FontAwesomeIcon icon={faEye} />
-                      </a>
-                    )}
-                  </td>
-                </tr>
-              ),
-          )}
+              <td className="text-center">
+                <Badge bg={getBadgeType(indicator.status)}>{indicator.status}</Badge>
+              </td>
+              <td className="text-center">
+                {(indicator.details || indicator.error) && (
+                  <a className="hand" onClick={getSystemHealthInfo(indicator)}>
+                    <FontAwesomeIcon icon={faEye} />
+                  </a>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </Table>
       {renderModal()}

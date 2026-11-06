@@ -19,7 +19,7 @@
 import { DecimalPipe, KeyValuePipe } from '@angular/common';
 import { Component, input } from '@angular/core';
 
-import { Services } from 'app/admin/metrics/metrics.model';
+import { EndpointMetrics } from 'app/shared/jhipster/metrics';
 
 @Component({
   selector: '<%- jhiPrefixDashed %>-metrics-endpoints-requests',
@@ -30,7 +30,7 @@ export class MetricsEndpointsRequests {
   /**
    * Object containing service related metrics
    */
-  readonly endpointsRequestsMetrics = input<Services>();
+  readonly endpointsRequestsMetrics = input<EndpointMetrics>();
 
   /**
    * Boolean field saying if the metrics are in the process of being updated

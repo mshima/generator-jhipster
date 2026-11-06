@@ -16,37 +16,22 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-export interface ConfigProps {
-  contexts: Contexts;
-}
+import { describe, expect, it } from 'vitest';
 
-export type Contexts = Record<string, Context>;
+import { toLogs } from './logs';
 
-export interface Context {
-  beans: Beans;
-  parentId?: any;
-}
+describe('logs', () => {
+  describe('toLogs', () => {
+    it('should convert the loggers using their effective level', () => {
+      const logs = toLogs({
+        levels: ['INFO', 'WARN'],
+        loggers: { ROOT: { configuredLevel: 'INFO', effectiveLevel: 'INFO' }, main: { configuredLevel: null, effectiveLevel: 'WARN' } },
+      });
 
-export type Beans = Record<string, Bean>;
-
-export interface Bean {
-  prefix: string;
-  properties: any;
-}
-
-export interface Env {
-  activeProfiles?: string[];
-  propertySources: PropertySource[];
-}
-
-export interface PropertySource {
-  name: string;
-  properties: Properties;
-}
-
-export type Properties = Record<string, Property>;
-
-export interface Property {
-  value: string;
-  origin?: string;
-}
+      expect(logs).toEqual([
+        { name: 'ROOT', level: 'INFO' },
+        { name: 'main', level: 'WARN' },
+      ]);
+    });
+  });
+});

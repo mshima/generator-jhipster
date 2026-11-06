@@ -23,6 +23,8 @@ import { defineComponent, h } from 'vue';
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 
+import { type MetricsResponse, toMetricsModel } from '@/shared/jhipster/metrics';
+
 import MetricsService, { metricsServiceKey } from './metrics.service';
 import Metrics from './metrics.vue';
 
@@ -236,7 +238,7 @@ describe('Metrics Component', () => {
   };
 
   beforeEach(() => {
-    axiosStub.get.mockResolvedValue({ data: { timers: [], gauges: [] } });
+    axiosStub.get.mockRejectedValue(new Error('unavailable'));
     const wrapper = shallowMount(Metrics, {
       global: {
         stubs: {
@@ -271,8 +273,7 @@ describe('Metrics Component', () => {
       // THEN
       expect(axiosStub.get).toHaveBeenCalledWith('management/jhimetrics');
       expect(axiosStub.get).toHaveBeenCalledWith('management/threaddump');
-      expect(metricsComponent.metrics).toHaveProperty('jvm');
-      expect(metricsComponent.metrics).toEqual(response);
+      expect(metricsComponent.metrics).toEqual(toMetricsModel(response as unknown as MetricsResponse));
       expect(metricsComponent.threadStats).toEqual({
         threadDumpRunnable: 1,
         threadDumpWaiting: 0,

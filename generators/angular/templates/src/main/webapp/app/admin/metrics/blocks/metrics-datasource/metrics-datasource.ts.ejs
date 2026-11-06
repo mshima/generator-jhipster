@@ -19,7 +19,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, input } from '@angular/core';
 
-import { Databases } from 'app/admin/metrics/metrics.model';
+import { DatasourceMetrics } from 'app/shared/jhipster/metrics';
 import { filterNaN } from 'app/core/util';
 <%_ if (enableTranslation) { _%>
 import { TranslateDirective } from 'app/shared/language';
@@ -34,7 +34,7 @@ export class MetricsDatasource {
   /**
    * Object containing all datasource related metrics
    */
-  readonly datasourceMetrics = input<Databases>();
+  readonly datasourceMetrics = input<DatasourceMetrics>();
 
   /**
    * Boolean field saying if the metrics are in the process of being updated

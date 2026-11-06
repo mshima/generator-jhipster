@@ -16,18 +16,17 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { KeyValuePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap/modal';
 
+import { HealthIndicator, HealthModel, HealthStatus, toHealthModel } from 'app/shared/jhipster/health';
 <%_ if (enableTranslation) { _%>
 import { TranslateDirective } from 'app/shared/language';
 <%_ } _%>
 
-import { HealthDetails, HealthModel, HealthStatus } from './health.model';
 import { HealthService } from './health.service';
 import HealthModal from './modal/health-modal';
 
@@ -39,7 +38,6 @@ import HealthModal from './modal/health-modal';
     TranslateDirective,
 <%_ } _%>
     FontAwesomeModule,
-    KeyValuePipe,
   ],
 })
 export default class Health implements OnInit {
@@ -64,13 +62,13 @@ export default class Health implements OnInit {
       next: health => this.health.set(health),
       error: (error: HttpErrorResponse) => {
         if (error.status === 503) {
-          this.health.set(error.error);
+          this.health.set(toHealthModel(error.error));
         }
       },
     });
   }
 
-  showHealth(health: { key: string; value: HealthDetails }): void {
+  showHealth(health: HealthIndicator): void {
     const modalRef = this.modalService.open(HealthModal);
     modalRef.componentInstance.health = health;
   }
