@@ -62,8 +62,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import tech.jhipster.web.rest.errors.ProblemDetailWithCause;
-import tech.jhipster.web.rest.errors.ProblemDetailWithCause.ProblemDetailWithCauseBuilder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.ErrorResponse;
@@ -113,6 +111,8 @@ _%>
     private static final String FIELD_ERRORS_KEY = "fieldErrors";
     private static final String MESSAGE_KEY = "message";
     private static final String PATH_KEY = "path";
+    private static final String CAUSE_KEY = "cause";
+    private static final URI BLANK_TYPE = URI.create("about:blank");
     private static final boolean CAUSAL_CHAIN_ENABLED = false;
     private static final Pattern QUALIFIED_CLASS_NAME = Pattern.compile("\\b[a-z_][a-z0-9_]*+(?:\\.[a-z_][a-z0-9_]*+)*+\\.[A-Z]");
 
@@ -134,8 +134,8 @@ _%>
     public <%- returnType %> handleAnyException(Throwable ex, <%- requestClass %> request
     ) {
         LOG.debug("Converting Exception to Problem Details:", ex);
-        ProblemDetailWithCause pdCause = wrapAndCustomizeProblem(ex, request);
-        return handleExceptionInternal((Exception) ex, pdCause, buildHeaders(ex), HttpStatusCode.valueOf(pdCause.getStatus()), request);
+        ProblemDetail problem = wrapAndCustomizeProblem(ex, request);
+        return handleExceptionInternal((Exception) ex, problem, buildHeaders(ex), HttpStatusCode.valueOf(problem.getStatus()), request);
     }
 
     @SuppressWarnings("java:S2638")
@@ -143,8 +143,8 @@ _%>
     @Override
     protected <%- returnType %> handleExceptionInternal(
             Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode statusCode, <%- requestEntityRequestClass %> request) {
-        if (!(body instanceof ProblemDetailWithCause)) {
-            ProblemDetailWithCause problem = getProblemDetailWithCause(ex);
+        if (!isApplicationProblem(body)) {
+            ProblemDetail problem = getProblemDetail(ex);
             problem.setStatus(statusCode.value());
             if (body instanceof ProblemDetail problemDetail) problem.setDetail(problemDetail.getDetail());
             body = customizeProblem(problem, ex, (<%- requestClass %>) request);
@@ -159,45 +159,48 @@ _%>
             return Mono.error(ex);
         }
         return Mono.just(
-            new ResponseEntity<>(body, updateContentType(headers), HttpStatusCode.valueOf(((ProblemDetailWithCause) body).getStatus()))
+            new ResponseEntity<>(body, updateContentType(headers), HttpStatusCode.valueOf(((ProblemDetail) body).getStatus()))
         );
 <%_ } else { _%>
         return super.handleExceptionInternal(ex, body, headers, statusCode, request);
 <%_ } _%>
     }
 
-    protected ProblemDetailWithCause wrapAndCustomizeProblem(Throwable ex, <%- requestClass %> request) {
-        return customizeProblem(getProblemDetailWithCause(ex), ex, request);
+    protected ProblemDetail wrapAndCustomizeProblem(Throwable ex, <%- requestClass %> request) {
+        return customizeProblem(getProblemDetail(ex), ex, request);
     }
 
-    private ProblemDetailWithCause getProblemDetailWithCause(Throwable ex) {
+    /**
+     * A problem with a type of its own comes from the application, the problems Spring creates have the blank type.
+     */
+    private static boolean isApplicationProblem(@Nullable Object body) {
+        return body instanceof ProblemDetail problem && problem.getType() != null && !BLANK_TYPE.equals(problem.getType());
+    }
+
+    private ProblemDetail getProblemDetail(Throwable ex) {
 <%_ if (!skipUserManagement) { _%>
         if (ex instanceof <%- packageName %>.service.UsernameAlreadyUsedException)
-            return (ProblemDetailWithCause) new LoginAlreadyUsedException().getBody();
+            return new LoginAlreadyUsedException().getBody();
         if (ex instanceof <%- packageName %>.service.EmailAlreadyUsedException)
-            return (ProblemDetailWithCause) new EmailAlreadyUsedException().getBody();
+            return new EmailAlreadyUsedException().getBody();
         if (ex instanceof <%- packageName %>.service.InvalidPasswordException)
-            return (ProblemDetailWithCause) new InvalidPasswordException().getBody();
+            return new InvalidPasswordException().getBody();
 
         if (ex instanceof AuthenticationException) {
             // Ensure no information about existing users is revealed via failed authentication attempts
-            return ProblemDetailWithCauseBuilder.instance()
-                .withStatus(toStatus(ex).value())
-                .withTitle("Unauthorized")
-                .withDetail("Invalid credentials")
-                .build();
+            ProblemDetail problem = ProblemDetail.forStatusAndDetail(toStatus(ex), "Invalid credentials");
+            problem.setTitle("Unauthorized");
+            return problem;
         }
 <%_ } _%>
-        if (
-            ex instanceof ErrorResponseException exp && exp.getBody() instanceof ProblemDetailWithCause problemDetailWithCause
-        ) return problemDetailWithCause;
-        return ProblemDetailWithCauseBuilder.instance().withStatus(toStatus(ex).value()).build();
+        if (ex instanceof ErrorResponseException exp && isApplicationProblem(exp.getBody())) return exp.getBody();
+        return ProblemDetail.forStatus(toStatus(ex));
     }
 
-    protected ProblemDetailWithCause customizeProblem(ProblemDetailWithCause problem, Throwable err, <%- requestClass %> request) {
+    protected ProblemDetail customizeProblem(ProblemDetail problem, Throwable err, <%- requestClass %> request) {
         if (problem.getStatus() <= 0) problem.setStatus(toStatus(err));
 
-        if (problem.getType() == null || problem.getType().equals(URI.create("about:blank"))) problem.setType(getMappedType(err));
+        if (problem.getType() == null || problem.getType().equals(BLANK_TYPE)) problem.setType(getMappedType(err));
 
         // higher precedence to Custom/ResponseStatus types
         String title = extractTitle(err, problem.getStatus());
@@ -221,12 +224,12 @@ _%>
 
         setFieldErrors(problem, err, problemProperties);
 
-        problem.setCause(buildCause(err.getCause(), request).orElse(null));
+        buildCause(err.getCause(), request).ifPresent(cause -> problem.setProperty(CAUSE_KEY, cause));
 
         return problem;
     }
 
-    private void setFieldErrors(ProblemDetailWithCause problem, Throwable err, Map<String, Object> problemProperties) {
+    private void setFieldErrors(ProblemDetail problem, Throwable err, Map<String, Object> problemProperties) {
         if (problemProperties != null && problemProperties.containsKey(FIELD_ERRORS_KEY)) return;
 
         if (err instanceof<%- reactive ? ' WebExchangeBindException ' : ' MethodArgumentNotValidException ' %>fieldException) {
@@ -329,7 +332,7 @@ _%>
 
     private String getCustomizedErrorDetails(Throwable err) {
         // The message of such an exception is its whole body, the message key of the problem tells the error
-        if (err instanceof ErrorResponseException exp && exp.getBody() instanceof ProblemDetailWithCause) return null;
+        if (err instanceof ErrorResponseException exp && isApplicationProblem(exp.getBody())) return null;
 
         Collection<String> activeProfiles = List.of(env.getActiveProfiles());
         if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
@@ -386,9 +389,9 @@ _%>
     }
 <%_ } _%>
 
-    public Optional<ProblemDetailWithCause> buildCause(final Throwable throwable, <%- requestClass %> request) {
+    public Optional<ProblemDetail> buildCause(final Throwable throwable, <%- requestClass %> request) {
         if (throwable != null && isCausalChainEnabled()) {
-            return Optional.of(customizeProblem(getProblemDetailWithCause(throwable), throwable, request));
+            return Optional.of(customizeProblem(getProblemDetail(throwable), throwable, request));
         }
         return Optional.empty();
     }
