@@ -412,7 +412,7 @@ describe('Component Tests', () => {
 
 <%_ if (builtInUserManagement) { _%>
     describe('Login validation', () => {
-      it.each(['jhi', 'jhi@pster.net', 'jhi+tag@pster.net', 'jhi.pster@mail.pster.net'])('Should accept the login %s', async login => {
+      it.each(['jhi', 'jhipster@example.com', 'jhipster+tag@example.com', 'jhi.pster@mail.example.com'])('Should accept the login %s', async login => {
         // GIVEN
         const wrapper = shallowMount(<%- entityAngularName %>Update, { global: mountOptions });
         comp = wrapper.vm;

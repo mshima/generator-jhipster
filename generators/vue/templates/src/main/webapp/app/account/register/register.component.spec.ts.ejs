@@ -38,7 +38,7 @@ const axiosStub = {
 describe('Register Component', () => {
   let register: RegisterComponentType;
   const filledRegisterAccount = {
-    email: 'jhi@pster.net',
+    email: 'jhipster@example.com',
     langKey: '<%- nativeLanguage %>',
     login: 'jhi',
     password: 'jhipster',
@@ -69,7 +69,7 @@ describe('Register Component', () => {
     expect(register.registerAccount.email).toBeUndefined();
   });
 
-  it.each(['jhi', 'jhi@pster.net', 'jhi+tag@pster.net', 'jhi.pster@mail.pster.net'])('should accept the login %s', async login => {
+  it.each(['jhi', 'jhipster@example.com', 'jhipster+tag@example.com', 'jhi.pster@mail.example.com'])('should accept the login %s', async login => {
     register.registerAccount.login = login;
     await register.$nextTick();
 
@@ -97,7 +97,7 @@ describe('Register Component', () => {
     await register.$nextTick();
 
     expect(axiosStub.post).toHaveBeenCalledWith('api/register', {
-      email: 'jhi@pster.net',
+      email: 'jhipster@example.com',
       langKey: '<%- nativeLanguage %>',
       login: 'jhi',
       password: 'jhipster',
@@ -116,7 +116,7 @@ describe('Register Component', () => {
     register.register();
     await register.$nextTick();
 
-    expect(axiosStub.post).toHaveBeenCalledWith('api/register', { email: 'jhi@pster.net', langKey: '<%- nativeLanguage %>', login: 'jhi', password: 'jhipster' });
+    expect(axiosStub.post).toHaveBeenCalledWith('api/register', { email: 'jhipster@example.com', langKey: '<%- nativeLanguage %>', login: 'jhi', password: 'jhipster' });
     await register.$nextTick();
     expect(register.success).toBeNull();
     expect(register.error).toBeNull();
@@ -132,7 +132,7 @@ describe('Register Component', () => {
     register.register();
     await register.$nextTick();
 
-    expect(axiosStub.post).toHaveBeenCalledWith('api/register', { email: 'jhi@pster.net', langKey: '<%- nativeLanguage %>', login: 'jhi', password: 'jhipster' });
+    expect(axiosStub.post).toHaveBeenCalledWith('api/register', { email: 'jhipster@example.com', langKey: '<%- nativeLanguage %>', login: 'jhi', password: 'jhipster' });
     await register.$nextTick();
     expect(register.success).toBeNull();
     expect(register.error).toBeNull();
@@ -148,7 +148,7 @@ describe('Register Component', () => {
     register.register();
     await register.$nextTick();
 
-    expect(axiosStub.post).toHaveBeenCalledWith('api/register', { email: 'jhi@pster.net', langKey: '<%- nativeLanguage %>', login: 'jhi', password: 'jhipster' });
+    expect(axiosStub.post).toHaveBeenCalledWith('api/register', { email: 'jhipster@example.com', langKey: '<%- nativeLanguage %>', login: 'jhi', password: 'jhipster' });
     await register.$nextTick();
     expect(register.success).toBeNull();
     expect(register.errorEmailExists).toBeNull();
@@ -169,10 +169,10 @@ describe('Register Component', () => {
 
     // THEN
     expect(axiosStub.post).toHaveBeenCalledWith('api/register', {
-      email: 'jhi@pster.net',
+      email: 'jhipster@example.com',
       langKey: '<%- nativeLanguage %>',
-      login: 'jhi@pster.net',
-      password: 'jhi@pster.net',
+      login: 'jhipster@example.com',
+      password: 'jhipster@example.com',
     });
     expect(wrapper.vm.success).toBe(true);
     language.mockRestore();

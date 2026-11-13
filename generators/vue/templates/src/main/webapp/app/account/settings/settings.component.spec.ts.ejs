@@ -144,7 +144,7 @@ describe('Settings Component', () => {
 
     // THEN
     expect(wrapper.find('#settings-title').exists()).toBe(true);
-    expect(axiosStub.post).toHaveBeenCalledWith('api/account', expect.objectContaining({ firstName: 'jhi@pster.net', email: 'jhi@pster.net' }));
+    expect(axiosStub.post).toHaveBeenCalledWith('api/account', expect.objectContaining({ firstName: 'jhipster@example.com', email: 'jhipster@example.com' }));
     expect(settings.success).toBe('OK');
   });
 });
