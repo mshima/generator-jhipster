@@ -1,0 +1,88 @@
+#
+# Copyright 2013-2026 the original author or authors from the JHipster project.
+#
+# This file is part of the JHipster project, see https://www.jhipster.tech/
+# for more information.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: 'SonarQube Analysis of the samples'
+description: >-
+  Analyses the samples the collect action uploaded, each one as it is, in one SonarQube server, and reports them in the
+  summary of the job. The goal is zero issues: fail-on-issues fails it when a sample has one.
+
+inputs:
+  samples-dir:
+    description: 'Directory with a sonar-<sample> folder for each sample, the artifacts of the collect action'
+    required: true
+  fail-on-issues:
+    description: "'true' to fail when a sample has an unresolved issue or its analysis failed, else they are warned about"
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    # Start SonarQube server using the Docker Compose file of the sonar action: its branch plugin is not used here.
+    - name: 'Start SonarQube server'
+      shell: bash
+      run: |
+        echo "::group::Starting sonarqube"
+        docker compose -f ${{ github.action_path }}/../docker-compose.yml up --build -d --wait
+        echo "::endgroup::"
+
+    # Create the SonarQube token
+    - name: 'Setup SonarQube'
+      shell: bash
+      run: |
+        SONAR_HOST_URL=http://localhost:9000
+        LOCAL_SONAR_LOGIN=admin
+        LOCAL_SONAR_PASSWORD=admin
+
+        SONAR_TOKEN=$(curl -s -u $LOCAL_SONAR_LOGIN:$LOCAL_SONAR_PASSWORD -X POST "$SONAR_HOST_URL/api/user_tokens/generate?login=$LOCAL_SONAR_LOGIN&name=token&type=USER_TOKEN" | jq -r '.token')
+
+        curl -s -u $SONAR_TOKEN: -X POST "$SONAR_HOST_URL/api/permissions/add_user?login=$LOCAL_SONAR_LOGIN&permission=scan"
+
+        echo "SONAR_HOST_URL=$SONAR_HOST_URL" >> $GITHUB_ENV
+        echo "SONAR_TOKEN=$SONAR_TOKEN" >> $GITHUB_ENV
+
+    # Analyse each sample as a project of its own
+    - name: 'Run SonarQube analysis of the samples'
+      id: sonar_metrics
+      shell: bash
+      run: |
+        ${{ github.action_path }}/analyse-samples.sh "${{ inputs.samples-dir }}" sonar_result.md
+
+        cat sonar_result.md >> $GITHUB_STEP_SUMMARY
+        cat sonar_result.md
+
+    # The goal is zero issues: they fail the analysis with fail-on-issues, they are warned about otherwise.
+    - name: 'Report the unresolved issues'
+      if: steps.sonar_metrics.outcome == 'success' && (env.ISSUES != '0' || env.FAILED_SAMPLES != '')
+      shell: bash
+      run: |
+        message="SonarQube Analysis of the samples: ${ISSUES} unresolved issues, failed samples '${FAILED_SAMPLES}'."
+        if [ "${{ inputs.fail-on-issues }}" == 'true' ]; then
+          echo "::error::${message}"
+          exit 1
+        fi
+        echo "::warning::${message}"
+
+    # Stop the SonarQube server
+    - name: 'Stop SonarQube server'
+      if: always()
+      shell: bash
+      run: |
+        echo "::group::Stopping SonarQube"
+        docker compose -f ${{ github.action_path }}/../docker-compose.yml down
+        echo "::endgroup::"

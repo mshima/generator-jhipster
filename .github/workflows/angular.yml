@@ -225,7 +225,7 @@ jobs:
         if: >-
           github.event_name == 'push' &&
           github.repository == 'jhipster/generator-jhipster' &&
-          matrix.sonar-analyse == 'true'
+          matrix.sample == 'ng-default'
         run: |
           ./mvnw -ntp --batch-mode initialize org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar \
             -Dsonar.host.url=https://sonarcloud.io \
@@ -235,9 +235,10 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+      # The analysis that blocks the merge: ng-default only, the other samples are analysed by the sonar job.
       - name: 'ANALYSIS: Local SonarQube PR Analysis'
         if: >-
-          matrix.sonar-analyse == 'true' &&
+          matrix.sample == 'ng-default' &&
           !contains(github.event.pull_request.labels.*.name, 'pr: disable-sonar') &&
           steps.compare.outputs.equals != 'true'
         uses: ./generator-jhipster/.github/actions/sonar
@@ -246,6 +247,66 @@ jobs:
           application-dir: ${{ github.workspace }}/app
           docker-compose-file: ${{ github.workspace }}/generator-jhipster/.github/actions/sonar/docker-compose.yml
           comment-token: ${{ secrets.JHIPSTER_PAT_PR_ISSUES }}
+
+      # Every sample is analysed by the sonar job, together, as it is, without blocking the merge: its backend when the
+      # job tested it, its client when the job tested it. The samples with workspaces are left out: the analysis scans
+      # a single application.
+      - name: 'ANALYSIS: Collect the sample for the SonarQube Analysis of the samples'
+        if: >-
+          matrix.workspaces != 'true' &&
+          !contains(github.event.pull_request.labels.*.name, 'pr: disable-sonar') &&
+          steps.compare.outputs.equals != 'true'
+        uses: ./generator-jhipster/.github/actions/sonar/collect
+        with:
+          sonar-project-key: ${{ matrix.sample }}
+          application-dir: ${{ github.workspace }}/app
+          backend: ${{ matrix.skip-backend-tests != 'true' }}
+          client: ${{ matrix.skip-frontend-tests != 'true' }}
+
+  sonar:
+    name: 'ANALYSIS: SonarQube Analysis of the samples'
+    runs-on: ubuntu-latest
+    needs: [build-matrix, applications]
+    # Runs alongside check-angular, which does not need it: it reports the new issues of every sample without blocking
+    # the merge. The samples that passed their tests are analysed when others failed.
+    if: >-
+      always() &&
+      github.event_name == 'pull_request' &&
+      github.event.action != 'closed' &&
+      needs.applications.result != 'skipped' &&
+      needs.applications.result != 'cancelled' &&
+      !contains(github.event.pull_request.labels.*.name, 'pr: disable-sonar')
+    timeout-minutes: 90
+    steps:
+      - name: 'SETUP: Download the samples to analyse'
+        uses: actions/download-artifact@v8
+        # A pull request whose samples all equal the ones of its base commit has none.
+        continue-on-error: true
+        with:
+          pattern: sonar-*
+          path: ${{ github.workspace }}/sonar
+      - name: 'SETUP: Count the samples to analyse'
+        id: samples
+        run: echo "count=$(find ${{ github.workspace }}/sonar -mindepth 1 -maxdepth 1 -type d -name 'sonar-*' 2>/dev/null | wc -l | tr -d ' ')" >> $GITHUB_OUTPUT
+      - name: 'SETUP: Checkout generator-jhipster'
+        if: steps.samples.outputs.count != '0'
+        uses: actions/checkout@v7
+        with:
+          path: generator-jhipster
+      # The maven and gradle caches give the scanner the dependencies of the Java code.
+      - uses: jhipster/actions/setup-runner@v2
+        if: steps.samples.outputs.count != '0'
+        with:
+          maven-cache: true
+          gradle-cache: true
+          binary-dir: ${{ github.workspace }}/generator-jhipster/bin
+      - name: 'ANALYSIS: SonarQube Analysis of the samples'
+        if: steps.samples.outputs.count != '0'
+        uses: ./generator-jhipster/.github/actions/sonar/samples
+        with:
+          samples-dir: ${{ github.workspace }}/sonar
+          # The goal is zero issues in every sample: 'true' fails the job on one. Off for now, the job only reports.
+          fail-on-issues: 'false'
 
   check-angular:
     permissions:

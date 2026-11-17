@@ -1,0 +1,72 @@
+#
+# Copyright 2013-2026 the original author or authors from the JHipster project.
+#
+# This file is part of the JHipster project, see https://www.jhipster.tech/
+# for more information.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: 'SonarQube Analysis of the samples: collect a sample'
+description: >-
+  Uploads the application of a sample, as the job left it, with the parts of it to analyse, for the sonar job to analyse
+  the samples together.
+
+inputs:
+  sonar-project-key:
+    description: 'SonarQube project key, the name of the sample'
+    required: true
+  application-dir:
+    description: 'Application directory'
+    required: true
+  backend:
+    description: "'true' to analyse the backend, the code the backend tests of the job cover"
+    required: true
+  client:
+    description: "'true' to analyse the client, the code the frontend tests of the job cover"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # The files the analysis does not read are left out of the copy, node_modules above all. The compiled classes and
+    # the reports of the tests stay: the analysis reads them.
+    - name: 'Prepare the sample for the analysis'
+      shell: bash
+      run: |
+        mkdir -p sonar-upload
+        tar -C "${{ inputs.application-dir }}" -cf - \
+            --exclude=./.git \
+            --exclude=./node_modules \
+            --exclude=./package-lock.json \
+            --exclude=./target/node \
+            --exclude=./target/classes/static \
+            --exclude='./target/*.original' \
+            --exclude='./target/*.jar' \
+            --exclude=./.gradle \
+            --exclude=./build/node \
+            --exclude=./build/libs \
+            --exclude=./build/resources/main/static \
+            . | tar -C sonar-upload -xf -
+        {
+          echo "backend=${{ inputs.backend }}"
+          echo "client=${{ inputs.client }}"
+        } > sonar-upload/.sonar-parts
+
+    - name: 'Upload the sample for the analysis'
+      uses: actions/upload-artifact@v7
+      with:
+        name: sonar-${{ inputs.sonar-project-key }}
+        path: sonar-upload
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 1
