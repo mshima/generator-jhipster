@@ -438,7 +438,22 @@ export function loadRequiredConfigIntoEntity<const E extends Partial<ServerEntit
   return entity;
 }
 
-export function preparePostEntityCommonDerivedProperties(entity: BaseApplicationEntity) {
+/** An entity has something to update: a field besides its id, or a relationship it persists. */
+export const isEntityUpdatable = ({
+  fields,
+  relationships,
+}: {
+  fields: { id?: boolean; transient?: boolean }[];
+  relationships: { id?: boolean; persistableRelationship?: boolean }[];
+}) =>
+  fields.some(field => !field.id && !field.transient) ||
+  relationships.some(relationship => !relationship.id && relationship.persistableRelationship);
+
+/**
+ * The properties the fields of the entity give: a copy of the entity with part of its fields takes the ones of the fields
+ * it keeps.
+ */
+export function prepareEntityFieldsDerivedProperties(entity: BaseApplicationEntity) {
   const { fields } = entity;
   const fieldsType = sortedUniq(fields.map(({ fieldType }) => fieldType).filter(fieldType => !fieldIsEnum(fieldType)));
 
@@ -457,13 +472,16 @@ export function preparePostEntityCommonDerivedProperties(entity: BaseApplication
   entity.anyFieldIsDateDerived = entity.anyFieldIsTimeDerived || entity.anyFieldIsLocalDate;
 
   entity.anyFieldIsBlobDerived = intersection(fieldsType, [BYTES, BYTE_BUFFER]).length > 0;
-  if (entity.anyFieldIsBlobDerived) {
-    const blobFields = fields.filter(({ fieldType }) => ([BYTES, BYTE_BUFFER] as string[]).includes(fieldType));
-    const blobFieldsContentType = sortedUniq(blobFields.map(({ fieldTypeBlobContent }) => fieldTypeBlobContent));
-    entity.anyFieldHasImageContentType = blobFieldsContentType.includes(IMAGE);
-    entity.anyFieldHasFileBasedContentType = blobFieldsContentType.some(fieldTypeBlobContent => fieldTypeBlobContent !== TEXT);
-    entity.anyFieldHasTextContentType = blobFieldsContentType.includes(TEXT);
-  }
+  // Set without a blob too: a copy without the blobs of the entity takes false.
+  const blobFields = fields.filter(({ fieldType }) => ([BYTES, BYTE_BUFFER] as string[]).includes(fieldType));
+  const blobFieldsContentType = sortedUniq(blobFields.map(({ fieldTypeBlobContent }) => fieldTypeBlobContent));
+  entity.anyFieldHasImageContentType = blobFieldsContentType.includes(IMAGE);
+  entity.anyFieldHasFileBasedContentType = blobFieldsContentType.some(fieldTypeBlobContent => fieldTypeBlobContent !== TEXT);
+  entity.anyFieldHasTextContentType = blobFieldsContentType.includes(TEXT);
+}
+
+export function preparePostEntityCommonDerivedProperties(entity: BaseApplicationEntity) {
+  prepareEntityFieldsDerivedProperties(entity);
 
   preparePostEntityCommonDerivedPropertiesNotTyped(entity as EntityAll);
 }
@@ -499,9 +517,7 @@ function preparePostEntityCommonDerivedPropertiesNotTyped(entity: EntityAll) {
   entity.persistableRelationships = relationships.filter(({ persistableRelationship }) => persistableRelationship);
   entity.otherEntitiesWithPersistableRelationship = uniq(entity.persistableRelationships.map(rel => rel.otherEntity));
 
-  entity.updatableEntity =
-    entity.fields.some(field => !field.id && !field.transient) ||
-    entity.relationships.some(relationship => !relationship.id && relationship.persistableRelationship);
+  entity.updatableEntity = isEntityUpdatable(entity);
 
   entity.entityContainsCollectionField = entity.relationships.some(relationship => relationship.collection);
 

@@ -346,16 +346,16 @@ export default class AngularGenerator extends AngularApplicationGenerator {
       prepareEnumImports({ entity }) {
         mutateData(entity, {
           __override__: false,
-          entityClientEnumImports: ({ fields }) => getClientEnumImportsFormat(fields, ANGULAR),
+          entityClientEnumImports: ({ clientFields }) => getClientEnumImportsFormat(clientFields!, ANGULAR),
         });
       },
       prepareTranslationPipeUsage({ application: { enableTranslation }, entity }) {
         mutateData(entity as AngularEntity & { searchEngineAny?: boolean }, {
-          angularEntityDetailsRequiresTranslationPipe: ({ fields }) =>
-            enableTranslation && fields.some(field => !field.hidden && Boolean(field.documentation)),
-          angularEntityUpdateRequiresTranslationPipe: ({ angularEntityDetailsRequiresTranslationPipe, fields }) =>
+          angularEntityDetailsRequiresTranslationPipe: ({ clientFields }) =>
+            enableTranslation && clientFields!.some(field => !field.hidden && Boolean(field.documentation)),
+          angularEntityUpdateRequiresTranslationPipe: ({ angularEntityDetailsRequiresTranslationPipe, clientFields }) =>
             Boolean(angularEntityDetailsRequiresTranslationPipe) ||
-            (enableTranslation && fields.some(field => !field.hidden && field.fieldIsEnum && !field.clientConstantsAsValues)),
+            (enableTranslation && clientFields!.some(field => !field.hidden && field.fieldIsEnum && !field.clientConstantsAsValues)),
           angularEntityListRequiresTranslationPipe: ({ searchEngineAny, relationships }) =>
             enableTranslation &&
             (Boolean(searchEngineAny) ||

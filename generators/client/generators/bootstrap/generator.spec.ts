@@ -60,6 +60,79 @@ describe(`generator - ${generator}`, () => {
     });
   });
 
+  describe('clientEntities', () => {
+    const anyFieldProperties = (entity: ClientEntity) =>
+      Object.fromEntries(Object.entries(entity).filter(([key, value]) => key.startsWith('anyField') && value));
+    const clientEntity = (name: string) => runResult.application!.clientEntities!.find(entity => entity.name === name)!;
+    // The only fields of their type, the entity of the clients giving none of their anyField properties.
+    const skippedFields = [
+      { fieldName: 'secret', fieldType: 'Hidden', fieldValues: 'ALPHA,BETA', skipClient: true },
+      { fieldName: 'moment', fieldType: 'Instant', skipClient: true },
+      { fieldName: 'picture', fieldType: 'ImageBlob', skipClient: true },
+      { fieldName: 'noted', fieldType: 'String', documentation: 'A note', skipClient: true },
+    ];
+
+    before(async () => {
+      await helpers.runJHipster(generator).withJHipsterConfig({}, [
+        {
+          name: 'Foo',
+          fields: [
+            { fieldName: 'shown', fieldType: 'String' },
+            { fieldName: 'color', fieldType: 'Color', fieldValues: 'RED,GREEN' },
+            ...skippedFields,
+          ],
+        },
+        {
+          name: 'Bar',
+          fields: [
+            { fieldName: 'picture', fieldType: 'ImageBlob' },
+            { fieldName: 'day', fieldType: 'LocalDate' },
+          ],
+        },
+        { name: 'Baz', skipClient: true, fields: [{ fieldName: 'name', fieldType: 'String' }] },
+      ]);
+    });
+
+    it('should prepare the entities the clients write', () => {
+      expect(runResult.application!.clientEntities!.map(entity => entity.name)).toEqual(expect.arrayContaining(['Foo', 'Bar']));
+      expect(runResult.application!.clientEntities!.map(entity => entity.name)).not.toContain('Baz');
+    });
+    it('should give the client entities from the filter', () => {
+      const { application, entities } = runResult;
+      const [foo, bar] = application!.filterEntitiesAndPropertiesForClient!([
+        entities!.Foo as ClientEntity,
+        entities!.Bar as ClientEntity,
+        entities!.Baz as ClientEntity,
+      ]);
+      expect(foo).toBe(clientEntity('Foo'));
+      expect(bar).toBe(clientEntity('Bar'));
+    });
+    it('should leave out the fields the clients skip', () => {
+      expect(clientEntity('Foo').fields.map(field => field.fieldName)).toEqual(['id', 'shown', 'color']);
+      expect((runResult.entities!.Foo as ClientEntity).clientFields!.map(field => field.fieldName)).toEqual(['id', 'shown', 'color']);
+    });
+    it('should list the values of the enums of the fields the clients keep only', () => {
+      expect((runResult.entities!.Foo as ClientEntity).enumTypeFields!.map(field => field.fieldName)).toEqual(['color']);
+    });
+    it('should derive the anyField properties from the fields that are left', () => {
+      expect(anyFieldProperties(clientEntity('Foo'))).toEqual({});
+      expect(anyFieldProperties(runResult.entities!.Foo as ClientEntity)).toEqual({
+        anyFieldHasDocumentation: true,
+        anyFieldHasFileBasedContentType: true,
+        anyFieldHasImageContentType: true,
+        anyFieldIsBlobDerived: true,
+        anyFieldIsDateDerived: true,
+        anyFieldIsInstant: true,
+        anyFieldIsTimeDerived: true,
+      });
+    });
+    it('should keep the anyField properties of an entity the clients skip no field of', () => {
+      expect(clientEntity('Bar').fields.map(field => field.fieldName)).toEqual(['id', 'picture', 'day']);
+      expect(anyFieldProperties(clientEntity('Bar'))).toEqual(anyFieldProperties(runResult.entities!.Bar as ClientEntity));
+      expect(clientEntity('Bar').anyFieldHasImageContentType).toBe(true);
+    });
+  });
+
   describe('withAdminUi', () => {
     const run = (config: Record<string, unknown>) => helpers.runJHipster(generator).withJHipsterConfig(config);
 

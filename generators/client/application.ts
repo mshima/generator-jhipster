@@ -39,6 +39,8 @@ export type ClientAddedApplicationProperties = {
   webappEnumerationsDir?: string;
   clientFrameworkBuiltIn: boolean;
   frontendAppName: string;
+  /** The entities the clients write, as they see them, prepared once before the clients write. */
+  clientEntities?: ClientEntity[];
   filterEntitiesForClient?: <const E extends ClientEntity>(entity: E[]) => E[];
   filterEntitiesAndPropertiesForClient?: <const E extends ClientEntity>(entity: E[]) => E[];
   filterEntityPropertiesForClient?: <const E extends ClientEntity>(entity: E) => E;

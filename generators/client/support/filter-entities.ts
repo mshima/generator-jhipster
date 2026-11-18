@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { isEntityUpdatable, prepareEntityFieldsDerivedProperties } from '../../base-application/support/prepare-entity.ts';
 import type { RelationshipWithEntity } from '../../base-application/types.ts';
 import type { Entity as ClientEntity, Field as ClientField, Relationship as ClientRelationship } from '../types.ts';
 
@@ -25,14 +26,18 @@ export const isClientRelationship = (rel: RelationshipWithEntity<ClientRelations
   rel.skipClient ?? !(rel.persistableRelationship || rel.relationshipEagerLoad || rel.otherEntity.jpaMetamodelFiltering);
 
 /**
- * Clone entity properties for frontend templates.
- * To be used in writing operations.
+ * The entity the clients see: a copy without the fields the clients skip, the relationships being kept as they are.
+ * The properties the fields give follow the fields that are left, as the templates import and declare what they tell.
  */
-export const filterEntityPropertiesForClient = <const E extends ClientEntity>(entity: E): E => ({
-  ...entity,
-  fields: entity.fields.filter(field => isClientField(field)),
-  relationships: entity.relationships.filter(rel => isClientRelationship(rel)),
-});
+export const filterEntityPropertiesForClient = <const E extends ClientEntity>(entity: E): E => {
+  const fields = entity.fields.filter(field => isClientField(field));
+  const clientEntity: E = { ...entity, fields };
+  if (fields.length !== entity.fields.length) {
+    prepareEntityFieldsDerivedProperties(clientEntity);
+    (clientEntity as { updatableEntity?: boolean }).updatableEntity = isEntityUpdatable(clientEntity);
+  }
+  return clientEntity;
+};
 
 /**
  * Filter entities for frontend templates.
@@ -43,4 +48,4 @@ export const filterEntitiesForClient = <const E extends ClientEntity>(entities: 
  * Filter entities and properties for frontend templates.
  */
 export const filterEntitiesAndPropertiesForClient = <const E extends ClientEntity>(entities: E[]): E[] =>
-  entities.filter(entity => !entity.skipClient).map(filterEntityPropertiesForClient);
+  filterEntitiesForClient(entities).map(filterEntityPropertiesForClient);

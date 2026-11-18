@@ -16,15 +16,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { overrideMutateDataProperty } from '../../../../lib/utils/object.ts';
+import { mutateData, overrideMutateDataProperty } from '../../../../lib/utils/object.ts';
 import { fieldIsEnum } from '../../../base-application/support/field-utils.ts';
 import { mutateApplication } from '../../application.ts';
 import clientCommand from '../../command.ts';
 import { mutateEntity, mutateField } from '../../entity.ts';
 import { ClientApplicationGenerator } from '../../generator.ts';
-import { isClientField } from '../../support/filter-entities.ts';
-import { filterEntitiesForClient, filterEntityPropertiesForClient, preparePostEntityClientDerivedProperties } from '../../support/index.ts';
-import type { Application as ClientApplication, Features as ClientFeatures, Options as ClientOptions } from '../../types.d.ts';
+import {
+  filterEntitiesForClient,
+  filterEntityPropertiesForClient,
+  isClientField,
+  preparePostEntityClientDerivedProperties,
+} from '../../support/index.ts';
+import type {
+  Application as ClientApplication,
+  Entity as ClientEntity,
+  Features as ClientFeatures,
+  Options as ClientOptions,
+} from '../../types.d.ts';
 
 export default class ClientBootstrap extends ClientApplicationGenerator {
   constructor(args?: string[], options?: ClientOptions, features?: ClientFeatures) {
@@ -101,10 +110,6 @@ export default class ClientBootstrap extends ClientApplicationGenerator {
                 `${microserviceName.toLowerCase()}/${entityFileName}`
               : entityFileName;
           },
-          enumTypeFields: ({ fields }) => {
-            const enumFields = fields.filter(field => fieldIsEnum(field.fieldType) && !field.clientConstantsAsValues);
-            return enumFields.filter((field, index) => enumFields.findIndex(({ fieldType }) => fieldType === field.fieldType) === index);
-          },
         });
       },
     });
@@ -126,14 +131,38 @@ export default class ClientBootstrap extends ClientApplicationGenerator {
     return this.delegateTasksToBlueprint(() => this.preparingEachEntityField);
   }
 
+  get postPreparingEachEntity() {
+    return this.asPostPreparingEachEntityTaskGroup({
+      prepareClientFields({ entity }) {
+        // Once every field is added, the derived fields of the primary key included, and before the clients prepare their models.
+        mutateData(entity, {
+          __override__: false,
+          clientFields: ({ fields }) => fields.filter(field => isClientField(field)),
+          enumTypeFields: ({ clientFields }) => {
+            const enumFields = clientFields!.filter(field => fieldIsEnum(field.fieldType) && !field.clientConstantsAsValues);
+            return enumFields.filter((field, index) => enumFields.findIndex(({ fieldType }) => fieldType === field.fieldType) === index);
+          },
+        });
+      },
+    });
+  }
+
+  get [ClientApplicationGenerator.POST_PREPARING_EACH_ENTITY]() {
+    return this.delegateTasksToBlueprint(() => this.postPreparingEachEntity);
+  }
+
   get default() {
     return this.asDefaultTaskGroup({
       addFallback({ application }) {
         application.filterEntitiesForClient ??= filterEntitiesForClient;
         application.filterEntityPropertiesForClient ??= filterEntityPropertiesForClient;
-        application.filterEntitiesAndPropertiesForClient ??= entities =>
-          // The fields the clients skip are left out; the relationships are kept as they are.
-          application.filterEntitiesForClient!(entities).map(entity => ({ ...entity, fields: entity.fields.filter(isClientField) }));
+        // Each entity gives its client entity; one with none, like an entity of another priority, is prepared again.
+        application.filterEntitiesAndPropertiesForClient ??= <const E extends ClientEntity>(entities: E[]): E[] =>
+          application.filterEntitiesForClient!(entities).map(
+            entity =>
+              (application.clientEntities?.find(({ name }) => name === entity.name) as E | undefined) ??
+              application.filterEntityPropertiesForClient!(entity),
+          );
       },
       postPreparingEntity({ entities }) {
         for (const entity of entities) {
@@ -145,5 +174,19 @@ export default class ClientBootstrap extends ClientApplicationGenerator {
 
   get [ClientApplicationGenerator.DEFAULT]() {
     return this.default;
+  }
+
+  get writingEntities() {
+    return this.asWritingEntitiesTaskGroup({
+      prepareClientEntities({ application, entities }) {
+        // After the default tasks of the clients set their properties on the entities, from the entities the clients write (without
+        // the content type fields): the bootstrap is queued before the clients, so this task runs before they write.
+        application.clientEntities = application.filterEntitiesForClient!(entities).map(application.filterEntityPropertiesForClient!);
+      },
+    });
+  }
+
+  get [ClientApplicationGenerator.WRITING_ENTITIES]() {
+    return this.writingEntities;
   }
 }

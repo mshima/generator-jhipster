@@ -158,6 +158,7 @@ describe(`generator - ${clientFramework}`, () => {
         const { application } = runResult;
         expect(application).toMatchSnapshot({
           addLanguageCallbacks: expect.any(Array),
+          clientEntities: expect.any(Array),
           customizeTemplatePaths: expect.any(Array),
           dockerComposeFiles: expect.any(Object),
           dockerContainers: expect.any(Object),

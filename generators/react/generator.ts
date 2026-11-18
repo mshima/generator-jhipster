@@ -294,13 +294,14 @@ ${comment}
   get postPreparingEachEntity() {
     return this.asPostPreparingEachEntityTaskGroup({
       prepareEntityModel({ entity }) {
-        const fieldsWithoutId = entity.fields.filter(field => !field.id);
+        const clientFields = entity.clientFields!;
+        const fieldsWithoutId = clientFields.filter(field => !field.id);
         mutateData(entity, {
           __override__: false,
           entityClientFields: () =>
             this.generateEntityClientFields(
               entity.primaryKey,
-              entity.fields,
+              clientFields,
               entity.relationships,
               entity.dto,
               'dayjs.Dayjs',
@@ -309,7 +310,7 @@ ${comment}
           entityClientImports: () => this.generateEntityClientImports(entity.relationships, entity.dto),
           entityClientFieldDefaultValues: () => this.generateEntityClientFieldDefaultValues(fieldsWithoutId),
           entityModelEnumImports: () => this.generateEntityClientEnumImports(fieldsWithoutId),
-          entityClientEnumImports: () => this.generateEntityClientEnumImports(entity.fields),
+          entityClientEnumImports: () => this.generateEntityClientEnumImports(clientFields),
         });
       },
     });

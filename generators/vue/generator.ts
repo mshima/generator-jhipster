@@ -381,7 +381,8 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
         }
       },
       prepareEntityModel({ entity }) {
-        const fieldsWithoutId = entity.fields.filter(field => !field.id);
+        const clientFields = entity.clientFields!;
+        const fieldsWithoutId = clientFields.filter(field => !field.id);
         // The authorities of the routes, like Angular: ROLE_USER when the entity declares none.
         const asAuthorities = (authorities: string[]): string =>
           (authorities.length > 0 ? authorities : ['ROLE_USER']).map(authority => `'${authority}'`).join(', ');
@@ -402,9 +403,9 @@ const ${entityAngularName}Update = () => import('@/entities/${entityFolderName}/
           entityClientImports: () => this.generateEntityClientImports(entity.relationships, entity.dto),
           entityClientFieldDefaultValues: () => this.generateEntityClientFieldDefaultValues(fieldsWithoutId),
           entityModelEnumImports: () => this.generateEntityClientEnumImports(fieldsWithoutId),
-          entityClientEnumImports: () => this.generateEntityClientEnumImports(entity.fields),
+          entityClientEnumImports: () => this.generateEntityClientEnumImports(clientFields),
           vueFormTimeFields: () =>
-            entity.fields.some(
+            clientFields.some(
               field =>
                 (field.fieldTypeInstant || field.fieldTypeZonedDateTime) &&
                 (!field.id || entity.builtInUserManagement || !field.autoGenerate) &&

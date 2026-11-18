@@ -20,14 +20,13 @@ import { mutateData } from '../../../lib/utils/object.ts';
 import { type EntitySamplesBatch, generateEntitySamples } from '../../base-application/support/entity-samples.ts';
 import type { Entity as ClientEntity, Field as ClientField } from '../types.ts';
 
-import { isClientField } from './filter-entities.ts';
 import { generateTestEntityId, stringifyTsEntity } from './template-utils.ts';
 import getTypescriptKeyType from './types-utils.ts';
 
 const SEED = 'post-prepare-client';
 
 export function preparePostEntityClientDerivedProperties(entity: ClientEntity) {
-  let clientFields = entity.fields.filter(field => isClientField(field));
+  let clientFields = entity.clientFields!;
   if (entity.builtInUser) {
     clientFields = clientFields.filter(field => ['id', 'login'].includes(field.fieldName));
   }
