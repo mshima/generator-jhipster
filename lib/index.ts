@@ -19,7 +19,7 @@
 
 import { basename, dirname, join } from 'node:path';
 
-import packageJson from '../package.json' with { type: 'json' };
+import rawPackageJson from '../package.json' with { type: 'json' };
 
 import { getPackageInstall } from './package-install.ts';
 
@@ -36,7 +36,13 @@ export const getSourceRoot = (relativePath?: string) => {
   return relativePath ? join(sourceRoot, relativePath) : sourceRoot;
 };
 
-export { packageJson };
+/**
+ * The package.json of generator-jhipster, its version the one of JHipster: the `yeoman.meta.packageVersion` of the
+ * package.json when it has one, like a build published under another name and version, as the meta of its generators
+ * tells.
+ */
+const packageVersion = (rawPackageJson as { yeoman?: { meta?: { packageVersion?: string } } }).yeoman?.meta?.packageVersion;
+export const packageJson: typeof rawPackageJson = packageVersion ? { ...rawPackageJson, version: packageVersion } : rawPackageJson;
 
 /**
  * What to install to generate again with this generator-jhipster, see `getPackageInstall`: the npm alias of a build
