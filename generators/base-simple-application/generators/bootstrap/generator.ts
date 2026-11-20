@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { getJHipsterInstall } from '../../../../lib/index.ts';
 import { getConfigWithDefaults } from '../../../../lib/jhipster/default-application-options.ts';
 import { finalizeMutations, removeFieldsWithNullishValues } from '../../../../lib/utils/object.ts';
 import packageJson from '../../../../package.json' with { type: 'json' };
@@ -75,6 +76,8 @@ export default class BaseSimpleApplicationBootstrapGenerator extends BaseSimpleA
         applicationDefaults({
           // The version of package.json when the meta has none, like a generator registered without its packagePath.
           jhipsterVersion: this.useVersionPlaceholders ? 'JHIPSTER_VERSION' : (this._meta.getPackageVersion?.() ?? packageJson.version),
+          // What to install to generate again, when it is not that version, like a build published under another name.
+          jhipsterInstall: this.useVersionPlaceholders ? undefined : getJHipsterInstall(),
         });
 
         applicationDefaults(mutateApplicationPreparing);

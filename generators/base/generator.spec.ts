@@ -188,6 +188,28 @@ describe(`generator - ${generator}`, () => {
       });
     });
 
+    describe('.jhipsterOldVersion with a recorded value that is not a version', () => {
+      let jhipsterOldVersion: string | null | undefined;
+      let lessThan: boolean | undefined;
+
+      before(async () => {
+        await helpers
+          .run(CustomGenerator)
+          .withJHipsterConfig({ jhipsterVersion: 'git+https://github.com/jhipster/generator-jhipster.git' })
+          .commitFiles()
+          .withJHipsterGenerators({ useDefaultMocks: true })
+          .withTask('postWriting', async function (this, { control }) {
+            ({ jhipsterOldVersion } = control);
+            lessThan = control.isJhipsterVersionLessThan('8.0.0');
+          });
+      });
+
+      it('ignores it', async () => {
+        expect(jhipsterOldVersion).toBeNull();
+        expect(lessThan).toBe(false);
+      });
+    });
+
     describe('.cleanupFiles', () => {
       let removeFiles: ReturnType<typeof exnode.fn>;
 

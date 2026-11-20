@@ -28,6 +28,8 @@ export type BaseSimpleApplicationLoadingAddedApplicationProperties = WriteContex
 export type BaseSimpleApplicationBootstrapAddedApplicationProperties = {
   /** The version of jhipster, the one the meta of the bootstrap generator tells. */
   jhipsterVersion: string;
+  /** What to install to generate again with this generator-jhipster, when it is not `jhipsterVersion`. */
+  jhipsterInstall?: string;
 };
 
 export type BaseSimpleApplicationPreparingAddedApplicationProperties = {

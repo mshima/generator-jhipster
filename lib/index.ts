@@ -21,6 +21,8 @@ import { basename, dirname, join } from 'node:path';
 
 import packageJson from '../package.json' with { type: 'json' };
 
+import { getPackageInstall } from './package-install.ts';
+
 export const isDistFolder = () => basename(dirname(import.meta.dirname)) === 'dist';
 
 export const getPackageRoot = (relativePath?: string) => {
@@ -35,3 +37,10 @@ export const getSourceRoot = (relativePath?: string) => {
 };
 
 export { packageJson };
+
+/**
+ * What to install to generate again with this generator-jhipster, see `getPackageInstall`: the npm alias of a build
+ * published under another name, like `npm:@mshima/generator-jhipster@0.0.14`, the git reference of a checkout, undefined
+ * when it is its version.
+ */
+export const getJHipsterInstall = (): string | undefined => getPackageInstall(getPackageRoot(), { name: 'generator-jhipster' });

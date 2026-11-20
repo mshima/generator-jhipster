@@ -22,10 +22,11 @@ import { rm } from 'node:fs/promises';
 import { relative } from 'node:path';
 
 import chalk from 'chalk';
-import { lt as semverLessThan } from 'semver';
+import { lt as semverLessThan, valid as semverValid } from 'semver';
 
 import type { ExportGeneratorOptionsFromCommand, ExportStoragePropertiesFromCommand, ParsableCommand } from '../../lib/command/types.ts';
-import { packageJson } from '../../lib/index.ts';
+import { getJHipsterInstall, packageJson } from '../../lib/index.ts';
+import { getPackageInstall } from '../../lib/package-install.ts';
 import { getGeneratorAlias } from '../../lib/resolver/blueprint-aliases.ts';
 import { requireGeneratorCommand } from '../../lib/resolver/generator-command.ts';
 import { normalizeBlueprintName } from '../../lib/utils/blueprint-name.ts';
@@ -157,6 +158,10 @@ export default class BaseGenerator<
               this.getContextData(this.#getBlueprintOldVersionKey(), { factory: () => this.blueprintConfig!.blueprintVersion });
             }
             this.blueprintConfig!.blueprintVersion = this._meta.getPackageVersion?.();
+            // What to install when it is not that version, like a checkout.
+            this.blueprintConfig!.blueprintInstall = getPackageInstall(this._meta.packagePath!, {
+              name: this._meta.getPackageJson?.<{ name?: string }>()?.name,
+            });
           }
         } catch {
           this.log(`Could not retrieve version of blueprint '${this.options.namespace}'`);
@@ -164,6 +169,10 @@ export default class BaseGenerator<
       }
       if (!this.fromBlueprint && !this.delegateToBlueprint && storeJHipsterVersion && !this.options.reproducibleTests) {
         this.jhipsterConfig.jhipsterVersion = this._meta.getPackageVersion?.();
+        // What to install to generate again, when it is not that version, like a build published under another name.
+        this.jhipsterConfig.jhipsterInstall = getJHipsterInstall();
+        // Replaced by jhipsterInstall.
+        this.config.delete('jhipsterPackage' as never);
       }
       if ((this.fromBlueprint || !this.delegateToBlueprint) && queueCommandTasks) {
         this._queueCurrentJHipsterCommandTasks();
@@ -216,7 +225,7 @@ export default class BaseGenerator<
     const generator = this;
     return this.getContextData<Control>('jhipster:control', {
       factory: () => {
-        let jhipsterOldVersion: string | null;
+        let jhipsterOldVersion: string | null | undefined;
         const customizeRemoveFiles: ((file: string) => string | undefined)[] = [];
 
         const collectCleanupFiles = (cleanup: CleanupArgumentType) =>
@@ -247,10 +256,14 @@ export default class BaseGenerator<
             }
           },
           get jhipsterOldVersion(): string | null {
-            jhipsterOldVersion ??=
-              existsSync(generator.config.path) ?
-                (JSON.parse(readFileSync(generator.config.path, 'utf-8'))[GENERATOR_JHIPSTER]?.jhipsterVersion ?? null)
-              : null;
+            if (jhipsterOldVersion === undefined) {
+              const recorded: unknown =
+                existsSync(generator.config.path) ?
+                  JSON.parse(readFileSync(generator.config.path, 'utf-8'))[GENERATOR_JHIPSTER]?.jhipsterVersion
+                : undefined;
+              // A recorded value that is not a version, like a git url or a path, is ignored: the versions compared are semver.
+              jhipsterOldVersion = typeof recorded === 'string' && semverValid(recorded) ? recorded : null;
+            }
             return jhipsterOldVersion;
           },
           /** Whether `docker compose` is installed, see `isDockerComposeAvailable`: detected when read, once for the process. */

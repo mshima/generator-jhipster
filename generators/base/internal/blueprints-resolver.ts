@@ -23,6 +23,7 @@ import type { PackageJson } from 'type-fest';
 import type { Store } from 'yeoman-environment';
 import type { StorePackageMeta } from 'yeoman-environment/store';
 
+import { getPackageInstall } from '../../../lib/package-install.ts';
 import { registerBlueprintAliases } from '../../../lib/resolver/blueprint-aliases.ts';
 import { packageNameToNamespace } from '../../../lib/utils/index.ts';
 import type CoreGenerator from '../../base-core/index.ts';
@@ -111,6 +112,13 @@ export class BlueprintsResolver {
     if (blueprints.length > 0) {
       blueprints.forEach(blueprint => {
         blueprint.version = this.#findBlueprintVersion(blueprint.name) ?? blueprint.version;
+        // What to install when it is not that version, like a checkout.
+        const install = this.#findBlueprintInstall(blueprint.name);
+        if (install) {
+          blueprint.install = install;
+        } else {
+          delete blueprint.install;
+        }
       });
       this.#generator.config.set('blueprints', blueprints);
     }
@@ -152,6 +160,14 @@ export class BlueprintsResolver {
       this.#log.warn(`Could not retrieve version of blueprint '${blueprintPkgName}'`);
     }
     return version;
+  }
+
+  /**
+   * What to install to generate again with the blueprint used, when it is not its version, like a checkout.
+   */
+  #findBlueprintInstall(blueprintPkgName: string): string | undefined {
+    const packagePath = this.#getBlueprintPackageMeta(blueprintPkgName)?.packagePath;
+    return packagePath ? getPackageInstall(packagePath, { name: blueprintPkgName }) : undefined;
   }
 
   #checkJHipsterBlueprintVersion(blueprintPkgName: string) {
