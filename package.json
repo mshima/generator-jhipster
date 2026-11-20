@@ -1,6 +1,6 @@
 {
-  "name": "generator-jhipster",
-  "version": "9.4.1-snapshot",
+  "name": "@mshima/generator-jhipster",
+  "version": "0.0.16",
   "description": "Spring Boot + Angular/React/Vue in one handy generator",
   "keywords": [
     "yeoman-generator",
@@ -229,5 +229,10 @@
     "type": "opencollective",
     "url": "https://opencollective.com/generator-jhipster",
     "logo": "https://opencollective.com/opencollective/logo.txt"
+  },
+  "yeoman": {
+    "meta": {
+      "packageVersion": "9.5.0-next.0"
+    }
   }
 }
