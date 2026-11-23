@@ -196,6 +196,13 @@ describe(`generator - ${generator}`, () => {
       runResult.assertFileContent(resourceIT, 'UPDATED_KIND = Kind.ONLY;');
     });
 
+    it('should filter an enum of a single value only by being specified', () => {
+      runResult.assertNoFileContent(resourceIT, '"kind.equals"');
+      runResult.assertNoFileContent(resourceIT, '"kind.in"');
+      runResult.assertFileContent(resourceIT, '.add(Arguments.of("kind.specified", values(true), values(false)))');
+      runResult.assertFileContent(resourceIT, '.add(Arguments.of("unit.equals", values(DEFAULT_UNIT), values(UPDATED_UNIT)))');
+    });
+
     it('should test the dates, times and durations with two values from the entity samples, the default one the earlier', () => {
       runResult.assertFileContent(resourceIT, 'DEFAULT_DAY = LocalDate.parse("2022-01-28");');
       runResult.assertFileContent(resourceIT, 'UPDATED_DAY = LocalDate.parse("2022-01-29");');
@@ -222,11 +229,14 @@ describe(`generator - ${generator}`, () => {
         'SMALLER_ZONED = ZonedDateTime.ofInstant(Instant.parse("2022-01-28T20:55:00.000Z"), ZoneOffset.UTC);',
       );
       runResult.assertFileContent(resourceIT, 'SMALLER_LASTING = Duration.parse("PT17M");');
-      runResult.assertFileContent(resourceIT, 'defaultMeasureFiltering("day.greaterThanOrEqual", DEFAULT_DAY, UPDATED_DAY);');
+      runResult.assertFileContent(resourceIT, '.add(Arguments.of("day.greaterThanOrEqual", values(DEFAULT_DAY), values(UPDATED_DAY)))');
     });
 
     it('should compare a number field above its default value with its updated value', () => {
-      runResult.assertFileContent(resourceIT, 'defaultMeasureFiltering("count.greaterThanOrEqual", DEFAULT_COUNT, UPDATED_COUNT);');
+      runResult.assertFileContent(
+        resourceIT,
+        '.add(Arguments.of("count.greaterThanOrEqual", values(DEFAULT_COUNT), values(UPDATED_COUNT)))',
+      );
     });
   });
 
